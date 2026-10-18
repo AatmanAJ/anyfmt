@@ -35,7 +35,7 @@ WORKLOAD=$!
 end=$(( $(date +%s) + SECS ))
 : > "$LOG"
 while (( $(date +%s) < end )); do
-  pids="$PID $(pgrep -f "$APP/Contents/Helpers" | tr '\n' ' ')"
+  pids="$PID $( { pgrep -f "$APP/Contents/Helpers" || true; } | tr "\n" " ")"
   for p in $pids; do lsof -nP -a -p "$p" -i 2>/dev/null | tail -n +2 >> "$LOG" || true; done
   sleep 0.5
 done
