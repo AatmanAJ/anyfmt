@@ -11,7 +11,7 @@ export HALO_ENGINES_DIR := $(ENGINES_DIST)
 XCB          := xcodebuild -project Halo.xcodeproj -derivedDataPath $(DERIVED) ENGINES_DIST=$(ENGINES_DIST)
 PRODUCTS     := $(DERIVED)/Build/Products/$(CONFIG)
 
-.PHONY: bootstrap engines generate build test test-packages test-unit check uitest matrix fixtures dmg clean gallery perf
+.PHONY: bootstrap engines generate build test test-packages test-unit check uitest matrix fixtures dmg clean gallery perf netcheck readme-formats
 
 ## Build-machine dependencies only. End users never install anything.
 bootstrap:
@@ -64,6 +64,15 @@ gallery: build
 perf: generate
 	$(XCB) -scheme Halo -configuration Release build -quiet
 	./scripts/perf.sh $(DERIVED)/Build/Products/Release
+
+## Zero network sockets from the app, CLI and engines during a workload.
+netcheck: generate
+	$(XCB) -scheme Halo -configuration Release build -quiet
+	./scripts/netcheck.sh $(DERIVED)/Build/Products/Release
+
+## Regenerates the README format table from the capability registry.
+readme-formats: build
+	$(PRODUCTS)/halo formats --markdown > docs/FORMATS.md
 
 dmg: generate
 	./packaging/make-dmg.sh

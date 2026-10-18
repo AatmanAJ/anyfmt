@@ -157,6 +157,10 @@ enum CLI {
         let json = args.contains("--json")
         let from = (args.firstIndex(of: "--from").flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil }).map { FormatID($0) }
         let router = Router.live()
+        if args.contains("--markdown") {
+            out(markdownTable(router))
+            return 0
+        }
         var rows: [[String: Any]] = []
         for f in Formats.all where from == nil || f.id == from {
             let routes = router.allRoutes(from: f.id)
@@ -179,6 +183,29 @@ enum CLI {
             out("\n\(count) conversion options")
         }
         return 0
+    }
+
+    /// README table, generated from the live capability registry (`make readme-formats`).
+    static func markdownTable(_ router: Router) -> String {
+        var md = "| Category | From | To |\n|---|---|---|\n"
+        for kind in FileKind.allCases {
+            let inputs = Formats.all.filter { $0.kind == kind && !router.allRoutes(from: $0.id).isEmpty }
+            guard !inputs.isEmpty else { continue }
+            var byTargets: [String: [String]] = [:]
+            var order: [String] = []
+            for f in inputs {
+                let targets = router.allRoutes(from: f.id).keys
+                    .sorted { (Formats.format($0)?.kind.rawValue ?? "", Formats.format($0)?.order ?? 0) < (Formats.format($1)?.kind.rawValue ?? "", Formats.format($1)?.order ?? 0) }
+                    .map { Formats.label($0) }.joined(separator: ", ")
+                if byTargets[targets] == nil { order.append(targets) }
+                byTargets[targets, default: []].append(f.label)
+            }
+            for t in order {
+                md += "| \(kind.rawValue.capitalized) | \(byTargets[t, default: []].joined(separator: ", ")) | \(t) |\n"
+            }
+        }
+        md += "\n**\(router.optionCount()) conversion options** (each input × output pair, direct or routed through up to 3 steps).\n"
+        return md
     }
 
     static func tools(_ args: [String]) -> Int32 {
