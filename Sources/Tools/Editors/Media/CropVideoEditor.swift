@@ -42,7 +42,7 @@ enum CropGeometry {
 
     /// Keeps a rect inside the frame (moving, then shrinking if needed).
     static func clamp(_ r: CGRectValue) -> CGRectValue {
-        let w = min(max(r.width, minimumSide), 1), h = min(max(r.height, minimumSide), 1)
+        let w = min(max(r.width, minimumSide / 2), 1), h = min(max(r.height, minimumSide / 2), 1)
         return CGRectValue(x: min(max(0, r.x), 1 - w), y: min(max(0, r.y), 1 - h), width: w, height: h)
     }
 
@@ -85,7 +85,10 @@ enum CropGeometry {
         case .left: availW = x1; availH = 2 * min(cy, 1 - cy)
         case .right: availW = 1 - x0; availH = 2 * min(cy, 1 - cy)
         }
-        w = min(w, availW, availH * rn)
+        // Respect the minimum side on both axes without breaking the ratio.
+        let minW = max(minimumSide, minimumSide * rn)
+        w = max(w, minW)
+        w = min(w, max(availW, 0), max(availH, 0) * rn)
         h = w / rn
         let nx: Double, ny: Double
         switch handle {

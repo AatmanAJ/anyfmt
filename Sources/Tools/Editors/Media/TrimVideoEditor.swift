@@ -51,6 +51,13 @@ final class TrimVideoModel: MediaEditorModel {
         TrimPlanner.plan(requested: range, duration: duration, frameDuration: fd, keyframes: session.keyframes, lossless: lossless)
     }
 
+    /// The keyframe-aligned range a lossless cut produces, when it differs from the selection.
+    var snappedRange: ClosedRange<Double>? {
+        guard session.state.isReady, case .copy(let s, let e, _) = plan else { return nil }
+        guard abs(s - range.lowerBound) > fd / 2 || abs(e - range.upperBound) > fd / 2 else { return nil }
+        return s...e
+    }
+
     var isWholeFile: Bool { range.lowerBound < fd / 2 && range.upperBound > duration - fd / 2 }
 
     var options: OptionValues {
@@ -113,7 +120,7 @@ struct TrimVideoEditor: View {
                          leading: AnyView(inOutButtons))
             FilmstripTimeline(filmstrip: model.session.filmstrip, player: model.session.player,
                               duration: model.duration, frameDuration: model.fd,
-                              selection: original ? nil : $model.range, dimOutside: true)
+                              selection: original ? nil : $model.range, dimOutside: true, ghost: model.snappedRange)
                 .disabled(!model.session.state.isReady)
         }
         .padding(DesignTokens.Space.l)

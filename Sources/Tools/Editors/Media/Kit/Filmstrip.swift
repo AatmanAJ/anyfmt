@@ -133,6 +133,8 @@ struct FilmstripTimeline: View {
     /// nil hides the selection (split, snapshot, crop).
     var selection: Binding<ClosedRange<Double>>?
     var dimOutside = true
+    /// Where a lossless cut will really land (dashed), when it differs from the selection.
+    var ghost: ClosedRange<Double>?
     var markers: [TimelineMarker] = []
     var onMarkerTap: ((TimelineMarker) -> Void)?
 
@@ -150,6 +152,14 @@ struct FilmstripTimeline: View {
                     strip(geo.size)
                     if let sel = selection?.wrappedValue {
                         selectionOverlay(sel, axis: axis, height: geo.size.height)
+                    }
+                    if let ghost, selection != nil {
+                        RoundedRectangle(cornerRadius: 3)
+                            .strokeBorder(Color.white.opacity(0.9), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                            .frame(width: max(2, axis.x(ghost.upperBound) - axis.x(ghost.lowerBound)), height: geo.size.height - 10)
+                            .offset(x: axis.x(ghost.lowerBound), y: 5)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
                     }
                     ForEach(markers) { m in markerView(m, axis: axis, height: geo.size.height) }
                     playhead(axis: axis, height: geo.size.height)

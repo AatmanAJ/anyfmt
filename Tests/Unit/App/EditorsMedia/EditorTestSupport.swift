@@ -57,13 +57,15 @@ actor EditorSamples {
         switch name {
         case "Beach day.mp4":
             try await Self.ffmpeg(["-filter_complex", "\(Self.scene)[v];\(Self.voice)[a]", "-map", "[v]", "-map", "[a]",
-                                   "-c:v", "libx264", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", u.path])
+                                   "-c:v", "libx264", "-g", "30", "-keyint_min", "30", "-sc_threshold", "0",
+                                   "-pix_fmt", "yuv420p", "-c:a", "aac", u.path])
         case "Sunset.mov":
             try await Self.ffmpeg(["-filter_complex", "gradients=s=640x480:c0=0xF5C451:c1=0xE5484D:c2=0x2B1B6E:n=3:speed=0.02:duration=5:rate=25[v]",
                                    "-map", "[v]", "-c:v", "libx264", "-pix_fmt", "yuv420p", u.path])
         case "Intro.mp4":
             try await Self.ffmpeg(["-filter_complex", "\(Self.scene.replacingOccurrences(of: "duration=12", with: "duration=4"))[v];\(Self.voice.replacingOccurrences(of: "d=12", with: "d=4"))[a]",
-                                   "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", u.path])
+                                   "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-g", "30", "-keyint_min", "30", "-sc_threshold", "0",
+                                   "-pix_fmt", "yuv420p", "-c:a", "aac", u.path])
         case "Clip.mkv":
             try await Self.ffmpeg(["-filter_complex", "testsrc2=size=320x240:rate=30:duration=3[v]", "-map", "[v]", "-c:v", "libx264", "-pix_fmt", "yuv420p", u.path])
         case "Interview.m4a":
