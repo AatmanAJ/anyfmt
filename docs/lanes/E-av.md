@@ -309,7 +309,7 @@ Detail in `docs/contract-changes/E-av.md`.
 - **E-2** `audioLossless.bitDepth` needs a "Keep" default. Today's "16" default truncates 24-bit sources (with dither).
 - **E-3** `FFmpegProgressParser` reports 1.0 on `progress=end` even after SIGTERM. Lane E caps it locally.
 - **E-4** Let lane C use `AVRoutes.resourceClass(for:options:)` for its queue class.
-- **E-5** Nits: the `-only-testing` target name is `CoreTests`; empty source directories need `.gitkeep`; three new `L()` keys need syncing; there's no `lavfi` device in the bundled ffmpeg.
+- **E-5** Nits: the `-only-testing` target name is `CoreTests`; empty source directories need `.gitkeep`; three new `L()` keys need syncing; there is no `lavfi` device in the bundled ffmpeg; and a Release `halo-matrix` fails to load the ad-hoc HaloCore under hardened runtime, so `make matrix` needs a Config fix.
 
 ## Licences and size
 

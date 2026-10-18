@@ -96,3 +96,12 @@ and `.cpu` otherwise.
 - The bundled ffmpeg has no `lavfi` input device. Fixture scripts must put
   source filters inside `-filter_complex` (as `Tests/Fixtures/lanes/av.sh`
   does), not use `-f lavfi -i …`.
+- **`make matrix` will fail to launch as configured.** A Release
+  `halo-matrix` (and the Release CLI) is ad-hoc signed with hardened
+  runtime, so library validation refuses the ad-hoc `HaloCore.framework`:
+  `dyld: … not valid for use in process: mapping process and mapped file
+  (non-platform) have different Team IDs`. Debug builds run. Possible fixes
+  (Config/Makefile, not lane E): set `ENABLE_HARDENED_RUNTIME = NO` for the
+  Matrix target, give the Matrix and CLI targets the
+  `com.apple.security.cs.disable-library-validation` entitlement for ad-hoc
+  builds, or sign with the Developer ID when one exists.
