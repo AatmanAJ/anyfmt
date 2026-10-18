@@ -213,6 +213,8 @@ public enum DesignTokens {
         public static let hoverLift: CGFloat = 5
         public static let glyphSize: CGFloat = 18
         public static let labelSize: CGFloat = 11.5
+        /// Format names in the display face (phase 2).
+        public static let titleLabelSize: CGFloat = 17
         public static let toolLabelSize: CGFloat = 9.5
         public static let screenEdgeInset: CGFloat = 8
         /// Keep the wheel out of the Mission Control / menu bar drag band.

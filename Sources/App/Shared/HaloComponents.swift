@@ -82,6 +82,7 @@ struct DisplayText: View {
         Text(verbatim: uppercase ? text.localizedUppercase : text)
             .font(.haloDisplay(size))
             .displayTracking(size)
+            .foregroundStyle(Color.haloInk)
             .lineLimit(2)
             .minimumScaleFactor(0.6)
     }

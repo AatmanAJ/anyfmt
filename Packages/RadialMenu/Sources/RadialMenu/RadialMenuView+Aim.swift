@@ -124,7 +124,7 @@ extension RadialMenuView {
             if lock, let slot = highlightedSlot, nodes.indices.contains(slot) {
                 lockLayer.frame = bounds
                 lockLayer.path = nodes[slot].outlinePath(config: configuration, center: wheelCenter)
-                lockLayer.strokeColor = palette.highlightStroke
+                lockLayer.strokeColor = palette.accent.cgColor
             }
             lockLayer.opacity = lock ? 1 : 0
         }
@@ -159,7 +159,7 @@ extension RadialMenuView {
             if on, let slot = highlightedSlot, nodes.indices.contains(slot) {
                 lipLayer.frame = bounds
                 lipLayer.path = nodes[slot].lipPath(config: configuration, center: wheelCenter, depth: configuration.lipDepth)
-                lipLayer.fillColor = palette.highlightStroke
+                lipLayer.fillColor = palette.accent.cgColor
             }
             lipLayer.opacity = on ? 1 : 0
         }
@@ -265,10 +265,15 @@ extension RadialMenuView {
     func setHoveredChip(_ index: Int?) {
         guard index != hoveredChip else { return }
         hoveredChip = index
+        let font = NSFont.systemFont(ofSize: configuration.labelSize, weight: .semibold)
         LayerAnimation.withoutActions {
             for (i, chip) in chipNodes.enumerated() {
-                chip.layer.fillColor = i == index ? palette.highlightFill : palette.hubFill
-                chip.layer.strokeColor = i == index ? palette.highlightStroke : palette.stroke
+                let hot = i == index
+                chip.layer.fillColor = hot ? palette.accent.cgColor : palette.hubFill
+                chip.layer.strokeColor = hot ? palette.accent.cgColor : palette.stroke
+                // White on the accent fill (cobalt in Halo: 5.0:1); the surface's text otherwise.
+                chip.text.string = NSAttributedString(string: chip.preset.title,
+                                                      attributes: [.font: font, .foregroundColor: hot ? NSColor.white : palette.content])
             }
         }
         if index != nil { setLip(false) }

@@ -206,7 +206,7 @@ public final class RadialMenuView: NSView {
             v.autoresizingMask = [.width, .height]
         }
         addSubview(shadowView)
-        if materialMode == .live {
+        if materialMode == .live && style.surface == nil {
             let vfx = NSVisualEffectView(frame: bounds)
             vfx.autoresizingMask = [.width, .height]
             vfx.blendingMode = .behindWindow
@@ -235,7 +235,9 @@ public final class RadialMenuView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 
-    private var liveMaskRoot: CALayer? { materialMode == .live ? maskRoot : nil }
+    private var liveMaskRoot: CALayer? { materialView != nil ? maskRoot : nil }
+    /// Vibrancy is drawn (live mode, no painted surface, transparency allowed).
+    private var usesLiveMaterial: Bool { materialView != nil && !resolvedAppearance.reduceTransparency }
 
     public override var isFlipped: Bool { false }
 
@@ -364,7 +366,7 @@ public final class RadialMenuView: NSView {
                 kept.append(node)
             } else {
                 let node = SegmentNode(slot: slot, itemID: item.id, canvas: canvas, scale: renderScale)
-                node.applyPalette(palette, liveMaterial: materialMode == .live && !resolvedAppearance.reduceTransparency)
+                node.applyPalette(palette, liveMaterial: usesLiveMaterial)
                 node.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
                 node.update(slot: slot, itemID: item.id, enabled: item.isEnabled, images: imgs, layout: radialLayout,
                             center: center, palette: palette, animation: nil)
@@ -418,7 +420,7 @@ public final class RadialMenuView: NSView {
                 return n
             }()
             node.layout(zone: zone, center: wheelCenter, config: configuration, palette: palette,
-                        liveMaterial: materialMode == .live && !resolvedAppearance.reduceTransparency, scale: renderScale)
+                        liveMaterial: usesLiveMaterial, scale: renderScale)
         } else if let node = dropZoneNode {
             node.removeFromTrees()
             dropZoneNode = nil
@@ -451,7 +453,7 @@ public final class RadialMenuView: NSView {
             // Reduce Transparency: AppKit already makes vibrancy opaque; we also paint solid fills.
             vfx.isHidden = appearance.reduceTransparency
         }
-        let live = materialMode == .live && !appearance.reduceTransparency
+        let live = materialView != nil && !appearance.reduceTransparency
         hubNode.layout(center: wheelCenter, config: configuration, palette: palette, liveMaterial: live)
         for node in nodes { node.applyPalette(palette, liveMaterial: live) }
         rebuild(animation: nil)

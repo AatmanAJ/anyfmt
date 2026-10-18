@@ -17,6 +17,11 @@ final class SegmentNode {
     private(set) var content = CALayer()
     private var normalImage = CALayer()
     private var highlightImage = CALayer()
+    /// Hover bands (style.highlightBands), clipped to the segment's shape.
+    private let bandLayer = CALayer()
+    private let bandMask = CAShapeLayer()
+    private var bandOrigin: CGPoint = .zero
+    private var bands: [CGColor]?
 
     private(set) var slot: RadialSlot
     private(set) var itemID: String
@@ -48,6 +53,13 @@ final class SegmentNode {
         fill.shadowOpacity = 0
         container.addSublayer(material)
         container.addSublayer(fill)
+        bandLayer.actions = SegmentNode.noActions
+        bandMask.actions = SegmentNode.noActions
+        bandMask.fillColor = NSColor.black.cgColor
+        bandLayer.mask = bandMask
+        bandLayer.opacity = 0
+        bandLayer.contentsScale = scale
+        container.addSublayer(bandLayer)
         container.addSublayer(rim)
         container.addSublayer(stroke)
         configureContent(content, normal: normalImage, highlight: highlightImage, scale: scale)
@@ -103,6 +115,11 @@ final class SegmentNode {
             shadow.shadowColor = p.shadowColor
             shadow.shadowOpacity = p.shadowOpacity
             shadow.shadowRadius = p.shadowRadius
+            if p.highlightBands != bands {
+                bands = p.highlightBands
+                bandLayer.contents = nil
+            }
+            if bands == nil { bandLayer.opacity = 0 }
         }
     }
 
@@ -132,6 +149,14 @@ final class SegmentNode {
             // A single item is a seamless ring.
             restSpec.gap = 0
             restSpec.corner = 0
+        }
+        // The bands' box covers the lifted shape; the mask follows every geometry change.
+        let box = WedgePath.path(lifted(config), center: center).boundingBoxOfPath.insetBy(dx: -2, dy: -2).integral
+        LayerAnimation.withoutActions {
+            if bandLayer.frame != box { bandLayer.contents = nil }
+            bandOrigin = box.origin
+            bandLayer.frame = box
+            bandMask.frame = bandLayer.bounds
         }
         let offset = layout.contentCenter(of: newSlot)
         contentCenter = CGPoint(x: center.x + offset.x, y: center.y + offset.y)
@@ -198,6 +223,8 @@ final class SegmentNode {
         for layer in [mask, material, fill] {
             layer.set("path", to: path, animation: animation)
         }
+        var toBand = CGAffineTransform(translationX: -bandOrigin.x, y: -bandOrigin.y)
+        bandMask.set("path", to: path.copy(using: &toBand), animation: animation)
         rim.set("path", to: full ? WedgePath.ringOutline(spec, center: center) : path, animation: animation)
         stroke.set("path", to: strokePath, animation: animation)
         shadow.set("shadowPath", to: path, animation: animation)
@@ -240,6 +267,15 @@ final class SegmentNode {
 
         let fillColor = on ? (isEnabled ? p.highlightFill : p.disabledHighlightFill) : p.restFill
         fill.set("fillColor", to: fillColor, animation: quick)
+        if let bands = p.highlightBands, on && isEnabled {
+            if bandLayer.contents == nil {
+                let image = SegmentNode.bandImage(size: bandLayer.bounds.size, colors: bands, scale: bandLayer.contentsScale)
+                LayerAnimation.withoutActions { bandLayer.contents = image }
+            }
+            bandLayer.set("opacity", to: Float(1), animation: quick)
+        } else {
+            bandLayer.set("opacity", to: Float(0), animation: quick)
+        }
         fill.set("shadowOpacity", to: liftable ? p.glowOpacity : Float(0), animation: quick)
         stroke.set("strokeColor", to: on && isEnabled ? p.highlightStroke : p.stroke, animation: quick)
         let showHighlight = on && isEnabled
@@ -268,6 +304,7 @@ final class SegmentNode {
             fill.shadowOpacity = 0
             highlightImage.opacity = 0
             normalImage.opacity = 1
+            bandLayer.opacity = 0
             for l in movingLayers { l.zPosition = 0 }
         }
     }
@@ -301,6 +338,34 @@ final class SegmentNode {
     /// Outer radius of the current shape.
     func currentOuterRadius(config: RadialMenuConfiguration) -> CGFloat {
         (isHighlighted && isEnabled ? lifted(config) : restSpec).outer
+    }
+
+    private static var bandCache: [String: CGImage] = [:]
+
+    /// Vertical hard-edged bands, left → right, each fading top → bottom into the next colour.
+    static func bandImage(size: CGSize, colors: [CGColor], scale: CGFloat) -> CGImage? {
+        let w = Int(ceil(size.width * scale)), h = Int(ceil(size.height * scale))
+        guard w > 0, h > 0, colors.count > 1 else { return nil }
+        let key = "\(w)x\(h)-" + colors.map { "\($0.components ?? [])" }.joined(separator: "|")
+        if let hit = bandCache[key] { return hit }
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: space,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        let bandWidth = CGFloat(w) / CGFloat(colors.count)
+        for (i, color) in colors.enumerated() {
+            let next = colors[min(i + 1, colors.count - 1)]
+            let rect = CGRect(x: floor(CGFloat(i) * bandWidth), y: 0, width: ceil(bandWidth) + 1, height: CGFloat(h))
+            guard let gradient = CGGradient(colorsSpace: space, colors: [color, next] as CFArray, locations: [0, 1]) else { continue }
+            ctx.saveGState()
+            ctx.clip(to: rect)
+            // CG's origin is bottom-left: top of the band = the colour itself.
+            ctx.drawLinearGradient(gradient, start: CGPoint(x: rect.midX, y: CGFloat(h)), end: CGPoint(x: rect.midX, y: 0), options: [])
+            ctx.restoreGState()
+        }
+        let image = ctx.makeImage()
+        if bandCache.count > 64 { bandCache.removeAll() }
+        bandCache[key] = image
+        return image
     }
 
     /// Brief fill pulse when a drop lands on this segment.

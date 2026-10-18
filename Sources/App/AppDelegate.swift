@@ -70,6 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let wheels = try WheelGallery.renderAll(to: dir.appendingPathComponent("gallery"), scale: 1)
             let cards = try ProgressCardGallery.render(into: dir)
             let actions = try ActionScreens.render(into: dir)
+            _ = try OptionsPanelGallery.render(into: dir)
             let total = wheels.count + cards.count + actions.count + AppShell.renderScreens(into: dir)
             FileHandle.standardError.write(Data("rendered \(total) images into \(dir.path)\n".utf8))
         } catch {

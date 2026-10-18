@@ -28,7 +28,8 @@ ALLOW=(
 )
 
 PATTERNS=(
-  'NSColor\((srgbRed|red|calibratedRed|deviceRed|white|calibratedWhite|genericGamma22White|srgbHex|hex):'
+  'NSColor\((srgbRed|red|calibratedRed|deviceRed|white|calibratedWhite|genericGamma22White):'
+  'srgbHex: *0x'
   'Color\((red|white|hue):'
   'Color\(hex: *0x'
   'NSColor\(hex: *0x'

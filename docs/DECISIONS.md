@@ -400,3 +400,27 @@ Account and in the menu bar ("Pro Licence & Account…").
 - **PATH symlinks.** Through the cask's or Settings' symlink, argv[0] is plain
   "halo", so the CLI couldn't find its bundled engines and every audio, video and
   SVG route vanished. It now resolves its own Helpers folder.
+
+### D-042 The wheel's phase 2 look: painted, banded, display-type
+The approved direction (B-014) asks for a near-black, editorial wheel, with colour
+used like a spotlight and no glass.
+- **Painted, not vibrant.** RadialMenu gains an optional `RadialMenuStyle.surface`
+  (disc, segment, hub, stroke, content, pill colours per appearance). When it's set,
+  no `NSVisualEffectView` is created, glow is off and there's one quiet shadow.
+  Halo uses a black disc, charcoal (`ink.800`) wedges and `ink.700` hairlines. In
+  light mode: a paper disc, white wedges and `paper.100` hairlines. The package's
+  defaults are unchanged for other hosts, and the MIT API is additive.
+- **Heat band on hover.** `style.highlightBands` paints hard-edged vertical bands
+  (flame → orange → peach) clipped to the hovered wedge. The band layer's mask
+  follows the same spring as the wedge, so it never spills outside a segment that's
+  still lifting. Text on the band is black (`ink.1000`). Increased Contrast and Reduce
+  Transparency fall back to the flat cobalt accent with white text, because bands
+  behind text are where contrast fails.
+- **Display type.** Format names render in Inter Display Black (`style.titleFontName`)
+  at 17 pt, tracked −2 %, with no SF Symbol: the name is the segment. Tools and
+  actions keep their glyphs, where symbols help recognition.
+- **Cobalt for state.** The lock ring, the tune lip, a hovered preset chip (white
+  text, 5.0:1) and the hub pill all use the accent, so "you're aiming at this" is one
+  colour. The lock always also says "· Locked", so colour is never the only signal.
+- Gallery and demo GIF backdrops lost their violet tint: neutral graphite/grey for
+  the "desktop" behind the wheel, black for the README GIF.

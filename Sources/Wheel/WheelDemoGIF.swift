@@ -22,9 +22,9 @@ public enum WheelDemoGIF {
             WheelContentProvider.items(for: provider.resolve(input, kind: kind, preferences: .standard).entries, cloud: cloud)
         }
         let scenes: [(WheelKind, String)] = [
-            (.convert, String(localized: "Drag a file, tap ⇧ Shift: every format it can become", comment: "Demo GIF caption")),
-            (.tools, String(localized: "Tap ⌘ Command: tools for this file", comment: "Demo GIF caption")),
-            (.actions, String(localized: "Tap ⌃ Control: AirDrop, Float, Copy, Move, Path, Terminal", comment: "Demo GIF caption")),
+            (.convert, String(localized: "Drag a file, press ⇧ Shift: every format it can become", comment: "Demo GIF caption")),
+            (.tools, String(localized: "Press ⌘ Command: tools for this file", comment: "Demo GIF caption")),
+            (.actions, String(localized: "Press ⌃ Control: AirDrop, Float, Copy, Move, Path, Terminal", comment: "Demo GIF caption")),
         ]
         var index = 0
         func write(_ image: NSImage, caption: String, repeat count: Int) throws {
@@ -61,13 +61,14 @@ public enum WheelDemoGIF {
         ])
     }
 
-    /// Wheel centred on a soft backdrop with a caption underneath.
+    /// Wheel centred on black with a display-type caption underneath.
     static func compose(_ wheel: NSImage, caption: String, scale: CGFloat) -> NSImage {
         let canvas = NSSize(width: 640, height: 600)
         let image = NSImage(size: canvas)
         image.lockFocus()
-        let colors = [NSColor(srgbRed: 0.95, green: 0.94, blue: 1, alpha: 1), NSColor(srgbRed: 0.90, green: 0.95, blue: 0.97, alpha: 1)]
-        NSGradient(colors: colors)?.draw(in: NSRect(origin: .zero, size: canvas), angle: -60)
+        // The phase 2 hero: black, the wheel as the only colour (D-042).
+        NSColor(hex: DesignTokens.Primitive.ink1000).setFill()
+        NSRect(origin: .zero, size: canvas).fill()
         let side = min(canvas.width - 80, canvas.height - 130)
         let w = wheel.size
         let s = min(side / w.width, side / w.height)
@@ -76,8 +77,9 @@ public enum WheelDemoGIF {
         let para = NSMutableParagraphStyle()
         para.alignment = .center
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 19, weight: .semibold),
-            .foregroundColor: NSColor(srgbRed: 0.15, green: 0.14, blue: 0.2, alpha: 0.9),
+            .font: HaloFonts.display(DesignTokens.Typeface.Size.displayM),
+            .foregroundColor: NSColor(hex: DesignTokens.Primitive.paper0),
+            .kern: DesignTokens.Typeface.Size.displayM * DesignTokens.Typeface.displayTracking,
             .paragraphStyle: para,
         ]
         (caption as NSString).draw(in: NSRect(x: 30, y: 36, width: canvas.width - 60, height: 50), withAttributes: attrs)

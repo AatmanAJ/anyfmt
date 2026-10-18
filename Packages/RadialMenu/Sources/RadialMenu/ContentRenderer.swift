@@ -53,8 +53,10 @@ enum ContentRenderer {
 
         let title = item.prominence == .title && style.uppercaseTitleProminence ? item.title.localizedUppercase : item.title
         let maxWidth = size.width
+        let titleFont = item.prominence == .title ? palette.titleFontName : nil
         let label = fittedLabel(title, maxWidth: maxWidth, size: m.label, weight: m.labelWeight,
-                                tracking: m.tracking, maxLines: m.maxLines, color: color)
+                                tracking: titleFont == nil ? m.tracking : -0.02 * m.label, maxLines: m.maxLines, color: color,
+                                fontName: titleFont)
         var subtitle: NSAttributedString?
         if let text = item.subtitle, !text.isEmpty {
             subtitle = attributed(text, size: m.caption, weight: .regular, tracking: 0, color: secondary, alignment: .center)
@@ -235,18 +237,18 @@ enum ContentRenderer {
     /// Fits a label into `maxWidth`: wraps up to `maxLines`, shrinking the font
     /// (down to 75 %) when a single word is too wide.
     static func fittedLabel(_ text: String, maxWidth: CGFloat, size: CGFloat, weight: NSFont.Weight,
-                            tracking: CGFloat, maxLines: Int, color: NSColor) -> FittedLabel {
+                            tracking: CGFloat, maxLines: Int, color: NSColor, fontName: String? = nil) -> FittedLabel {
         var fontSize = size
         let minimum = size * 0.75
         var attributedText = attributed(text, size: fontSize, weight: weight, tracking: tracking, color: color,
-                                        alignment: .center, truncate: maxLines == 1)
+                                        alignment: .center, truncate: maxLines == 1, fontName: fontName)
         func longestWordWidth(_ s: NSAttributedString) -> CGFloat {
             let words = s.string.split(whereSeparator: { $0 == " " || $0 == "\n" })
             let attrs = s.attributes(at: 0, effectiveRange: nil)
             return words.map { NSAttributedString(string: String($0), attributes: attrs).size().width }.max() ?? 0
         }
         func lineCount(_ s: NSAttributedString, size: CGFloat) -> Int {
-            let font = NSFont.systemFont(ofSize: size, weight: weight)
+            let font = Self.font(size: size, weight: weight, name: fontName)
             let lh = font.ascender - font.descender + font.leading
             let h = s.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin]).height
             return Int((h / lh).rounded())
@@ -258,9 +260,9 @@ enum ContentRenderer {
             if !tooWide { break }
             fontSize -= 0.5
             attributedText = attributed(text, size: fontSize, weight: weight, tracking: tracking, color: color,
-                                        alignment: .center, truncate: maxLines == 1)
+                                        alignment: .center, truncate: maxLines == 1, fontName: fontName)
         }
-        let font = NSFont.systemFont(ofSize: fontSize, weight: weight)
+        let font = Self.font(size: fontSize, weight: weight, name: fontName)
         let lineHeight = ceil(font.ascender - font.descender + font.leading)
         let bounds = attributedText.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
                                                  options: [.usesLineFragmentOrigin])
@@ -268,15 +270,21 @@ enum ContentRenderer {
         return FittedLabel(text: attributedText, height: CGFloat(lines) * lineHeight)
     }
 
+    /// A named face (e.g. the host's display font) or the system font.
+    static func font(size: CGFloat, weight: NSFont.Weight, name: String?) -> NSFont {
+        if let name, let f = NSFont(name: name, size: size) { return f }
+        return NSFont.systemFont(ofSize: size, weight: weight)
+    }
+
     static func attributed(_ text: String, size: CGFloat, weight: NSFont.Weight, tracking: CGFloat, color: NSColor,
-                           alignment: NSTextAlignment, truncate: Bool = false) -> NSAttributedString {
+                           alignment: NSTextAlignment, truncate: Bool = false, fontName: String? = nil) -> NSAttributedString {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
         paragraph.lineBreakMode = truncate ? .byTruncatingTail : .byWordWrapping
         paragraph.lineSpacing = 0
         paragraph.maximumLineHeight = 0
         return NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: size, weight: weight),
+            .font: font(size: size, weight: weight, name: fontName),
             .foregroundColor: color,
             .kern: tracking,
             .paragraphStyle: paragraph,

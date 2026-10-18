@@ -161,6 +161,12 @@ final class OptionsPanelModel: ObservableObject {
         }
     }
 
+    func overrideEstimate(_ e: OptionsPanelController.Estimate?) {
+        cancelEstimate()
+        estimate = e
+        estimating = false
+    }
+
     func cancelEstimate() {
         estimateTask?.cancel()
         estimateTask = nil
@@ -192,15 +198,13 @@ struct OptionsPanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.l) {
             HStack(alignment: .firstTextBaseline) {
-                Text(verbatim: model.title)
-                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayL))
-                    .displayTracking(DesignTokens.Typeface.Size.displayL)
+                DisplayText(model.title, size: DesignTokens.Typeface.Size.displayXL)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
                 if let input = model.input {
                     Text(verbatim: "\(input.lastPathComponent) → \(model.title)")
-                        .font(.system(size: DesignTokens.TypeRamp.body))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
+                        .foregroundStyle(Color.haloSecondaryText)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
@@ -214,28 +218,39 @@ struct OptionsPanelView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(maxHeight: 320)
-            HStack {
-                Toggle(String(localized: "Remember as default for \(model.title)",
-                              comment: "Options panel checkbox, e.g. Remember as default for GIF"),
+            HStack(spacing: DesignTokens.Space.s) {
+                Toggle(String(localized: "Make default for \(model.title)",
+                              comment: "Options panel checkbox: use these options for every future conversion to this format, e.g. Make default for GIF"),
                        isOn: $model.rememberAsDefault)
                     .toggleStyle(.checkbox)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .foregroundStyle(Color.haloSecondaryText)
                 Spacer()
                 Button(String(localized: "Cancel", comment: "Options panel button")) { model.cancel() }
+                    .buttonStyle(.haloQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(String(localized: "Save as Preset", comment: "Options panel button")) { model.saveAsPreset() }
+                    .buttonStyle(.haloSecondary)
                 Button(String(localized: "Convert", comment: "Options panel button that runs the conversion")) { model.convert() }
+                    .buttonStyle(.haloPrimary)
                     .keyboardShortcut(.defaultAction)
             }
             if let saved = model.savedPresetTitle {
-                Text("Saved “\(saved)”. It’s on the wheel next time.", comment: "Options panel confirmation after saving a preset")
-                    .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(.secondary)
+                Label {
+                    Text("Saved “\(saved)”. It’s on the wheel next time.", comment: "Options panel confirmation after saving a preset")
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.accentText)
+                }
+                .font(.system(size: DesignTokens.TypeRamp.caption))
+                .foregroundStyle(Color.haloSecondaryText)
             }
         }
-        .padding(DesignTokens.Space.xl)
-        .frame(width: 520)
+        .padding(DesignTokens.Space.xl + DesignTokens.Space.xs)
+        .frame(width: 560)
         .font(.system(size: DesignTokens.TypeRamp.body))
-        .tint(Color(nsColor: WheelTheme.style.accentColor))
+        .tint(Color.iris)
+        .haloWindowBackground()
     }
 }
 
@@ -245,15 +260,17 @@ private struct EstimateTiles: View {
     let hasInput: Bool
 
     var body: some View {
-        HStack(spacing: DesignTokens.Space.s) {
-            tile(size, caption: sizeCaption)
-            tile(estimate?.duration.map { Self.seconds($0) } ?? "—",
-                 caption: String(localized: "Duration", comment: "Options panel estimate tile"))
-            tile(estimate?.frames.map { "\($0)" } ?? "—",
-                 caption: String(localized: "Frames", comment: "Options panel estimate tile"))
+        HStack(spacing: DesignTokens.Component.Tile.spacing) {
+            StatNumeral(value: size, caption: sizeCaption, hero: estimate?.bytes != nil)
+            StatNumeral(value: estimate?.duration.map { Self.seconds($0) } ?? "—",
+                        caption: String(localized: "Duration", comment: "Options panel estimate tile"))
+            StatNumeral(value: estimate?.frames.map { "\($0)" } ?? "—",
+                        caption: String(localized: "Frames", comment: "Options panel estimate tile"))
         }
-        .opacity(estimating ? 0.6 : 1)
+        .opacity(estimating ? 0.7 : 1)
+        .animation(.easeOut(duration: DesignTokens.Curve.snap.duration), value: estimating)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Estimate", comment: "VoiceOver label of the estimate tiles"))
     }
 
     private var size: String {
@@ -273,20 +290,6 @@ private struct EstimateTiles: View {
     }
 
     static func seconds(_ s: Double) -> String { s < 10 ? String(format: "%.1f s", s) : "\(Int(s.rounded())) s" }
-
-    private func tile(_ value: String, caption: String) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
-            Text(verbatim: value)
-                .font(.haloDisplay(DesignTokens.Typeface.Size.displayM))
-                .monospacedDigit()
-            Text(verbatim: caption)
-                .font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
-                .foregroundStyle(.secondary)
-        }
-        .padding(DesignTokens.Space.m)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile).fill(Color.primary.opacity(0.06)))
-    }
 }
 
 private struct PresetRow: View {
@@ -298,8 +301,8 @@ private struct PresetRow: View {
             HStack(spacing: DesignTokens.Space.xs) {
                 ForEach(presets) { preset in
                     Button(preset.title) { apply(preset) }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
+                        .buttonStyle(.haloQuiet)
+                        .background(Capsule().fill(Color.haloTile))
                         .help(String(localized: "Use these options", comment: "Tooltip on a preset in the options panel"))
                 }
             }

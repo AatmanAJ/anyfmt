@@ -148,7 +148,7 @@ public enum WheelGallery {
                 host.layoutSubtreeIfNeeded()
                 guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { continue }
                 // Popover-like backing so the controls read correctly in both modes.
-                let background = appearanceName == .darkAqua ? NSColor(white: 0.17, alpha: 1) : NSColor(white: 0.97, alpha: 1)
+                let background = NSColor.halo(DesignTokens.Semantic.windowBackground)
                 if let ctx = NSGraphicsContext(bitmapImageRep: rep) {
                     NSGraphicsContext.saveGraphicsState()
                     NSGraphicsContext.current = ctx

@@ -72,6 +72,49 @@ public struct RadialMenuStyle {
     public var appearanceOverride: RadialAppearance?
     /// Draws titles in capitals with a little tracking (format labels).
     public var uppercaseTitleProminence: Bool
+    /// A painted, opaque wheel instead of behind-window vibrancy. nil keeps vibrancy.
+    public var surface: SurfaceSet?
+    /// Hard-edged vertical bands painted on the hovered segment (left → right),
+    /// each fading into the next. nil uses the accent as a flat fill. Increased
+    /// Contrast and Reduce Transparency always fall back to the flat accent.
+    public var highlightBands: [NSColor]?
+    /// PostScript name of the face for `.title` labels (format names). nil = system.
+    public var titleFontName: String?
+
+    /// Colours of a painted wheel, per appearance.
+    public struct Surface {
+        public var disc: NSColor
+        public var segment: NSColor
+        public var hub: NSColor
+        public var stroke: NSColor
+        public var content: NSColor
+        public var secondaryContent: NSColor
+        /// Content on the hovered segment (on the bands, or on the accent).
+        public var highlightContent: NSColor
+        public var pill: NSColor
+        public var pillText: NSColor
+        public init(disc: NSColor, segment: NSColor, hub: NSColor, stroke: NSColor, content: NSColor,
+                    secondaryContent: NSColor, highlightContent: NSColor, pill: NSColor, pillText: NSColor) {
+            self.disc = disc
+            self.segment = segment
+            self.hub = hub
+            self.stroke = stroke
+            self.content = content
+            self.secondaryContent = secondaryContent
+            self.highlightContent = highlightContent
+            self.pill = pill
+            self.pillText = pillText
+        }
+    }
+
+    public struct SurfaceSet {
+        public var light: Surface
+        public var dark: Surface
+        public init(light: Surface, dark: Surface) {
+            self.light = light
+            self.dark = dark
+        }
+    }
 
     public init(accentColor: NSColor = RadialMenuStyle.defaultAccent,
                 badgeColor: NSColor = RadialMenuStyle.defaultBadge,
@@ -116,35 +159,38 @@ public extension NSColor {
 struct RadialPalette {
     let appearance: RadialAppearance
     /// Painted under the tint when there's no live vibrancy (snapshots, Reduce Transparency).
-    let material: CGColor
+    var material: CGColor
     /// Over the material at rest.
-    let restFill: CGColor
-    let hubFill: CGColor
-    let stroke: CGColor
+    var restFill: CGColor
+    var hubFill: CGColor
+    var stroke: CGColor
     let strokeWidth: CGFloat
     let rim: CGColor
     let rimWidth: CGFloat
-    let content: NSColor
-    let secondaryContent: NSColor
+    var content: NSColor
+    var secondaryContent: NSColor
     let disabledContent: NSColor
     let highlightFill: CGColor
     let confirmFill: CGColor
-    let highlightStroke: CGColor
-    let highlightContent: NSColor
+    var highlightStroke: CGColor
+    var highlightContent: NSColor
     let disabledHighlightFill: CGColor
     let shadowColor: CGColor
-    let shadowOpacity: Float
+    var shadowOpacity: Float
     let shadowRadius: CGFloat
     let glowColor: CGColor
-    let glowOpacity: Float
-    let pillFill: CGColor
-    let pillText: NSColor
+    var glowOpacity: Float
+    var pillFill: CGColor
+    var pillText: NSColor
     let pillHighlightFill: CGColor
     let badgeFill: NSColor
     let badgeText: NSColor
     let accent: NSColor
     let dropZoneStroke: CGColor
     let hitFill: CGColor
+    /// Resolved hover bands (nil = flat `highlightFill`).
+    var highlightBands: [CGColor]?
+    var titleFontName: String?
 
     @MainActor
     init(style: RadialMenuStyle, appearance a: RadialAppearance, hitAlpha: CGFloat) {
@@ -210,5 +256,29 @@ struct RadialPalette {
         badgeText = resolve(style.badgeTextColor)
         dropZoneStroke = (a.isDark ? white.withAlphaComponent(0.45) : ink.withAlphaComponent(0.35)).cgColor
         hitFill = NSColor(white: a.isDark ? 0 : 1, alpha: max(0.005, hitAlpha)).cgColor
+
+        if let set = style.surface {
+            let sf = a.isDark ? set.dark : set.light
+            material = resolve(sf.disc).cgColor
+            restFill = resolve(sf.segment).cgColor
+            hubFill = resolve(sf.hub).cgColor
+            stroke = resolve(a.increaseContrast ? sf.content.withAlphaComponent(0.7) : sf.stroke).cgColor
+            content = resolve(sf.content)
+            secondaryContent = resolve(sf.secondaryContent)
+            pillFill = resolve(sf.pill).cgColor
+            pillText = resolve(sf.pillText)
+            // A painted surface sits flat: no glow, one quiet shadow.
+            glowOpacity = 0
+            shadowOpacity = min(shadowOpacity, 0.22)
+            highlightStroke = accent.cgColor
+        }
+        let banded = !(a.increaseContrast || a.reduceTransparency) && (style.highlightBands?.count ?? 0) > 1
+        highlightBands = banded ? style.highlightBands?.map { resolve($0).cgColor } : nil
+        if let set = style.surface {
+            let sf = a.isDark ? set.dark : set.light
+            // On the bands the surface's highlight colour (dark text); on a flat accent, white.
+            highlightContent = banded ? resolve(sf.highlightContent) : white
+        }
+        titleFontName = style.titleFontName
     }
 }

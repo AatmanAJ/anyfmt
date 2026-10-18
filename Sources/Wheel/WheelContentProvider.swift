@@ -114,7 +114,8 @@ public struct WheelContentProvider: Sendable {
             var spoken = String(localized: "Convert to \(name)", comment: "VoiceOver label of a conversion segment")
             if let via { spoken += ", \(via)" }
             return RadialItem(id: entry.id, title: label, subtitle: via,
-                              image: symbol(format?.glyph ?? Formats.kind(target.format).glyph),
+                              // The display-type name is the segment's hero (D-042); no symbol.
+                              image: nil,
                               prominence: .title, accessibilityLabel: spoken,
                               accessibilityHint: String(localized: "Saves a converted copy beside the original",
                                                         comment: "VoiceOver hint of a conversion segment"))

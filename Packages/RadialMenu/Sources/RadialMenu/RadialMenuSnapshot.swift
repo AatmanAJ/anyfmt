@@ -100,14 +100,15 @@ public enum RadialMenuSnapshot {
             ctx.fill(rect)
         case .wallpaper:
             let colors: [CGColor] = dark
-                ? [NSColor(srgbHex: 0x1A1730).cgColor, NSColor(srgbHex: 0x14213A).cgColor, NSColor(srgbHex: 0x221A2E).cgColor]
-                : [NSColor(srgbHex: 0xE6E1FB).cgColor, NSColor(srgbHex: 0xDDEBF5).cgColor, NSColor(srgbHex: 0xF7E6DD).cgColor]
+                ? [NSColor(srgbHex: 0x26282B).cgColor, NSColor(srgbHex: 0x1B1C1E).cgColor, NSColor(srgbHex: 0x2C2A28).cgColor]
+                : [NSColor(srgbHex: 0xE9EAEC).cgColor, NSColor(srgbHex: 0xDCDFE3).cgColor, NSColor(srgbHex: 0xEDEAE6).cgColor]
             guard let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: colors as CFArray,
                                             locations: [0, 0.55, 1]) else { return }
             ctx.drawLinearGradient(gradient, start: CGPoint(x: rect.minX, y: rect.maxY),
                                    end: CGPoint(x: rect.maxX, y: rect.minY), options: [])
-            // A soft highlight so translucent fills have something to show through.
-            let glow = dark ? NSColor(srgbHex: 0x5B4BC4, alpha: 0.35) : NSColor(white: 1, alpha: 0.65)
+            // A neutral stand-in for a desktop (no hue), with a soft highlight so
+            // translucent fills have something to show through.
+            let glow = dark ? NSColor(white: 1, alpha: 0.06) : NSColor(white: 1, alpha: 0.65)
             if let radial = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
                                        colors: [glow.cgColor, glow.withAlphaComponent(0).cgColor] as CFArray,
                                        locations: [0, 1]) {

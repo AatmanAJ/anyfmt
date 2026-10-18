@@ -38,16 +38,36 @@ public enum WheelTheme {
         // Configuring happens after the drop (tune lip / ⌥), never by hovering mid-drag (D-038).
         c.optionsDwell = 0
         c.presetBand = 46
+        // Format names are the segment's hero (D-042).
+        c.labelSize = DesignTokens.Wheel.titleLabelSize
         return c
     }
 
+    /// The approved phase 2 look (D-042): a painted near-black disc with charcoal
+    /// wedges (no vibrancy), heavy uppercase format names in Inter Display, the
+    /// heat band on the hovered segment with black text, cobalt for the lock,
+    /// the lip, chips and the hub pill. Pro marks in orange with black text.
     public static var style: RadialMenuStyle {
-        let p = DesignTokens.Palette.self
-        return RadialMenuStyle(
-            accentColor: RadialMenuStyle.dynamic(light: NSColor(srgbHex: p.iris.light), dark: NSColor(srgbHex: p.iris.dark)),
-            badgeColor: RadialMenuStyle.dynamic(light: NSColor(srgbHex: p.proGold.light), dark: NSColor(srgbHex: p.proGold.dark)),
-            badgeTextColor: NSColor(srgbHex: p.ink.light),
+        let p = DesignTokens.Primitive.self
+        let dyn = { (light: Int, dark: Int) in RadialMenuStyle.dynamic(light: NSColor(srgbHex: light), dark: NSColor(srgbHex: dark)) }
+        var style = RadialMenuStyle(
+            accentColor: NSColor(srgbHex: p.cobalt500),
+            badgeColor: dyn(DesignTokens.Palette.proGold.light, DesignTokens.Palette.proGold.dark),
+            badgeTextColor: dyn(p.paper0, p.ink1000),
             material: .popover)
+        let dark = RadialMenuStyle.Surface(
+            disc: NSColor(srgbHex: p.ink950), segment: NSColor(srgbHex: p.ink800), hub: NSColor(srgbHex: p.ink900),
+            stroke: NSColor(srgbHex: p.ink700), content: NSColor(srgbHex: p.paper0), secondaryContent: NSColor(srgbHex: p.ink400),
+            highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.ink900), pillText: NSColor(srgbHex: p.paper0))
+        let light = RadialMenuStyle.Surface(
+            disc: NSColor(srgbHex: p.paper50), segment: NSColor(srgbHex: p.paper0), hub: NSColor(srgbHex: p.paper50),
+            stroke: NSColor(srgbHex: p.paper100), content: NSColor(srgbHex: p.ink950), secondaryContent: NSColor(srgbHex: p.ink300),
+            highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.ink950), pillText: NSColor(srgbHex: p.paper0))
+        style.surface = RadialMenuStyle.SurfaceSet(light: light, dark: dark)
+        style.highlightBands = DesignTokens.Band.heat.dropLast(2).map { NSColor(srgbHex: $0) }
+        HaloFonts.registerBundled()
+        style.titleFontName = DesignTokens.Typeface.displayBlack
+        return style
     }
 
     public static var strings: RadialMenuStrings {
