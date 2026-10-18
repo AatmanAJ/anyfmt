@@ -47,6 +47,9 @@ Public API the app (and the wheel) can use:
 - `MetadataField`, `MetadataSnapshot`, `MetadataReader.read(_:locator:)`, `MetadataChanges` (`parse`, `encode`, `diff`)
 - `OptionColor` ("#RRGGBB[AA]" option strings ⇄ CGColor)
 
+`CropGeometry` (the shared `.rect` convention) and `OrderOption` (1-based
+"order" lists) are generic enough for lane G2's crop video and PDF tools to reuse.
+
 ### Editors (app, `Sources/Tools/Editors/Image/`)
 
 `ImageEditors.open(_:inputs:onSave:) -> Bool` opens, inside the shared
