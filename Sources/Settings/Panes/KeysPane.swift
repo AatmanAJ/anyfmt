@@ -20,7 +20,7 @@ struct KeysPane: View {
             } header: {
                 Text("Wheels")
             } footer: {
-                FootnoteText(text: String(localized: "Tap once mid-drag: press and let go. Holds and key combinations are ignored, so Finder’s own ⌘ and ⌥ drag shortcuts still work. Picking a key another wheel uses swaps the two."))
+                FootnoteText(text: String(localized: "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two."))
             }
 
             Section {
@@ -81,7 +81,7 @@ struct KeysPane: View {
                     model.hooks.onFinderShortcutChanged?(on)
                 })) {
                     Text("Return opens the wheel for the Finder selection")
-                    Text("Off by default. Needs Accessibility and Automation, explained below. Renaming with Return still works in text fields.")
+                    Text("Off by default. Needs the two permissions below. Return still renames in text fields.")
                 }
                 .accessibilityIdentifier("keys.finderShortcut")
                 if settings.finderShortcutEnabled {
@@ -143,7 +143,7 @@ private struct ServicesNote: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("No permissions? Use the Services menu")
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
-                Text("Right-click files in Finder › Services › “Open in \(Brand.name) Wheel”. To give it a shortcut, go to System Settings › Keyboard › Keyboard Shortcuts › Services › Files and Folders.")
+                Text("Right-click files › Services › Open in \(Brand.name) Wheel. Give it a shortcut in Keyboard Shortcuts › Services › Files and Folders.")
                     .font(.system(size: DesignTokens.TypeRamp.label))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
