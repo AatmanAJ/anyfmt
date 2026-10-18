@@ -207,6 +207,26 @@ final class OnboardingModelTests: XCTestCase {
         XCTAssertFalse(settings.updateChecksEnabled)
     }
 
+    func testClosingTheWindowCountsAsFinished() throws {
+        let (settings, cleanup) = try makeSettings()
+        defer { cleanup() }
+        var finished = 0
+        let model = OnboardingModel(settings: settings, loginItem: LaunchAtLogin(service: .fake()),
+                                    coach: PermissionsCoach(probe: .granted), info: SampleState.info,
+                                    hooks: OnboardingHooks(onFinish: { finished += 1 }))
+        let controller = OnboardingWindowController(model: model)
+        let window = try XCTUnwrap(controller.window)
+        window.alphaValue = 0
+        controller.loadContent()
+        window.orderFrontRegardless()
+        spin(0.2)
+        XCTAssertEqual(window.contentRect(forFrameRect: window.frame).size, OnboardingWindowController.contentSize)
+        window.close()
+        XCTAssertTrue(settings.onboardingCompleted)
+        XCTAssertEqual(finished, 1)
+        XCTAssertNil(window.contentView, "SwiftUI tree torn down, so polling stops")
+    }
+
     func testLaunchArgumentsResetOnboarding() throws {
         let (settings, cleanup) = try makeSettings()
         defer { cleanup() }

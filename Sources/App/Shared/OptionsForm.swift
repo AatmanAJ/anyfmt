@@ -257,6 +257,8 @@ private struct FileSizeField: View {
             .pickerStyle(.menu)
             .fixedSize()
         }
+        // Freeze the unit once shown, so typing 0.5 MB doesn't flip to 500 KB mid-edit.
+        .onAppear { if unit == nil { unit = OptionsFormLogic.split(bytes: bytes).unit } }
     }
 }
 

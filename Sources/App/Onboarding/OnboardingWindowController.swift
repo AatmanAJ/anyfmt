@@ -109,6 +109,8 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
         // Tear the SwiftUI tree down so permission polling stops with it.
         window?.contentView = nil
         contentLoaded = false
+        // Already closing: finishing must not close the window again.
+        model.close = {}
         if !isSnapshot { model.finish() }
         if Self.instance === self { Self.instance = nil }
     }

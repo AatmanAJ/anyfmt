@@ -1,6 +1,6 @@
 # Lane P (Phase 3 UI): Settings, onboarding, permissions coach, About, OptionsForm
 
-Status: **done**, building clean (no warnings in lane files), 89 hosted tests green.
+Status: **done**, building clean (no warnings in lane files), 90 lane tests green (91 with the existing smoke test).
 Wiring into `AppDelegate` is the orchestrator's (see "Hooks to wire").
 
 ## What's built
@@ -80,8 +80,8 @@ Rendered offscreen by `UIScreenshotTests` (D-025). Refresh with
 Sample state in screenshots: favourites JPG/PNG/WebP/PDF, BMP/TGA hidden, Finder shortcut on with Accessibility granted and Automation not, two sample packs. Version shows "1.0 (100)".
 
 ## Tests (Tests/Unit/App/Settings, hosted, suite-named UserDefaults)
-89 tests, all passing:
-`OptionsFormLogicTests` (visibleWhen incl. transitive and loosely typed, coercion per kind, non-default diff, choice style, file size, hex, rect, page/time ranges), `TriggerAssignmentTests` (swap, repair, model writes + hook), `ModifierTapDetectorTests` (tap, hold, exclusive threshold, chords, other key spoils, reset), `TapTesterTests`, `HotkeyTests` (needs ⌘/⌃, modifier-only, reserved, storage round trip, display), `NamingPreviewTests`, `AppSettingsPersistenceTests` (defaults, full round trip, reset keeps onboarding, hooks, last pane), `BundledEnginesTests` (drift vs VERSIONS.md, parse, licence folders), `DiagnosticsTests` (no paths), `PermissionsCoachTests` (live grant via polling, prompt-then-deep-link, denied automation), `LaunchAtLoginTests` (fake SMAppService), `DemoHitTestTests`, `DemoModelTests` (drag→tap→drop, morph, hold/chord, remapped keys, cancel), `OnboardingModelTests`, `SettingsWindowTests` (toolbar, resize, remembered pane, live re-fit, ⌘W), `FormatsPaneModelTests`, `UIScreenshotTests`.
+90 tests, all passing:
+`OptionsFormLogicTests` (visibleWhen incl. transitive and loosely typed, coercion per kind, non-default diff, choice style, file size, hex, rect, page/time ranges), `TriggerAssignmentTests` (swap, repair, model writes + hook), `ModifierTapDetectorTests` (tap, hold, exclusive threshold, chords, other key spoils, reset), `TapTesterTests`, `HotkeyTests` (needs ⌘/⌃, modifier-only, reserved, storage round trip, display), `NamingPreviewTests`, `AppSettingsPersistenceTests` (defaults, full round trip, reset keeps onboarding, hooks, last pane), `BundledEnginesTests` (drift vs VERSIONS.md, parse, licence folders), `DiagnosticsTests` (no paths), `PermissionsCoachTests` (live grant via polling, prompt-then-deep-link, denied automation), `LaunchAtLoginTests` (fake SMAppService), `DemoHitTestTests`, `DemoModelTests` (drag→tap→drop, morph, hold/chord, remapped keys, cancel), `OnboardingModelTests` (incl. closing the window counts as finished and tears down polling), `SettingsWindowTests` (toolbar, resize, remembered pane, live re-fit, ⌘W), `FormatsPaneModelTests`, `UIScreenshotTests`.
 
 ```bash
 xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug test \
