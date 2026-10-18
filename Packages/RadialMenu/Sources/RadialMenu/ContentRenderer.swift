@@ -78,8 +78,12 @@ enum ContentRenderer {
         }
         if total() > size.height { showSubtitle = false }
         if total() > size.height { showBadge = false }
-        // No badge row → put the accessory beside the glyph instead.
-        let accessoryBesideGlyph = !showBadge && item.accessory != nil
+        // No room for a badge row: a compact chip sits on the glyph's top-right
+        // corner instead, so Pro segments always say so.
+        let cornerBadge = !showBadge && glyph != nil
+            ? item.badge.map { badgeImageSpec(text: $0, accessory: item.accessory, size: m.badge - 0.5, palette: palette) }
+            : nil
+        let accessoryBesideGlyph = !showBadge && cornerBadge == nil && item.accessory != nil
 
         return draw(size: size, scale: scale) { _ in
             var y = (size.height + total()) / 2 // top of the stack (non-flipped)
@@ -87,6 +91,10 @@ enum ContentRenderer {
                 y -= glyphSize.height
                 let rect = CGRect(x: (size.width - glyphSize.width) / 2, y: y, width: glyphSize.width, height: glyphSize.height)
                 drawImage(glyph, in: rect, tint: glyphTint)
+                if let cornerBadge {
+                    let x = min(size.width - cornerBadge.size.width, rect.maxX - 5)
+                    cornerBadge.draw(CGPoint(x: max(0, x), y: rect.maxY - cornerBadge.size.height + 5))
+                }
                 if accessoryBesideGlyph, let accessory = item.accessory {
                     let a = glyphImage(accessory, pointSize: m.badge + 1)
                     let s = fit(a.size, into: m.badge + 3)
@@ -234,8 +242,16 @@ enum ContentRenderer {
             let attrs = s.attributes(at: 0, effectiveRange: nil)
             return words.map { NSAttributedString(string: String($0), attributes: attrs).size().width }.max() ?? 0
         }
+        func lineCount(_ s: NSAttributedString, size: CGFloat) -> Int {
+            let font = NSFont.systemFont(ofSize: size, weight: weight)
+            let lh = font.ascender - font.descender + font.leading
+            let h = s.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin]).height
+            return Int((h / lh).rounded())
+        }
         while fontSize > minimum {
-            let tooWide = maxLines == 1 ? attributedText.size().width > maxWidth : longestWordWidth(attributedText) > maxWidth
+            let tooWide = maxLines == 1
+                ? attributedText.size().width > maxWidth
+                : longestWordWidth(attributedText) > maxWidth || lineCount(attributedText, size: fontSize) > maxLines
             if !tooWide { break }
             fontSize -= 0.5
             attributedText = attributed(text, size: fontSize, weight: weight, tracking: tracking, color: color,

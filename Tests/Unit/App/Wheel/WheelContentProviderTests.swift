@@ -140,11 +140,18 @@ final class WheelContentProviderTests: XCTestCase {
         p.favouriteFormats = ["pdf", "webp", "doesnotexist"]
         let f = formats(provider.entries(for: input("photo.jpg"), kind: .convert, preferences: p))
         XCTAssertEqual(Array(f.prefix(2)), ["pdf", "webp"])
-        // The rest keep the router's order.
+        // The rest keep their usual order.
         let rest = Array(f.dropFirst(2))
-        let routerOrder = formats(provider.entries(for: input("photo.jpg"), kind: .convert, preferences: prefs))
+        let usual = formats(provider.entries(for: input("photo.jpg"), kind: .convert, preferences: prefs))
             .filter { !["pdf", "webp"].contains($0) }
-        XCTAssertEqual(rest, routerOrder)
+        XCTAssertEqual(rest, usual)
+    }
+
+    func testSameKindTargetsComeFirst() {
+        let f = formats(provider.entries(for: input("clip.mov"), kind: .convert, preferences: prefs))
+        let videoCount = f.filter { Formats.kind(FormatID($0)) == .video }.count
+        XCTAssertEqual(videoCount, 2)
+        XCTAssertTrue(f.prefix(videoCount).allSatisfy { Formats.kind(FormatID($0)) == .video }, "\(f)")
     }
 
     func testHiddenAndShownFormats() {

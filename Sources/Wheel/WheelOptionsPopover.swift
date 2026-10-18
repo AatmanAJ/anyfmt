@@ -217,6 +217,7 @@ struct WheelOptionsView: View {
         }
         .padding(DesignTokens.Space.l)
         .frame(width: 280)
+        .tint(Color(nsColor: WheelTheme.style.accentColor))
         .font(.system(size: DesignTokens.TypeRamp.body))
         .animation(.easeOut(duration: DesignTokens.Motion.crossfade), value: model.visibleSpecs.map(\.id))
     }
@@ -251,15 +252,24 @@ struct WheelOptionsView: View {
                 }
             case .choice(let choices):
                 if choices.count <= 3 {
+                    // Segmented controls get the full width under their label.
+                    Text(verbatim: spec.label)
                     Picker(spec.label, selection: model.binding(text: spec)) {
                         ForEach(choices) { Text(verbatim: $0.label).tag($0.id) }
                     }
                     .pickerStyle(.segmented)
+                    .labelsHidden()
                 } else {
-                    Picker(spec.label, selection: model.binding(text: spec)) {
-                        ForEach(choices) { Text(verbatim: $0.label).tag($0.id) }
+                    HStack {
+                        Text(verbatim: spec.label)
+                        Spacer()
+                        Picker(spec.label, selection: model.binding(text: spec)) {
+                            ForEach(choices) { Text(verbatim: $0.label).tag($0.id) }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .fixedSize()
                     }
-                    .pickerStyle(.menu)
                 }
             case .fileSize:
                 LabeledField(label: spec.label, unit: "MB") {
@@ -269,24 +279,27 @@ struct WheelOptionsView: View {
                 ColorPicker(spec.label, selection: model.binding(color: spec), supportsOpacity: false)
             case .pageRange, .timeRange, .text, .rect:
                 LabeledField(label: spec.label, unit: nil) {
-                    TextField(spec.help ?? spec.label, text: model.binding(text: spec))
+                    TextField(placeholder(for: spec), text: model.binding(text: spec))
                 }
             }
-            if let help = spec.help, !isTextLike(spec.kind) {
+            if let help = spec.help {
                 Text(verbatim: help)
                     .font(.system(size: DesignTokens.TypeRamp.caption))
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .disabled(!model.interactive)
     }
 
-    private func isTextLike(_ kind: OptionKind) -> Bool {
-        switch kind {
-        case .pageRange, .timeRange, .text, .rect: true
-        default: false
+    private func placeholder(for spec: OptionSpec) -> String {
+        switch spec.kind {
+        case .pageRange: String(localized: "All pages", comment: "Placeholder of an empty page range")
+        case .timeRange: String(localized: "Whole file", comment: "Placeholder of an empty time range")
+        default: spec.label
         }
     }
+
 }
 
 private struct LabeledField<Field: View>: View {

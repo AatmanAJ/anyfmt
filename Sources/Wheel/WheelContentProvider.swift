@@ -8,8 +8,9 @@ import RadialMenu
 /// Rules:
 /// - Convert: targets every input can reach (the router intersects multi-file
 ///   drags and skips inputs already in the target format). Favourites first, in
-///   their order; hidden formats and `.hiddenByDefault` rows are dropped unless
-///   the user showed them. Folders and mixed selections get whatever the router
+///   their order; then targets of the input's own kind (a video's video formats
+///   before its audio and GIF ones), then the rest in the router's order. Hidden
+///   formats and `.hiddenByDefault` rows are dropped unless the user showed them. Folders and mixed selections get whatever the router
 ///   offers for all of them (archive targets when the archive lane ships them).
 /// - Tools: only tools that apply to every input (and whose arity is met).
 /// - Actions: always the full set; they work on anything, folders included.
@@ -81,10 +82,14 @@ public struct WheelContentProvider: Sendable {
             return true
         }
         let rank = Dictionary(preferences.favouriteFormats.enumerated().map { ($1, $0) }, uniquingKeysWith: { a, _ in a })
-        // Stable: favourites by their rank, everything else keeps the router's kind/catalogue order.
+        let inputKinds = Set(formats.map(Formats.kind))
+        func affinity(_ f: FormatID) -> Int { inputKinds.contains(Formats.kind(f)) ? 0 : 1 }
+        // Stable: favourites by rank, then same-kind targets, then the router's kind/catalogue order.
         let ordered = all.enumerated().sorted { a, b in
             let ra = rank[a.element.format] ?? Int.max, rb = rank[b.element.format] ?? Int.max
-            return ra != rb ? ra < rb : a.offset < b.offset
+            if ra != rb { return ra < rb }
+            let ka = affinity(a.element.format), kb = affinity(b.element.format)
+            return ka != kb ? ka < kb : a.offset < b.offset
         }
         return ordered.map { WheelEntry.convert($0.element) }
     }

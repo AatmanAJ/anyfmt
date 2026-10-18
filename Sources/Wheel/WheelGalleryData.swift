@@ -38,18 +38,21 @@ enum WheelGalleryData {
         func grid(_ from: FormatID, _ to: [FormatID], flags: CapabilityFlags = []) {
             rows += Capability.grid([from], to, engine, flags: flags)
         }
-        grid(Formats.jpg, [Formats.png, Formats.heic, Formats.webp, Formats.avif, Formats.tiff, Formats.gif, Formats.bmp, Formats.pdf])
-        grid(Formats.png, [Formats.jpg, Formats.heic, Formats.webp, Formats.avif, Formats.tiff, Formats.gif, Formats.bmp, Formats.pdf, Formats.ico])
-        grid(Formats.heic, [Formats.jpg, Formats.png, Formats.webp, Formats.avif, Formats.tiff, Formats.gif, Formats.bmp, Formats.pdf])
-        rows.append(Capability(Formats.png, Formats.icns, engine))
+        let stills = [Formats.jpg, Formats.png, Formats.heic, Formats.webp, Formats.avif, Formats.tiff, Formats.gif, Formats.bmp]
+        for from in [Formats.jpg, Formats.png, Formats.heic] {
+            grid(from, stills)
+            // An image → PDF is an end point, never a stepping stone to documents.
+            rows.append(Capability(from, Formats.pdf, engine, flags: [.terminalOnly]))
+        }
+        rows.append(Capability(Formats.png, Formats.ico, engine, flags: [.lossless]))
         grid(Formats.mov, [Formats.mp4, Formats.webm, Formats.mkv, Formats.gif, Formats.mp3, Formats.m4a, Formats.wav])
         grid(Formats.wav, [Formats.mp3, Formats.m4a, Formats.flac, Formats.aiff, Formats.ogg, Formats.opus])
-        grid(Formats.pdf, [Formats.jpg, Formats.png, Formats.heic, Formats.tiff, Formats.txt, Formats.docx, Formats.html, Formats.md, Formats.rtf])
-        rows.append(Capability(Formats.png, Formats.webp, engine))
-        grid(Formats.docx, [Formats.pdf, Formats.odt, Formats.rtf, Formats.txt, Formats.html, Formats.md, Formats.epub])
-        grid(Formats.xlsx, [Formats.csv, Formats.tsv, Formats.ods, Formats.json, Formats.pdf, Formats.html])
-        grid(Formats.pptx, [Formats.pdf, Formats.png, Formats.jpg])
-        grid(Formats.epub, [Formats.pdf, Formats.txt, Formats.html, Formats.docx, Formats.md])
+        grid(Formats.pdf, [Formats.jpg, Formats.png, Formats.heic, Formats.tiff], flags: [.multiOutput])
+        grid(Formats.pdf, [Formats.txt, Formats.docx, Formats.html, Formats.md, Formats.rtf], flags: [.terminalOnly])
+        grid(Formats.docx, [Formats.pdf, Formats.odt, Formats.rtf, Formats.txt, Formats.html, Formats.md, Formats.epub], flags: [.terminalOnly])
+        grid(Formats.xlsx, [Formats.csv, Formats.tsv, Formats.ods, Formats.json, Formats.pdf, Formats.html], flags: [.terminalOnly])
+        grid(Formats.pptx, [Formats.pdf, Formats.png, Formats.jpg], flags: [.terminalOnly])
+        grid(Formats.epub, [Formats.pdf, Formats.txt, Formats.html, Formats.docx, Formats.md], flags: [.terminalOnly])
         grid(Formats.srt, [Formats.vtt, Formats.txt])
         grid(Formats.zip, [Formats.tar, Formats.gz, Formats.sevenZip])
         grid(Formats.folder, [Formats.zip, Formats.tar, Formats.gz])

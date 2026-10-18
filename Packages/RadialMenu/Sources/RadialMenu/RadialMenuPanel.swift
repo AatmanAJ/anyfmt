@@ -72,6 +72,21 @@ public final class RadialMenuPanel: NSPanel {
 
     // MARK: Showing
 
+    /// Orders the panel in once, invisibly and off-screen, so the first real show
+    /// doesn't pay for window-server and Core Animation setup. Call at launch.
+    public func prewarm() {
+        guard !isVisible else { return }
+        let saved = frame
+        alphaValue = 0
+        setFrame(NSRect(x: -20_000, y: -20_000, width: saved.width, height: saved.height), display: false)
+        orderFrontRegardless()
+        menuView.layoutSubtreeIfNeeded()
+        menuView.displayIfNeeded()
+        orderOut(nil)
+        setFrame(saved, display: false)
+        alphaValue = 1
+    }
+
     /// Centres the wheel on `point` (global coordinates), pushed inward near
     /// screen edges, and orders it in without activating the app.
     public func show(at point: CGPoint, animated: Bool = true) {

@@ -226,11 +226,21 @@ final class WheelControllerTests: XCTestCase {
 
 @MainActor
 final class WheelGalleryTests: XCTestCase {
+    /// Dev hook: `TEST_RUNNER_HALO_GALLERY_OUT=<dir> xcodebuild test …` writes the full-size gallery there.
+    func testRenderGalleryToRequestedDirectory() throws {
+        guard let out = ProcessInfo.processInfo.environment["HALO_GALLERY_OUT"], !out.isEmpty else {
+            throw XCTSkip("set HALO_GALLERY_OUT to render the gallery")
+        }
+        let files = try WheelGallery.renderAll(to: URL(fileURLWithPath: out), scale: 2)
+        XCTAssertFalse(files.isEmpty)
+    }
+
     func testRenderAllWritesEveryCase() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("wheel-gallery-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: dir) }
         let files = try WheelGallery.renderAll(to: dir, scale: 1)
-        XCTAssertEqual(files.count, WheelGallery.cases().count)
+        XCTAssertGreaterThanOrEqual(files.count, WheelGallery.cases().count)
+        XCTAssertTrue(files.contains { $0.lastPathComponent == "wheel-options-video-light.png" })
         XCTAssertEqual(Set(files.map(\.lastPathComponent)).count, files.count, "unique names")
         let names = Set(files.map { $0.deletingPathExtension().lastPathComponent })
         XCTAssertTrue(names.contains { $0.hasPrefix("wheel-image-light-") }, "wheel-<kind>-<appearance>-<count>")

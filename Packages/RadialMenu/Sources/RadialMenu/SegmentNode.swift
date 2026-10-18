@@ -110,9 +110,12 @@ final class SegmentNode {
 
     struct Images {
         var normal: CGImage?
-        var highlight: CGImage?
+        /// Rendered lazily on first hover (keeps the open path short).
+        var highlight: (() -> CGImage?)?
         var size: CGSize
     }
+
+    private var highlightProvider: (() -> CGImage?)?
 
     /// Moves this node to `slot` (morphing paths) and shows `images`. When the item
     /// changes during an animated move, old content fades out while new content fades in.
@@ -165,13 +168,20 @@ final class SegmentNode {
     }
 
     private func set(_ images: Images, on c: CALayer, normal: CALayer, highlight: CALayer) {
+        highlightProvider = images.highlight
         LayerAnimation.withoutActions {
             c.bounds = CGRect(origin: .zero, size: images.size)
             normal.frame = c.bounds
             highlight.frame = c.bounds
             normal.contents = images.normal
-            highlight.contents = images.highlight
+            highlight.contents = nil
         }
+    }
+
+    private func ensureHighlightImage() {
+        guard highlightImage.contents == nil, let provider = highlightProvider else { return }
+        let image = provider()
+        LayerAnimation.withoutActions { highlightImage.contents = image }
     }
 
     /// Re-renders content in place (appearance or scale change).
@@ -233,6 +243,7 @@ final class SegmentNode {
         fill.set("shadowOpacity", to: liftable ? p.glowOpacity : Float(0), animation: quick)
         stroke.set("strokeColor", to: on && isEnabled ? p.highlightStroke : p.stroke, animation: quick)
         let showHighlight = on && isEnabled
+        if showHighlight { ensureHighlightImage() }
         highlightImage.set("opacity", to: showHighlight ? Float(1) : Float(0), animation: quick)
         normalImage.set("opacity", to: showHighlight ? Float(0) : Float(1), animation: quick)
         LayerAnimation.withoutActions {

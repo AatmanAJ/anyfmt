@@ -124,8 +124,47 @@ public enum WheelGallery {
             try data.write(to: url, options: .atomic)
             written.append(url)
         }
+        written += try renderOptionsSamples(to: directory, scale: scale)
         Log.wheel.info("gallery: wrote \(written.count) images to \(directory.path, privacy: .public)")
         return written
+    }
+
+    /// The options popover's content for a few schemas, live (after a drop) and mid-drag.
+    static func renderOptionsSamples(to directory: URL, scale: CGFloat) throws -> [URL] {
+        let samples: [(String, String, OptionsSchema, Bool)] = [
+            ("video", "MP4", StandardSchemas.video, true),
+            ("image", "WebP", StandardSchemas.imageLosslessCapable, true),
+            ("audio", "MP3", StandardSchemas.audioLossy, true),
+            ("pdf-drag", "PNG", StandardSchemas.pdfRender, false),
+        ]
+        var out: [URL] = []
+        for (name, label, schema, interactive) in samples {
+            for (tag, appearanceName) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
+                let title = String(localized: "\(label) options", comment: "Title of the conversion options popover, e.g. MP4 options")
+                let model = WheelOptionsModel(title: title, schema: schema, values: schema.defaults, interactive: interactive)
+                let host = NSHostingView(rootView: WheelOptionsView(model: model))
+                host.appearance = NSAppearance(named: appearanceName)
+                host.frame = NSRect(origin: .zero, size: host.fittingSize)
+                host.layoutSubtreeIfNeeded()
+                guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { continue }
+                // Popover-like backing so the controls read correctly in both modes.
+                let background = appearanceName == .darkAqua ? NSColor(white: 0.17, alpha: 1) : NSColor(white: 0.97, alpha: 1)
+                if let ctx = NSGraphicsContext(bitmapImageRep: rep) {
+                    NSGraphicsContext.saveGraphicsState()
+                    NSGraphicsContext.current = ctx
+                    background.setFill()
+                    NSBezierPath(rect: host.bounds).fill()
+                    NSGraphicsContext.restoreGraphicsState()
+                }
+                host.cacheDisplay(in: host.bounds, to: rep)
+                guard let data = rep.representation(using: .png, properties: [:]) else { continue }
+                let url = directory.appendingPathComponent("wheel-options-\(name)-\(tag)").appendingPathExtension("png")
+                try data.write(to: url, options: .atomic)
+                out.append(url)
+            }
+        }
+        _ = scale
+        return out
     }
 
     // MARK: Window

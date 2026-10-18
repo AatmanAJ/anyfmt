@@ -250,10 +250,11 @@ public final class RadialMenuView: NSView {
         let normal = ContentRenderer.segmentImage(item: item, ring: slot.ring, size: size, scale: renderScale,
                                                   state: enabled ? .normal : .disabled, palette: palette,
                                                   style: style, config: configuration)
-        let highlight = enabled
-            ? ContentRenderer.segmentImage(item: item, ring: slot.ring, size: size, scale: renderScale, state: .highlighted,
-                                           palette: palette, style: style, config: configuration)
-            : normal
+        let scale = renderScale, palette = palette, style = style, config = configuration
+        let highlight: (() -> CGImage?)? = enabled ? {
+            ContentRenderer.segmentImage(item: item, ring: slot.ring, size: size, scale: scale, state: .highlighted,
+                                         palette: palette, style: style, config: config)
+        } : nil
         return SegmentNode.Images(normal: normal, highlight: highlight, size: size)
     }
 

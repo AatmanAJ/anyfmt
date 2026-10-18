@@ -76,6 +76,13 @@ public final class WheelController: NSObject {
 
     // MARK: Showing
 
+    /// Pays the panel's one-time window-server/Core Animation setup up front (call at launch).
+    public func prewarm() {
+        menuView.setItems(WheelContentProvider.items(for: provider.entries(for: WheelInput(), kind: .actions, preferences: preferences),
+                                                     cloud: cloud), animated: false)
+        panel.prewarm()
+    }
+
     /// Mid-drag entry point. `point` is the pointer in global coordinates.
     public func show(kind: WheelKind, urls: [URL], promisedTypes: [UTType] = [], at point: CGPoint) {
         prepareForNewSession(mode: .drag)
