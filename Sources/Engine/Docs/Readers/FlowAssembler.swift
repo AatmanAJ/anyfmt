@@ -82,6 +82,17 @@ enum FlowAssembler {
         }
     }
 
+    /// Header cells are bold by definition; drop the redundant bold runs.
+    static func plainHeaderRows(_ t: DocTable) -> DocTable {
+        var t = t
+        for k in t.rows.indices where t.rows[k].isHeader {
+            t.rows[k].cells = t.rows[k].cells.map { c in
+                DocTableCell(c.blocks.map { b in if case .paragraph(let i) = b { return .paragraph(unwrapBold(i)) }; return b })
+            }
+        }
+        return t
+    }
+
     static func unwrapBold(_ a: [DocInline]) -> [DocInline] {
         a.flatMap { i -> [DocInline] in
             if case .strong(let c) = i { return c }

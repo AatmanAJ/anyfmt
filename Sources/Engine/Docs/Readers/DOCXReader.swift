@@ -268,7 +268,7 @@ struct DocxReadContext {
         guard !rows.isEmpty else { return nil }
         // No explicit header: treat an all-bold first row as one.
         if !rows.contains(where: \.isHeader), rows.count > 1, Self.isAllBold(rows[0]) { rows[0].isHeader = true }
-        return DocTable(rows: rows)
+        return FlowAssembler.plainHeaderRows(DocTable(rows: rows))
     }
 
     static func isAllBold(_ r: DocTableRow) -> Bool {

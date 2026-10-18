@@ -68,7 +68,7 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
     /// Renders a local HTML file; `readAccess` is the folder WebKit may read (attachments next to it).
     public static func render(fileURL: URL, readAccess: URL, to output: URL, page: PageSetup, timeout: TimeInterval = 90) async throws {
         try await render(output: output, page: page, timeout: timeout) { web in
-            web.loadFileURL(fileURL, allowingReadAccessTo: readAccess)
+            web.loadFileURL(fileURL.absoluteURL.standardizedFileURL, allowingReadAccessTo: readAccess.absoluteURL.standardizedFileURL)
         }
     }
 
@@ -146,7 +146,7 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
         info.isHorizontallyCentered = false
         info.isVerticallyCentered = false
         info.jobDisposition = .save
-        info.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = output
+        info.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = output.absoluteURL.standardizedFileURL
         let op = web.printOperation(with: info)
         op.showsPrintPanel = false
         op.showsProgressPanel = false

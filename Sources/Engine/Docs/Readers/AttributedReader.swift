@@ -86,7 +86,7 @@ public enum AttributedReader {
                     rows.append(DocTableRow(rowCells))
                 }
                 if rows.count > 1, DocxReadContext.isAllBold(rows[0]) { rows[0].isHeader = true }
-                items.append(.block(.table(DocTable(rows: rows))))
+                items.append(.block(.table(FlowAssembler.plainHeaderRows(DocTable(rows: rows)))))
                 continue
             }
             let text = (s.string as NSString).substring(with: p.range)
