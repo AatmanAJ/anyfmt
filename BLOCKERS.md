@@ -83,8 +83,10 @@ make uitest
 
 **Why blocked.** No remote is configured, and creating a public repository is
 publishing, which needs the owner's go-ahead. CI workflows exist
-(`.github/workflows/ci.yml`, `nightly.yml`, `release.yml`), and the exact steps they
-run (`make engines`, `make build`, `make test`, `make matrix`) pass locally.
+(`.github/workflows/ci.yml`, `nightly.yml`, `release.yml`) and are `actionlint`-clean.
+The CI job's steps (`make build`, `make test`) pass on a **fresh clone** of `main`, and
+`make matrix` passes locally. That fresh-clone run caught, and led to a fix for, one
+timing-sensitive test.
 
 ```bash
 gh repo create aiwithaj/halo --public --source . --remote origin --push

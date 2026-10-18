@@ -26,6 +26,6 @@ true points at the BLOCKERS.md entry that explains it.
 | 18 | Zero network calls without opt-in | ✅ | `make netcheck`: 0 sockets (lsof every 0.5 s + nettop) from the app, CLI and engines; ffmpeg `--disable-network`; cloud gate tests |
 | 19 | All engines bundled, licences + source offer in `LICENSES/`, app < 150 MB | ✅ | ffmpeg/ffprobe/libav*/resvg in the bundle; `LICENSES/` (also inside the app); **63 MB** app, **27 MB** DMG |
 | 20 | DMG builds; notarized if creds present | 🟡 | `make dmg` builds a styled, ad-hoc signed DMG. No Developer ID or notary profile on this machine → **B-002** |
-| 21 | README with GIF, CONTRIBUTING, CI green | 🟡 | README with `docs/screens/wheel-demo.gif` and a generated format table; CONTRIBUTING; CI workflows written and their steps pass locally. No GitHub remote, so CI has never run → **B-004** |
+| 21 | README with GIF, CONTRIBUTING, CI green | 🟡 | README with `docs/screens/wheel-demo.gif` and a generated format table; CONTRIBUTING; CI workflows lint-clean (`actionlint`), and the CI job's steps (`make build`, `make test`) pass on a **fresh clone** of `main` (engines cached, as CI does after its first run). No GitHub remote yet, so Actions itself has never run → **B-004** |
 | 22 | PARITY.md: feature-by-feature vs the reference, honest | ✅ | `docs/PARITY.md` |
 | 23 | POLISH_AUDIT.md closed out | ✅ | `docs/POLISH_AUDIT.md`: every item fixed or justified; 3 live-look items → **B-001** |
