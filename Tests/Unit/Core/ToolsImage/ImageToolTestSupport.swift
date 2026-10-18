@@ -38,7 +38,7 @@ enum G1 {
 
     /// Deterministic "photo-like" image: smooth gradients plus mild noise.
     static func photo(width: Int = 320, height: Int = 240, alpha: Bool = false, seed: UInt64 = 1) -> CGImage {
-        var rng = SplitMix(seed: seed)
+        var rng = RedactNoise(seed: seed)
         var px = [UInt8](repeating: 0, count: width * height * 4)
         for y in 0..<height {
             for x in 0..<width {
@@ -57,7 +57,7 @@ enum G1 {
     /// Uniform random noise (every pixel independent): used where tests check
     /// that no original value survives.
     static func noise(width: Int, height: Int, seed: UInt64 = 7) -> CGImage {
-        var rng = SplitMix(seed: seed)
+        var rng = RedactNoise(seed: seed)
         var px = [UInt8](repeating: 255, count: width * height * 4)
         for i in stride(from: 0, to: px.count, by: 4) {
             px[i] = UInt8(rng.next() & 0xFF); px[i + 1] = UInt8(rng.next() & 0xFF); px[i + 2] = UInt8(rng.next() & 0xFF)
@@ -103,12 +103,12 @@ enum G1 {
     }
 
     static func properties(_ url: URL) -> [String: Any] {
-        ImageSupport.properties(of: url) ?? [:]
+        ToolImageSupport.properties(of: url) ?? [:]
     }
 
     /// Straight RGBA8 sRGB pixels of a file or image.
     static func pixels(_ image: CGImage) -> [UInt8] {
-        ImageSupport.rgba8(image, colorSpace: srgb)?.pixels ?? []
+        ToolImageSupport.rgba8(image, colorSpace: srgb)?.pixels ?? []
     }
 
     static func pixel(_ px: [UInt8], width: Int, x: Int, y: Int) -> (r: Int, g: Int, b: Int, a: Int) {

@@ -93,7 +93,7 @@ public enum AnnotationRenderer {
         let unit = min(size.width, size.height)
         let pts = a.points.map { CGPoint(x: $0.x * size.width, y: $0.y * size.height) }
         let lineWidth = max(1, CGFloat(a.width) * unit)
-        let color = HexColor.cgColor(a.color)
+        let color = OptionColor.cgColor(a.color)
         ctx.saveGState()
         defer { ctx.restoreGState() }
         ctx.setLineCap(.round)
@@ -181,8 +181,8 @@ public enum AnnotationRenderer {
     /// Composites annotations over `image` at full resolution.
     public static func render(_ list: [Annotation], over image: CGImage) throws -> CGImage {
         let w = image.width, h = image.height
-        guard let ctx = ImageSupport.makeContext(width: w, height: h, colorSpace: ImageSupport.colorSpace(of: image),
-                                                 deep: ImageSupport.isDeep(image), opaque: !ImageSupport.hasAlpha(image)) else {
+        guard let ctx = ToolImageSupport.makeContext(width: w, height: h, colorSpace: ToolImageSupport.colorSpace(of: image),
+                                                 deep: ToolImageSupport.isDeep(image), opaque: !ToolImageSupport.hasAlpha(image)) else {
             throw ConversionError.other(L("The image couldn’t be processed."), detail: "annotate context")
         }
         ctx.interpolationQuality = .none

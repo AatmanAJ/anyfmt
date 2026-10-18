@@ -4,7 +4,7 @@ import HaloCore
 
 /// Compact options for the instant Compress tool, for the wheel's options
 /// popover. Edits `ToolSchemas.compress` values in place.
-public struct CompressOptionsView: View {
+public struct ImageCompressOptionsView: View {
     @Binding var options: OptionValues
     /// Size of the (first) file, for "≈ 1.2 MB" estimates in percentage mode.
     let originalBytes: Int?
@@ -103,7 +103,7 @@ public struct CompressOptionsView: View {
 }
 
 /// Compact options for the instant Resize tool (`ToolSchemas.resize`).
-public struct ResizeOptionsView: View {
+public struct ImageResizeOptionsView: View {
     @Binding var options: OptionValues
     /// Upright pixel size of the (first) file, for the live readout.
     let sourceSize: CGSize?

@@ -5,7 +5,7 @@ import ImageIO
 /// EXIF orientation as an affine transform, so a raw (stored) image can be
 /// drawn upright without re-rendering its pixels. In y-up space it maps the
 /// raw image rect (0, 0, w, h) onto the upright rect (0, 0, W, H).
-public enum OrientationTransform {
+public enum ToolOrientationTransform {
     public static func transform(_ o: CGImagePropertyOrientation, width w: CGFloat, height h: CGFloat) -> CGAffineTransform {
         switch o {
         case .up: .identity
@@ -22,7 +22,7 @@ public enum OrientationTransform {
     /// Draws `raw` upright into `rect` (y-up user space).
     static func draw(_ raw: CGImage, orientation: CGImagePropertyOrientation, in rect: CGRect, context ctx: CGContext) {
         let w = CGFloat(raw.width), h = CGFloat(raw.height)
-        let upright = orientation.swapsAxes ? CGSize(width: h, height: w) : CGSize(width: w, height: h)
+        let upright = ToolImageSupport.swapsAxes(orientation) ? CGSize(width: h, height: w) : CGSize(width: w, height: h)
         ctx.saveGState()
         ctx.translateBy(x: rect.minX, y: rect.minY)
         ctx.scaleBy(x: rect.width / upright.width, y: rect.height / upright.height)
@@ -100,21 +100,21 @@ struct ImagesToPDFRunner: ToolRunner {
             // (huge) lossless pixels. Re-encode those as JPEG, which PDF carries natively.
             if let type = CGImageSourceGetType(src) as String?,
                ["public.heic", "public.heif", "public.avif", "org.webmproject.webp", "public.avci"].contains(type),
-               !ImageSupport.hasAlpha(raw),
-               let jpeg = try? ImageEncoder.encodeNative(raw, type: "public.jpeg", quality: 0.9, properties: [:], format: Formats.jpg),
+               !ToolImageSupport.hasAlpha(raw),
+               let jpeg = try? ToolImageEncoder.encodeNative(raw, type: "public.jpeg", quality: 0.9, properties: [:], format: Formats.jpg),
                let jsrc = CGImageSourceCreateWithData(jpeg as CFData, nil), let j = CGImageSourceCreateImageAtIndex(jsrc, 0, nil) {
                 raw = j
             }
             let props = (CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [String: Any]) ?? [:]
-            let o = ImageSupport.orientation(of: props)
+            let o = ToolImageSupport.orientation(of: props)
             let dpi = CGFloat((props[kCGImagePropertyDPIWidth as String] as? NSNumber)?.doubleValue ?? 72)
-            let pixels = o.swapsAxes ? CGSize(width: raw.height, height: raw.width) : CGSize(width: raw.width, height: raw.height)
+            let pixels = ToolImageSupport.swapsAxes(o) ? CGSize(width: raw.height, height: raw.width) : CGSize(width: raw.width, height: raw.height)
             let plan = PDFPagePlan.page(for: pixels, dpi: dpi, pageSize: pageSize)
             var media = plan.media
             let boxData = Data(bytes: &media, count: MemoryLayout<CGRect>.size)
             ctx.beginPDFPage([kCGPDFContextMediaBox as String: boxData] as CFDictionary)
             ctx.interpolationQuality = .high
-            OrientationTransform.draw(raw, orientation: o, in: plan.frame, context: ctx)
+            ToolOrientationTransform.draw(raw, orientation: o, in: plan.frame, context: ctx)
             ctx.endPDFPage()
             context.progress(Double(i + 1) / Double(inputs.count) * 0.95)
         }

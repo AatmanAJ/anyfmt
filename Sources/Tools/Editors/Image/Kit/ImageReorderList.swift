@@ -16,9 +16,9 @@ struct ImageEditorItem: Identifiable {
 
     static func load(_ urls: [URL], edge: Int = 480) -> [ImageEditorItem] {
         urls.enumerated().map { i, url in
-            let thumb = ImageSupport.thumbnail(url, maxPixelSize: edge)
-            let size = ImageSupport.pixelSize(of: url) ?? thumb.map { CGSize(width: $0.width, height: $0.height) } ?? CGSize(width: 1, height: 1)
-            let dpi = (ImageSupport.properties(of: url)?["DPIWidth"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 72
+            let thumb = ToolImageSupport.thumbnail(url, maxPixelSize: edge)
+            let size = ToolImageSupport.pixelSize(of: url) ?? thumb.map { CGSize(width: $0.width, height: $0.height) } ?? CGSize(width: 1, height: 1)
+            let dpi = (ToolImageSupport.properties(of: url)?["DPIWidth"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 72
             return ImageEditorItem(id: i, url: url, thumbnail: thumb, pixelSize: size, dpi: dpi)
         }
     }

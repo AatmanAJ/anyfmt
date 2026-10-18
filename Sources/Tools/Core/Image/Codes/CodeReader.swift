@@ -127,12 +127,12 @@ struct ReadCodesRunner: ToolRunner {
 
     func run(_ request: ToolRequest, context: EngineContext) async throws -> ConversionOutput {
         guard let input = request.inputs.first else { throw ConversionError.invalidOption("inputs") }
-        let decoded = try ImageSupport.decode(input)
+        let decoded = try ToolImageSupport.decode(input)
         context.progress(0.3)
         var results = try CodeReader.read(decoded.image)
         if results.isEmpty, max(decoded.width, decoded.height) < 1200 {
             // Small codes read better enlarged.
-            let up = try ImageSupport.resample(decoded.image, width: decoded.width * 2, height: decoded.height * 2)
+            let up = try ToolImageSupport.resample(decoded.image, width: decoded.width * 2, height: decoded.height * 2)
             results = try CodeReader.read(up)
         }
         guard !results.isEmpty else {

@@ -18,7 +18,7 @@ final class ImageAdjustModel: ToolEditorModel {
         self.tool = tool
         self.inputs = inputs
         preview = inputs.first.flatMap { ImageEditorKit.preview($0) }
-        pixelSize = inputs.first.flatMap(ImageSupport.pixelSize(of:)) ?? .zero
+        pixelSize = inputs.first.flatMap(ToolImageSupport.pixelSize(of:)) ?? .zero
         adjustments = ImageAdjustments(options: tool.defaultOptions)
         rendered = preview
     }

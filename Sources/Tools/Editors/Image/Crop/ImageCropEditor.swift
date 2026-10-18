@@ -53,7 +53,7 @@ final class ImageCropModel: ToolEditorModel {
         self.inputs = inputs
         let url = inputs.first
         preview = url.flatMap { ImageEditorKit.preview($0) }
-        pixelSize = url.flatMap(ImageSupport.pixelSize(of:)) ?? preview.map { CGSize(width: $0.width, height: $0.height) } ?? CGSize(width: 1, height: 1)
+        pixelSize = url.flatMap(ToolImageSupport.pixelSize(of:)) ?? preview.map { CGSize(width: $0.width, height: $0.height) } ?? CGSize(width: 1, height: 1)
         let defaults = tool.defaultOptions
         aspect = defaults.string("aspect", default: "free")
         rect = CropGeometry.parseRect(defaults.string("rect", default: "0,0,1,1")) ?? CGRect(x: 0, y: 0, width: 1, height: 1)
@@ -190,7 +190,7 @@ struct ImageCropCanvas: View {
             }
         }
         .background(ImageEditorKeyCatcher(handle: keys) { event in
-            guard let d = event.arrowDelta else { return false }
+            guard let d = ImageEditorKeyCatcher.arrowDelta(event) else { return false }
             let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
             model.nudge(dx: d.x * step, dy: d.y * step)
             return true

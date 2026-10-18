@@ -38,7 +38,7 @@ struct ResizeImageRunner: ToolRunner {
         try await PixelToolPipeline(request: request, context: context).run { decoded in
             let t = ResizePlan.targetSize(for: decoded.size, options: request.options)
             guard Int(t.width) <= 32768, Int(t.height) <= 32768 else { throw ConversionError.invalidOption("width") }
-            return try ImageSupport.resample(decoded.image, width: Int(t.width), height: Int(t.height))
+            return try ToolImageSupport.resample(decoded.image, width: Int(t.width), height: Int(t.height))
         }
     }
 }
@@ -179,8 +179,8 @@ public struct ImageAdjustments: Sendable, Hashable {
     public func render(_ image: CGImage) throws -> CGImage {
         guard !isNeutral else { return image }
         let out = apply(to: CIImage(cgImage: image))
-        return try ImageSupport.render(out, width: image.width, height: image.height, colorSpace: ImageSupport.colorSpace(of: image),
-                                       like: image, opaque: !ImageSupport.hasAlpha(image))
+        return try ToolImageSupport.render(out, width: image.width, height: image.height, colorSpace: ToolImageSupport.colorSpace(of: image),
+                                       like: image, opaque: !ToolImageSupport.hasAlpha(image))
     }
 }
 

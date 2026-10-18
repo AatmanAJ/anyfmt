@@ -50,9 +50,9 @@ public enum Redactor {
                              referenceSize: CGSize? = nil) throws -> CGImage {
         guard !regions.isEmpty else { return image }
         let w = image.width, h = image.height
-        let cs = ImageSupport.colorSpace(of: image)
-        let opaque = !ImageSupport.hasAlpha(image)
-        guard let ctx = ImageSupport.makeContext(width: w, height: h, colorSpace: cs, deep: false, opaque: opaque),
+        let cs = ToolImageSupport.colorSpace(of: image)
+        let opaque = !ToolImageSupport.hasAlpha(image)
+        guard let ctx = ToolImageSupport.makeContext(width: w, height: h, colorSpace: cs, deep: false, opaque: opaque),
               let data = ctx.data else {
             throw ConversionError.other(L("The image couldn’t be processed."), detail: "redact context")
         }
@@ -115,7 +115,7 @@ public enum Redactor {
                 counts[g] += 1
             }
         }
-        var rng = SplitMix(seed: seed &* 0x9E37_79B9_7F4A_7C15)
+        var rng = RedactNoise(seed: seed &* 0x9E37_79B9_7F4A_7C15)
         let values = sums.indices.map { i -> SIMD4<Float> in
             var v = sums[i] / max(1, counts[i])
             // ±3 levels of deterministic noise: block values never equal any source pixel by construction of an average alone.
@@ -142,7 +142,7 @@ public enum Redactor {
     /// Bilinear reconstruction from block centres plus fine noise against banding.
     private static func paintSmooth(_ px: UnsafeMutablePointer<UInt8>, rowBytes: Int, _ r: (x0: Int, y0: Int, x1: Int, y1: Int),
                                     block: Int, grid: Grid, seed: UInt64) {
-        var rng = SplitMix(seed: seed &* 0xD1B5_4A32_D192_ED03)
+        var rng = RedactNoise(seed: seed &* 0xD1B5_4A32_D192_ED03)
         let b = Float(block)
         for y in r.y0..<r.y1 {
             let row = px + y * rowBytes
@@ -174,7 +174,7 @@ public enum Redactor {
 }
 
 /// Small deterministic PRNG (SplitMix64) so redactions are reproducible.
-struct SplitMix {
+struct RedactNoise {
     private var state: UInt64
     init(seed: UInt64) { state = seed }
     mutating func next() -> UInt64 {
@@ -196,7 +196,7 @@ struct RedactImageRunner: ToolRunner {
             throw ConversionError.other(L("Draw at least one area to redact."), detail: "redact: no regions")
         }
         let style = Redactor.Style(rawValue: request.options.string("style", default: "pixelate")) ?? .pixelate
-        let fill = HexColor.cgColor(request.options.string("color", default: "#000000"))
+        let fill = OptionColor.cgColor(request.options.string("color", default: "#000000"))
         return try await PixelToolPipeline(request: request, context: context).run { decoded in
             try Redactor.apply(decoded.image, regions: regions, style: style, fill: fill)
         }

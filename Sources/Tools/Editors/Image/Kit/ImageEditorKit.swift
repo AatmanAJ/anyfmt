@@ -21,7 +21,7 @@ enum ImageEditorKit {
     static var danger: Color { dynamic(DesignTokens.Palette.danger) }
 
     static func color(hex: String) -> Color {
-        guard let c = HexColor.components(hex) else { return .black }
+        guard let c = OptionColor.components(hex) else { return .black }
         return Color(.sRGB, red: c.r, green: c.g, blue: c.b, opacity: c.a)
     }
 
@@ -61,7 +61,7 @@ enum ImageEditorKit {
     static let previewEdge = 1400
 
     static func preview(_ url: URL, edge: Int = previewEdge) -> CGImage? {
-        ImageSupport.thumbnail(url, maxPixelSize: edge)
+        ToolImageSupport.thumbnail(url, maxPixelSize: edge)
     }
 }
 
@@ -249,7 +249,7 @@ extension ImageEditorKit {
                     .accessibilityAddTraits(selected ? .isSelected : [])
                 }
                 let custom = !swatches.contains { $0.uppercased() == hex.uppercased() }
-                Button { ColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
+                Button { ImageColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
                     Circle()
                         .fill(AngularGradient(colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red], center: .center))
                         .overlay(Circle().fill(custom ? ImageEditorKit.color(hex: hex) : .clear).padding(4))
@@ -286,7 +286,7 @@ extension ImageEditorKit {
         var body: some View {
             HStack(spacing: DesignTokens.Space.s) {
                 Text(label).font(.system(size: DesignTokens.TypeRamp.body))
-                Button { ColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
+                Button { ImageColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
                     RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
                         .fill(ImageEditorKit.color(hex: hex))
                         .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).strokeBorder(Color.primary.opacity(0.2), lineWidth: 0.5))
@@ -356,11 +356,13 @@ struct ImageEditorKeyCatcher: NSViewRepresentable {
     }
 }
 
-extension NSEvent {
-    var isDeleteKey: Bool { keyCode == 51 || keyCode == 117 }
+extension ImageEditorKeyCatcher {
+    /// ⌫ or ⌦.
+    static func isDelete(_ e: NSEvent) -> Bool { e.keyCode == 51 || e.keyCode == 117 }
+
     /// (dx, dy) for arrow keys, y down; nil otherwise.
-    var arrowDelta: CGPoint? {
-        switch keyCode {
+    static func arrowDelta(_ e: NSEvent) -> CGPoint? {
+        switch e.keyCode {
         case 123: CGPoint(x: -1, y: 0)
         case 124: CGPoint(x: 1, y: 0)
         case 125: CGPoint(x: 0, y: 1)
@@ -372,15 +374,15 @@ extension NSEvent {
 
 /// Routes the shared `NSColorPanel` to whichever well opened it last.
 @MainActor
-final class ColorPanelBridge: NSObject {
-    static let shared = ColorPanelBridge()
+final class ImageColorPanelBridge: NSObject {
+    static let shared = ImageColorPanelBridge()
     private var onChange: ((String) -> Void)?
 
     func open(hex: String, onChange: @escaping (String) -> Void) {
         self.onChange = nil // don't echo the initial colour
         let panel = NSColorPanel.shared
         panel.showsAlpha = false
-        if let c = HexColor.components(hex) {
+        if let c = OptionColor.components(hex) {
             panel.color = NSColor(srgbRed: c.r, green: c.g, blue: c.b, alpha: 1)
         }
         self.onChange = onChange
@@ -391,7 +393,7 @@ final class ColorPanelBridge: NSObject {
 
     @objc private func colorChanged(_ sender: NSColorPanel) {
         let c = sender.color.usingColorSpace(.sRGB) ?? .black
-        onChange?(HexColor.string(r: Double(c.redComponent), g: Double(c.greenComponent), b: Double(c.blueComponent)))
+        onChange?(OptionColor.string(r: Double(c.redComponent), g: Double(c.greenComponent), b: Double(c.blueComponent)))
     }
 }
 

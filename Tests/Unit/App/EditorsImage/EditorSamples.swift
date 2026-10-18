@@ -198,7 +198,7 @@ enum EditorSnapshot {
         guard writesFiles else { return nil }
         var data = try XCTUnwrap(rep.representation(using: .png, properties: [:]))
         // Dogfood the compress tool's palette PNG writer to keep the repo light.
-        if let cg = rep.cgImage, let px = ImageSupport.rgba8(cg, colorSpace: EditorSamples.srgb) {
+        if let cg = rep.cgImage, let px = ToolImageSupport.rgba8(cg, colorSpace: EditorSamples.srgb) {
             let q = PaletteQuantizer(maxColors: 256).quantize(pixels: px.pixels, width: px.width, height: px.height)
             if let small = PalettePNGWriter.write(q, colorSpace: EditorSamples.srgb, dpi: 144, metadataChunks: []), small.count < data.count { data = small }
         }

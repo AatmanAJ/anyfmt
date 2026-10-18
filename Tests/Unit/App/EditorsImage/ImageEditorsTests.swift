@@ -239,12 +239,12 @@ final class ImageEditorsTests: XCTestCase {
     func testOptionViewsEditBindings() {
         var compress = ToolSchemas.compress.defaults
         let binding = Binding(get: { compress }, set: { compress = $0 })
-        _ = CompressOptionsView(options: binding, originalBytes: 2_000_000).body
+        _ = ImageCompressOptionsView(options: binding, originalBytes: 2_000_000).body
         binding.wrappedValue[OptionKey.sizeMode] = .string("percent")
         XCTAssertEqual(compress.string(OptionKey.sizeMode, default: ""), "percent")
         var resize = ToolSchemas.resize.defaults
         let rb = Binding(get: { resize }, set: { resize = $0 })
-        _ = ResizeOptionsView(options: rb, sourceSize: CGSize(width: 4032, height: 3024)).body
+        _ = ImageResizeOptionsView(options: rb, sourceSize: CGSize(width: 4032, height: 3024)).body
         rb.wrappedValue["mode"] = .string("preset")
         XCTAssertEqual(ResizePlan.targetSize(for: CGSize(width: 4032, height: 3024), options: resize), CGSize(width: 1920, height: 1440))
     }

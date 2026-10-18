@@ -54,9 +54,9 @@ public enum BackgroundComposer {
         let size = CGSize(width: subject.width, height: subject.height)
         let pad = CGFloat(paddingPixels(for: size, style: style))
         let canvas = canvasSize(for: size, style: style)
-        let cs = ImageSupport.colorSpace(of: subject)
-        guard let ctx = ImageSupport.makeContext(width: Int(canvas.width), height: Int(canvas.height), colorSpace: cs,
-                                                 deep: ImageSupport.isDeep(subject), opaque: true) else {
+        let cs = ToolImageSupport.colorSpace(of: subject)
+        guard let ctx = ToolImageSupport.makeContext(width: Int(canvas.width), height: Int(canvas.height), colorSpace: cs,
+                                                 deep: ToolImageSupport.isDeep(subject), opaque: true) else {
             throw ConversionError.other(L("The image couldn’t be processed."), detail: "background context")
         }
         ctx.interpolationQuality = .high
@@ -65,7 +65,7 @@ public enum BackgroundComposer {
 
         let frame = CGRect(x: pad, y: pad, width: size.width, height: size.height)
         let radius = min(size.width, size.height) * CGFloat(style.cornerRadius) / 100
-        let cutout = ImageSupport.hasAlpha(subject)
+        let cutout = ToolImageSupport.hasAlpha(subject)
         let shadowBlur = max(4, max(pad * 0.55, min(size.width, size.height) * 0.025))
         let shadowColor = CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.32)
         let shadowOffset = CGSize(width: 0, height: -shadowBlur * 0.35)
@@ -98,7 +98,7 @@ public enum BackgroundComposer {
     static func paintFill(_ style: BackdropStyle, in ctx: CGContext, rect: CGRect, backgroundImage: CGImage?) {
         switch style.fill {
         case .solid:
-            ctx.setFillColor(HexColor.cgColor(style.color1))
+            ctx.setFillColor(OptionColor.cgColor(style.color1))
             ctx.fill(rect)
         case .image where backgroundImage != nil:
             guard let bg = backgroundImage else { return }
@@ -107,8 +107,8 @@ public enum BackgroundComposer {
             let w = CGFloat(bg.width) * s, h = CGFloat(bg.height) * s
             ctx.draw(bg, in: CGRect(x: rect.midX - w / 2, y: rect.midY - h / 2, width: w, height: h))
         case .gradient, .image:
-            let colors = [HexColor.cgColor(style.color1), HexColor.cgColor(style.color2)] as CFArray
-            guard let gradient = CGGradient(colorsSpace: ImageSupport.srgb, colors: colors, locations: [0, 1]) else { return }
+            let colors = [OptionColor.cgColor(style.color1), OptionColor.cgColor(style.color2)] as CFArray
+            guard let gradient = CGGradient(colorsSpace: ToolImageSupport.srgb, colors: colors, locations: [0, 1]) else { return }
             // CSS convention: 0° = towards the top, 90° = towards the right,
             // 135° = towards the bottom-right. The gradient spans the whole rect.
             let rad = style.angle * .pi / 180
@@ -133,7 +133,7 @@ struct AddBackgroundRunner: ToolRunner {
                 throw ConversionError.other(L("Choose a background image first."), detail: "addBackground: empty imagePath")
             }
             let url = URL(fileURLWithPath: (style.imagePath as NSString).expandingTildeInPath)
-            backgroundImage = try ImageSupport.decode(url).image
+            backgroundImage = try ToolImageSupport.decode(url).image
         }
         return try await PixelToolPipeline(request: request, context: context).run { decoded in
             try BackgroundComposer.compose(subject: decoded.image, style: style, backgroundImage: backgroundImage)

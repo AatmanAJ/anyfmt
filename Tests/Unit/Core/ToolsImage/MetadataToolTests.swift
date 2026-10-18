@@ -120,7 +120,7 @@ final class MetadataToolTests: XCTestCase {
         XCTAssertNil(tiff?[kCGImagePropertyTIFFMake as String])
         XCTAssertNil((p[kCGImagePropertyExifDictionary as String] as? [String: Any])?[kCGImagePropertyExifDateTimeOriginal as String])
         XCTAssertEqual((p[kCGImagePropertyOrientation as String] as? NSNumber)?.intValue, 6, "orientation still applies")
-        XCTAssertEqual(ImageSupport.pixelSize(of: out[0]), CGSize(width: 200, height: 300))
+        XCTAssertEqual(ToolImageSupport.pixelSize(of: out[0]), CGSize(width: 200, height: 300))
         let data = try Data(contentsOf: out[0])
         for secret in ["Ann Artist", "TestCam", "Old title"] { XCTAssertNil(data.range(of: Data(secret.utf8)), secret) }
         XCTAssertEqual(try XCTUnwrap(JPEGSegments.parse(try Data(contentsOf: input))).scan, try XCTUnwrap(JPEGSegments.parse(data)).scan)

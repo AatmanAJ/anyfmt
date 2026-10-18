@@ -27,14 +27,14 @@ trips is removed before returning) and never overwrite.
 | 23 | Edit metadata | `EditMetadataRunner` (`Metadata/`) | same format |
 | 24 | Strip metadata | `StripMetadataRunner` | same format |
 
-"Same format" means `ImageFormats.outputFormat(for:)`: the input format when we
+"Same format" means `ToolImageFormats.outputFormat(for:)`: the input format when we
 can write it (ImageIO, or the bundled ffmpeg for WebP and for AVIF where the OS
 has no encoder), RAW → JPG, ICO/ICNS/JXL/anything unwritable → PNG.
 
 Public API the app (and the wheel) can use:
 
-- `DecodedImage`, `ImageSupport` (`decode`, `thumbnail`, `pixelSize`, `properties`, `resample`, `colorSpace`, `managedContext`)
-- `ImageFormats.outputFormat(for:)`, `ImageFormats.canWrite(_:)`
+- `ToolDecodedImage`, `ToolImageSupport` (`decode`, `thumbnail`, `pixelSize`, `properties`, `resample`, `colorSpace`, `managedContext`)
+- `ToolImageFormats.outputFormat(for:)`, `ToolImageFormats.canWrite(_:)`
 - `ResizePlan.targetSize(for:options:)`, `CropGeometry` (parse/format/aspect/pixel rects)
 - `ImageAdjustments` (options ⇄ struct, `apply(to: CIImage)`, `render(_:)`)
 - `Annotation` (Codable; `decodeList`/`encodeList`), `AnnotationRenderer` (draw into any CGContext, bounds, hit test, render)
@@ -42,10 +42,10 @@ Public API the app (and the wheel) can use:
 - `SubjectMasker` (`mask`, `cutout`, method `.automatic` / `.personOnly`)
 - `BackdropStyle` + `BackgroundComposer` (named `Backdrop…` because SwiftUI owns `BackgroundStyle`)
 - `CollageStyle`, `CollageLayout.make(aspects:style:)`, `OrderOption` (1-based "order" lists)
-- `OrientationTransform`, `PDFPagePlan.page(for:dpi:pageSize:)`
+- `ToolOrientationTransform`, `PDFPagePlan.page(for:dpi:pageSize:)`
 - `CodeReadResult`, `CodeReader` (`read`, `text(for:)`, `parse(_:)`, `parse(fileAt:)`)
 - `MetadataField`, `MetadataSnapshot`, `MetadataReader.read(_:locator:)`, `MetadataChanges` (`parse`, `encode`, `diff`)
-- `HexColor`
+- `OptionColor` ("#RRGGBB[AA]" option strings ⇄ CGColor)
 
 ### Editors (app, `Sources/Tools/Editors/Image/`)
 
@@ -69,7 +69,7 @@ by screenshots). Each editor has a `ToolEditorModel`:
 
 Also exported:
 
-- `CompressOptionsView(options:originalBytes:)` and `ResizeOptionsView(options:sourceSize:)`: 300 pt popovers editing a `Binding<OptionValues>` for the wheel.
+- `ImageCompressOptionsView(options:originalBytes:)` and `ImageResizeOptionsView(options:sourceSize:)`: 300 pt popovers editing a `Binding<OptionValues>` for the wheel.
 - `CodeResultPresenter.present(results:source:copyToClipboard:)` / `present(fileAt:)`: floating panel, one row per code with Copy; links get **Open link…**, which shows the full URL in a confirmation alert first. Presenting copies all payloads (BUILD.md "copies result").
 - `ImageEditors.presentResult(_:outputs:)`: call after a tool job succeeds; opens the code list for Read QR, false otherwise (see contract change 2).
 
@@ -153,8 +153,8 @@ Debug; without it the test still renders every view).
   verbatim (lines starting `[` or `\` escaped with `\`), blank separator;
   `CodeReader.parse` round-trips it exactly. Small images are retried at 2×.
   Links: only http(s), mailto, tel, sms, facetime, never opened automatically.
-- **G1-12 Editor names are prefixed** (`ImageCropModel`, `ImageEditorKit.*`) so
-  lane G2's editors in the same module can't collide.
+- **G1-12 Names are prefixed** (`ImageCropModel`, `ImageEditorKit.*` in the app; `Tool…` for HaloCore helpers such as `ToolImageSupport`, `ToolImageEncoder`; no extensions on system types) so
+  lanes D and G2 sharing the same modules can’t collide at merge.
 
 ## Shipped vs not (for PARITY.md)
 
@@ -224,4 +224,4 @@ from the test file to a checkout's `Engines/dist` (works from worktrees).
 
 None. Not verifiable on this machine: the macOS 13 person-segmentation path
 and the AVIF-via-ffmpeg fallback only run on older systems. The person path is
-exercised here by forcing `SubjectMasker.Method.personOnly`, the AVIF fallback by `ImageEncoder.forceFFmpegAVIF`.
+exercised here by forcing `SubjectMasker.Method.personOnly`, the AVIF fallback by `ToolImageEncoder.forceFFmpegAVIF`.

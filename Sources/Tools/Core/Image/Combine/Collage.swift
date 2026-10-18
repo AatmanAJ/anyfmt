@@ -98,7 +98,7 @@ struct CollageRunner: ToolRunner {
         guard inputs.count >= 2 else { throw ConversionError.other(L("A collage needs at least two images."), detail: "collage inputs \(inputs.count)") }
         let style = CollageStyle(options: request.options)
         let sizes = try inputs.map { url -> CGSize in
-            guard let s = ImageSupport.pixelSize(of: url) else { throw ConversionError.unreadable(url, detail: "no pixel size") }
+            guard let s = ToolImageSupport.pixelSize(of: url) else { throw ConversionError.unreadable(url, detail: "no pixel size") }
             return s
         }
         let layout = CollageLayout.make(aspects: sizes.map { $0.width / max(1, $0.height) }, style: style)
@@ -107,13 +107,13 @@ struct CollageRunner: ToolRunner {
                   let img = CGImageSourceCreateImageAtIndex(src, 0, nil), let cs = img.colorSpace else { return false }
             return cs.isWideGamutRGB
         }
-        let cs = anyWide ? ImageSupport.displayP3 : ImageSupport.srgb
-        guard let ctx = ImageSupport.makeContext(width: Int(layout.canvas.width), height: Int(layout.canvas.height),
+        let cs = anyWide ? ToolImageSupport.displayP3 : ToolImageSupport.srgb
+        guard let ctx = ToolImageSupport.makeContext(width: Int(layout.canvas.width), height: Int(layout.canvas.height),
                                                  colorSpace: cs, deep: false, opaque: true) else {
             throw ConversionError.other(L("The collage is too large to create."), detail: "collage context \(layout.canvas)")
         }
         ctx.interpolationQuality = .high
-        ctx.setFillColor(HexColor.cgColor(style.background, fallback: CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 1)))
+        ctx.setFillColor(OptionColor.cgColor(style.background, fallback: CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 1)))
         ctx.fill(CGRect(origin: .zero, size: layout.canvas))
         let H = layout.canvas.height
         for (i, url) in inputs.enumerated() {
@@ -121,7 +121,7 @@ struct CollageRunner: ToolRunner {
             let f = layout.frames[i]
             // Decode at (about) the drawn size: fast and memory-friendly for big batches.
             let maxEdge = Int(max(f.width, f.height).rounded(.up))
-            guard let img = ImageSupport.thumbnail(url, maxPixelSize: maxEdge) else { throw ConversionError.unreadable(url, detail: "thumbnail") }
+            guard let img = ToolImageSupport.thumbnail(url, maxPixelSize: maxEdge) else { throw ConversionError.unreadable(url, detail: "thumbnail") }
             ctx.draw(img, in: CGRect(x: f.minX, y: H - f.maxY, width: f.width, height: f.height))
             context.progress(0.1 + 0.7 * Double(i + 1) / Double(inputs.count))
         }
@@ -132,7 +132,7 @@ struct CollageRunner: ToolRunner {
         let scratch = out.scratch
         defer { try? FileManager.default.removeItem(at: scratch) }
         let props: [String: Any] = request.metadata == .stripAll ? [:] : [kCGImagePropertyOrientation as String: 1]
-        let data = try await ImageEncoder(context: context, scratch: scratch).encode(image, as: format, quality: 0.9, properties: props)
+        let data = try await ToolImageEncoder(context: context, scratch: scratch).encode(image, as: format, quality: 0.9, properties: props)
         let url = try out.write(data, ext: Formats.extension(for: format))
         context.progress(1)
         return ConversionOutput(url)

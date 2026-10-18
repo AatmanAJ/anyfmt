@@ -117,7 +117,7 @@ final class ContainerMetadataTests: XCTestCase {
         XCTAssertEqual(try frameInfo(cropped[0]).count, 4)
         XCTAssertEqual(try frameInfo(cropped[0]).width, 60)
         // Remove background still writes a single PNG.
-        XCTAssertEqual(AnimatedGIF.read(gif)?.frames.count, 4)
+        XCTAssertEqual(ToolAnimatedGIF.read(gif)?.frames.count, 4)
     }
 
     func testAnimatedGIFCompressToTarget() async throws {
@@ -170,7 +170,7 @@ final class ContainerMetadataTests: XCTestCase {
     }
 
     func testAVIFCompressAndStrip() async throws {
-        try XCTSkipUnless(ImageFormats.canWrite(Formats.avif))
+        try XCTSkipUnless(ToolImageFormats.canWrite(Formats.avif))
         let input = try G1.write(G1.photo(width: 320, height: 240), to: dir.appendingPathComponent("p.avif"),
                                  type: try XCTUnwrap(UTType("public.avif")), quality: 0.95,
                                  properties: [kCGImagePropertyGPSDictionary as String: [kCGImagePropertyGPSLatitude as String: 10.0,
@@ -184,7 +184,7 @@ final class ContainerMetadataTests: XCTestCase {
 
     func testFFmpegAVIFFallbackEncodes() async throws {
         try XCTSkipUnless(G1.ffmpeg.isAvailable)
-        var encoder = ImageEncoder(context: G1.context, scratch: dir.appendingPathComponent(".scratch"))
+        var encoder = ToolImageEncoder(context: G1.context, scratch: dir.appendingPathComponent(".scratch"))
         encoder.forceFFmpegAVIF = true
         let hi = try await encoder.encode(G1.photo(width: 160, height: 120), as: Formats.avif, quality: 0.9, properties: [:])
         let lo = try await encoder.encode(G1.photo(width: 160, height: 120), as: Formats.avif, quality: 0.2, properties: [:])
@@ -205,7 +205,7 @@ final class ContainerMetadataTests: XCTestCase {
         ctx.setFillColor(gray: 0.9, alpha: 1); ctx.fill(CGRect(x: 0, y: 0, width: 10, height: 20))
         let url = try G1.write(try XCTUnwrap(ctx.makeImage()), to: dir.appendingPathComponent("g.jpg"), type: .jpeg,
                                properties: [kCGImagePropertyOrientation as String: 6])
-        let d = try ImageSupport.decode(url)
+        let d = try ToolImageSupport.decode(url)
         XCTAssertEqual(d.width, 20); XCTAssertEqual(d.height, 40)
         XCTAssertEqual(d.image.colorSpace?.model, .rgb)
         // Rotated 90° clockwise: the bright left stripe is now along the top.
@@ -222,7 +222,7 @@ final class ContainerMetadataTests: XCTestCase {
             kCGImagePropertyExifDictionary as String: [kCGImagePropertyExifDateTimeOriginal as String: "2020:01:01 00:00:00",
                                                        kCGImagePropertyExifBodySerialNumber as String: "123"],
         ]
-        let p = MetadataFilter.properties(source, policy: .stripPrivate, for: Formats.jpg)
+        let p = ToolMetadataFilter.properties(source, policy: .stripPrivate, for: Formats.jpg)
         let tiff = p[kCGImagePropertyTIFFDictionary as String] as? [String: Any]
         XCTAssertNil(tiff?[kCGImagePropertyTIFFMake as String])
         XCTAssertEqual(tiff?[kCGImagePropertyTIFFCopyright as String] as? String, "© Me")
@@ -235,6 +235,6 @@ final class ContainerMetadataTests: XCTestCase {
         XCTAssertNotNil(exif?[kCGImagePropertyExifDateTimeOriginal as String])
         XCTAssertNil(exif?[kCGImagePropertyExifBodySerialNumber as String])
         XCTAssertEqual(p[kCGImagePropertyOrientation as String] as? Int, 1)
-        XCTAssertTrue(MetadataFilter.properties(source, policy: .stripAll, for: Formats.jpg).isEmpty)
+        XCTAssertTrue(ToolMetadataFilter.properties(source, policy: .stripAll, for: Formats.jpg).isEmpty)
     }
 }

@@ -82,7 +82,7 @@ final class ImageAnnotateModel: ToolEditorModel {
         self.tool = tool
         self.inputs = inputs
         preview = inputs.first.flatMap { ImageEditorKit.preview($0) }
-        pixelSize = inputs.first.flatMap(ImageSupport.pixelSize(of:)) ?? .zero
+        pixelSize = inputs.first.flatMap(ToolImageSupport.pixelSize(of:)) ?? .zero
         annotations = Annotation.decodeList(tool.defaultOptions.string("annotations", default: "[]"))
     }
 
@@ -265,8 +265,8 @@ struct ImageAnnotateCanvas: View {
             }
         }
         .background(ImageEditorKeyCatcher(handle: keys) { event in
-            if event.isDeleteKey, model.selection != nil { model.deleteSelection(); return true }
-            if let d = event.arrowDelta, model.selection != nil {
+            if ImageEditorKeyCatcher.isDelete(event), model.selection != nil { model.deleteSelection(); return true }
+            if let d = ImageEditorKeyCatcher.arrowDelta(event), model.selection != nil {
                 let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
                 model.nudgeSelection(dx: d.x * step / max(1, model.pixelSize.width), dy: d.y * step / max(1, model.pixelSize.height))
                 return true

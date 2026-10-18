@@ -18,16 +18,16 @@ struct CompressImageRunner: ToolRunner {
 
     func run(_ request: ToolRequest, context: EngineContext) async throws -> ConversionOutput {
         guard let input = request.inputs.first else { throw ConversionError.invalidOption("inputs") }
-        let decoded = try ImageSupport.decode(input)
-        let format = ImageFormats.outputFormat(for: decoded.format)
+        let decoded = try ToolImageSupport.decode(input)
+        let format = ToolImageFormats.outputFormat(for: decoded.format)
         let output = ToolOutput(request: request)
         let scratch = output.scratch
         defer { try? FileManager.default.removeItem(at: scratch) }
         let compressor = ImageCompressor(
             image: decoded.image, format: format,
-            properties: MetadataFilter.properties(decoded.properties, policy: request.metadata, for: format),
+            properties: ToolMetadataFilter.properties(decoded.properties, policy: request.metadata, for: format),
             dpi: (decoded.properties[kCGImagePropertyDPIWidth as String] as? NSNumber)?.doubleValue,
-            encoder: ImageEncoder(context: context, scratch: scratch), progress: context.progress)
+            encoder: ToolImageEncoder(context: context, scratch: scratch), progress: context.progress)
 
         let o = request.options
         let original = decoded.fileSize
@@ -36,7 +36,7 @@ struct CompressImageRunner: ToolRunner {
         let canReuseOriginal = sameFormat && request.metadata == .keep && decoded.sourceOrientation == .up
         let mode = o.string(OptionKey.sizeMode, default: "quality")
         var data: Data
-        if format == Formats.gif, let animation = AnimatedGIF.read(input) {
+        if format == Formats.gif, let animation = ToolAnimatedGIF.read(input) {
             // Animated GIFs: GIF has no quality knob, so re-encode, then shrink every frame until it fits.
             let target: Int? = switch mode {
             case "size": max(1, o.int(OptionKey.targetSize, default: 1_000_000))
@@ -78,8 +78,8 @@ struct CompressImageRunner: ToolRunner {
 
 extension CompressImageRunner {
     /// Re-encodes an animation; with a target, scales all frames down together until it fits.
-    static func fitAnimated(_ animation: AnimatedGIF.Animation, target: Int?, progress: ProgressSink) throws -> Data {
-        var data = try AnimatedGIF.encode(animation)
+    static func fitAnimated(_ animation: ToolAnimatedGIF.Animation, target: Int?, progress: ProgressSink) throws -> Data {
+        var data = try ToolAnimatedGIF.encode(animation)
         guard let target, data.count > target, let first = animation.frames.first?.image else { return data }
         var scale = 1.0
         for round in 0..<8 {
@@ -88,7 +88,7 @@ extension CompressImageRunner {
             scale *= min(0.9, max(0.3, (Double(target) / Double(data.count)).squareRoot() * 0.95))
             let w = max(1, Int((Double(first.width) * scale).rounded())), h = max(1, Int((Double(first.height) * scale).rounded()))
             guard w >= 8, h >= 8 else { break }
-            data = try AnimatedGIF.encode(AnimatedGIF.map(animation) { try ImageSupport.resample($0, width: w, height: h) })
+            data = try ToolAnimatedGIF.encode(ToolAnimatedGIF.map(animation) { try ToolImageSupport.resample($0, width: w, height: h) })
             if data.count <= target { return data }
         }
         let want = ByteCountFormatter.string(fromByteCount: Int64(target), countStyle: .file)
@@ -102,10 +102,10 @@ struct ImageCompressor {
     let format: FormatID
     let properties: [String: Any]
     let dpi: Double?
-    let encoder: ImageEncoder
+    let encoder: ToolImageEncoder
     var progress: ProgressSink = .ignore
 
-    private var isLossy: Bool { ImageFormats.isLossy(format) }
+    private var isLossy: Bool { ToolImageFormats.isLossy(format) }
 
     /// Quality mode. For PNG, quality picks a palette size (≥ 95 stays lossless).
     func encode(quality q: Int) async throws -> Data {
@@ -136,7 +136,7 @@ struct ImageCompressor {
             let scale = min(0.9, max(0.2, ratio.squareRoot() * 0.95))
             let w = Int((Double(current.width) * scale).rounded()), h = Int((Double(current.height) * scale).rounded())
             guard w >= 8, h >= 8 else { break }
-            current = try ImageSupport.resample(current, width: w, height: h)
+            current = try ToolImageSupport.resample(current, width: w, height: h)
         }
         let got = ByteCountFormatter.string(fromByteCount: Int64(smallest?.count ?? 0), countStyle: .file)
         let want = ByteCountFormatter.string(fromByteCount: Int64(target), countStyle: .file)
@@ -182,8 +182,8 @@ struct ImageCompressor {
     }
 
     private func quantizedPNG(_ img: CGImage, colors: Int) -> Data? {
-        let cs = ImageSupport.colorSpace(of: img)
-        guard let px = ImageSupport.rgba8(img, colorSpace: cs) else { return nil }
+        let cs = ToolImageSupport.colorSpace(of: img)
+        guard let px = ToolImageSupport.rgba8(img, colorSpace: cs) else { return nil }
         let result = PaletteQuantizer(maxColors: colors).quantize(pixels: px.pixels, width: px.width, height: px.height)
         let meta = MetadataCarrier.pngChunks(properties: properties, width: img.width, height: img.height)
         return PalettePNGWriter.write(result, colorSpace: cs, dpi: dpi, metadataChunks: meta)

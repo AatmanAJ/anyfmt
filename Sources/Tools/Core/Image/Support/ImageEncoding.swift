@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 /// Writes CGImages in any format the image tools output. ImageIO first; the
 /// bundled ffmpeg (libwebp, libaom) for WebP always and AVIF when this macOS
 /// has no native AVIF encoder (research/PLATFORM_RESEARCH.md §C).
-struct ImageEncoder: Sendable {
+struct ToolImageEncoder: Sendable {
     let ffmpeg: FFmpeg
     /// Private scratch folder inside the request's output directory (ffmpeg round trips).
     let scratch: URL
@@ -26,13 +26,13 @@ struct ImageEncoder: Sendable {
         switch format {
         case Formats.webp:
             return try await encodeWithFFmpeg(image, format: format, quality: quality ?? 0.85)
-        case Formats.avif where !ImageFormats.nativeAVIF || forceFFmpegAVIF:
+        case Formats.avif where !ToolImageFormats.nativeAVIF || forceFFmpegAVIF:
             return try await encodeWithFFmpeg(image, format: format, quality: quality ?? 0.8)
         default:
-            guard let type = ImageFormats.destinationType(for: format) else {
+            guard let type = ToolImageFormats.destinationType(for: format) else {
                 throw ConversionError.unsupported(from: format, to: format)
             }
-            return try Self.encodeNative(image, type: type, quality: ImageFormats.isLossy(format) ? (quality ?? 0.9) : nil,
+            return try Self.encodeNative(image, type: type, quality: ToolImageFormats.isLossy(format) ? (quality ?? 0.9) : nil,
                                          properties: properties, format: format)
         }
     }
@@ -89,8 +89,8 @@ struct ImageEncoder: Sendable {
 
     static func convertedToSRGB8(_ image: CGImage) throws -> CGImage {
         if image.bitsPerComponent == 8, let cs = image.colorSpace, cs.name == CGColorSpace.sRGB { return image }
-        let opaque = !ImageSupport.hasAlpha(image)
-        guard let ctx = ImageSupport.makeContext(width: image.width, height: image.height, colorSpace: ImageSupport.srgb,
+        let opaque = !ToolImageSupport.hasAlpha(image)
+        guard let ctx = ToolImageSupport.makeContext(width: image.width, height: image.height, colorSpace: ToolImageSupport.srgb,
                                                  deep: false, opaque: opaque) else {
             throw ConversionError.other(L("The image couldn’t be processed."), detail: "sRGB context")
         }
@@ -101,7 +101,7 @@ struct ImageEncoder: Sendable {
 }
 
 /// What the image tools can read and write on this Mac.
-public enum ImageFormats {
+public enum ToolImageFormats {
     /// ImageIO destination types available at runtime.
     static let destinationTypes: Set<String> = Set((CGImageDestinationCopyTypeIdentifiers() as? [String]) ?? [])
 
@@ -182,34 +182,34 @@ struct PixelToolPipeline {
     /// Decodes the first input, lets `transform` produce new pixels, and
     /// writes them in the tool's output format with the metadata policy applied.
     func run(outputFormat: FormatID? = nil, quality: Double? = nil,
-             _ transform: (DecodedImage) async throws -> CGImage) async throws -> ConversionOutput {
+             _ transform: (ToolDecodedImage) async throws -> CGImage) async throws -> ConversionOutput {
         guard let input = request.inputs.first else { throw ConversionError.invalidOption("inputs") }
-        let decoded = try ImageSupport.decode(input)
+        let decoded = try ToolImageSupport.decode(input)
         context.progress(0.2)
         // Animated GIF in, GIF out: run the transform on every frame.
-        if (outputFormat ?? Formats.gif) == Formats.gif, decoded.format == Formats.gif, let animation = AnimatedGIF.read(input) {
-            var frames: [AnimatedGIF.Frame] = []
+        if (outputFormat ?? Formats.gif) == Formats.gif, decoded.format == Formats.gif, let animation = ToolAnimatedGIF.read(input) {
+            var frames: [ToolAnimatedGIF.Frame] = []
             for (i, f) in animation.frames.enumerated() {
                 try Task.checkCancellation()
-                let frame = DecodedImage(image: f.image, format: decoded.format, typeIdentifier: decoded.typeIdentifier,
+                let frame = ToolDecodedImage(image: f.image, format: decoded.format, typeIdentifier: decoded.typeIdentifier,
                                          properties: decoded.properties, sourceOrientation: .up, fileSize: decoded.fileSize)
-                frames.append(AnimatedGIF.Frame(image: try await transform(frame), delay: f.delay))
+                frames.append(ToolAnimatedGIF.Frame(image: try await transform(frame), delay: f.delay))
                 context.progress(0.2 + 0.7 * Double(i + 1) / Double(animation.frames.count))
             }
-            let url = try ToolOutput(request: request).write(try AnimatedGIF.encode(.init(frames: frames, loopCount: animation.loopCount)), ext: "gif")
+            let url = try ToolOutput(request: request).write(try ToolAnimatedGIF.encode(.init(frames: frames, loopCount: animation.loopCount)), ext: "gif")
             context.progress(1)
             return ConversionOutput(url)
         }
         let image = try await transform(decoded)
         try Task.checkCancellation()
         context.progress(0.7)
-        let format = outputFormat ?? ImageFormats.outputFormat(for: decoded.format)
+        let format = outputFormat ?? ToolImageFormats.outputFormat(for: decoded.format)
         let out = ToolOutput(request: request)
         let scratch = out.scratch
         defer { try? FileManager.default.removeItem(at: scratch) }
-        let encoder = ImageEncoder(context: context, scratch: scratch)
-        let props = MetadataFilter.properties(decoded.properties, policy: request.metadata, for: format)
-        let data = try await encoder.encode(image, as: format, quality: quality ?? ImageFormats.reencodeQuality(format), properties: props)
+        let encoder = ToolImageEncoder(context: context, scratch: scratch)
+        let props = ToolMetadataFilter.properties(decoded.properties, policy: request.metadata, for: format)
+        let data = try await encoder.encode(image, as: format, quality: quality ?? ToolImageFormats.reencodeQuality(format), properties: props)
         let url = try out.write(data, ext: Formats.extension(for: format))
         context.progress(1)
         return ConversionOutput(url)

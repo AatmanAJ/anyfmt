@@ -117,9 +117,9 @@ final class ImageEditorScreenshotTests: XCTestCase {
         let results = [CodeReadResult(payload: "https://example.com/menu?table=12", symbology: "QR"),
                        CodeReadResult(payload: "4006381333931", symbology: "EAN13")]
         for dark in [false, true] {
-            try EditorSnapshot.write(CompressOptionsView(options: c, originalBytes: 3_400_000).background(Color(nsColor: .windowBackgroundColor)),
+            try EditorSnapshot.write(ImageCompressOptionsView(options: c, originalBytes: 3_400_000).background(Color(nsColor: .windowBackgroundColor)),
                                      size: NSSize(width: 300, height: 170), name: "popover-compress", dark: dark)
-            try EditorSnapshot.write(ResizeOptionsView(options: r, sourceSize: CGSize(width: 4032, height: 3024)).background(Color(nsColor: .windowBackgroundColor)),
+            try EditorSnapshot.write(ImageResizeOptionsView(options: r, sourceSize: CGSize(width: 4032, height: 3024)).background(Color(nsColor: .windowBackgroundColor)),
                                      size: NSSize(width: 300, height: 170), name: "popover-resize", dark: dark)
             try EditorSnapshot.write(CodeResultsView(results: results, source: "menu.jpg", copiedAll: true, onDone: {})
                 .background(Color(nsColor: .windowBackgroundColor)), size: NSSize(width: 420, height: 230), name: "editor-readcodes", dark: dark)

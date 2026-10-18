@@ -5,7 +5,7 @@ import ImageIO
 /// `MetadataPolicy`. Pixels handed to the encoder are always upright, so the
 /// orientation tag is reset to 1. Colour profiles travel with the CGImage's
 /// colour space, so every policy keeps them.
-enum MetadataFilter {
+enum ToolMetadataFilter {
     private static let metadataDictionaries: [String] = [
         kCGImagePropertyExifDictionary as String, kCGImagePropertyExifAuxDictionary as String, kCGImagePropertyTIFFDictionary as String,
         kCGImagePropertyIPTCDictionary as String, kCGImagePropertyGPSDictionary as String,

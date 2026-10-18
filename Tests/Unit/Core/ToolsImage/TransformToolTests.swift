@@ -104,8 +104,8 @@ final class TransformToolTests: XCTestCase {
         for o in 1...8 {
             let url = try G1.write(G1.photo(width: 60, height: 40, seed: UInt64(o)), to: dir.appendingPathComponent("o\(o).png"), type: .png,
                                    properties: [kCGImagePropertyOrientation as String: o])
-            let mine = try ImageSupport.decode(url).image
-            let reference = try XCTUnwrap(ImageSupport.thumbnail(url, maxPixelSize: 60))
+            let mine = try ToolImageSupport.decode(url).image
+            let reference = try XCTUnwrap(ToolImageSupport.thumbnail(url, maxPixelSize: 60))
             XCTAssertEqual(mine.width, reference.width, "orientation \(o)")
             XCTAssertEqual(mine.height, reference.height, "orientation \(o)")
             let a = G1.pixels(mine), b = G1.pixels(reference)
@@ -121,12 +121,12 @@ final class TransformToolTests: XCTestCase {
         for o in 1...8 {
             let raw = G1.photo(width: 50, height: 30, seed: UInt64(o + 10))
             let orientation = try XCTUnwrap(CGImagePropertyOrientation(rawValue: UInt32(o)))
-            let expected = try ImageSupport.oriented(raw, orientation)
+            let expected = try ToolImageSupport.oriented(raw, orientation)
             let w = expected.width, h = expected.height
             let ctx = try XCTUnwrap(CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: G1.srgb,
                                               bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
             ctx.interpolationQuality = .none
-            OrientationTransform.draw(raw, orientation: orientation, in: CGRect(x: 0, y: 0, width: w, height: h), context: ctx)
+            ToolOrientationTransform.draw(raw, orientation: orientation, in: CGRect(x: 0, y: 0, width: w, height: h), context: ctx)
             let drawn = try XCTUnwrap(ctx.makeImage())
             let a = G1.pixels(expected), b = G1.pixels(drawn)
             for (x, y) in [(0, 0), (w - 1, 0), (0, h - 1), (w / 3, h / 2)] {

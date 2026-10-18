@@ -79,7 +79,7 @@ final class MetadataEditorModel: ToolEditorModel {
 
     static func thumbnail(for url: URL?) -> NSImage {
         guard let url else { return NSImage() }
-        if let cg = ImageSupport.thumbnail(url, maxPixelSize: 320) {
+        if let cg = ToolImageSupport.thumbnail(url, maxPixelSize: 320) {
             return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
         }
         if url.pathExtension.lowercased() == "pdf", let page = PDFDocument(url: url)?.page(at: 0) {

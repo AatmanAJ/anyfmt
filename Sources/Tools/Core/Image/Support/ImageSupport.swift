@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 
 /// A decoded still image. `image` is upright (EXIF orientation applied) and
 /// keeps the source's colour space, so writing it back embeds the same ICC profile.
-public struct DecodedImage: @unchecked Sendable {
+public struct ToolDecodedImage: @unchecked Sendable {
     public let image: CGImage
     public let format: FormatID?
     public let typeIdentifier: String?
@@ -19,11 +19,11 @@ public struct DecodedImage: @unchecked Sendable {
     public var width: Int { image.width }
     public var height: Int { image.height }
     public var size: CGSize { CGSize(width: image.width, height: image.height) }
-    public var hasAlpha: Bool { ImageSupport.hasAlpha(image) }
+    public var hasAlpha: Bool { ToolImageSupport.hasAlpha(image) }
 }
 
 /// Decoding, orientation, colour-space and rendering helpers shared by every image tool.
-public enum ImageSupport {
+public enum ToolImageSupport {
     /// No colour management: pixels pass through untouched (orientation, crops).
     static let passthroughContext = CIContext(options: [
         .workingColorSpace: NSNull(), .outputColorSpace: NSNull(), .cacheIntermediates: false,
@@ -35,7 +35,7 @@ public enum ImageSupport {
 
     // MARK: Decoding
 
-    public static func decode(_ url: URL, applyOrientation: Bool = true) throws -> DecodedImage {
+    public static func decode(_ url: URL, applyOrientation: Bool = true) throws -> ToolDecodedImage {
         guard let src = CGImageSourceCreateWithURL(url as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
               CGImageSourceGetCount(src) > 0,
               let raw = CGImageSourceCreateImageAtIndex(src, 0, [kCGImageSourceShouldCacheImmediately: true] as CFDictionary)
@@ -44,7 +44,7 @@ public enum ImageSupport {
         let orientation = Self.orientation(of: props)
         let image = applyOrientation ? try oriented(raw, orientation) : raw
         let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-        return DecodedImage(image: image, format: Formats.detect(url), typeIdentifier: CGImageSourceGetType(src) as String?,
+        return ToolDecodedImage(image: image, format: Formats.detect(url), typeIdentifier: CGImageSourceGetType(src) as String?,
                             properties: props, sourceOrientation: orientation, fileSize: size)
     }
 
@@ -59,7 +59,7 @@ public enum ImageSupport {
         guard let p = properties(of: url),
               let w = (p[kCGImagePropertyPixelWidth as String] as? NSNumber)?.doubleValue,
               let h = (p[kCGImagePropertyPixelHeight as String] as? NSNumber)?.doubleValue else { return nil }
-        return orientation(of: p).swapsAxes ? CGSize(width: h, height: w) : CGSize(width: w, height: h)
+        return swapsAxes(orientation(of: p)) ? CGSize(width: h, height: w) : CGSize(width: w, height: h)
     }
 
     /// Fast, oriented, downsampled image for previews and thumbnails (uses
@@ -88,7 +88,7 @@ public enum ImageSupport {
         let ci = CIImage(cgImage: image, options: rgb ? [.colorSpace: NSNull()] : nil).oriented(orientation)
         let moved = ci.transformed(by: CGAffineTransform(translationX: -ci.extent.minX, y: -ci.extent.minY))
         let w = image.width, h = image.height
-        let size = orientation.swapsAxes ? (h, w) : (w, h)
+        let size = ToolImageSupport.swapsAxes(orientation) ? (h, w) : (w, h)
         return try render(moved, width: size.0, height: size.1, colorSpace: colorSpace(of: image), like: image,
                           opaque: !hasAlpha(image), context: rgb ? passthroughContext : managedContext, managed: !rgb)
     }
@@ -197,10 +197,10 @@ public enum ImageSupport {
     }
 }
 
-extension CGImagePropertyOrientation {
+extension ToolImageSupport {
     /// True for the four orientations that swap width and height.
-    var swapsAxes: Bool {
-        switch self {
+    static func swapsAxes(_ o: CGImagePropertyOrientation) -> Bool {
+        switch o {
         case .left, .leftMirrored, .right, .rightMirrored: true
         default: false
         }
@@ -208,7 +208,7 @@ extension CGImagePropertyOrientation {
 }
 
 /// Colours from "#RRGGBB" / "#RRGGBBAA" option strings.
-public enum HexColor {
+public enum OptionColor {
     public static func components(_ hex: String) -> (r: Double, g: Double, b: Double, a: Double)? {
         var s = hex.trimmingCharacters(in: .whitespaces)
         if s.hasPrefix("#") { s.removeFirst() }

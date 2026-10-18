@@ -25,7 +25,7 @@ enum ImageMetadataIO {
     // MARK: Read
 
     static func read(_ url: URL) throws -> MetadataSnapshot {
-        guard let props = ImageSupport.properties(of: url) else { throw ConversionError.unreadable(url, detail: "no image properties") }
+        guard let props = ToolImageSupport.properties(of: url) else { throw ConversionError.unreadable(url, detail: "no image properties") }
         let format = Formats.detect(url)
         var fields: [MetadataField] = []
         func add(_ key: String, _ label: String, _ group: String, _ value: String?, editable: Bool = false, placeholder: String? = nil) {
@@ -77,8 +77,8 @@ enum ImageMetadataIO {
 
         let w = (props[kCGImagePropertyPixelWidth as String] as? NSNumber)?.intValue ?? 0
         let h = (props[kCGImagePropertyPixelHeight as String] as? NSNumber)?.intValue ?? 0
-        let o = ImageSupport.orientation(of: props)
-        add("image.size", L("Dimensions"), L("Image"), o.swapsAxes ? "\(h) × \(w)" : "\(w) × \(h)")
+        let o = ToolImageSupport.orientation(of: props)
+        add("image.size", L("Dimensions"), L("Image"), ToolImageSupport.swapsAxes(o) ? "\(h) × \(w)" : "\(w) × \(h)")
         add("image.profile", L("Colour profile"), L("Image"), string(props[kCGImagePropertyProfileName as String]))
         add("image.model", L("Colour model"), L("Image"), string(props[kCGImagePropertyColorModel as String]))
         if let depth = (props[kCGImagePropertyDepth as String] as? NSNumber)?.intValue { add("image.depth", L("Bit depth"), L("Image"), "\(depth)-bit") }
@@ -97,7 +97,7 @@ enum ImageMetadataIO {
         guard let format else { return false }
         if format == Formats.jpg || format == Formats.png || format == Formats.webp { return true }
         return [Formats.heic, Formats.heif, Formats.avif, Formats.tiff, Formats.jp2, Formats.psd].contains(format)
-            && ImageFormats.destinationType(for: format) != nil
+            && ToolImageFormats.destinationType(for: format) != nil
     }
 
     // MARK: Write
@@ -145,10 +145,10 @@ enum ImageMetadataIO {
             return try output.write(PNGChunks.build(kept), ext: "png")
         }
         // Re-encode the stored (un-rotated) pixels with the new properties.
-        guard let raw = CGImageSourceCreateImageAtIndex(src, 0, nil), let type = ImageFormats.destinationType(for: format) else {
+        guard let raw = CGImageSourceCreateImageAtIndex(src, 0, nil), let type = ToolImageFormats.destinationType(for: format) else {
             throw ConversionError.unreadable(input, detail: "decode for re-encode")
         }
-        let data = try ImageEncoder.encodeNative(raw, type: type, quality: ImageFormats.isLossy(format) ? 0.92 : nil,
+        let data = try ToolImageEncoder.encodeNative(raw, type: type, quality: ToolImageFormats.isLossy(format) ? 0.92 : nil,
                                                  properties: meta, format: format)
         return try output.write(data, ext: input.pathExtension.isEmpty ? Formats.extension(for: format) : input.pathExtension.lowercased())
     }
@@ -220,7 +220,7 @@ enum ImageMetadataIO {
 
     /// Metadata dictionaries for writing (pixel/encoding keys removed).
     static func metadataDictionaries(_ p: [String: Any], keepOrientation: Bool) -> [String: Any] {
-        var out = MetadataFilter.properties(p, policy: .keep, for: Formats.png)
+        var out = ToolMetadataFilter.properties(p, policy: .keep, for: Formats.png)
         if keepOrientation { out[kCGImagePropertyOrientation as String] = p[kCGImagePropertyOrientation as String] ?? 1 }
         if keepOrientation, var t = out[tiff] as? [String: Any], let o = p[kCGImagePropertyOrientation as String] {
             t[kCGImagePropertyTIFFOrientation as String] = o
@@ -276,8 +276,8 @@ enum ImageMetadataIO {
 
     static func strip(_ input: URL, output: ToolOutput, context: EngineContext) async throws -> URL {
         let format = Formats.detect(input)
-        let props = ImageSupport.properties(of: input) ?? [:]
-        let orientation = ImageSupport.orientation(of: props)
+        let props = ToolImageSupport.properties(of: input) ?? [:]
+        let orientation = ToolImageSupport.orientation(of: props)
         let original = try Data(contentsOf: input)
         let ext = input.pathExtension.isEmpty ? Formats.extension(for: format ?? Formats.png) : input.pathExtension.lowercased()
 
@@ -304,12 +304,12 @@ enum ImageMetadataIO {
             return try output.write(data, ext: ext)
         }
         // Everything else: re-encode upright pixels with no metadata (ICC travels with the colour space).
-        let decoded = try ImageSupport.decode(input)
-        let outFormat = ImageFormats.outputFormat(for: format)
+        let decoded = try ToolImageSupport.decode(input)
+        let outFormat = ToolImageFormats.outputFormat(for: format)
         let scratch = output.scratch
         defer { try? FileManager.default.removeItem(at: scratch) }
-        let data = try await ImageEncoder(context: context, scratch: scratch)
-            .encode(decoded.image, as: outFormat, quality: ImageFormats.reencodeQuality(outFormat), properties: [:])
+        let data = try await ToolImageEncoder(context: context, scratch: scratch)
+            .encode(decoded.image, as: outFormat, quality: ToolImageFormats.reencodeQuality(outFormat), properties: [:])
         return try output.write(data, ext: outFormat == format ? ext : Formats.extension(for: outFormat))
     }
 

@@ -25,7 +25,7 @@ final class ImageRedactModel: ToolEditorModel {
         self.tool = tool
         self.inputs = inputs
         preview = inputs.first.flatMap { ImageEditorKit.preview($0, edge: 1200) }
-        pixelSize = inputs.first.flatMap(ImageSupport.pixelSize(of:)) ?? .zero
+        pixelSize = inputs.first.flatMap(ToolImageSupport.pixelSize(of:)) ?? .zero
         let o = tool.defaultOptions
         style = Redactor.Style(rawValue: o.string("style", default: "pixelate")) ?? .pixelate
         regions = Redactor.parseRegions(o.string("regions", default: "")).map { Region(rect: $0) }
@@ -45,7 +45,7 @@ final class ImageRedactModel: ToolEditorModel {
 
     func renderPreview() {
         guard let preview else { return }
-        rendered = (try? Redactor.apply(preview, regions: regions.map(\.rect), style: style, fill: HexColor.cgColor(color),
+        rendered = (try? Redactor.apply(preview, regions: regions.map(\.rect), style: style, fill: OptionColor.cgColor(color),
                                         referenceSize: pixelSize)) ?? preview
     }
 
@@ -128,7 +128,7 @@ struct ImageRedactCanvas: View {
             }
         }
         .background(ImageEditorKeyCatcher(handle: keys) { event in
-            if event.isDeleteKey, model.selection != nil { model.deleteSelection(); return true }
+            if ImageEditorKeyCatcher.isDelete(event), model.selection != nil { model.deleteSelection(); return true }
             return false
         })
         .accessibilityElement(children: .contain)

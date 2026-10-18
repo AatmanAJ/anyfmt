@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 /// Animated GIF frames in and out, so pixel tools (resize, crop, adjust,
 /// annotate, redact, add background) and compress keep the animation.
 /// ImageIO hands back each frame already composited onto the full canvas.
-enum AnimatedGIF {
+enum ToolAnimatedGIF {
     struct Frame {
         var image: CGImage
         /// Seconds this frame stays on screen.

@@ -79,7 +79,7 @@ public enum SubjectMasker {
         f?.setValue(CIVector(cgRect: mask.extent), forKey: kCIInputExtentKey)
         guard let out = f?.outputImage else { return 0 }
         var px = [UInt8](repeating: 0, count: 4)
-        ImageSupport.managedContext.render(out, toBitmap: &px, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+        ToolImageSupport.managedContext.render(out, toBitmap: &px, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
                                            format: .RGBA8, colorSpace: nil)
         return Double(px[0]) / 255
     }
@@ -98,8 +98,8 @@ public enum SubjectMasker {
         guard let out = f?.outputImage else {
             throw ConversionError.other(L("Background removal isn’t available right now."), detail: "CIBlendWithMask")
         }
-        return try ImageSupport.render(out.cropped(to: input.extent), width: image.width, height: image.height,
-                                       colorSpace: ImageSupport.colorSpace(of: image), like: image, opaque: false)
+        return try ToolImageSupport.render(out.cropped(to: input.extent), width: image.width, height: image.height,
+                                       colorSpace: ToolImageSupport.colorSpace(of: image), like: image, opaque: false)
     }
 }
 
