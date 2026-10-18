@@ -7,7 +7,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 allowed='^Sources/(Cloud/|Wheel/CloudSegments\.swift|Shared/Entitlements\.swift|Shared/Specs\.swift|Settings/AccountSettings)'
-pattern='Entitlements|\.can\(\.|isSignedIn|CloudFeature|\.plan\b'
+pattern='Entitlements|entitlements\.|\.can\(\.|isSignedIn|CloudFeature'
 
 violations="$(grep -rnE "$pattern" Sources --include='*.swift' | grep -vE "$allowed" || true)"
 if [[ -n "$violations" ]]; then
