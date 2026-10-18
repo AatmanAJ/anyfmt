@@ -47,7 +47,8 @@ struct ImageAdjustEditor: View {
 
     var body: some View {
         EditorShell(model: model, preview: { original in
-            ImageEditorKit.FittedImage(image: original ? model.preview : model.rendered, size: model.pixelSize, checkerboard: true) { _ in EmptyView() }
+            ImageEditorKit.FittedImage(image: original ? model.preview : model.rendered, size: model.pixelSize, checkerboard: true,
+                                       source: model.inputs.first) { _ in EmptyView() }
                 .accessibilityLabel(original ? String(localized: "Original image") : String(localized: "Adjusted image"))
         }, sidebar: {
             ImageAdjustSidebar(model: model)
@@ -77,6 +78,7 @@ struct ImageAdjustSidebar: View {
             Button(String(localized: "Reset all")) { model.resetAll() }
                 .disabled(model.adjustments.isNeutral)
         }
+        .padding(.horizontal, EditorTokens.sectionPadding)
     }
 
     static func percentFromOne(_ v: Double) -> String {

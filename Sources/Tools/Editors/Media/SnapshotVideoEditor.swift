@@ -113,7 +113,6 @@ struct SnapshotVideoEditor: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             TransportBar(player: model.session.player, duration: model.session.duration, leading: AnyView(
                 Button { model.addCurrent() } label: { Label("Add Frame", systemImage: "camera") }
-                    .controlSize(.small)
                     .help(String(localized: "Capture the frame on screen (F)"))))
             FilmstripTimeline(filmstrip: model.session.filmstrip, player: model.session.player,
                               duration: model.session.duration, frameDuration: model.fd,
@@ -127,19 +126,16 @@ struct SnapshotVideoEditor: View {
     @ViewBuilder
     private var sidebar: some View {
         SidebarSection(String(localized: "Format")) {
-            Picker(String(localized: "Format"), selection: $model.format) {
-                Text("PNG").tag("png")
-                Text("JPG").tag("jpg")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            EditorChoiceChips(String(localized: "Format"), selection: $model.format, options: [
+                .init("png", String(localized: "PNG")),
+                .init("jpg", String(localized: "JPG")),
+            ])
             Text(model.format == "png" ? String(localized: "Lossless, exact pixels. Larger files.") : String(localized: "Smaller files, very high quality."))
                 .font(MediaStyle.caption()).foregroundStyle(.secondary)
             if let v = model.session.info?.video {
                 InfoRow(label: String(localized: "Size"), value: "\(v.displayWidth) × \(v.displayHeight) px")
             }
         }
-        Divider()
         SidebarSection(String(localized: "Frames")) {
             if model.captures.isEmpty {
                 Text("No frames yet, so the middle frame will be saved. Scrub to a frame and press F to add it.")
@@ -151,17 +147,17 @@ struct SnapshotVideoEditor: View {
                             if let image = c.image {
                                 Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
                             } else {
-                                Rectangle().fill(Color.primary.opacity(0.08))
+                                Rectangle().fill(EditorPalette.chip)
                             }
                         }
-                        .frame(width: 64, height: 36)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .frame(width: EditorTokens.thumbnail.width, height: EditorTokens.thumbnail.height)
+                        .clipped()
                         VStack(alignment: .leading, spacing: 1) {
                             Text("Frame \(i + 1)").font(MediaStyle.label(.medium))
                             Text(MediaTimes.timecode(c.time)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary)
                         }
                         Spacer()
-                        Button { model.remove(c) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
+                        Button { model.remove(c) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove frame \(i + 1)"))
                     }
@@ -171,7 +167,6 @@ struct SnapshotVideoEditor: View {
                 }
             }
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("F", String(localized: "Add the frame on screen")), ("← →", String(localized: "Previous / next frame")),
                              ("Space", String(localized: "Play / pause"))])

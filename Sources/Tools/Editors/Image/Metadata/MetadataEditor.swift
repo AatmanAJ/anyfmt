@@ -113,9 +113,11 @@ struct MetadataTable: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignTokens.Space.l) {
                     if let reason = snapshot.readOnlyReason {
-                        Label(reason, systemImage: "lock")
-                            .font(.system(size: DesignTokens.TypeRamp.body))
-                            .foregroundStyle(.secondary)
+                        Label(reason, systemImage: "lock.fill")
+                            .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
+                            .foregroundStyle(Color.haloInk)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .haloTile(padding: EditorTokens.sectionPadding)
                     }
                     ForEach(snapshot.groups, id: \.name) { group in
                         groupCard(group.name, group.fields)
@@ -126,35 +128,35 @@ struct MetadataTable: View {
                 .frame(maxWidth: .infinity)
             }
         } else if let error = model.loadError {
-            VStack(spacing: DesignTokens.Space.m) {
-                Image(systemName: "exclamationmark.triangle").font(.system(size: 28)).foregroundStyle(.secondary)
-                Text(error).multilineTextAlignment(.center).foregroundStyle(.secondary)
-            }
-            .padding(DesignTokens.Space.xxl)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EditorStateView(kind: .problem, title: String(localized: "Can’t read the metadata"),
+                            message: String(localized: "\(LoadingOverlay.sentence(error)) Your file hasn’t been changed."))
+                .padding(DesignTokens.Space.xl)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            ProgressView(String(localized: "Reading metadata…"))
+            EditorStateView(kind: .loading, title: String(localized: "Reading metadata…"))
+                .padding(DesignTokens.Space.xl)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
     private func groupCard(_ name: String, _ fields: [MetadataField]) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-            Text(name)
-                .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
+            EditorCaption(name)
                 .padding(.leading, DesignTokens.Space.xs)
-                .accessibilityAddTraits(.isHeader)
             VStack(spacing: 0) {
                 ForEach(Array(fields.enumerated()), id: \.element.id) { i, field in
                     row(field)
-                    if i < fields.count - 1 { Divider().padding(.leading, 140) }
+                    if i < fields.count - 1 {
+                        Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline).padding(.leading, 140)
+                    }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(Color(nsColor: .controlBackgroundColor)))
-            .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium)
-                .strokeBorder(Color.primary.opacity(contrast == .increased ? 0.4 : 0.08), lineWidth: contrast == .increased ? 1 : 0.5))
+            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+            .overlay {
+                if contrast == .increased {
+                    RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).strokeBorder(Color.haloSecondaryText)
+                }
+            }
         }
     }
 
@@ -166,7 +168,7 @@ struct MetadataTable: View {
                     .accessibilityHidden(true)
                 Text(field.label)
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(field.editable ? .primary : .secondary)
+                    .foregroundStyle(field.editable ? Color.haloInk : Color.haloSecondaryText)
                     .lineLimit(1)
             }
             .frame(width: 128, alignment: .leading)
@@ -178,7 +180,7 @@ struct MetadataTable: View {
                     .overlay(alignment: .leading) {
                         if removed {
                             HStack(spacing: 4) {
-                                Text(field.value).strikethrough().foregroundStyle(.secondary).lineLimit(1)
+                                Text(field.value).strikethrough().foregroundStyle(Color.haloSecondaryText).lineLimit(1)
                                 Text("Removed").foregroundStyle(ImageEditorKit.danger)
                             }
                             .font(.system(size: DesignTokens.TypeRamp.body))
@@ -190,12 +192,12 @@ struct MetadataTable: View {
             } else {
                 Text(field.value.isEmpty ? "—" : field.value)
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(field.value.isEmpty ? .tertiary : (field.editable ? .primary : .secondary))
+                    .foregroundStyle(field.value.isEmpty || !field.editable ? Color.haloSecondaryText : Color.haloInk)
                     .textSelection(.enabled)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !field.editable {
-                    Image(systemName: "lock.fill").font(.system(size: 9)).foregroundStyle(.tertiary)
+                    Image(systemName: "lock.fill").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.haloSecondaryText)
                         .help(String(localized: "Read-only technical field"))
                         .accessibilityLabel(String(localized: "Read-only"))
                 }
@@ -211,21 +213,23 @@ struct MetadataSidebar: View {
     @ObservedObject var model: MetadataEditorModel
 
     var body: some View {
-        VStack(alignment: .center, spacing: DesignTokens.Space.s) {
+        HStack(spacing: DesignTokens.Space.m) {
             Image(nsImage: model.thumbnail)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: 160, maxHeight: 120)
-                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                .frame(width: 64, height: 64)
                 .accessibilityHidden(true)
-            Text(model.url?.lastPathComponent ?? "")
-                .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
-                .lineLimit(2).multilineTextAlignment(.center).truncationMode(.middle)
-            if let size = model.snapshot?.value("file.size") {
-                Text(size).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
+                Text(model.url?.lastPathComponent ?? "")
+                    .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+                    .lineLimit(2).truncationMode(.middle)
+                if let size = model.snapshot?.value("file.size") {
+                    Text(size).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
+                }
             }
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity)
+        .haloTile(padding: EditorTokens.sectionPadding)
 
         ImageEditorKit.Section(String(localized: "Changes")) {
             // In table order.
@@ -240,7 +244,7 @@ struct MetadataSidebar: View {
                         Text(label).font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
                         Text(value.map { "→ \($0)" } ?? String(localized: "Removed"))
                             .font(.system(size: DesignTokens.TypeRamp.caption))
-                            .foregroundStyle(value == nil ? ImageEditorKit.danger : .secondary)
+                            .foregroundStyle(value == nil ? ImageEditorKit.danger : Color.haloSecondaryText)
                             .lineLimit(1).truncationMode(.tail)
                     }
                 }

@@ -118,6 +118,14 @@ struct WaveformTimeline: View {
 
     var body: some View {
         VStack(spacing: DesignTokens.Space.xs) {
+            if showsEdits, let sel = selection?.wrappedValue {
+                GeometryReader { geo in
+                    HandleLabels(selection: sel, axis: TimeAxis(start: wave.viewStart, end: wave.viewEnd, width: geo.size.width),
+                                 handleWidth: MediaStyle.handleWidth,
+                                 inTitle: String(localized: "Start"), outTitle: String(localized: "End"))
+                }
+                .frame(height: EditorTokens.Timeline.labelHeight)
+            }
             GeometryReader { geo in
                 let axis = TimeAxis(start: wave.viewStart, end: wave.viewEnd, width: geo.size.width)
                 ZStack(alignment: .topLeading) {
@@ -128,9 +136,9 @@ struct WaveformTimeline: View {
                 .contentShape(Rectangle())
                 .gesture(gesture(axis: axis))
                 .background(ScrollMonitor { event, x in handleScroll(event, x: x, axis: axis) })
-                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium))
+                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
             }
-            .frame(minHeight: 150, maxHeight: 340)
+            .frame(minHeight: EditorTokens.Timeline.waveformMinHeight, maxHeight: EditorTokens.Timeline.waveformMaxHeight)
             GeometryReader { geo in TimeRuler(axis: TimeAxis(start: wave.viewStart, end: wave.viewEnd, width: geo.size.width)) }
                 .frame(height: MediaStyle.rulerHeight)
             overview
@@ -150,7 +158,7 @@ struct WaveformTimeline: View {
             let mid = size.height / 2
             let amp = (mid - 6) * gain
             let limit = mid - 2
-            ctx.fill(Path(CGRect(x: 0, y: mid, width: size.width, height: 1)), with: .color(.secondary.opacity(0.25)))
+            ctx.fill(Path(CGRect(x: 0, y: mid, width: size.width, height: 1)), with: .color(Color.haloSecondaryText.opacity(0.35)))
             var inside = Path(), outside = Path(), bleeped = Path()
             let toneHalf = min(limit, CGFloat(BleepAudioRunner.toneAmplitude) * amp)
             for (i, c) in columns.enumerated() {
@@ -167,11 +175,11 @@ struct WaveformTimeline: View {
                 else if let sel, !sel.contains(t) { outside.addRect(r) }
                 else { inside.addRect(r) }
             }
-            ctx.fill(outside, with: .color(.secondary.opacity(0.35)))
+            ctx.fill(outside, with: .color(Color.haloSecondaryText.opacity(0.5)))
             ctx.fill(inside, with: .color(MediaStyle.accent))
             ctx.fill(bleeped, with: .color(MediaStyle.danger.opacity(0.85)))
         }
-        .background(Color.primary.opacity(0.04))
+        .background(EditorPalette.chip)
         .accessibilityElement()
         .accessibilityLabel(Text("Waveform"))
         .accessibilityValue(Text(wave.isComplete ? "" : String(localized: "Loading")))
@@ -182,9 +190,9 @@ struct WaveformTimeline: View {
         if let sel = selection?.wrappedValue {
             let x0 = axis.x(sel.lowerBound), x1 = axis.x(sel.upperBound)
             ZStack(alignment: .topLeading) {
-                Rectangle().fill(Color.black.opacity(0.12)).frame(width: max(0, x0), height: height)
-                Rectangle().fill(Color.black.opacity(0.12)).frame(width: max(0, axis.width - x1), height: height).offset(x: max(0, x1))
-                Rectangle().fill(MediaStyle.accent.opacity(0.08)).frame(width: max(0, x1 - x0), height: height).offset(x: x0)
+                Rectangle().fill(EditorPalette.overlayHalo.opacity(0.18)).frame(width: max(0, x0), height: height)
+                Rectangle().fill(EditorPalette.overlayHalo.opacity(0.18)).frame(width: max(0, axis.width - x1), height: height).offset(x: max(0, x1))
+                Rectangle().fill(MediaStyle.accent.opacity(0.1)).frame(width: max(0, x1 - x0), height: height).offset(x: x0)
                 edgeHandle(leading: true, height: height).offset(x: x0 - MediaStyle.handleWidth)
                     .accessibilityElement().accessibilityLabel(Text("In point"))
                     .accessibilityValue(Text(MediaTimes.timecode(sel.lowerBound)))
@@ -200,16 +208,17 @@ struct WaveformTimeline: View {
                 let x0 = axis.x(r.range.lowerBound), x1 = axis.x(r.range.upperBound)
                 let selected = selectedRange?.wrappedValue == r.id
                 ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 4)
+                    Rectangle()
                         .fill(MediaStyle.danger.opacity(selected ? 0.22 : 0.14))
-                        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(MediaStyle.danger.opacity(selected ? 1 : 0.6),
-                                                                                lineWidth: selected ? (contrast == .increased ? 3 : 2) : 1))
+                        .overlay(Rectangle().strokeBorder(MediaStyle.danger.opacity(selected ? 1 : 0.6),
+                                                          lineWidth: selected ? (contrast == .increased ? 3 : 2) : 1))
                         .frame(width: max(2, x1 - x0), height: height)
+                    // Flame with black text (6.3:1); the number names the bleep.
                     Text("\(n + 1)")
                         .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold).monospacedDigit())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(EditorPalette.onWarm)
                         .padding(.horizontal, 5).padding(.vertical, 1)
-                        .background(Capsule().fill(MediaStyle.danger))
+                        .background(Capsule().fill(EditorPalette.flame))
                         .offset(x: 4, y: 4)
                     if selected {
                         grip().offset(x: -4, y: height / 2 - 12)
@@ -226,21 +235,27 @@ struct WaveformTimeline: View {
     }
 
     private func grip() -> some View {
-        RoundedRectangle(cornerRadius: 3).fill(MediaStyle.danger).frame(width: 8, height: 24)
-            .overlay(VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(.white).frame(width: 4, height: 1.5) } })
+        Capsule().fill(EditorPalette.flame).frame(width: 8, height: 24)
+            .overlay(Capsule().strokeBorder(EditorPalette.overlayRim, lineWidth: DesignTokens.Shape.hairline))
+            .overlay(VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(EditorPalette.onWarm).frame(width: 4, height: 1.5) } })
     }
 
     private func edgeHandle(leading: Bool, height: CGFloat) -> some View {
         UnevenHandleShape(leading: leading)
             .fill(MediaStyle.accent)
             .frame(width: MediaStyle.handleWidth, height: height)
-            .overlay(VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(Color.white.opacity(0.9)).frame(width: 2, height: 2) } })
+            .overlay(VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(EditorPalette.overlayRim).frame(width: 2, height: 2) } })
     }
 
     private func playhead(axis: TimeAxis, height: CGFloat) -> some View {
         let x = axis.x(player.currentTime)
-        return Rectangle().fill(MediaStyle.ink).frame(width: MediaStyle.playheadWidth, height: height)
-            .offset(x: x - MediaStyle.playheadWidth / 2)
+        let w = EditorTokens.Timeline.knob
+        return OverlayStroke(path: Path { p in
+                p.move(to: CGPoint(x: w / 2, y: 0))
+                p.addLine(to: CGPoint(x: w / 2, y: height))
+            }, width: MediaStyle.playheadWidth)
+            .frame(width: w, height: height)
+            .offset(x: x - w / 2)
             .opacity(x >= -2 && x <= axis.width + 2 ? 1 : 0)
             .allowsHitTesting(false)
             .accessibilityElement()
@@ -258,8 +273,8 @@ struct WaveformTimeline: View {
                 let x0 = CGFloat(wave.viewStart / max(duration, 0.001)) * w
                 let x1 = CGFloat(wave.viewEnd / max(duration, 0.001)) * w
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.primary.opacity(0.08))
-                    Capsule().fill(MediaStyle.accent.opacity(0.55)).frame(width: max(8, x1 - x0)).offset(x: x0)
+                    Capsule().fill(EditorPalette.chip)
+                    Capsule().fill(MediaStyle.accent).frame(width: max(8, x1 - x0)).offset(x: x0)
                 }
                 .contentShape(Rectangle())
                 .gesture(DragGesture(minimumDistance: 0).onChanged { v in
@@ -267,7 +282,7 @@ struct WaveformTimeline: View {
                     wave.setStart(center - wave.viewSpan / 2)
                 })
             }
-            .frame(height: 6)
+            .frame(height: EditorTokens.Timeline.overviewHeight)
             .accessibilityElement()
             .accessibilityLabel(Text("Visible part"))
             .accessibilityValue(Text("\(MediaTimes.timecode(wave.viewStart)) to \(MediaTimes.timecode(wave.viewEnd))"))

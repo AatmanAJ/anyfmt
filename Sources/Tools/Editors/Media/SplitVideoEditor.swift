@@ -133,7 +133,6 @@ struct SplitVideoEditor: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             TransportBar(player: model.session.player, duration: model.duration, leading: AnyView(
                 Button { model.addMarker() } label: { Label("Split Here", systemImage: "scissors") }
-                    .controlSize(.small)
                     .help(String(localized: "Add a split at the playhead (M)"))))
             FilmstripTimeline(filmstrip: model.session.filmstrip, player: model.session.player,
                               duration: model.duration, frameDuration: model.fd,
@@ -153,17 +152,14 @@ struct SplitVideoEditor: View {
     @ViewBuilder
     private var sidebar: some View {
         SidebarSection(String(localized: "Split")) {
-            Picker(String(localized: "Split"), selection: $model.mode) {
-                Text("At markers").tag("at")
-                Text("Every…").tag("every")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            EditorChoiceChips(String(localized: "Split"), selection: $model.mode, options: [
+                .init("at", String(localized: "At markers")),
+                .init("every", String(localized: "Every…")),
+            ])
             if model.mode == "every" { everyControls } else { markerList }
         }
-        Divider()
         SidebarSection(String(localized: "Quality")) {
-            Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless).toggleStyle(.switch).controlSize(.small)
+            Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless)
             if model.session.state.isReady && !model.cuts.isEmpty {
                 if model.cutPlan.lossless {
                     let moved = zip(model.cutPlan.cuts, model.cuts).contains { abs($0 - $1) > model.fd / 2 }
@@ -172,13 +168,12 @@ struct SplitVideoEditor: View {
                                      : String(localized: "Lossless. Every cut is already on a keyframe."),
                          tint: MediaStyle.success)
                 } else if model.lossless {
-                    Note(systemImage: "exclamationmark.circle.fill", text: String(localized: "Some cuts are far from a keyframe, so the video re-encodes once and every part starts exactly on time."), tint: .orange)
+                    Note(systemImage: "exclamationmark.circle.fill", text: String(localized: "Some cuts are far from a keyframe, so the video re-encodes once and every part starts exactly on time."), tint: MediaStyle.warning)
                 } else {
                     Note(systemImage: "film.stack", text: String(localized: "Re-encodes once; every part starts exactly on time."))
                 }
             }
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("Space", String(localized: "Play / pause")), ("← →", String(localized: "Previous / next frame")),
                              ("M", String(localized: "Split at playhead")), ("⌫", String(localized: "Remove nearest split"))])
@@ -198,9 +193,8 @@ struct SplitVideoEditor: View {
             HStack(spacing: DesignTokens.Space.xs) {
                 ForEach(SplitVideoModel.everyPresets, id: \.self) { s in
                     Button(s < 60 ? "\(s)s" : "\(s / 60)m") { model.every = s }
-                        .controlSize(.small)
-                        .buttonStyle(.bordered)
-                        .tint(model.every == s ? MediaStyle.accent : nil)
+                        .buttonStyle(.editorChip(selected: model.every == s, fill: true))
+                        .accessibilityAddTraits(model.every == s ? .isSelected : [])
                 }
             }
             if model.session.state.isReady {
@@ -223,19 +217,19 @@ struct SplitVideoEditor: View {
             VStack(spacing: 2) {
                 ForEach(Array(model.markers.enumerated()), id: \.element) { i, t in
                     HStack {
-                        Text("\(i + 2)").font(MediaStyle.caption(.bold).monospacedDigit()).foregroundStyle(.white)
-                            .frame(width: 18, height: 16).background(Capsule().fill(MediaStyle.mint))
+                        Text("\(i + 2)").font(MediaStyle.caption(.bold).monospacedDigit()).foregroundStyle(EditorPalette.onWarm)
+                            .frame(width: 20, height: 16).background(Capsule().fill(EditorPalette.orange))
                         Button(MediaTimes.timecode(t)) { model.session.player.seek(to: t) }
                             .buttonStyle(.plain).font(MediaStyle.timecode)
                         Spacer()
-                        Button { model.removeMarker(t) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
+                        Button { model.removeMarker(t) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove split at \(MediaTimes.timecode(t))"))
                     }
                     .padding(.vertical, 3)
                 }
             }
-            Button(String(localized: "Remove All")) { model.markers = [] }.controlSize(.small)
+            Button(String(localized: "Remove All")) { model.markers = [] }
         }
     }
 }
@@ -251,8 +245,8 @@ private struct PartsBar: View {
                 ForEach(Array(parts.enumerated()), id: \.offset) { i, p in
                     let w = max(4, geo.size.width * CGFloat((p.upperBound - p.lowerBound) / max(duration, 0.001)) - 2)
                     ZStack {
-                        RoundedRectangle(cornerRadius: 4).fill((i % 2 == 0 ? MediaStyle.accent : MediaStyle.mint).opacity(0.22))
-                        RoundedRectangle(cornerRadius: 4).strokeBorder((i % 2 == 0 ? MediaStyle.accent : MediaStyle.mint).opacity(0.6))
+                        Capsule().fill((i % 2 == 0 ? MediaStyle.accent : MediaStyle.mint).opacity(0.22))
+                        Capsule().strokeBorder((i % 2 == 0 ? MediaStyle.accent : MediaStyle.mint).opacity(0.7))
                         if w > 54 {
                             Text("\(i + 1) · \(MediaTimes.timecode(p.upperBound - p.lowerBound, fraction: 1))")
                                 .font(MediaStyle.caption(.medium).monospacedDigit()).lineLimit(1)
@@ -266,6 +260,6 @@ private struct PartsBar: View {
                 }
             }
         }
-        .frame(height: 22)
+        .frame(height: EditorTokens.Timeline.partsHeight)
     }
 }

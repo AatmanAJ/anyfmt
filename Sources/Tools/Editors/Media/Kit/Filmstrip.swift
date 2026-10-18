@@ -108,13 +108,14 @@ struct TimeRuler: View {
             var m = (axis.start / minor).rounded(.up) * minor
             while m <= axis.end {
                 let x = axis.x(m)
-                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 3)), with: .color(.secondary.opacity(0.5)))
+                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 3)), with: .color(Color.haloSecondaryText.opacity(0.6)))
                 m += minor
             }
             while t <= axis.end + 1e-9 {
                 let x = axis.x(t)
-                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 6)), with: .color(.secondary))
-                let text = Text(MediaTimes.timecode(t, fraction: step < 1 ? 2 : 0)).font(MediaStyle.caption()).foregroundColor(.secondary)
+                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 6)), with: .color(Color.haloSecondaryText))
+                let text = Text(MediaTimes.timecode(t, fraction: step < 1 ? 2 : 0)).font(MediaStyle.caption().monospacedDigit())
+                    .foregroundColor(Color.haloSecondaryText)
                 let resolved = ctx.resolve(text)
                 let w = resolved.measure(in: size).width
                 let lx = min(max(0, x - w / 2), size.width - w)
@@ -157,6 +158,13 @@ struct FilmstripTimeline: View {
 
     var body: some View {
         VStack(spacing: DesignTokens.Space.xs) {
+            if let sel = selection?.wrappedValue {
+                GeometryReader { geo in
+                    HandleLabels(selection: sel, axis: TimeAxis(start: 0, end: max(duration, 0.001), width: geo.size.width),
+                                 handleWidth: MediaStyle.handleWidth)
+                }
+                .frame(height: EditorTokens.Timeline.labelHeight)
+            }
             GeometryReader { geo in
                 let axis = TimeAxis(start: 0, end: max(duration, 0.001), width: geo.size.width)
                 ZStack(alignment: .topLeading) {
@@ -165,12 +173,11 @@ struct FilmstripTimeline: View {
                         selectionOverlay(sel, axis: axis, height: geo.size.height)
                     }
                     if let ghost, selection != nil {
-                        RoundedRectangle(cornerRadius: 3)
-                            .strokeBorder(Color.white.opacity(0.9), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
-                            .frame(width: max(2, axis.x(ghost.upperBound) - axis.x(ghost.lowerBound)), height: geo.size.height - 10)
-                            .offset(x: axis.x(ghost.lowerBound), y: 5)
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
+                        // Where a lossless cut really lands: dashed white with a dark halo.
+                        OverlayStroke(path: Path(CGRect(x: axis.x(ghost.lowerBound), y: 6,
+                                                        width: max(2, axis.x(ghost.upperBound) - axis.x(ghost.lowerBound)),
+                                                        height: geo.size.height - 12)),
+                                      dash: [5, 3], quiet: true)
                     }
                     ForEach(markers) { m in markerView(m, axis: axis, height: geo.size.height) }
                     playhead(axis: axis, height: geo.size.height)
@@ -195,7 +202,7 @@ struct FilmstripTimeline: View {
                     if let image {
                         Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
                     } else {
-                        Rectangle().fill(Color.primary.opacity(0.06))
+                        Rectangle().fill(EditorPalette.chip)
                     }
                 }
                 .frame(width: size.width / CGFloat(max(1, filmstrip.thumbnails.count)), height: size.height)
@@ -203,21 +210,25 @@ struct FilmstripTimeline: View {
             }
         }
         .frame(width: size.width, height: size.height)
-        .background(Color.primary.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.small))
+        .background(EditorPalette.chip)
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
         .accessibilityHidden(true)
     }
 
     private func selectionOverlay(_ sel: ClosedRange<Double>, axis: TimeAxis, height: CGFloat) -> some View {
         let x0 = axis.x(sel.lowerBound), x1 = axis.x(sel.upperBound)
         let border: CGFloat = contrast == .increased ? 4 : 3
+        let dim = EditorPalette.overlayHalo.opacity(contrast == .increased ? EditorTokens.Overlay.dimIncreased : EditorTokens.Overlay.dim)
+        let frame = RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
         return ZStack(alignment: .topLeading) {
             if dimOutside {
-                Rectangle().fill(Color.black.opacity(0.5)).frame(width: max(0, x0), height: height)
-                Rectangle().fill(Color.black.opacity(0.5)).frame(width: max(0, axis.width - x1), height: height).offset(x: x1)
+                Rectangle().fill(dim).frame(width: max(0, x0), height: height)
+                Rectangle().fill(dim).frame(width: max(0, axis.width - x1), height: height).offset(x: x1)
             }
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+            frame
                 .strokeBorder(MediaStyle.accent, lineWidth: border)
+                // A white inner rim keeps the frame visible over blue footage.
+                .overlay(frame.inset(by: border).strokeBorder(EditorPalette.overlayRim, lineWidth: DesignTokens.Shape.hairline))
                 .frame(width: max(MediaStyle.handleWidth * 2, x1 - x0 + MediaStyle.handleWidth * 2), height: height)
                 .offset(x: x0 - MediaStyle.handleWidth)
             handle(edge: .leading).offset(x: x0 - MediaStyle.handleWidth)
@@ -239,7 +250,7 @@ struct FilmstripTimeline: View {
             .fill(MediaStyle.accent)
             .frame(width: MediaStyle.handleWidth, height: MediaStyle.stripHeight)
             .overlay(
-                VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(Color.white.opacity(0.9)).frame(width: 2, height: 2) } }
+                VStack(spacing: 3) { ForEach(0..<3) { _ in Capsule().fill(EditorPalette.overlayRim).frame(width: 2, height: 2) } }
                     .frame(width: 2)
             )
             .contentShape(Rectangle().inset(by: -6))
@@ -248,12 +259,15 @@ struct FilmstripTimeline: View {
     private func markerView(_ m: TimelineMarker, axis: TimeAxis, height: CGFloat) -> some View {
         let x = axis.x(m.time)
         return VStack(spacing: 0) {
+            // Orange with black text (9.6:1); the number names the part.
             Text(m.label)
                 .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(EditorPalette.onWarm)
                 .padding(.horizontal, 4).padding(.vertical, 1)
-                .background(Capsule().fill(MediaStyle.mint))
-            Rectangle().fill(MediaStyle.mint).frame(width: 2, height: height - 12)
+                .background(Capsule().fill(EditorPalette.orange))
+                .overlay(Capsule().strokeBorder(EditorPalette.overlayHalo.opacity(0.5), lineWidth: DesignTokens.Shape.hairline))
+            Rectangle().fill(EditorPalette.orange).frame(width: 2, height: height - 12)
+                .overlay(Rectangle().stroke(EditorPalette.overlayHalo.opacity(0.4), lineWidth: 0.5))
         }
         .frame(width: 28)
         .offset(x: x - 14, y: -2)
@@ -265,12 +279,17 @@ struct FilmstripTimeline: View {
 
     private func playhead(axis: TimeAxis, height: CGFloat) -> some View {
         let x = axis.x(player.currentTime)
+        let knob = EditorTokens.Timeline.knob
         return ZStack(alignment: .top) {
-            Rectangle().fill(Color.white).frame(width: MediaStyle.playheadWidth, height: height + 8)
-                .shadow(color: .black.opacity(0.6), radius: 1)
-            Circle().fill(Color.white).frame(width: 9, height: 9).shadow(color: .black.opacity(0.5), radius: 1).offset(y: -6)
+            OverlayStroke(path: Path { p in
+                p.move(to: CGPoint(x: knob / 2, y: 0))
+                p.addLine(to: CGPoint(x: knob / 2, y: height + 8))
+            }, width: MediaStyle.playheadWidth)
+            .frame(width: knob, height: height + 8)
+            OverlayHandle(round: true, size: knob).offset(y: -knob / 2)
         }
-        .offset(x: x - MediaStyle.playheadWidth / 2, y: -4)
+        .frame(width: knob, height: height + 8, alignment: .top)
+        .offset(x: x - knob / 2, y: -4)
         .allowsHitTesting(false)
         .accessibilityElement()
         .accessibilityLabel(Text("Playhead"))
@@ -320,12 +339,50 @@ struct FilmstripTimeline: View {
     }
 }
 
+/// "In 0:02.40" / "Out 0:08.60" tags over the trim handles, so the handles say
+/// what they are and where they sit (not just a colour).
+struct HandleLabels: View {
+    let selection: ClosedRange<Double>
+    let axis: TimeAxis
+    let handleWidth: CGFloat
+    var inTitle = String(localized: "In")
+    var outTitle = String(localized: "Out")
+
+    var body: some View {
+        let x0 = axis.x(selection.lowerBound) - handleWidth, x1 = axis.x(selection.upperBound) + handleWidth
+        ZStack(alignment: .topLeading) {
+            // Pins the stack's leading edge to x = 0 so the guides below are absolute.
+            Color.clear.frame(width: axis.width, height: 1)
+            tag(inTitle, selection.lowerBound)
+                .fixedSize()
+                .alignmentGuide(.leading) { d in min(max(0, x0 - d.width), axis.width - d.width) * -1 }
+            tag(outTitle, selection.upperBound)
+                .fixedSize()
+                .alignmentGuide(.leading) { d in min(max(0, x1), axis.width - d.width) * -1 }
+        }
+        .frame(width: axis.width, alignment: .topLeading)
+        .accessibilityHidden(true)
+    }
+
+    private func tag(_ title: String, _ t: Double) -> some View {
+        HStack(spacing: DesignTokens.Space.xs) {
+            Text(title).fontWeight(.bold)
+            Text(MediaTimes.timecode(t)).monospacedDigit()
+        }
+        .font(.system(size: DesignTokens.TypeRamp.micro, weight: .semibold))
+        .foregroundStyle(EditorPalette.onSelected)
+        .padding(.horizontal, DesignTokens.Space.s - 2)
+        .frame(height: EditorTokens.Timeline.labelHeight - 2)
+        .background(Capsule().fill(EditorPalette.overlayCore))
+    }
+}
+
 /// Handle shape: rounded on the outer side only.
 struct UnevenHandleShape: Shape {
     let leading: Bool
 
     func path(in rect: CGRect) -> Path {
-        let r = DesignTokens.Radius.small
+        let r = min(DesignTokens.Shape.tile, rect.width)
         var p = Path()
         if leading {
             p.move(to: CGPoint(x: rect.maxX, y: rect.minY))

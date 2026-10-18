@@ -56,13 +56,14 @@ struct ZoomControls: View {
                     wave.setZoom(wave.duration / span)
                     wave.setStart((fitTo.lowerBound + fitTo.upperBound) / 2 - wave.viewSpan / 2)
                 }
-                .controlSize(.small)
+                .buttonStyle(.editorChip)
             }
             Button(String(localized: "Show All")) { wave.setZoom(1) }
-                .controlSize(.small)
+                .buttonStyle(.editorChip)
                 .disabled(wave.zoom <= 1.01)
         }
         .buttonStyle(.borderless)
+        .foregroundStyle(Color.haloInk)
     }
 }
 

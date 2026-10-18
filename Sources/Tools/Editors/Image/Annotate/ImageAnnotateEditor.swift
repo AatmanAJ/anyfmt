@@ -69,7 +69,7 @@ final class ImageAnnotateModel: ToolEditorModel {
     @Published var annotations: [Annotation] = []
     @Published var selection: UUID?
     @Published var mode: Mode = .arrow
-    @Published var color = "#FF3B30"
+    @Published var color = "#FF3B30" // token-ok: default paint colour (content)
     @Published var width = 0.008
     @Published var fontSize = Annotation.defaultFontSize
     /// Bumped to ask the sidebar to focus the text field.
@@ -171,7 +171,7 @@ final class ImageAnnotateModel: ToolEditorModel {
         case .text:
             Annotation(kind: .text, points: [p], color: color, width: width, text: String(localized: "Text"), fontSize: fontSize)
         case .highlight:
-            Annotation(kind: .highlight, points: [p, p], color: color == "#FF3B30" ? "#FFCC00" : color, width: width)
+            Annotation(kind: .highlight, points: [p, p], color: color == "#FF3B30" ? "#FFCC00" : color, width: width) // token-ok: paint colours
         case .freehand:
             Annotation(kind: .freehand, points: [p], color: color, width: width)
         default:
@@ -244,7 +244,7 @@ struct ImageAnnotateCanvas: View {
     @State private var keys = ImageEditorKeyCatcher.Handle()
 
     var body: some View {
-        ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize) { rect in
+        ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize, source: model.inputs.first) { rect in
             if !showOriginal {
                 Canvas { ctx, _ in
                     ctx.withCGContext { cg in
@@ -282,16 +282,10 @@ struct ImageAnnotateCanvas: View {
     private func selectionOverlay(_ rect: CGRect) -> some View {
         if let a = model.selected {
             let b = ImageEditorKit.denormalized(AnnotationRenderer.bounds(of: a, imageSize: rect.size), in: rect)
-            Path { $0.addRect(b.insetBy(dx: -3, dy: -3)) }
-                .stroke(ImageEditorKit.accent, style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                .allowsHitTesting(false)
+            OverlayStroke(path: Path { $0.addRect(b.insetBy(dx: -4, dy: -4)) }, dash: [5, 3], width: DesignTokens.Shape.hairline)
             ForEach(Array(handlePoints(a).enumerated()), id: \.offset) { _, p in
                 let v = ImageEditorKit.denormalized(p, in: rect)
-                Circle().fill(Color.white)
-                    .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: 1.5))
-                    .frame(width: 10, height: 10)
-                    .position(v)
-                    .allowsHitTesting(false)
+                OverlayHandle(round: true).position(v).allowsHitTesting(false)
             }
         }
     }
@@ -396,16 +390,11 @@ struct ImageAnnotateSidebar: View {
                     let selected = model.mode == m
                     Button { model.mode = m } label: {
                         VStack(spacing: 2) {
-                            Image(systemName: m.glyph).font(.system(size: 15, weight: .medium))
-                            Text(m.label).font(.system(size: DesignTokens.TypeRamp.micro + 0.5, weight: .medium)).lineLimit(1)
+                            Image(systemName: m.glyph).font(.system(size: EditorTokens.cellGlyphSize, weight: .medium))
+                            Text(m.label).lineLimit(1).minimumScaleFactor(0.8)
                         }
-                        .frame(maxWidth: .infinity, minHeight: 42)
-                        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                            .fill(selected ? ImageEditorKit.accent : Color.primary.opacity(0.06)))
-                        .foregroundStyle(selected ? Color.white : Color.primary)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(EditorCellButtonStyle(selected: selected))
                     .keyboardShortcut(m.shortcut, modifiers: [.command, .option])
                     .help("\(m.label) (⌥⌘\(String(m.shortcut.character).uppercased()))")
                     .accessibilityLabel(m.label)

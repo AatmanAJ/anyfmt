@@ -132,12 +132,11 @@ struct BleepAudioEditor: View {
             HStack {
                 ZoomControls(wave: model.audio.wave)
                 Spacer()
-                Text("Drag across the waveform to mark a bleep").font(MediaStyle.caption()).foregroundStyle(.secondary)
+                Text("Drag across the waveform to mark a bleep").font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
             }
             Spacer(minLength: 0)
             TransportBar(player: model.player, duration: model.duration, showsFrameSteps: false, leading: AnyView(
                 Button { model.addAtPlayhead() } label: { Label("Bleep Here", systemImage: "plus") }
-                    .controlSize(.small)
                     .help(String(localized: "Mark half a second at the playhead (M)"))))
         }
         .padding(DesignTokens.Space.l)
@@ -147,21 +146,17 @@ struct BleepAudioEditor: View {
     @ViewBuilder
     private var sidebar: some View {
         SidebarSection(String(localized: "Replace with")) {
-            Picker(String(localized: "Replace with"), selection: $model.style) {
-                Label("Tone", systemImage: "speaker.wave.3").tag("tone")
-                Label("Silence", systemImage: "speaker.slash").tag("silence")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            EditorChoiceChips(String(localized: "Replace with"), selection: $model.style, options: [
+                .init("tone", String(localized: "Tone"), systemImage: "speaker.wave.3"),
+                .init("silence", String(localized: "Silence"), systemImage: "speaker.slash"),
+            ])
             Text(model.style == "tone" ? String(localized: "A 1 kHz tone replaces the sound, like broadcast censoring.")
                                        : String(localized: "The marked parts go silent."))
                 .font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Button { model.previewSelected() } label: { Label("Preview", systemImage: "play.circle") }
-                .controlSize(.small)
                 .disabled(model.ranges.isEmpty)
                 .help(String(localized: "Play the selected bleep with a short lead-in"))
         }
-        Divider()
         SidebarSection(String(localized: "Bleeps")) {
             if model.ranges.isEmpty {
                 Text("None yet. Drag across the waveform, or press M at the playhead.")
@@ -171,21 +166,24 @@ struct BleepAudioEditor: View {
                     let isSelected = model.selected == r.id
                     HStack(spacing: DesignTokens.Space.s) {
                         Text("\(i + 1)")
-                            .font(MediaStyle.caption(.bold).monospacedDigit()).foregroundStyle(.white)
-                            .frame(width: 20, height: 16).background(Capsule().fill(MediaStyle.danger))
+                            .font(MediaStyle.caption(.bold).monospacedDigit()).foregroundStyle(EditorPalette.onWarm)
+                            .frame(width: 20, height: 16).background(Capsule().fill(EditorPalette.flame))
                         VStack(alignment: .leading, spacing: 1) {
                             Text("\(MediaTimes.timecode(r.range.lowerBound)) – \(MediaTimes.timecode(r.range.upperBound))")
                                 .font(MediaStyle.timecode)
                             Text(String(format: "%.2f s", r.range.upperBound - r.range.lowerBound))
-                                .font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary)
+                                .font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
                         }
                         Spacer()
-                        Button { model.remove(r.id) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
+                        Button { model.remove(r.id) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove bleep \(i + 1)"))
                     }
                     .padding(.vertical, 4).padding(.horizontal, 6)
-                    .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).fill(isSelected ? MediaStyle.danger.opacity(0.12) : .clear))
+                    .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
+                        .fill(isSelected ? MediaStyle.danger.opacity(0.16) : .clear))
+                    .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
+                        .strokeBorder(isSelected ? MediaStyle.danger : .clear, lineWidth: DesignTokens.Shape.hairline + 0.5))
                     .contentShape(Rectangle())
                     .onTapGesture {
                         model.selected = r.id
@@ -195,10 +193,9 @@ struct BleepAudioEditor: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
                 }
-                Button(String(localized: "Remove All")) { model.ranges = []; model.selected = nil }.controlSize(.small)
+                Button(String(localized: "Remove All")) { model.ranges = []; model.selected = nil }
             }
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("Space", String(localized: "Play with preview")), ("M", String(localized: "Bleep at playhead")),
                              ("⌫", String(localized: "Remove selected bleep")), ("⌘= ⌘−", String(localized: "Zoom in / out"))])

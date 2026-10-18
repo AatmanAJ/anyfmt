@@ -66,7 +66,8 @@ final class ImageCropModel: ToolEditorModel {
     var cropPixels: CGSize { CropGeometry.pixelRect(rect, aspect: "free", imageSize: pixelSize).size }
 
     var statusLine: String? {
-        "\(ImageEditorKit.pixelText(pixelSize)) → \(ImageEditorKit.pixelText(cropPixels))"
+        guard preview != nil else { return nil }
+        return "\(ImageEditorKit.pixelText(pixelSize)) → \(ImageEditorKit.pixelText(cropPixels))"
     }
 
     var canSave: Bool { preview != nil }
@@ -184,7 +185,7 @@ struct ImageCropCanvas: View {
     @State private var keys = ImageEditorKeyCatcher.Handle()
 
     var body: some View {
-        ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize) { imageRect in
+        ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize, source: model.inputs.first) { imageRect in
             if !showOriginal {
                 overlay(imageRect)
             }
@@ -202,25 +203,31 @@ struct ImageCropCanvas: View {
     @ViewBuilder
     private func overlay(_ imageRect: CGRect) -> some View {
         let crop = ImageEditorKit.denormalized(model.rect, in: imageRect)
+        let o = EditorTokens.Overlay.self
         ZStack(alignment: .topLeading) {
             Path { p in
                 p.addRect(imageRect)
                 p.addRect(crop)
             }
-            .fill(Color.black.opacity(contrast == .increased ? 0.65 : 0.5), style: FillStyle(eoFill: true))
+            .fill(EditorPalette.overlayHalo.opacity(contrast == .increased ? o.dimIncreased : o.dim), style: FillStyle(eoFill: true))
 
-            // Rule of thirds.
-            Path { p in
+            // Rule of thirds: quiet white lines with a dark halo.
+            OverlayStroke(path: Path { p in
                 for i in 1...2 {
                     let x = crop.minX + crop.width * CGFloat(i) / 3, y = crop.minY + crop.height * CGFloat(i) / 3
                     p.move(to: CGPoint(x: x, y: crop.minY)); p.addLine(to: CGPoint(x: x, y: crop.maxY))
                     p.move(to: CGPoint(x: crop.minX, y: y)); p.addLine(to: CGPoint(x: crop.maxX, y: y))
                 }
-            }
-            .stroke(Color.white.opacity(active == nil ? 0.35 : 0.6), lineWidth: 0.75)
+            }, width: DesignTokens.Shape.hairline, quiet: true)
+            .opacity(active == nil ? o.thirds : o.thirdsActive)
 
-            Rectangle().path(in: crop).stroke(Color.white, lineWidth: contrast == .increased ? 2 : 1)
+            OverlayStroke(path: Rectangle().path(in: crop))
             handles(crop)
+            OverlayBadge(text: "\(Int(model.cropPixels.width.rounded())) × \(Int(model.cropPixels.height.rounded()))")
+                .offset(x: crop.minX + DesignTokens.Space.s, y: max(imageRect.minY + DesignTokens.Space.xs, crop.minY + DesignTokens.Space.s))
+                .opacity(crop.width > 110 && crop.height > 40 ? 1 : 0)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
 
             Rectangle().fill(Color.white.opacity(0.001))
                 .contentShape(Rectangle())
@@ -235,23 +242,22 @@ struct ImageCropCanvas: View {
         .accessibilityHint(String(localized: "Drag to move or resize. Arrow keys nudge by one pixel, with Shift by ten."))
     }
 
+    /// Cobalt corner brackets (dark halo, white rim) plus square handles on the edges.
     private func handles(_ r: CGRect) -> some View {
-        let len = min(18, min(r.width, r.height) / 3), t: CGFloat = 3
-        return Path { p in
-            // Corner brackets.
-            for (c, dx, dy) in [(CGPoint(x: r.minX, y: r.minY), 1.0, 1.0), (CGPoint(x: r.maxX, y: r.minY), -1.0, 1.0),
-                                (CGPoint(x: r.maxX, y: r.maxY), -1.0, -1.0), (CGPoint(x: r.minX, y: r.maxY), 1.0, -1.0)] {
-                p.move(to: CGPoint(x: c.x, y: c.y + dy * len)); p.addLine(to: c); p.addLine(to: CGPoint(x: c.x + dx * len, y: c.y))
+        let o = EditorTokens.Overlay.self
+        let len = min(o.cornerLength, min(r.width, r.height) / 3)
+        return ZStack(alignment: .topLeading) {
+            OverlayStroke(path: Path { p in
+                for (c, dx, dy) in [(CGPoint(x: r.minX, y: r.minY), 1.0, 1.0), (CGPoint(x: r.maxX, y: r.minY), -1.0, 1.0),
+                                    (CGPoint(x: r.maxX, y: r.maxY), -1.0, -1.0), (CGPoint(x: r.minX, y: r.maxY), 1.0, -1.0)] {
+                    p.move(to: CGPoint(x: c.x, y: c.y + dy * len)); p.addLine(to: c); p.addLine(to: CGPoint(x: c.x + dx * len, y: c.y))
+                }
+            }, width: o.cornerWidth)
+            ForEach([ImageCropHandle.top, .bottom, .left, .right], id: \.self) { h in
+                let a = h.anchor(in: r)
+                OverlayHandle().position(a)
             }
-            // Edge bars.
-            let half = len * 0.6
-            p.move(to: CGPoint(x: r.midX - half, y: r.minY)); p.addLine(to: CGPoint(x: r.midX + half, y: r.minY))
-            p.move(to: CGPoint(x: r.midX - half, y: r.maxY)); p.addLine(to: CGPoint(x: r.midX + half, y: r.maxY))
-            p.move(to: CGPoint(x: r.minX, y: r.midY - half)); p.addLine(to: CGPoint(x: r.minX, y: r.midY + half))
-            p.move(to: CGPoint(x: r.maxX, y: r.midY - half)); p.addLine(to: CGPoint(x: r.maxX, y: r.midY + half))
         }
-        .stroke(Color.white, style: StrokeStyle(lineWidth: t, lineCap: .round, lineJoin: .round))
-        .shadow(color: .black.opacity(0.35), radius: 1.5)
         .allowsHitTesting(false)
     }
 
@@ -307,12 +313,12 @@ private struct AspectGlyph: View {
             if let ratio {
                 let box = geo.size
                 let w = min(box.width, box.height * ratio), h = w / ratio
-                RoundedRectangle(cornerRadius: 2)
+                Rectangle()
                     .strokeBorder(lineWidth: 1.5)
                     .frame(width: w, height: h)
                     .position(x: box.width / 2, y: box.height / 2)
             } else {
-                Image(systemName: "crop").font(.system(size: 14)).frame(width: geo.size.width, height: geo.size.height)
+                Image(systemName: "crop").font(.system(size: EditorTokens.cellGlyphSize)).frame(width: geo.size.width, height: geo.size.height)
             }
         }
         .accessibilityHidden(true)
@@ -329,32 +335,30 @@ struct ImageCropSidebar: View {
 
     var body: some View {
         ImageEditorKit.Section(String(localized: "Aspect ratio")) {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 72), spacing: 6)], spacing: 6) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DesignTokens.Space.s), count: 3), spacing: DesignTokens.Space.s) {
                 ForEach(aspects, id: \.id) { a in
                     let selected = model.aspect == a.id
                     Button { model.aspect = a.id } label: {
                         VStack(spacing: 3) {
                             AspectGlyph(ratio: CropGeometry.ratio(a.id)).frame(width: 22, height: 16)
-                            Text(a.label).font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
+                            Text(a.label)
                         }
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                            .fill(selected ? ImageEditorKit.accent.opacity(0.16) : Color.primary.opacity(0.05)))
-                        .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                            .strokeBorder(selected ? ImageEditorKit.accent : Color.clear, lineWidth: 1.5))
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(selected ? ImageEditorKit.accent : Color.primary)
+                    .buttonStyle(EditorCellButtonStyle(selected: selected))
                     .accessibilityLabel(a.label)
                     .accessibilityAddTraits(selected ? .isSelected : [])
                 }
             }
         }
         ImageEditorKit.Section(String(localized: "Size")) {
-            HStack {
-                Text(ImageEditorKit.pixelText(model.cropPixels))
-                    .font(.system(size: DesignTokens.TypeRamp.title, weight: .semibold).monospacedDigit())
+            HStack(alignment: .firstTextBaseline) {
+                Text(verbatim: "\(Int(model.cropPixels.width.rounded())) × \(Int(model.cropPixels.height.rounded()))")
+                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayM))
+                    .displayTracking(DesignTokens.Typeface.Size.displayM)
+                    .monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .accessibilityLabel(ImageEditorKit.pixelText(model.cropPixels))
+                Text("px").font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold)).foregroundStyle(Color.haloSecondaryText)
                 Spacer()
                 Button(String(localized: "Reset")) { model.reset() }
                     .disabled(model.isFullFrame && model.aspect == "free")

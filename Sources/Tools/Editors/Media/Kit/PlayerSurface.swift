@@ -36,9 +36,8 @@ struct VideoSurface: View {
             }
         }
         .aspectRatio(aspect, contentMode: .fit)
-        .background(Color.black)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium))
-        .shadow(color: .black.opacity(0.18), radius: 8, y: 2)
+        .background(EditorPalette.overlayHalo)
+        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
         .accessibilityElement()
         .accessibilityLabel(Text("Video preview"))
         .accessibilityValue(Text(MediaTimes.timecode(player.currentTime)))
@@ -62,10 +61,13 @@ struct TransportBar: View {
             }
             Button(action: player.togglePlay) {
                 Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .frame(width: 34, height: 26)
+                    .font(.system(size: DesignTokens.TypeRamp.title, weight: .bold))
+                    .foregroundStyle(EditorPalette.onSelected)
+                    .frame(width: EditorTokens.cellHeight - 10, height: EditorTokens.cellHeight - 10)
+                    .background(Circle().fill(EditorPalette.selected))
+                    .contentShape(Circle())
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
             .help(player.isPlaying ? String(localized: "Pause (Space)") : String(localized: "Play (Space)"))
             .accessibilityLabel(player.isPlaying ? Text("Pause") : Text("Play"))
             if showsFrameSteps {
@@ -74,7 +76,7 @@ struct TransportBar: View {
             Spacer(minLength: 0)
             Text("\(MediaTimes.timecode(player.currentTime)) / \(MediaTimes.timecode(duration))")
                 .font(MediaStyle.timecode)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.haloSecondaryText)
                 .accessibilityLabel(Text("Time \(MediaTimes.timecode(player.currentTime)) of \(MediaTimes.timecode(duration))"))
             if let trailing { trailing }
         }
@@ -82,9 +84,12 @@ struct TransportBar: View {
 
     private func transportButton(_ symbol: String, _ help: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol).font(.system(size: 13)).frame(width: 28, height: 26)
+            Image(systemName: symbol).font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+                .foregroundStyle(Color.haloInk)
+                .frame(width: EditorTokens.chipHeight + 4, height: EditorTokens.chipHeight)
+                .contentShape(Rectangle())
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .help(help)
         .accessibilityLabel(Text(help))
     }

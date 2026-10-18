@@ -266,11 +266,10 @@ struct CropVideoEditor: View {
                 ForEach(CropVideoModel.aspects, id: \.self) { id in AspectButton(id: id, selected: model.aspect == id) { model.aspect = id } }
             }
         }
-        Divider()
         SidebarSection(String(localized: "Size")) {
             HStack(spacing: DesignTokens.Space.s) {
                 PixelField(label: String(localized: "Width"), value: model.pixels.width) { model.setPixelSize(width: $0) }
-                Text("×").foregroundStyle(.secondary)
+                Text("×").foregroundStyle(Color.haloSecondaryText)
                 PixelField(label: String(localized: "Height"), value: model.pixels.height) { model.setPixelSize(height: $0) }
                 Text("px").font(MediaStyle.caption()).foregroundStyle(.secondary)
             }
@@ -280,12 +279,10 @@ struct CropVideoEditor: View {
                 .controlSize(.small)
                 .disabled(model.rect == .full && model.aspect == "free")
         }
-        Divider()
         SidebarSection(String(localized: "Output")) {
             Note(systemImage: "speaker.wave.2", text: String(localized: "Sound is copied unchanged. The picture re-encodes in its own format, using the hardware encoder when available."))
             Note(systemImage: "ruler", text: String(localized: "Sizes are rounded to even pixels, which every video encoder needs."))
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("Space", String(localized: "Play / pause")), ("← →", String(localized: "Previous / next frame")),
                              ("B", String(localized: "Before / after"))])
@@ -305,21 +302,22 @@ private struct CropOverlay: View {
         let r = model.rect
         let crop = CGRect(x: area.minX + CGFloat(r.x) * area.width, y: area.minY + CGFloat(r.y) * area.height,
                           width: CGFloat(r.width) * area.width, height: CGFloat(r.height) * area.height)
+        let o = EditorTokens.Overlay.self
         ZStack(alignment: .topLeading) {
             Path { p in p.addRect(area); p.addRect(crop) }
-                .fill(Color.black.opacity(0.55), style: FillStyle(eoFill: true))
+                .fill(EditorPalette.overlayHalo.opacity(contrast == .increased ? o.dimIncreased : o.dim), style: FillStyle(eoFill: true))
                 .allowsHitTesting(false)
-            Path { p in
+            OverlayStroke(path: Path { p in
                 for i in 1...2 {
                     let x = crop.minX + crop.width * CGFloat(i) / 3, y = crop.minY + crop.height * CGFloat(i) / 3
                     p.move(to: CGPoint(x: x, y: crop.minY)); p.addLine(to: CGPoint(x: x, y: crop.maxY))
                     p.move(to: CGPoint(x: crop.minX, y: y)); p.addLine(to: CGPoint(x: crop.maxX, y: y))
                 }
-            }
-            .stroke(Color.white.opacity(active ? 0.55 : 0.28), lineWidth: 1)
-            .allowsHitTesting(false)
+            }, width: DesignTokens.Shape.hairline, quiet: true)
+            .opacity(active ? o.thirdsActive : o.thirds)
+            OverlayStroke(path: Rectangle().path(in: crop))
             Rectangle()
-                .strokeBorder(Color.white, lineWidth: contrast == .increased ? 2.5 : 1.5)
+                .fill(Color.clear)
                 .frame(width: crop.width, height: crop.height)
                 .offset(x: crop.minX, y: crop.minY)
                 .contentShape(Rectangle())
@@ -328,11 +326,7 @@ private struct CropOverlay: View {
                 .accessibilityLabel(Text("Crop area"))
                 .accessibilityValue(Text("\(model.pixels.width) by \(model.pixels.height) pixels"))
             ForEach(VideoCropGeometry.Handle.allCases, id: \.self) { h in handleView(h, crop: crop) }
-            Text("\(model.pixels.width) × \(model.pixels.height)")
-                .font(MediaStyle.caption(.semibold).monospacedDigit())
-                .foregroundStyle(.white)
-                .padding(.horizontal, 7).padding(.vertical, 3)
-                .background(Capsule().fill(Color.black.opacity(0.6)))
+            OverlayBadge(text: "\(model.pixels.width) × \(model.pixels.height)")
                 .offset(x: crop.minX + 8, y: max(area.minY + 6, crop.minY + 8))
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
@@ -356,11 +350,8 @@ private struct CropOverlay: View {
         let p = position(h, crop)
         let corner = [.topLeft, .topRight, .bottomRight, .bottomLeft].contains(h)
         let horizontal = h == .top || h == .bottom
-        let size = corner ? CGSize(width: 14, height: 14) : (horizontal ? CGSize(width: 26, height: 6) : CGSize(width: 6, height: 26))
-        return RoundedRectangle(cornerRadius: 2)
-            .fill(Color.white)
-            .shadow(color: .black.opacity(0.45), radius: 1.5)
-            .frame(width: size.width, height: size.height)
+        _ = horizontal
+        return OverlayHandle(size: corner ? EditorTokens.Overlay.handle + 3 : EditorTokens.Overlay.handle)
             .frame(width: 30, height: 30)
             .contentShape(Rectangle())
             .offset(x: p.x - 15, y: p.y - 15)
@@ -409,17 +400,9 @@ private struct AspectButton: View {
             VStack(spacing: 4) {
                 glyph.frame(height: 18)
                 Text(id == "free" ? String(localized: "Free") : (id == "1:1" ? String(localized: "Square") : id))
-                    .font(MediaStyle.caption(selected ? .semibold : .regular))
             }
-            .frame(maxWidth: .infinity, minHeight: 46)
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                .fill(selected ? MediaStyle.accent.opacity(0.16) : Color.primary.opacity(0.05)))
-            .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                .strokeBorder(selected ? MediaStyle.accent : Color.primary.opacity(0.1), lineWidth: selected ? 1.5 : 1))
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .foregroundStyle(selected ? MediaStyle.accent : Color.primary)
+        .buttonStyle(EditorCellButtonStyle(selected: selected))
         .accessibilityLabel(Text(id == "free" ? String(localized: "Free aspect ratio") : id))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -428,9 +411,9 @@ private struct AspectButton: View {
     private var glyph: some View {
         if let r = VideoCropGeometry.ratio(id) {
             let w: CGFloat = r >= 1 ? 22 : 22 * CGFloat(r), h: CGFloat = r >= 1 ? 22 / CGFloat(r) : 22
-            RoundedRectangle(cornerRadius: 2).strokeBorder(lineWidth: 1.5).frame(width: max(8, w * 0.8), height: max(8, h * 0.8))
+            Rectangle().strokeBorder(lineWidth: 1.5).frame(width: max(8, w * 0.8), height: max(8, h * 0.8))
         } else {
-            Image(systemName: "crop").font(.system(size: 14))
+            Image(systemName: "crop").font(.system(size: EditorTokens.cellGlyphSize))
         }
     }
 }
