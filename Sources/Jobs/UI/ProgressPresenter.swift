@@ -21,6 +21,8 @@ final class ProgressPresenter {
         /// Off in tests: no springs, no delays.
         var animated = true
         var announcesToVoiceOver = true
+        /// Follow the real pointer for hover (tests turn it off and drive hover themselves).
+        var tracksPointer = true
         /// Running progress is spoken only while VoiceOver is on (and sparingly).
         var voiceOverEnabled: @MainActor () -> Bool = { NSWorkspace.shared.isVoiceOverEnabled }
         var screens: @MainActor () -> [ProgressScreen] = { ProgressScreen.system() }
@@ -231,6 +233,7 @@ final class ProgressPresenter {
             guard let self, let card else { return }
             self.reveal.now(card.model.state.outputs)
         }
+        host.tracksPointer = configuration.tracksPointer
         host.onHoverChange = { [weak self, weak card] inside in
             MainActor.assumeIsolated {
                 guard let self, let card else { return }

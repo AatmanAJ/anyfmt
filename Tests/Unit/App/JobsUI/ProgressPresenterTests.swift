@@ -64,6 +64,7 @@ final class ProgressPresenterTests: XCTestCase {
         var config = ProgressPresenter.Configuration()
         config.animated = false
         config.announcesToVoiceOver = false
+        config.tracksPointer = false // the real mouse must not hover a test's card
         config.autoCloseDelay = autoClose
         config.hoverResumeDelay = hoverResume
         let screens = [screen]

@@ -33,6 +33,8 @@ final class ProgressHostingView<Content: View>: NSHostingView<Content> {
     var onContentSizeChange: (() -> Void)?
     /// Hover only counts over the card itself, not its transparent shadow margin.
     var hoverInset: CGFloat = 0
+    /// Off in tests: hover then comes only from `onHoverChange`, never the real pointer.
+    var tracksPointer = true { didSet { updateTrackingAreas() } }
     private var hoverArea: NSTrackingArea?
     private var sizeChangeScheduled = false
 
@@ -51,7 +53,7 @@ final class ProgressHostingView<Content: View>: NSHostingView<Content> {
         super.updateTrackingAreas()
         if let hoverArea { removeTrackingArea(hoverArea) }
         let rect = bounds.insetBy(dx: hoverInset, dy: hoverInset)
-        guard rect.width > 0, rect.height > 0 else { hoverArea = nil; return }
+        guard tracksPointer, rect.width > 0, rect.height > 0 else { hoverArea = nil; return }
         let area = NSTrackingArea(rect: rect, options: [.mouseEnteredAndExited, .activeAlways], owner: self)
         addTrackingArea(area)
         hoverArea = area

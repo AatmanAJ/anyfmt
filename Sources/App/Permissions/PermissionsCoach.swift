@@ -217,20 +217,9 @@ struct PermissionRow: View {
     var body: some View {
         let status = coach[permission]
         HStack(alignment: .center, spacing: DesignTokens.Space.m) {
-            Image(systemName: permission.glyph)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(status == .granted ? Color.haloSuccess : Color.iris)
-                .frame(width: 28, height: 28)
-                .background(Circle().fill((status == .granted ? Color.haloSuccess : Color.iris).opacity(0.12)))
-                .overlay(alignment: .bottomTrailing) {
-                    // Status dot: green when granted, grey until then.
-                    Circle()
-                        .fill(status == .granted ? Color.haloSuccess : Color(nsColor: .tertiaryLabelColor))
-                        .frame(width: 8, height: 8)
-                        .overlay(Circle().strokeBorder(Color(nsColor: .windowBackgroundColor), lineWidth: 1.5))
-                        .offset(x: 1, y: 1)
-                }
-                .accessibilityHidden(true)
+            // The same glyph tile as Settings; granted = filled cobalt, waiting = quiet.
+            // The row's "Granted" label carries the state too, never colour alone.
+            SettingsGlyphTile(symbol: permission.glyph, quiet: status != .granted)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: permission.title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
