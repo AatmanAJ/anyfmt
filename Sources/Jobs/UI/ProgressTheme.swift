@@ -2,96 +2,116 @@ import AppKit
 import HaloCore
 import SwiftUI
 
-/// Progress-card metrics, type, colour and motion, all derived from `DesignTokens`.
-/// Namespaced so nothing here collides with other lanes' helpers in the app module.
+/// Progress-card metrics, type, colour and motion, all from `DesignTokens`
+/// (component tokens in `DesignTokens+Jobs.swift`). Namespaced so nothing here
+/// collides with other areas' helpers in the app module.
 enum ProgressTheme {
+    private typealias C = DesignTokens.Component.ProgressCard
+
     enum Metrics {
-        /// Reference card ≈ 260 × 70 pt; ours is a little wider so a file name,
-        /// the percentage and the ETA share one line without truncating.
-        static let cardWidth: CGFloat = 288
-        static let horizontalPadding = DesignTokens.Space.m
-        static let verticalPadding = DesignTokens.Space.m - 1
-        static let iconSize: CGFloat = 36
-        static let iconSpacing = DesignTokens.Space.m - 2
-        static let cornerRadius = DesignTokens.Radius.large
-        static let barHeight: CGFloat = 5
-        static let barTop: CGFloat = 7
-        static let footerTop: CGFloat = 6
-        static let controlSize: CGFloat = 18
+        static let cardWidth = C.width
+        static let padding = C.padding
+        static let numeralColumn = C.numeralColumn
+        static let columnGap = C.columnGap
+        static let barHeight = C.barHeight
+        static let barTop = C.barTop
+        static let cornerRadius = DesignTokens.Shape.tile
         /// Gap between stacked cards.
-        static let stackSpacing = DesignTokens.Space.s
-        /// Transparent margin around each card inside its panel, for the soft shadow.
-        static let shadowMargin: CGFloat = 22
+        static let stackSpacing = C.stackSpacing
+        /// Transparent margin around each card inside its panel, for its shadow.
+        static let shadowMargin = C.shadowMargin
         /// Keep cards this far inside the screen's visible frame.
-        static let edgeInset = DesignTokens.Space.m
-        /// The newest card's top edge sits this far below the drop point, so the
-        /// pointer isn't left resting on it (which would pause auto-close).
-        static let anchorGap: CGFloat = 26
-        static let maxVisibleCards = 5
-        static let buttonHeight: CGFloat = 22
+        static let edgeInset = C.edgeInset
+        static let anchorGap = C.anchorGap
+        static let maxVisibleCards = C.maxVisible
+        static let summaryHeight = C.summaryHeight
+        static let quietButtonHeight = C.quietButtonHeight
     }
 
     enum Typography {
-        static let title = DesignTokens.TypeRamp.body                 // 13
-        static let detail = DesignTokens.TypeRamp.caption + 0.5       // 11
-        static let message = DesignTokens.TypeRamp.label - 0.5        // 11.5
-        static let button = DesignTokens.TypeRamp.caption + 0.5       // 11
+        static let numeral = C.numeralSize
+        static let glyph = C.glyphSize
+        static let headline = C.headlineSize
+        static let detail = C.detailSize
+        static let statusGlyph = C.statusGlyphSize
+        static let summaryNumeral = C.summaryNumeralSize
     }
 
     enum Timing {
         static let autoClose: TimeInterval = 1.6
         static let hoverResume: TimeInterval = 1.0
         static let copiedFeedback: TimeInterval = 1.4
-        static let restack: TimeInterval = 0.26
+        /// Sliding to a new slot in the stack.
+        static let restack = DesignTokens.Curve.glide.duration + 0.04
         /// Panel ordered out after this; `disappear` finishes inside it.
-        static let dismiss: TimeInterval = DesignTokens.Motion.close + 0.07
-        static let appear = Animation.spring(response: 0.34, dampingFraction: 0.8)
-        static let disappear = Animation.easeIn(duration: DesignTokens.Motion.close + 0.03)
-        static let fade = Animation.easeOut(duration: DesignTokens.Motion.crossfade + 0.03)
-        static let state = Animation.spring(response: 0.3, dampingFraction: 0.85)
-        static let bar = Animation.linear(duration: 0.12)
+        static let dismiss = DesignTokens.Curve.exit.duration + 0.06
+        /// Cards in: glide. Out: exit. Presses: snap. Reduce Motion: a short crossfade.
+        static let appear = curve(DesignTokens.Curve.glide)
+        static let disappear = curve(DesignTokens.Curve.exit)
+        static let press = curve(DesignTokens.Curve.snap)
+        static let state = curve(DesignTokens.Curve.glide)
+        static let fade = Animation.easeOut(duration: DesignTokens.Curve.reducedCrossfade)
+        static let bar = Animation.linear(duration: DesignTokens.Curve.snap.duration)
+        /// VoiceOver hears progress at most every quarter, and no more often than this.
+        static let spokenProgressInterval: TimeInterval = 8
+
+        static func curve(_ c: (c1: CGPoint, c2: CGPoint, duration: Double)) -> Animation {
+            .timingCurve(Double(c.c1.x), Double(c.c1.y), Double(c.c2.x), Double(c.c2.y), duration: c.duration)
+        }
+
+        static func caCurve(_ c: (c1: CGPoint, c2: CGPoint, duration: Double)) -> CAMediaTimingFunction {
+            CAMediaTimingFunction(controlPoints: Float(c.c1.x), Float(c.c1.y), Float(c.c2.x), Float(c.c2.y))
+        }
     }
 
     // MARK: Colour
+    //
+    // Resolved from the SwiftUI colour scheme (not the window's appearance) so
+    // offscreen renders of either appearance come out right.
 
     static func color(_ pair: (light: Int, dark: Int), _ scheme: ColorScheme) -> Color {
-        let hex = scheme == .dark ? pair.dark : pair.light
-        return Color(.sRGB, red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255,
-                     blue: Double(hex & 0xFF) / 255, opacity: 1)
+        Color(hex: scheme == .dark ? pair.dark : pair.light)
     }
 
-    static func accent(_ s: ColorScheme) -> Color { color(DesignTokens.Palette.iris, s) }
-    static func success(_ s: ColorScheme) -> Color { color(DesignTokens.Palette.success, s) }
+    static func tile(_ s: ColorScheme) -> Color { color(DesignTokens.Semantic.tile, s) }
+    static func ink(_ s: ColorScheme) -> Color { color(DesignTokens.Semantic.textPrimary, s) }
+    /// Cobalt as a small glyph or text (AA on either tile).
+    static func accentText(_ s: ColorScheme) -> Color { color(DesignTokens.Semantic.accentPrimaryText, s) }
+    /// Cobalt as a fill (behind white).
+    static var accentFill: Color { Color(hex: DesignTokens.Primitive.cobalt500) }
+    /// Errors: flame on charcoal, ember on light (both AA as text). Always with an icon + words.
     static func danger(_ s: ColorScheme) -> Color { color(DesignTokens.Palette.danger, s) }
-    static func ink(_ s: ColorScheme) -> Color { color(DesignTokens.Palette.ink, s) }
+    static var onAccent: Color { Color(hex: DesignTokens.Semantic.onAccentPrimary) }
 
     static func secondary(_ s: ColorScheme, highContrast: Bool) -> Color {
-        highContrast ? ink(s).opacity(0.86) : color(DesignTokens.Palette.mist, s)
+        highContrast ? ink(s) : color(DesignTokens.Semantic.textSecondary, s)
     }
 
+    /// The dimmed display grey: only ever at numeral sizes.
+    static func dimNumeral(_ s: ColorScheme, highContrast: Bool) -> Color {
+        // Dark: the semantic dim grey (3.2:1 on charcoal, large type). Light: its
+        // `textDimDisplay` (#9A9A9A) is only 2.5:1 on the #F2F2F2 tile, so use ink500 (4.6:1).
+        highContrast ? secondary(s, highContrast: false)
+            : color((light: DesignTokens.Primitive.ink500, dark: DesignTokens.Semantic.textDimDisplay.dark), s)
+    }
+
+    /// The empty part of the bar.
     static func track(_ s: ColorScheme, highContrast: Bool) -> Color {
-        ink(s).opacity(highContrast ? 0.28 : (s == .dark ? 0.16 : 0.10))
+        // Charcoal-on-charcoal in dark (the board), a hairline grey on the light tile.
+        highContrast ? color(DesignTokens.Semantic.textSecondary, s).opacity(0.5)
+            : color((light: DesignTokens.Semantic.hairline.light, dark: DesignTokens.Semantic.raised.dark), s)
     }
 
-    static func hairline(_ s: ColorScheme, highContrast: Bool) -> Color {
-        if highContrast { return ink(s).opacity(0.55) }
-        return s == .dark ? Color.white.opacity(0.14) : Color.black.opacity(0.10)
+    /// The tile's edge: a hairline in light (so #F2F2F2 reads on a white desktop),
+    /// none on dark; a full-strength line with Increased Contrast.
+    static func edge(_ s: ColorScheme, highContrast: Bool) -> Color? {
+        if highContrast { return ink(s).opacity(0.7) }
+        return s == .light ? color(DesignTokens.Semantic.hairline, s) : nil
     }
 
-    /// Fill used when transparency is reduced (and as the vibrancy's tint).
-    static func solidSurface(_ s: ColorScheme) -> Color {
-        s == .dark ? Color(.sRGB, red: 0.15, green: 0.15, blue: 0.17, opacity: 1)
-            : Color(.sRGB, red: 0.985, green: 0.985, blue: 0.99, opacity: 1)
+    static func shadowOpacity(_ s: ColorScheme) -> Double {
+        s == .dark ? DesignTokens.Component.Elevation.floatOpacityDark : DesignTokens.Component.Elevation.floatOpacityLight
     }
-}
-
-/// How a card paints its background.
-enum ProgressCardSurface: Equatable {
-    /// Behind-window vibrancy (the real thing, on screen).
-    case vibrancy
-    /// A translucent fill approximating the material, for offscreen renders
-    /// (`ImageRenderer` can't draw AppKit visual-effect views).
-    case translucent
 }
 
 /// Accessibility settings a render can force (the system values are read-only).
@@ -101,20 +121,11 @@ struct ProgressAppearanceOverrides: Equatable {
     var reduceMotion: Bool?
 }
 
-private struct ProgressCardSurfaceKey: EnvironmentKey {
-    static let defaultValue = ProgressCardSurface.vibrancy
-}
-
 private struct ProgressAppearanceOverridesKey: EnvironmentKey {
     static let defaultValue = ProgressAppearanceOverrides()
 }
 
 extension EnvironmentValues {
-    var progressCardSurface: ProgressCardSurface {
-        get { self[ProgressCardSurfaceKey.self] }
-        set { self[ProgressCardSurfaceKey.self] = newValue }
-    }
-
     var progressAppearanceOverrides: ProgressAppearanceOverrides {
         get { self[ProgressAppearanceOverridesKey.self] }
         set { self[ProgressAppearanceOverridesKey.self] = newValue }

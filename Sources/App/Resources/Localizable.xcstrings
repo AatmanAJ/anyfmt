@@ -26,10 +26,12 @@
     },
     "%@ px" : {},
     "%@ removed." : {},
+    "%@ s" : {},
     "%@ to %@" : {},
     "%@ together — not a tap" : {},
     "%@ wheel" : {},
     "%@ · %@ on disk" : {},
+    "%@ · from %@" : {},
     "%@ – %@" : {},
     "%@ – %@ · %@ of %@" : {},
     "%@ — but %@ isn’t assigned to a wheel." : {},
@@ -66,6 +68,8 @@
     "%lld folders" : {},
     "%lld folders in the Move menu" : {},
     "%lld frames · %@" : {},
+    "%lld h" : {},
+    "%lld h %lld min" : {},
     "%lld h %lld min left" : {},
     "%lld h left" : {},
     "%lld hours" : {},
@@ -76,6 +80,7 @@
     },
     "%lld marks" : {},
     "%lld marks · %@" : {},
+    "%lld min" : {},
     "%lld min left" : {},
     "%lld more jobs" : {},
     "%lld of %lld" : {},
@@ -89,6 +94,8 @@
     "%lld parts · re-encoded at exact times" : {},
     "%lld PDFs" : {},
     "%lld px" : {},
+    "%lld running · %@" : {},
+    "%lld s" : {},
     "%lld s left" : {},
     "%lld selected" : {},
     "%lld separate files" : {},
@@ -97,6 +104,8 @@
     "%lld × %lld" : {},
     "%lld × %lld → %lld × %lld px" : {},
     "%lld%%" : {},
+    "%lld%% larger" : {},
+    "%lld%% smaller" : {},
     "%lld-%lld runs backwards" : {},
     "%lld: %@" : {},
     "%lldm" : {},
@@ -113,6 +122,9 @@
     "1 hour" : {},
     "1 image" : {},
     "1 MB" : {},
+    "1 more job" : {
+      "extractionState" : "stale"
+    },
     "1 page" : {},
     "1 PDF" : {},
     "1 video" : {},
@@ -171,6 +183,7 @@
     "AirDrop, Float, Copy, Move, Path, Terminal" : {},
     "AirDrop…" : {},
     "All clips match, so they’re joined losslessly: no re-encode, same quality, done in seconds." : {},
+    "All finished" : {},
     "All Licences…" : {},
     "All pages" : {},
     "Almost done" : {},
@@ -285,6 +298,7 @@
       "comment" : "VoiceOver label of a conversion segment"
     },
     "Convert, edit and share files from the drag you're already doing. Press a key mid-drag and a wheel of options opens around the pointer." : {},
+    "Converted %lld files to %@" : {},
     "Converted copies get the same created and modified dates. Tool results are dated now." : {},
     "Converted files will be saved in this folder." : {},
     "Converted to %@" : {},
@@ -297,8 +311,11 @@
     "Copied to the clipboard" : {},
     "Copied “%@”" : {},
     "Copied “%@” to “%@”, but couldn’t remove the original." : {},
-    "Copies technical details for a bug report" : {},
+    "Copies technical details for a bug report" : {
+      "extractionState" : "stale"
+    },
     "Copies the audio without re-encoding. Cuts land within a few milliseconds of your marks." : {},
+    "Copies the versions, the engine’s last output and what was tried, for a bug report" : {},
     "Copy" : {},
     "Copy %@" : {},
     "Copy %lld Items" : {},
@@ -359,7 +376,9 @@
     "Drag across the waveform to mark what to bleep" : {},
     "Drag clips to reorder" : {},
     "Drag it, then press a trigger key. Or use the actions to open a wheel." : {},
-    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {},
+    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {
+      "extractionState" : "stale"
+    },
     "Drag on the image to cover an area. Drag an area to move it, or its corner to resize." : {},
     "Drag order" : {},
     "Drag over anything you want to hide" : {},
@@ -387,7 +406,10 @@
     },
     "Drop ring" : {},
     "Drop ring shortcut" : {},
-    "Duration" : {},
+    "Drop to add" : {},
+    "Duration" : {
+      "comment" : "Options panel estimate tile"
+    },
     "Each file is compressed to this share of its own size." : {},
     "Each page is exactly the size of its image. JPEGs are embedded without recompression." : {},
     "Each value is a fraction from 0 to 1" : {},
@@ -403,6 +425,7 @@
     },
     "Enlarge images with a machine-learning model that runs on the server." : {},
     "Enter a server address." : {},
+    "Error: %@" : {},
     "Estimated size" : {
       "comment" : "Options panel estimate tile"
     },
@@ -415,6 +438,7 @@
     "Exact size" : {},
     "Expires" : {},
     "Exposure" : {},
+    "Failed" : {},
     "Faithful PowerPoint, Keynote, legacy Office and OpenDocument conversions (LibreOffice)." : {},
     "Favourite" : {},
     "Favourites" : {},
@@ -453,7 +477,9 @@
     "Formats this file can become" : {},
     "Frame" : {},
     "Frame %lld" : {},
-    "Frames" : {},
+    "Frames" : {
+      "comment" : "Options panel estimate tile"
+    },
     "Free" : {},
     "Free and open source (AGPL-3.0). You can read every line." : {},
     "Free and open source. Everything on your Mac stays free, with no account." : {},
@@ -522,6 +548,9 @@
     "Install %@ %@" : {},
     "Installed %@" : {},
     "Installed at %@" : {},
+    "items" : {
+      "comment" : "Follows the item count on the Float shelf: “5 items”"
+    },
     "Join order" : {},
     "JPG" : {},
     "KB" : {},
@@ -616,6 +645,8 @@
     "More" : {
       "comment" : "Wheel segment that shows the next page of targets"
     },
+    "more job" : {},
+    "more jobs" : {},
     "Move %@ to your Applications folder to launch it at login." : {},
     "Move %lld items to" : {},
     "Move Down" : {},
@@ -646,6 +677,7 @@
     "No conversions" : {
       "comment" : "Hub text when a file has no conversion targets"
     },
+    "No files" : {},
     "No files were selected." : {},
     "No frames yet, so the middle frame will be saved. Scrub to a frame and press F to add it." : {},
     "No image chosen" : {},
@@ -667,10 +699,13 @@
     "Not granted" : {},
     "Not Now" : {},
     "Not synced yet" : {},
+    "Nothing converted yet" : {},
     "Nothing local ever needs a key. Skipping changes nothing." : {},
     "Nothing to convert" : {},
     "Nothing to set: converting to %@ has no options." : {},
-    "Nothing yet" : {},
+    "Nothing yet" : {
+      "extractionState" : "stale"
+    },
     "Off by default. Needs the two permissions below. Return still renames in text fields." : {},
     "Office pack" : {},
     "OK" : {},
@@ -891,6 +926,7 @@
     "Row" : {},
     "Runs straight away with your defaults" : {},
     "s" : {},
+    "Same size" : {},
     "Sample.heic" : {},
     "Saturation" : {},
     "Save as Preset" : {
@@ -965,8 +1001,11 @@
     "Shows the next page of options" : {
       "comment" : "VoiceOver hint of the More segment"
     },
+    "Shows the result in Finder" : {},
     "Sign in to use %@ Cloud. Everything on your Mac keeps working without it." : {},
-    "Sign In…" : {},
+    "Sign In…" : {
+      "comment" : "Onboarding activation page"
+    },
     "Sign Out" : {},
     "Sign-in didn’t finish. Try again." : {},
     "Sign-in was cancelled." : {},
@@ -1094,6 +1133,7 @@
     "To" : {},
     "To remove everything, including camera details, use Strip metadata." : {},
     "Tone" : {},
+    "Took %@" : {},
     "Tool" : {},
     "Tools" : {},
     "Transcription" : {},
@@ -1145,6 +1185,7 @@
     "Violet" : {},
     "Visible part" : {},
     "W" : {},
+    "Waiting" : {},
     "Waiting for your OK in System Settings › General › Login Items." : {},
     "Waiting…" : {},
     "Warmth" : {},

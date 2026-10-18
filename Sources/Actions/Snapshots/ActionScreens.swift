@@ -7,9 +7,9 @@ import HaloCore
 ///     try ActionScreens.render(into: docsScreensURL)
 ///
 /// Writes float-stack-{light,dark}.png, float-grid-{light,dark}.png,
-/// float-empty-{light,dark}.png and move-chooser{,-dark}.png. Window-server
-/// materials can't be captured offscreen, so cards render with their solid
-/// (Reduce Transparency) fill on a soft backdrop.
+/// float-empty-{light,dark}.png, float-drop-{light,dark}.png (files dragged
+/// over an empty shelf) and move-chooser{,-dark}.png. Cards are solid
+/// charcoal tiles, so the renders match the screen.
 @MainActor
 public enum ActionScreens {
     @discardableResult
@@ -26,6 +26,8 @@ public enum ActionScreens {
                                            to: directory.appendingPathComponent("float-grid-\(name).png")))
             written.append(try renderShelf(.empty, samples: samples, appearance: look, scale: scale,
                                            to: directory.appendingPathComponent("float-empty-\(name).png")))
+            written.append(try renderShelf(.empty, dropTarget: true, samples: samples, appearance: look, scale: scale,
+                                           to: directory.appendingPathComponent("float-drop-\(name).png")))
             written.append(try renderMoveChooser(samples: samples, appearance: look, scale: scale,
                                                  to: directory.appendingPathComponent(name == "light" ? "move-chooser.png" : "move-chooser-dark.png")))
         }
@@ -34,8 +36,8 @@ public enum ActionScreens {
 
     // MARK: Shelf
 
-    static func renderShelf(_ mode: ShelfCardView.Mode, samples: SampleFiles, appearance: NSAppearance,
-                            scale: CGFloat, to url: URL) throws -> URL {
+    static func renderShelf(_ mode: ShelfCardView.Mode, dropTarget: Bool = false, samples: SampleFiles,
+                            appearance: NSAppearance, scale: CGFloat, to url: URL) throws -> URL {
         let provider = SampleThumbnails(samples: samples)
         let card = ShelfCardView()
         card.forceSolid = true
@@ -51,6 +53,7 @@ public enum ActionScreens {
         if mode == .expanded, let first = items.first {
             card.gridView.cell(for: first.id)?.forceHover = true
         }
+        if dropTarget { card.showDropTarget() }
         return try capture(card, cardSize: size, appearance: appearance, scale: scale, to: url)
     }
 
@@ -68,7 +71,7 @@ public enum ActionScreens {
     /// appears on the display), lets AppKit draw it, and renders the layer tree.
     static func capture(_ card: ActionCardView, cardSize: NSSize, appearance: NSAppearance,
                         scale: CGFloat, to url: URL) throws -> URL {
-        let margin: CGFloat = 36
+        let margin = DesignTokens.Space.xxl
         let size = NSSize(width: cardSize.width + 2 * margin, height: cardSize.height + 2 * margin)
         let window = NSWindow(contentRect: NSRect(x: -30_000, y: -30_000, width: size.width, height: size.height),
                               styleMask: [.borderless], backing: .buffered, defer: false)
@@ -115,17 +118,16 @@ public enum ActionScreens {
     }
 }
 
-/// A soft gradient standing in for a desktop, so edges and shadows read.
+/// A plain desktop stand-in: page black in dark (the approved board), a light
+/// grey in light so the #F2F2F2 tile and its hairline read.
 @MainActor
 private final class BackdropView: NSView {
-    private let gradient = CAGradientLayer()
+    private let fill = CALayer()
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.addSublayer(gradient)
-        gradient.startPoint = CGPoint(x: 0, y: 1)
-        gradient.endPoint = CGPoint(x: 1, y: 0)
+        layer?.addSublayer(fill)
     }
 
     @available(*, unavailable)
@@ -133,14 +135,13 @@ private final class BackdropView: NSView {
 
     override func layout() {
         super.layout()
-        let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        gradient.frame = bounds
-        gradient.zPosition = -1
-        gradient.colors = isDark
-            ? [ActionStyle.rgb(0x15141B).cgColor, ActionStyle.rgb(0x221F2E).cgColor]
-            : [ActionStyle.rgb(0xE4E1EE).cgColor, ActionStyle.rgb(0xD5E3EE).cgColor]
+        fill.frame = bounds
+        fill.zPosition = -1
+        fill.backgroundColor = ActionStyle.cg(
+            ActionStyle.color((light: DesignTokens.Primitive.paper100, dark: DesignTokens.Primitive.ink1000)),
+            in: effectiveAppearance)
         CATransaction.commit()
     }
 }
@@ -219,9 +220,13 @@ private final class SampleThumbnails: ShelfThumbnailProviding {
     }
 }
 
-/// Procedural stand-ins for photo thumbnails (our own art, no assets).
+/// Procedural stand-ins for photo thumbnails (our own art, no assets), drawn
+/// from the palette so the renders sit inside the direction: a heat-band
+/// sunset, a cobalt lagoon, a night skyline and a document.
 /// NSImage draws them lazily, possibly off the main actor.
 enum SampleArt {
+    private typealias P = DesignTokens.Primitive
+
     static func image(width: CGFloat, height: CGFloat, draw: @escaping @Sendable (CGContext, CGSize) -> Void) -> NSImage {
         NSImage(size: NSSize(width: width, height: height), flipped: false) { rect in
             guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
@@ -230,20 +235,22 @@ enum SampleArt {
         }
     }
 
+    static func cg(_ hex: Int, alpha: CGFloat = 1) -> CGColor { NSColor.halo((light: hex, dark: hex)).withAlphaComponent(alpha).cgColor }
+
     static func linear(_ ctx: CGContext, _ colors: [Int], from: CGPoint, to: CGPoint) {
         let cs = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
-        let cg = colors.map { ActionStyle.rgb($0).cgColor } as CFArray
-        if let g = CGGradient(colorsSpace: cs, colors: cg, locations: nil) {
+        let colours = colors.map { cg($0) } as CFArray
+        if let g = CGGradient(colorsSpace: cs, colors: colours, locations: nil) {
             ctx.drawLinearGradient(g, start: from, end: to, options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
         }
     }
 
     static func sunset() -> NSImage {
         image(width: 480, height: 360) { ctx, s in
-            linear(ctx, [0xFFB36B, 0xFF7A7A, 0x7B5CE0], from: CGPoint(x: 0, y: s.height * 0.3), to: CGPoint(x: 0, y: s.height))
-            ctx.setFillColor(ActionStyle.rgb(0xFFE7A3).cgColor)
+            linear(ctx, [P.cream100, P.orange500, P.flame600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: s.height * 0.3))
+            ctx.setFillColor(cg(P.paper0))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.56, y: s.height * 0.34, width: s.width * 0.2, height: s.width * 0.2))
-            ctx.setFillColor(ActionStyle.rgb(0x5B3F8C).cgColor)
+            ctx.setFillColor(cg(P.ember700))
             ctx.beginPath()
             ctx.move(to: CGPoint(x: 0, y: s.height * 0.38))
             ctx.addLine(to: CGPoint(x: s.width * 0.22, y: s.height * 0.58))
@@ -253,7 +260,7 @@ enum SampleArt {
             ctx.addLine(to: CGPoint(x: s.width, y: 0))
             ctx.addLine(to: CGPoint(x: 0, y: 0))
             ctx.fillPath()
-            ctx.setFillColor(ActionStyle.rgb(0x3A2766).cgColor)
+            ctx.setFillColor(cg(P.ink900))
             ctx.beginPath()
             ctx.move(to: CGPoint(x: 0, y: s.height * 0.22))
             ctx.addCurve(to: CGPoint(x: s.width, y: s.height * 0.26),
@@ -267,12 +274,12 @@ enum SampleArt {
 
     static func lagoon() -> NSImage {
         image(width: 300, height: 400) { ctx, s in
-            linear(ctx, [0x9FE7F5, 0x48C6C9, 0x1C8C9C], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
-            ctx.setFillColor(ActionStyle.rgb(0xF6E3B4).cgColor)
+            linear(ctx, [P.cobalt400, P.cobaltBright, P.cobalt700], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            ctx.setFillColor(cg(P.cream100))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.18, y: s.height * 0.48, width: s.width * 0.64, height: s.height * 0.12))
-            ctx.setFillColor(ActionStyle.rgb(0x2E9E6B).cgColor)
+            ctx.setFillColor(cg(P.ink800))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.34, y: s.height * 0.53, width: s.width * 0.3, height: s.height * 0.1))
-            ctx.setStrokeColor(NSColor(white: 1, alpha: 0.5).cgColor)
+            ctx.setStrokeColor(cg(P.paper0, alpha: 0.5))
             ctx.setLineWidth(3)
             for i in 0..<5 {
                 let y = s.height * (0.12 + CGFloat(i) * 0.07)
@@ -286,14 +293,14 @@ enum SampleArt {
 
     static func dusk() -> NSImage {
         image(width: 480, height: 270) { ctx, s in
-            linear(ctx, [0x0F1B3D, 0x3B2A6B, 0xC2577A], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            linear(ctx, [P.ink1000, P.cobalt700, P.flame600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
             let widths: [CGFloat] = [0.08, 0.06, 0.1, 0.07, 0.09, 0.05, 0.11, 0.08, 0.06, 0.1, 0.07, 0.13]
             let heights: [CGFloat] = [0.42, 0.6, 0.35, 0.72, 0.5, 0.4, 0.64, 0.3, 0.55, 0.45, 0.68, 0.38]
             var x: CGFloat = 0
             for (w, h) in zip(widths, heights) {
-                ctx.setFillColor(ActionStyle.rgb(0x10132A).cgColor)
+                ctx.setFillColor(cg(P.ink950))
                 ctx.fill(CGRect(x: x * s.width, y: 0, width: w * s.width, height: h * s.height))
-                ctx.setFillColor(ActionStyle.rgb(0xFFD27A, alpha: 0.8).cgColor)
+                ctx.setFillColor(cg(P.orange500, alpha: 0.85))
                 var wy: CGFloat = 0.06
                 while wy < h - 0.06 {
                     ctx.fill(CGRect(x: (x + w * 0.3) * s.width, y: wy * s.height, width: 3, height: 4))
@@ -306,11 +313,11 @@ enum SampleArt {
 
     static func document() -> NSImage {
         image(width: 300, height: 388) { ctx, s in
-            ctx.setFillColor(NSColor.white.cgColor)
+            ctx.setFillColor(cg(P.paper0))
             ctx.fill(CGRect(origin: .zero, size: s))
-            ctx.setFillColor(ActionStyle.rgb(0x6E56F8).cgColor)
+            ctx.setFillColor(cg(P.ink950))
             ctx.fill(CGRect(x: 26, y: s.height - 58, width: s.width * 0.55, height: 16))
-            ctx.setFillColor(ActionStyle.rgb(0xC9C6D6).cgColor)
+            ctx.setFillColor(cg(P.paper100))
             var y = s.height - 92
             for i in 0..<9 {
                 let w = (i % 3 == 2) ? s.width * 0.5 : s.width - 52
@@ -319,7 +326,7 @@ enum SampleArt {
             }
             let bars: [CGFloat] = [0.35, 0.55, 0.45, 0.8]
             for (i, h) in bars.enumerated() {
-                ctx.setFillColor(ActionStyle.rgb(i == 3 ? 0x14B8A0 : 0xB7ACFB).cgColor)
+                ctx.setFillColor(cg(i == 3 ? P.orange500 : P.cobalt500))
                 ctx.fill(CGRect(x: 30 + CGFloat(i) * 46, y: 34, width: 30, height: 90 * h))
             }
         }

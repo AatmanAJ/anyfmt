@@ -70,8 +70,8 @@ final class ShelfGridView: NSView {
                 cell.update(item: item)
                 if motion && cell.frame != target {
                     NSAnimationContext.runAnimationGroup { ctx in
-                        ctx.duration = 0.22
-                        ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.3, 1)
+                        ctx.duration = DesignTokens.Curve.glide.duration
+                        ctx.timingFunction = ActionStyle.curve(DesignTokens.Curve.glide)
                         ctx.allowsImplicitAnimation = true
                         cell.animator().frame = target
                     }
@@ -108,14 +108,14 @@ final class ShelfGridCell: NSView, NSDraggingSource {
     private let print = ShelfPrintLayer()
     private let hoverLayer = CALayer()
     // Two single-line labels: each draws exactly what a single-line cell measures.
-    private let line1 = PassiveLabel(size: 11, color: .labelColor)
-    private let line2 = PassiveLabel(size: 11, color: .labelColor)
+    private let line1 = PassiveLabel(size: DesignTokens.Component.Shelf.cellLabelSize, weight: .medium)
+    private let line2 = PassiveLabel(size: DesignTokens.Component.Shelf.cellLabelSize, weight: .medium)
     private let removeButton: RoundSymbolButton
     private var tracking: NSTrackingArea?
     private var mouseDown: NSEvent?
     private(set) var isHovered = false { didSet { updateHover() } }
     static let thumbSide: CGFloat = 56
-    static let labelFont = ActionStyle.font(11)
+    static let labelFont = ActionStyle.font(DesignTokens.Component.Shelf.cellLabelSize, .medium)
     static let labelWidth = ShelfGridView.cellSize.width - 6
 
     /// Text budget per line: the label width less the text cell's insets
@@ -134,11 +134,12 @@ final class ShelfGridCell: NSView, NSDraggingSource {
         self.item = item
         self.thumbnails = thumbnails
         self.renderScale = scale
-        removeButton = RoundSymbolButton(symbol: "xmark", label: "", diameter: 18, pointSize: 7.5, style: .badge)
+        removeButton = RoundSymbolButton(symbol: "xmark", label: "", diameter: DesignTokens.Component.Shelf.badgeDiameter,
+                                         pointSize: DesignTokens.Component.Shelf.badgeGlyph, style: .badge)
         super.init(frame: NSRect(origin: .zero, size: ShelfGridView.cellSize))
         wantsLayer = true
         layer?.masksToBounds = false
-        hoverLayer.cornerRadius = DesignTokens.Radius.medium
+        hoverLayer.cornerRadius = DesignTokens.Shape.tile
         hoverLayer.cornerCurve = .continuous
         hoverLayer.opacity = 0
         hoverLayer.actions = ShelfPrintLayer.noActions
@@ -253,7 +254,7 @@ final class ShelfGridCell: NSView, NSDraggingSource {
 
     private func updateHover() {
         let on = isHovered || forceHover
-        let duration = (forceHover || window == nil) ? 0 : 0.12
+        let duration = (forceHover || window == nil) ? 0 : ActionStyle.duration(DesignTokens.Curve.snap)
         CATransaction.begin()
         CATransaction.setAnimationDuration(duration)
         hoverLayer.opacity = on ? 1 : 0
@@ -347,7 +348,8 @@ final class ShelfGridCell: NSView, NSDraggingSource {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 1
         fade.toValue = 0
-        fade.duration = 0.18
+        fade.duration = DesignTokens.Curve.exit.duration + 0.06
+        fade.timingFunction = ActionStyle.curve(DesignTokens.Curve.exit)
         fade.fillMode = .forwards
         fade.isRemovedOnCompletion = false
         layer.add(fade, forKey: "out")
@@ -358,8 +360,8 @@ final class ShelfGridCell: NSView, NSDraggingSource {
             to = CATransform3DTranslate(to, -c.x, -c.y, 0)
             let shrink = CABasicAnimation(keyPath: "transform")
             shrink.toValue = NSValue(caTransform3D: to)
-            shrink.duration = 0.2
-            shrink.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            shrink.duration = DesignTokens.Curve.exit.duration + 0.06
+            shrink.timingFunction = ActionStyle.curve(DesignTokens.Curve.exit)
             shrink.fillMode = .forwards
             shrink.isRemovedOnCompletion = false
             layer.add(shrink, forKey: "shrink")

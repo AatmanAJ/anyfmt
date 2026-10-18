@@ -2,10 +2,10 @@ import AppKit
 import HaloCore
 import SwiftUI
 
-/// Renders progress cards in every state offscreen into PNGs (docs/screens),
-/// so design regressions are visible in review. Built from real
-/// `ProgressCardState` builders over fake records, so it exercises the same
-/// code as the live windows. `--render-gallery` can call `render(into:)` too.
+/// Renders progress cards (and toasts) in every state offscreen into PNGs
+/// (docs/screens), so design regressions are visible in review. Built from the
+/// real `ProgressCardState` builders over fake records, so it exercises the
+/// same code as the live windows. `--render-gallery` calls `render(into:)` too.
 @MainActor
 enum ProgressCardGallery {
     struct Scene {
@@ -19,23 +19,40 @@ enum ProgressCardGallery {
         var copied: Set<Int> = []
     }
 
+    struct ToastScene {
+        let name: String
+        let scheme: ColorScheme
+        var increasedContrast = false
+        let toasts: [ToastContent]
+    }
+
     @discardableResult
     static func render(into directory: URL, scale: CGFloat = 2) throws -> [URL] {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         var written: [URL] = []
         for scene in scenes() {
             let url = directory.appendingPathComponent("progress-\(scene.name).png")
-            try png(for: scene, scale: scale).write(to: url, options: .atomic)
+            try png(SceneView(scene: scene)
+                .environment(\.colorScheme, scene.scheme)
+                .environment(\.progressAppearanceOverrides, scene.overrides), scale: scale).write(to: url, options: .atomic)
+            written.append(url)
+        }
+        for scene in toastScenes() {
+            let url = directory.appendingPathComponent("toast-\(scene.name).png")
+            try png(ToastSceneView(scene: scene).environment(\.colorScheme, scene.scheme), scale: scale)
+                .write(to: url, options: .atomic)
             written.append(url)
         }
         return written
     }
 
     static func png(for scene: Scene, scale: CGFloat) throws -> Data {
-        let view = SceneView(scene: scene)
+        try png(SceneView(scene: scene)
             .environment(\.colorScheme, scene.scheme)
-            .environment(\.progressCardSurface, .translucent)
-            .environment(\.progressAppearanceOverrides, scene.overrides)
+            .environment(\.progressAppearanceOverrides, scene.overrides), scale: scale)
+    }
+
+    private static func png<V: View>(_ view: V, scale: CGFloat) throws -> Data {
         let renderer = ImageRenderer(content: view)
         renderer.scale = scale
         guard let cg = renderer.cgImage,
@@ -48,11 +65,22 @@ enum ProgressCardGallery {
     // MARK: Scenes
 
     static func scenes() -> [Scene] {
+        let board: [(ProgressCardModel.Subject, ProgressCardState)] = [
+            (.job(UUID()), Fixtures.success),
+            (.job(UUID()), Fixtures.running),
+        ]
         let overview: [(ProgressCardModel.Subject, ProgressCardState)] = [
             (.job(UUID()), Fixtures.running),
             (.batch(UUID()), Fixtures.batchRunning),
             (.job(UUID()), Fixtures.success),
             (.job(UUID()), Fixtures.failure),
+        ]
+        let more: [(ProgressCardModel.Subject, ProgressCardState)] = [
+            (.job(UUID()), Fixtures.queued),
+            (.job(UUID()), Fixtures.cancelling),
+            (.job(UUID()), Fixtures.successTimed),
+            (.batch(UUID()), Fixtures.batchDone),
+            (.batch(UUID()), Fixtures.batchPartial),
         ]
         let stack: [(ProgressCardModel.Subject, ProgressCardState)] = [
             (.job(UUID()), Fixtures.running),
@@ -63,35 +91,55 @@ enum ProgressCardGallery {
             (.summary, ProgressCardState.summary(hidden: [Fixtures.running, Fixtures.queued, Fixtures.audio])),
         ]
         return [
+            Scene(name: "board-dark", scheme: .dark, cards: board),
             Scene(name: "running", scheme: .light, cards: [(.job(UUID()), Fixtures.running)]),
             Scene(name: "success", scheme: .light, cards: [(.job(UUID()), Fixtures.success)]),
             Scene(name: "failure", scheme: .light, cards: [(.job(UUID()), Fixtures.failure)]),
             Scene(name: "batch", scheme: .light, cards: [(.batch(UUID()), Fixtures.batchRunning), (.batch(UUID()), Fixtures.batchPartial)]),
-            Scene(name: "states-light", scheme: .light, cards: overview, spacing: 20),
-            Scene(name: "states-dark", scheme: .dark, cards: overview, spacing: 20),
+            Scene(name: "states-light", scheme: .light, cards: overview),
+            Scene(name: "states-dark", scheme: .dark, cards: overview),
+            Scene(name: "more-states-light", scheme: .light, cards: more),
+            Scene(name: "more-states-dark", scheme: .dark, cards: more),
             Scene(name: "stack-light", scheme: .light, cards: stack),
             Scene(name: "stack-dark", scheme: .dark, cards: stack),
             Scene(name: "high-contrast", scheme: .light, overrides: ProgressAppearanceOverrides(increasedContrast: true),
-                  cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.failure)], spacing: 20),
+                  cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.success), (.job(UUID()), Fixtures.failure)]),
+            Scene(name: "high-contrast-dark", scheme: .dark, overrides: ProgressAppearanceOverrides(increasedContrast: true),
+                  cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.success), (.job(UUID()), Fixtures.failure)]),
             Scene(name: "reduce-transparency-dark", scheme: .dark,
-                  overrides: ProgressAppearanceOverrides(increasedContrast: true, reduceTransparency: true),
-                  cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.success)], spacing: 20),
-            Scene(name: "interactions", scheme: .light,
-                  cards: [(.job(UUID()), Fixtures.success), (.job(UUID()), Fixtures.failure)], spacing: 20,
+                  overrides: ProgressAppearanceOverrides(reduceTransparency: true),
+                  cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.success)]),
+            Scene(name: "interactions", scheme: .dark,
+                  cards: [(.job(UUID()), Fixtures.success), (.job(UUID()), Fixtures.failure)],
                   hovered: [0], copied: [1]),
+        ]
+    }
+
+    static func toastScenes() -> [ToastScene] {
+        let all = [
+            ToastContent(message: "Copied 3 items", kind: .success),
+            ToastContent(message: "Link copied", systemImage: "link", kind: .info),
+            ToastContent(message: "Moved 4 items to “Client Work”", kind: .success),
+            ToastContent(message: "Couldn’t open Ghostty.", kind: .error),
+            ToastContent(message: "Moved 2 of 3 items. “Budget.xlsx” is open in another app, so it stayed where it was.", kind: .error),
+        ]
+        return [
+            ToastScene(name: "states-dark", scheme: .dark, toasts: all),
+            ToastScene(name: "states-light", scheme: .light, toasts: all),
+            ToastScene(name: "high-contrast", scheme: .light, increasedContrast: true, toasts: [all[0], all[3]]),
         ]
     }
 
     private struct SceneView: View {
         let scene: Scene
         var body: some View {
-            VStack(spacing: scene.spacing) {
+            VStack(alignment: .leading, spacing: scene.spacing) {
                 ForEach(Array(scene.cards.enumerated()), id: \.offset) { i, item in
                     let model = Self.model(item.0, item.1, hovered: scene.hovered.contains(i), copied: scene.copied.contains(i))
                     if item.0 == .summary { ProgressSummaryCard(model: model) } else { ProgressCard(model: model) }
                 }
             }
-            .padding(36)
+            .padding(DesignTokens.Space.xxl)
             .background(Backdrop(scheme: scene.scheme))
         }
 
@@ -101,23 +149,30 @@ enum ProgressCardGallery {
             m.isShown = true
             m.isHovered = hovered
             m.didCopyDetails = copied
-            m.icons = Fixtures.icons(for: state)
             return m
         }
     }
 
-    /// Our own soft desktop-ish backdrop (an iris → mint wash), so translucency reads.
-    /// A plain vertical gradient keeps the PNGs small (rows compress to almost nothing).
+    private struct ToastSceneView: View {
+        let scene: ToastScene
+        var body: some View {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
+                ForEach(Array(scene.toasts.enumerated()), id: \.offset) { _, t in
+                    ToastView(content: t, increasedContrast: scene.increasedContrast)
+                }
+            }
+            .padding(DesignTokens.Space.xxl)
+            .frame(width: DesignTokens.Component.Toast.maxWidth + 2 * DesignTokens.Space.xxl, alignment: .leading)
+            .background(Backdrop(scheme: scene.scheme))
+        }
+    }
+
+    /// A plain desktop stand-in: page black in dark (the board), a light grey
+    /// in light so the #F2F2F2 tile and its hairline still read.
     private struct Backdrop: View {
         let scheme: ColorScheme
         var body: some View {
-            let iris = ProgressTheme.accent(scheme), mint = ProgressTheme.color(DesignTokens.Palette.mint, scheme)
-            let base = scheme == .dark ? Color(.sRGB, red: 0.08, green: 0.08, blue: 0.11) : Color(.sRGB, red: 0.95, green: 0.95, blue: 0.97)
-            ZStack {
-                base
-                LinearGradient(colors: [iris.opacity(scheme == .dark ? 0.32 : 0.20), mint.opacity(scheme == .dark ? 0.22 : 0.22)],
-                               startPoint: .top, endPoint: .bottom)
-            }
+            Color(hex: scheme == .dark ? DesignTokens.Primitive.ink1000 : DesignTokens.Primitive.paper100)
         }
     }
 
@@ -127,29 +182,57 @@ enum ProgressCardGallery {
         static let dir = URL(fileURLWithPath: "/Users/Shared/Example", isDirectory: true)
         static func file(_ name: String) -> URL { dir.appendingPathComponent(name) }
 
+        /// Sizes for the fake files, so finished cards show a real size change.
+        static let sizes = FileSizes { url in
+            let table: [String: Int64] = [
+                "clip.mov": 6_300_000, "clip.gif": 2_400_000,
+                "Trip 01.heic": 3_100_000, "Trip 02.heic": 2_900_000, "Trip 03.heic": 3_300_000,
+                "Trip 01.jpg": 2_200_000, "Trip 02.jpg": 2_000_000, "Trip 03.jpg": 2_500_000,
+            ]
+            return table[url.lastPathComponent]
+        }
+
+        static let finished = Date(timeIntervalSinceReferenceDate: 800_000_000)
+
         static var running: ProgressCardState {
             ProgressCardState.single(JobRecord(
-                title: "IMG_2041.heic → JPG", activityTitle: L("Converting to \("JPG")"),
-                inputs: [file("IMG_2041.heic")], state: .running, fraction: 0.42, eta: 12))
+                title: "interview.mov → MP4", activityTitle: L("Converting to \("MP4")"),
+                inputs: [file("interview.mov")], resourceClass: .videoToolbox, state: .running, fraction: 0.48, eta: 20),
+                sizes: sizes)
         }
 
         static var queued: ProgressCardState {
             ProgressCardState.single(JobRecord(
-                title: "Interview.mov → MP4", activityTitle: L("Converting to \("MP4")"),
-                inputs: [file("Interview.mov")], resourceClass: .videoToolbox, state: .queued))
+                title: "Interview B-roll.mov → MP4", activityTitle: L("Converting to \("MP4")"),
+                inputs: [file("Interview B-roll.mov")], resourceClass: .videoToolbox, state: .queued), sizes: sizes)
+        }
+
+        static var cancelling: ProgressCardState {
+            ProgressCardState.single(JobRecord(
+                title: "Keynote.mov → WebM", activityTitle: L("Converting to \("WebM")"),
+                inputs: [file("Keynote.mov")], state: .running, fraction: 0.31, eta: 40, cancelRequested: true), sizes: sizes)
         }
 
         static var audio: ProgressCardState {
             ProgressCardState.single(JobRecord(
                 title: "Podcast episode 12.wav → MP3", activityTitle: L("Converting to \("MP3")"),
-                inputs: [file("Podcast episode 12.wav")], state: .running, fraction: 0.77, eta: 134))
+                inputs: [file("Podcast episode 12.wav")], state: .running, fraction: 0.77, eta: 134), sizes: sizes)
         }
 
         static var success: ProgressCardState {
+            let out = file("clip.gif")
+            return ProgressCardState.single(JobRecord(
+                title: "clip.mov → GIF", activityTitle: L("Converting to \("GIF")"), completedTitle: L("Converted to \("GIF")"),
+                inputs: [file("clip.mov")], state: .succeeded([out]), fraction: 1, outputs: [out]), sizes: sizes)
+        }
+
+        /// Sizes unknown (e.g. a folder): the numeral is the time it took.
+        static var successTimed: ProgressCardState {
             let out = file("Product demo.mp4")
             return ProgressCardState.single(JobRecord(
                 title: "Product demo.mov → MP4", activityTitle: L("Converting to \("MP4")"), completedTitle: L("Converted to \("MP4")"),
-                inputs: [file("Product demo.mov")], state: .succeeded([out]), fraction: 1, outputs: [out]))
+                inputs: [file("Product demo.mov")], state: .succeeded([out]), fraction: 1, outputs: [out],
+                startedAt: finished.addingTimeInterval(-4.8), finishedAt: finished), sizes: sizes)
         }
 
         static var failure: ProgressCardState {
@@ -158,7 +241,7 @@ enum ProgressCardGallery {
                 title: "Screen recording.mov → MP4", activityTitle: L("Converting to \("MP4")"),
                 failedTitle: L("Couldn’t convert to \("MP4")"), inputs: [file("Screen recording.mov")],
                 state: .failed(message: failure.message, details: failure.details),
-                errorMessage: failure.message, errorDetails: failure.details))
+                errorMessage: failure.message, errorDetails: failure.details), sizes: sizes)
         }
 
         static var batchRunning: ProgressCardState {
@@ -169,7 +252,19 @@ enum ProgressCardGallery {
             }
             let batch = JobBatch(title: "12 files → JPG", activityTitle: L("Converting \(12) files to \("JPG")"),
                                  note: L("\(2) already \("JPG")"), jobIDs: records.map(\.id), fileCount: 14, eta: 31)
-            return ProgressCardState.batch(batch, records: records)
+            return ProgressCardState.batch(batch, records: records, sizes: sizes)
+        }
+
+        static var batchDone: ProgressCardState {
+            let names = ["Trip 01", "Trip 02", "Trip 03"]
+            let records: [JobRecord] = names.map { n in
+                let out = file("\(n).jpg")
+                return JobRecord(title: "\(n).heic", inputs: [file("\(n).heic")], state: .succeeded([out]), fraction: 1,
+                                 outputs: [out])
+            }
+            let batch = JobBatch(title: "3 files → JPG", activityTitle: L("Converting \(3) files to \("JPG")"),
+                                 completedTitle: L("Converted \(3) files to \("JPG")"), jobIDs: records.map(\.id))
+            return ProgressCardState.batch(batch, records: records, sizes: sizes)
         }
 
         static var batchPartial: ProgressCardState {
@@ -181,33 +276,7 @@ enum ProgressCardGallery {
                     : JobRecord(title: n, inputs: [file(n)], state: .succeeded([file(n)]), fraction: 1, outputs: [file(n)])
             }
             let batch = JobBatch(title: "4 files → DOCX", jobIDs: records.map(\.id))
-            return ProgressCardState.batch(batch, records: records)
-        }
-
-        /// Finder icons by type, and a drawn "photo" thumbnail for images.
-        static func icons(for state: ProgressCardState) -> [ProgressIconImage] {
-            state.iconURLs.map { url in
-                if Formats.detect(url).map(Formats.kind) == .image { return ProgressIconImage(image: photo, isThumbnail: true) }
-                let type = Formats.detect(url).flatMap { Formats.format($0)?.utType } ?? .data
-                return ProgressIconImage(image: NSWorkspace.shared.icon(for: type), isThumbnail: false)
-            }
-        }
-
-        /// A tiny landscape (sky, sun, hills) standing in for a photo thumbnail.
-        static let photo: NSImage = NSImage(size: NSSize(width: 48, height: 36), flipped: false) { rect in
-            let sky = NSGradient(colors: [NSColor(srgbRed: 0.98, green: 0.78, blue: 0.55, alpha: 1),
-                                          NSColor(srgbRed: 0.55, green: 0.62, blue: 0.95, alpha: 1)])
-            sky?.draw(in: rect, angle: 90)
-            NSColor(srgbRed: 1, green: 0.93, blue: 0.7, alpha: 1).setFill()
-            NSBezierPath(ovalIn: NSRect(x: 30, y: 18, width: 9, height: 9)).fill()
-            NSColor(srgbRed: 0.26, green: 0.45, blue: 0.42, alpha: 1).setFill()
-            let hills = NSBezierPath()
-            hills.move(to: .zero)
-            hills.curve(to: NSPoint(x: 48, y: 8), controlPoint1: NSPoint(x: 14, y: 22), controlPoint2: NSPoint(x: 30, y: 2))
-            hills.line(to: NSPoint(x: 48, y: 0))
-            hills.close()
-            hills.fill()
-            return true
+            return ProgressCardState.batch(batch, records: records, sizes: sizes)
         }
     }
 }

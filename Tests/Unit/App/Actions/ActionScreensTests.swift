@@ -16,7 +16,8 @@ final class ActionScreensTests: XCTestCase {
 
         let names = Set(written.map(\.lastPathComponent))
         XCTAssertEqual(names, ["float-stack-light.png", "float-stack-dark.png", "float-grid-light.png", "float-grid-dark.png",
-                               "float-empty-light.png", "float-empty-dark.png", "move-chooser.png", "move-chooser-dark.png"])
+                               "float-empty-light.png", "float-empty-dark.png", "float-drop-light.png", "float-drop-dark.png",
+                               "move-chooser.png", "move-chooser-dark.png"])
         for url in written {
             let image = NSImage(contentsOf: url)
             XCTAssertNotNil(image, url.lastPathComponent)
