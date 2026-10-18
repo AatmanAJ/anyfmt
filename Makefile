@@ -13,7 +13,7 @@ PRODUCTS     := $(DERIVED)/Build/Products/$(CONFIG)
 NAME         := $(shell sed -n 's/^BRAND_NAME = //p' Config/Brand.xcconfig)
 SLUG         := $(shell echo $(NAME) | tr '[:upper:]' '[:lower:]')
 
-.PHONY: bootstrap engines generate build test test-packages test-unit check uitest matrix fixtures dmg clean gallery perf netcheck readme-formats
+.PHONY: bootstrap engines generate build test test-packages test-unit check sdk-test uitest matrix fixtures dmg clean gallery perf netcheck readme-formats
 
 ## Build-machine dependencies only. End users never install anything.
 bootstrap:
@@ -36,7 +36,7 @@ build: generate
 	@python3 scripts/sync-strings.py $(DERIVED)
 
 ## Unit tests: packages + core + app-hosted, plus policy checks.
-test: generate test-packages test-unit check gallery
+test: generate test-packages sdk-test test-unit check gallery
 
 test-packages:
 	cd Packages/DragSense && swift test
@@ -44,6 +44,17 @@ test-packages:
 
 test-unit:
 	$(XCB) -scheme Halo -configuration Debug test -quiet
+
+## TypeScript SDK (packages/sdk) + public API contract, run against Tests/Mock/server.mjs.
+## Lints Server/openapi.yaml, checks the generated types are current, builds, tests.
+## Skips with a message when Node 18+/npm is missing or `npm ci` can't install
+## (e.g. offline CI without a cache); SDK_TEST_REQUIRED=1 turns the skip into a failure.
+sdk-test:
+	@cd packages/sdk && { command -v npm >/dev/null && node -e 'process.exit(parseInt(process.versions.node, 10) < 18 ? 1 : 0)' \
+	  && npm ci --no-audit --no-fund --prefer-offline --loglevel=error; } || { \
+	  echo "sdk-test: SKIPPED: couldn't install packages/sdk dev dependencies (needs Node 18+, npm and the registry or a warm cache)."; \
+	  [ -z "$$SDK_TEST_REQUIRED" ] || exit 1; exit 0; }; \
+	npm test
 
 check:
 	./scripts/check-entitlements.sh
