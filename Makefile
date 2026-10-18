@@ -69,7 +69,8 @@ GALLERY_KEEP := wheel-image-light-9 wheel-image-dark-9 wheel-image-tools-light-1
 gallery: build
 	$(PRODUCTS)/$(NAME).app/Contents/MacOS/$(NAME) --render-gallery $(CURDIR)/docs/screens
 	@for f in $(GALLERY_KEEP); do src=$$(ls docs/screens/gallery/$$f*.png 2>/dev/null | head -1); \
-	  [ -n "$$src" ] && cp "$$src" docs/screens/; done; echo "curated wheel screenshots copied to docs/screens/" 
+	  [ -n "$$src" ] && cp "$$src" docs/screens/; done; echo "curated wheel screenshots copied to docs/screens/"
+	$(PRODUCTS)/$(NAME).app/Contents/MacOS/$(NAME) --render-demo-gif $(CURDIR)/docs/screens/wheel-demo.gif
 
 perf: generate
 	$(XCB) -scheme Halo -configuration Release build -quiet

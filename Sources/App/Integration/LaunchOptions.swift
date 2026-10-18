@@ -7,12 +7,14 @@ import Darwin
 ///   --no-onboarding          skip the welcome window
 ///   --show-onboarding        force the welcome window
 ///   --render-gallery <dir>   render Wheel Gallery PNGs offscreen and exit (make gallery)
+///   --render-demo-gif <file> render the README wheel GIF and exit
 struct LaunchOptions {
     var perfReport: URL?
     var quitAfterReady = false
     var noOnboarding = false
     var showOnboarding = false
     var renderGallery: URL?
+    var renderDemoGIF: URL?
 
     init(_ args: [String] = CommandLine.arguments) {
         func value(after flag: String) -> String? {
@@ -23,6 +25,7 @@ struct LaunchOptions {
         noOnboarding = args.contains("--no-onboarding")
         showOnboarding = args.contains("--show-onboarding")
         renderGallery = value(after: "--render-gallery").map { URL(fileURLWithPath: $0, isDirectory: true) }
+        renderDemoGIF = value(after: "--render-demo-gif").map { URL(fileURLWithPath: $0) }
     }
 
     /// Wall time since the kernel started this process, in milliseconds.

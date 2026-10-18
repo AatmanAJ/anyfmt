@@ -23,6 +23,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         guard !Self.isRunningTests else { return }
+        if let gif = launch.renderDemoGIF {
+            Task { @MainActor in
+                do { try await WheelDemoGIF.render(to: gif); exit(0) } catch {
+                    FileHandle.standardError.write(Data("demo gif failed: \(error)\n".utf8)); exit(1)
+                }
+            }
+            return
+        }
         if let dir = launch.renderGallery {
             renderGallery(into: dir)
             exit(0)
