@@ -54,13 +54,13 @@ final class SplitVideoModel: MediaEditorModel {
         SplitPlan.requestedCuts(mode: mode, every: Double(every), at: markers, duration: duration, minimumSegment: max(fd, 0.1))
     }
 
-    var plan: SplitPlan {
-        SplitPlan.plan(cuts: cuts, duration: duration, frameDuration: fd, keyframes: session.keyframes, preferLossless: lossless)
+    var cutPlan: SplitPlan {
+        SplitPlan.make(cuts: cuts, duration: duration, frameDuration: fd, keyframes: session.keyframes, preferLossless: lossless)
     }
 
     /// Part boundaries for the preview bar (where the parts will actually start).
     var parts: [ClosedRange<Double>] {
-        let b = [0] + plan.cuts + [duration]
+        let b = [0] + cutPlan.cuts + [duration]
         return zip(b, b.dropFirst()).map { $0...$1 }
     }
 
@@ -77,8 +77,8 @@ final class SplitVideoModel: MediaEditorModel {
 
     var statusLine: String? {
         guard session.state.isReady else { return nil }
-        let n = cuts.isEmpty ? 1 : plan.segmentCount
-        return plan.lossless ? String(localized: "\(n) parts · lossless") : String(localized: "\(n) parts · re-encoded at exact times")
+        let n = cuts.isEmpty ? 1 : cutPlan.segmentCount
+        return cutPlan.lossless ? String(localized: "\(n) parts · lossless") : String(localized: "\(n) parts · re-encoded at exact times")
     }
 
     func addMarker() {
@@ -165,10 +165,10 @@ struct SplitVideoEditor: View {
         SidebarSection(String(localized: "Quality")) {
             Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless).toggleStyle(.switch).controlSize(.small)
             if model.session.state.isReady && !model.cuts.isEmpty {
-                if model.plan.lossless {
-                    let moved = zip(model.plan.cuts, model.cuts).contains { abs($0 - $1) > model.fd / 2 }
+                if model.cutPlan.lossless {
+                    let moved = zip(model.cutPlan.cuts, model.cuts).contains { abs($0 - $1) > model.fd / 2 }
                     Note(systemImage: "checkmark.seal.fill",
-                         text: moved ? String(localized: "Lossless. Parts start on the nearest keyframes: \(model.plan.cuts.map { MediaTimes.timecode($0) }.joined(separator: ", ")).")
+                         text: moved ? String(localized: "Lossless. Parts start on the nearest keyframes: \(model.cutPlan.cuts.map { MediaTimes.timecode($0) }.joined(separator: ", ")).")
                                      : String(localized: "Lossless. Every cut is already on a keyframe."),
                          tint: MediaStyle.success)
                 } else if model.lossless {

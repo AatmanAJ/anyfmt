@@ -19,7 +19,7 @@ public struct TrimVideoRunner: ToolRunner {
         let lossless = run.options.bool(OptionKey.lossless, default: true)
         let keyframes = lossless ? try? await KeyframeIndex.load(info, locator: context.locator) : nil
         let fd = video.frameDuration
-        var plan = TrimPlanner.plan(requested: requested, duration: info.duration, frameDuration: fd,
+        var plan = TrimPlanner.cut(requested: requested, duration: info.duration, frameDuration: fd,
                                     keyframes: keyframes, lossless: lossless)
         let out = run.outputURL(ext: run.keptExtension(of: run.input))
         let maps = MediaRun.avMaps(info, container: container)

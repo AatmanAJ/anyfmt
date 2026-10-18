@@ -112,7 +112,7 @@ public enum TrimPlanner {
     /// the keyframe at or before it, out forward to the one at or after it);
     /// when that keyframe is more than `maxSnap` away it takes the nearest one
     /// on the other side instead, if that's within `maxSnap`.
-    public static func plan(requested: ClosedRange<Double>, duration: Double, frameDuration fd: Double,
+    public static func cut(requested: ClosedRange<Double>, duration: Double, frameDuration fd: Double,
                             keyframes: KeyframeIndex?, lossless: Bool) -> TrimPlan {
         let start = snapToFrame(max(0, requested.lowerBound), fd)
         let end = min(duration, max(start + fd, snapToFrame(requested.upperBound, fd)))
@@ -170,7 +170,7 @@ public struct SplitPlan: Sendable, Equatable {
 
     /// Lossless when every cut has a keyframe close after it (the segment
     /// muxer cuts on the first keyframe at or after each time).
-    public static func plan(cuts requested: [Double], duration: Double, frameDuration fd: Double,
+    public static func make(cuts requested: [Double], duration: Double, frameDuration fd: Double,
                             keyframes: KeyframeIndex?, preferLossless: Bool) -> SplitPlan {
         let snapped = requested.map { TrimPlanner.snapToFrame($0, fd) }
         guard preferLossless, let k = keyframes, !k.keyframes.isEmpty, !snapped.isEmpty else {

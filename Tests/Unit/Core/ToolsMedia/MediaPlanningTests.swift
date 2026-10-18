@@ -24,11 +24,11 @@ final class MediaPlanningTests: XCTestCase {
     private let keys = KeyframeIndex(keyframes: [0, 1, 2, 3], packets: (0..<120).map { Double($0) / 30 })
 
     func testTrimPlanSnapsToEnclosingKeyframes() {
-        let p = TrimPlanner.plan(requested: 1.2...2.6, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
+        let p = TrimPlanner.cut(requested: 1.2...2.6, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
         XCTAssertEqual(p, .copy(start: 1, end: 3, toEnd: false))
-        let exact = TrimPlanner.plan(requested: 1...3, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
+        let exact = TrimPlanner.cut(requested: 1...3, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
         XCTAssertEqual(exact, .copy(start: 1, end: 3, toEnd: false))
-        let toEnd = TrimPlanner.plan(requested: 2.0...3.9, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
+        let toEnd = TrimPlanner.cut(requested: 2.0...3.9, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: true)
         XCTAssertEqual(toEnd, .copy(start: 2, end: 4, toEnd: true))
     }
 
@@ -36,20 +36,20 @@ final class MediaPlanningTests: XCTestCase {
         // 2 s GOP offset by 0.37 s, as hardware encoders often produce.
         let k = KeyframeIndex(keyframes: [0, 2.37, 4.37, 6.37, 8.37, 10.37], packets: [])
         let fd = 1.0 / 30
-        let p = TrimPlanner.plan(requested: 4.2...7.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        let p = TrimPlanner.cut(requested: 4.2...7.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
         XCTAssertEqual(p, .copy(start: 4.37, end: 8.37, toEnd: false), "0.17 s late beats 1.83 s early")
-        let q = TrimPlanner.plan(requested: 3...9.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        let q = TrimPlanner.cut(requested: 3...9.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
         XCTAssertEqual(q, .copy(start: 2.37, end: 10.37, toEnd: false))
-        let r = TrimPlanner.plan(requested: 3...7.0, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        let r = TrimPlanner.cut(requested: 3...7.0, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
         XCTAssertEqual(r, .copy(start: 2.37, end: 6.37, toEnd: false), "out falls back to the keyframe before it")
     }
 
     func testTrimPlanFallsBackWhenKeyframesAreFar() {
         let sparse = KeyframeIndex(keyframes: [0], packets: [])
-        let p = TrimPlanner.plan(requested: 2.5...3, duration: 10, frameDuration: 1.0 / 30, keyframes: sparse, lossless: true)
+        let p = TrimPlanner.cut(requested: 2.5...3, duration: 10, frameDuration: 1.0 / 30, keyframes: sparse, lossless: true)
         XCTAssertFalse(p.isLossless)
         XCTAssertEqual(p.start, 2.5, accuracy: 1.0 / 60)
-        let off = TrimPlanner.plan(requested: 1...3, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: false)
+        let off = TrimPlanner.cut(requested: 1...3, duration: 4, frameDuration: 1.0 / 30, keyframes: keys, lossless: false)
         XCTAssertEqual(off, .reencode(start: 1, end: 3, reason: .losslessOff))
     }
 
@@ -57,10 +57,10 @@ final class MediaPlanningTests: XCTestCase {
         let fd = 1.0 / 30
         let cuts = SplitPlan.requestedCuts(mode: "every", every: 1, at: [], duration: 4, minimumSegment: 0.1)
         XCTAssertEqual(cuts, [1, 2, 3])
-        let p = SplitPlan.plan(cuts: cuts, duration: 4, frameDuration: fd, keyframes: keys, preferLossless: true)
+        let p = SplitPlan.make(cuts: cuts, duration: 4, frameDuration: fd, keyframes: keys, preferLossless: true)
         XCTAssertTrue(p.lossless)
         XCTAssertEqual(p.segmentCount, 4)
-        let off = SplitPlan.plan(cuts: [1.5], duration: 4, frameDuration: fd, keyframes: keys, preferLossless: true)
+        let off = SplitPlan.make(cuts: [1.5], duration: 4, frameDuration: fd, keyframes: keys, preferLossless: true)
         XCTAssertFalse(off.lossless, "a keyframe 0.5 s late is too far for a 1.5 s part")
         XCTAssertEqual(SplitPlan.requestedCuts(mode: "at", every: 0, at: [0, 2, 5], duration: 4, minimumSegment: 0.1), [2])
     }

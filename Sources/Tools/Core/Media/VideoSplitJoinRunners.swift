@@ -26,7 +26,7 @@ public struct SplitVideoRunner: ToolRunner {
         }
         let preferLossless = run.options.bool(OptionKey.lossless, default: true)
         let keyframes = preferLossless ? try? await KeyframeIndex.load(info, locator: context.locator) : nil
-        let plan = SplitPlan.plan(cuts: requested, duration: info.duration, frameDuration: fd,
+        let plan = SplitPlan.make(cuts: requested, duration: info.duration, frameDuration: fd,
                                   keyframes: keyframes, preferLossless: preferLossless)
         context.logger.info("split \(plan.segmentCount) parts lossless=\(plan.lossless)")
 
