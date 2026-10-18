@@ -35,7 +35,7 @@ build: generate
 	$(XCB) -scheme Halo -configuration $(CONFIG) build | xcbeautify 2>/dev/null || $(XCB) -scheme Halo -configuration $(CONFIG) build -quiet
 
 ## Unit tests: packages + core + app-hosted, plus policy checks.
-test: generate test-packages test-unit check
+test: generate test-packages test-unit check gallery
 
 test-packages:
 	cd Packages/DragSense && swift test
@@ -59,9 +59,16 @@ matrix: generate fixtures
 	$(XCB) -scheme Halo -configuration Release build -quiet
 	$(DERIVED)/Build/Products/Release/halo-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
 
-## Wheel Gallery screenshots into docs/screens.
+## Wheel Gallery + every screen, offscreen. Full set → docs/screens/gallery (gitignored);
+## a curated set of key states is copied next to it and committed so regressions show in diffs.
+GALLERY_KEEP := wheel-image-light-9 wheel-image-dark-9 wheel-image-tools-light-14 wheel-video-dark-11 \
+                wheel-audio-light-6 wheel-actions-light-7 wheel-pdf-light-9 wheel-multi-light wheel-folder-dark \
+                wheel-count-light-20 wheel-count-dark-24 wheel-appearance-contrast wheel-appearance-opaque-dark \
+                wheel-options-video-dark wheel-options-image-light
 gallery: build
 	$(PRODUCTS)/$(NAME).app/Contents/MacOS/$(NAME) --render-gallery $(CURDIR)/docs/screens
+	@for f in $(GALLERY_KEEP); do src=$$(ls docs/screens/gallery/$$f*.png 2>/dev/null | head -1); \
+	  [ -n "$$src" ] && cp "$$src" docs/screens/; done; echo "curated wheel screenshots copied to docs/screens/" 
 
 perf: generate
 	$(XCB) -scheme Halo -configuration Release build -quiet

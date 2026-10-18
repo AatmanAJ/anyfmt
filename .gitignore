@@ -36,3 +36,6 @@ Config/App-Info.plist
 
 # Agent worktrees (parallel lanes)
 .claude/worktrees/
+
+# Full gallery render (make gallery); curated copies live in docs/screens/
+docs/screens/gallery/
