@@ -154,6 +154,11 @@ public struct OutputPlacer: Sendable {
     static func ext(of file: URL, target: FormatID?) -> String {
         let name = file.lastPathComponent.lowercased()
         if name.hasSuffix(".tar.gz") { return "tar.gz" }
+        // One plain file gzipped keeps its own extension: notes.txt → notes.txt.gz.
+        if target == Formats.gz, file.pathExtension.lowercased() == "gz" {
+            let inner = file.deletingPathExtension().pathExtension
+            if !inner.isEmpty { return inner + ".gz" }
+        }
         if target == Formats.folder { return "" }
         if let target, file.pathExtension.isEmpty { return Formats.extension(for: target) }
         return file.pathExtension

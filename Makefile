@@ -47,6 +47,7 @@ test-unit:
 
 check:
 	./scripts/check-entitlements.sh
+	./scripts/check-duplicate-files.sh
 
 ## UI tests need macOS Automation Mode enabled (see BLOCKERS.md).
 uitest: generate
