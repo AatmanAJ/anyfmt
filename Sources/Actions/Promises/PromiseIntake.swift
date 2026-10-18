@@ -99,11 +99,19 @@ public struct PromiseIntake: Sendable {
                 batch.fail(count: expected[index], index: index, error: error)
                 continue
             }
-            receiver.receivePromisedFiles(atDestination: destination, options: [:], operationQueue: queue) { url, error in
-                batch.deliver(url: error == nil ? url : nil, index: index, error: error)
-            }
+            // The reader runs on `queue`, not the main thread. It must not inherit
+            // this method's @MainActor isolation, or Swift 6's runtime check traps
+            // the moment a promised file arrives (crash seen on real hardware).
+            receiver.receivePromisedFiles(atDestination: destination, options: [:], operationQueue: queue,
+                                          reader: Self.reader(batch, index: index))
         }
         return PendingPromises(batch: batch, queue: queue)
+    }
+}
+
+extension PromiseIntake {
+    nonisolated static func reader(_ batch: PromiseBatch, index: Int) -> @Sendable (URL, (any Error)?) -> Void {
+        { url, error in batch.deliver(url: error == nil ? url : nil, index: index, error: error) }
     }
 }
 
@@ -133,7 +141,7 @@ fileprivate struct QueueBox: @unchecked Sendable {
 }
 
 /// Collects reader callbacks from any queue and resumes one waiter.
-fileprivate final class PromiseBatch: @unchecked Sendable {
+final class PromiseBatch: @unchecked Sendable {
     private let lock = NSLock()
     private var remaining: Int
     private var results: [(index: Int, order: Int, url: URL)] = []
