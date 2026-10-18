@@ -326,7 +326,7 @@ public enum ToolCatalog {
         ToolSpec(ToolIDs.editMetadata, L("Edit metadata"), glyph: "info.circle", kinds: [.image, .audio, .video, .pdf], needsEditor: true, schema: ToolSchemas.metadata, suffix: "edited"),
         ToolSpec(ToolIDs.stripMetadata, L("Strip metadata"), glyph: "eraser", kinds: [.image, .audio, .video, .pdf], needsEditor: false, suffix: "clean"),
         // PDF (25–26)
-        ToolSpec(ToolIDs.organizePDF, L("Merge / split / reorder"), glyph: "rectangle.grid.2x2", kinds: [.pdf], needsEditor: true, schema: ToolSchemas.organizePDF, suffix: "organized"),
+        ToolSpec(ToolIDs.organizePDF, L("Merge / split / reorder"), glyph: "rectangle.grid.2x2", kinds: [.pdf], arity: .combine(minimum: 1), needsEditor: true, schema: ToolSchemas.organizePDF, suffix: "organized"),
         ToolSpec(ToolIDs.compressPDF, L("Compress PDF"), glyph: "arrow.down.doc", kinds: [.pdf], needsEditor: false, schema: ToolSchemas.compressPDF, suffix: "compressed"),
         // Pro, server-backed. Never counted as local tools.
         ToolSpec(ToolIDs.transcribe, L("Transcribe"), glyph: "text.bubble", kinds: [.audio, .video], needsEditor: false, suffix: "transcript", cloud: .transcription),
