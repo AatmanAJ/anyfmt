@@ -97,10 +97,3 @@ enum AppShell {
         (try? UIScreenshots.renderAll(to: dir).count) ?? 0
     }
 }
-
-/// Optional, user-downloaded engine packs shown in Settings › Engines.
-/// Filled by the docs lane's pack installers when present.
-@MainActor
-enum PackCatalog {
-    static func statuses() -> [PackStatus] { [] }
-}
