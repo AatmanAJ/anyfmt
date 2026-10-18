@@ -14,6 +14,9 @@ enum ProgressCardGallery {
         var overrides = ProgressAppearanceOverrides()
         let cards: [(ProgressCardModel.Subject, ProgressCardState)]
         var spacing: CGFloat = ProgressTheme.Metrics.stackSpacing
+        /// Indices of cards drawn as hovered / just after "Copy details".
+        var hovered: Set<Int> = []
+        var copied: Set<Int> = []
     }
 
     @discardableResult
@@ -73,6 +76,9 @@ enum ProgressCardGallery {
             Scene(name: "reduce-transparency-dark", scheme: .dark,
                   overrides: ProgressAppearanceOverrides(increasedContrast: true, reduceTransparency: true),
                   cards: [(.job(UUID()), Fixtures.running), (.job(UUID()), Fixtures.success)], spacing: 20),
+            Scene(name: "interactions", scheme: .light,
+                  cards: [(.job(UUID()), Fixtures.success), (.job(UUID()), Fixtures.failure)], spacing: 20,
+                  hovered: [0], copied: [1]),
         ]
     }
 
@@ -80,8 +86,8 @@ enum ProgressCardGallery {
         let scene: Scene
         var body: some View {
             VStack(spacing: scene.spacing) {
-                ForEach(Array(scene.cards.enumerated()), id: \.offset) { _, item in
-                    let model = Self.model(item.0, item.1)
+                ForEach(Array(scene.cards.enumerated()), id: \.offset) { i, item in
+                    let model = Self.model(item.0, item.1, hovered: scene.hovered.contains(i), copied: scene.copied.contains(i))
                     if item.0 == .summary { ProgressSummaryCard(model: model) } else { ProgressCard(model: model) }
                 }
             }
@@ -89,9 +95,12 @@ enum ProgressCardGallery {
             .background(Backdrop(scheme: scene.scheme))
         }
 
-        static func model(_ subject: ProgressCardModel.Subject, _ state: ProgressCardState) -> ProgressCardModel {
+        static func model(_ subject: ProgressCardModel.Subject, _ state: ProgressCardState,
+                          hovered: Bool, copied: Bool) -> ProgressCardModel {
             let m = ProgressCardModel(subject: subject, state: state)
             m.isShown = true
+            m.isHovered = hovered
+            m.didCopyDetails = copied
             m.icons = Fixtures.icons(for: state)
             return m
         }

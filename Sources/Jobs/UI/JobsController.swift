@@ -26,6 +26,21 @@ final class JobsController {
             self.recents.add(record)
             self.onJobFinished?(record)
         }
+        Self.prewarmRoutes()
+    }
+
+    /// Fills the live router's memo off the main thread, after launch, so even
+    /// the first Shift-tap finds its targets in microseconds (cold planning is
+    /// milliseconds per format on a ~400-row table).
+    static func prewarmRoutes(after delay: TimeInterval = 1.5) {
+        Task.detached(priority: .utility) {
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            let router = Router.live()
+            for start in Set(router.table.rows.map(\.from)) {
+                if Task.isCancelled { return }
+                _ = router.allRoutes(from: start)
+            }
+        }
     }
 
     /// Converts the dropped files to the segment's target. Returns the batch id.

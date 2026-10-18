@@ -57,6 +57,38 @@ final class RouterMemoTests: JobsTestCase {
         XCTAssertGreaterThan(Router.live().memoizedStartCount, 0, "live() hands back the warm router")
     }
 
+    /// A table shaped like the shipped one (~400 rows over ~45 formats) to
+    /// measure what memoisation buys a drag: wheel content = commonTargets.
+    func testMemoisationPerformanceOnRealisticTable() {
+        let images: [FormatID] = ["jpg", "png", "heic", "webp", "avif", "tiff", "gif", "bmp", "heif", "jp2", "psd", "ico"]
+        let audio: [FormatID] = ["mp3", "m4a", "wav", "flac", "ogg", "opus", "aiff", "caf"]
+        let video: [FormatID] = ["mp4", "mov", "mkv", "webm", "avi", "wmv", "m4v"]
+        let docs: [FormatID] = ["docx", "odt", "md", "txt", "rtf", "html", "epub", "pages"]
+        var rows = Capability.grid(images, images, a, flags: .lossless)
+            + Capability.grid(audio, audio, a) + Capability.grid(video, video, b)
+            + Capability.grid(video, ["mp3", "m4a", "gif"], b) + Capability.grid(docs, docs, a)
+        rows += images.map { Capability($0, "pdf", a) } + ["png", "jpg", "txt", "docx"].map { Capability("pdf", FormatID($0), a, flags: .multiOutput) }
+        rows += docs.map { Capability($0, "pdf", a) }
+        let table = CapabilityTable(rows)
+        let inputs: [FormatID] = ["heic", "png", "mov"]
+
+        let iterations = 200
+        var start = Date()
+        for _ in 0..<iterations { _ = Router(table: table).commonTargets(for: inputs) }
+        let cold = Date().timeIntervalSince(start) / Double(iterations)
+
+        _ = Router.cached(for: table).commonTargets(for: inputs)
+        start = Date()
+        for _ in 0..<iterations { _ = Router.cached(for: table).commonTargets(for: inputs) }
+        let warm = Date().timeIntervalSince(start) / Double(iterations)
+
+        print(String(format: "PERF router rows=%d cold commonTargets=%.3f ms warm (memoised)=%.3f ms speedup=%.0fx",
+                     rows.count, cold * 1000, warm * 1000, cold / max(warm, 1e-9)))
+        XCTAssertLessThan(warm, cold, "memoised lookups beat recomputing")
+        XCTAssertEqual(Router.cached(for: table).commonTargets(for: inputs).map(\.format),
+                       Router(table: table).commonTargets(for: inputs).map(\.format))
+    }
+
     func testMemoIsThreadSafe() async {
         let router = Router(table: table)
         let starts = Set(table.rows.map(\.from)).sorted()

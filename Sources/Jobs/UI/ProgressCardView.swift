@@ -349,16 +349,20 @@ struct ProgressPillButtonStyle: ButtonStyle {
         let configuration: ButtonStyleConfiguration
         let kind: Kind
         @Environment(\.colorScheme) private var scheme
+        @Environment(\.colorSchemeContrast) private var contrast
+        @Environment(\.progressAppearanceOverrides) private var overrides
 
         var body: some View {
             let ink = ProgressTheme.ink(scheme)
+            let highContrast = overrides.increasedContrast ?? (contrast == .increased)
             configuration.label
                 .font(.system(size: ProgressTheme.Typography.button, weight: .medium))
-                .foregroundStyle(kind == .prominent ? Color.white : ink.opacity(0.88))
+                .foregroundStyle(kind == .prominent ? Color.white : ink.opacity(highContrast ? 1 : 0.88))
                 .padding(.horizontal, 10)
                 .frame(height: ProgressTheme.Metrics.buttonHeight)
                 .background(Capsule().fill(kind == .prominent ? ProgressTheme.accent(scheme)
                     : ink.opacity(scheme == .dark ? 0.14 : 0.075)))
+                .overlay(Capsule().strokeBorder(ink.opacity(highContrast && kind == .quiet ? 0.5 : 0), lineWidth: 1))
                 .contentShape(Capsule())
                 .opacity(configuration.isPressed ? 0.7 : 1)
         }
