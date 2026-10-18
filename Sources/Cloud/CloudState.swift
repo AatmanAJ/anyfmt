@@ -25,13 +25,17 @@ struct CloudSnapshot: Sendable, Equatable {
     var signingIn = false
     /// Last human error from a background step (e.g. finishing sign-in), for the UI.
     var lastError: String?
+    /// The stored offline licence (`LicenceStore.connect(to:)`), active or not;
+    /// `entitlements` folds it in only while it's in date.
+    var licence: LicenceEntitlements? = nil
 
     var isSignedIn: Bool { credentials != nil }
 
     var entitlements: CloudEntitlements {
-        guard isSignedIn else { return .signedOut }
-        return account?.entitlements
-            ?? CloudEntitlements(isSignedIn: true, plan: .free, features: [], quotas: .none, customDomains: [])
+        let base: CloudEntitlements = isSignedIn
+            ? account?.entitlements ?? CloudEntitlements(isSignedIn: true, plan: .free, features: [], quotas: .none, customDomains: [])
+            : .signedOut
+        return base.merging(licence)
     }
 }
 
