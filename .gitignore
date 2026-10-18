@@ -33,3 +33,6 @@ packaging/sparkle/private*
 # macOS
 .DS_Store
 Config/App-Info.plist
+
+# Agent worktrees (parallel lanes)
+.claude/worktrees/
