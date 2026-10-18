@@ -75,25 +75,27 @@ final class FFmpegProgressParserTests: XCTestCase {
                      "out_time_us=900000", "speed=2x", "out_time_us=N/A", "garbage", "progress=continue", "out_time_us=1500000", "progress=end"] {
             p.feed(line)
         }
-        XCTAssertEqual(rec.values, [0.25, 0.5, 0.75, 1], "monotonic: the 0.45 regression is dropped")
+        XCTAssertEqual(rec.values, [0.25, 0.5, 0.75], "monotonic: the 0.45 regression is dropped; `end` isn't completion")
         XCTAssertEqual(p.lastFraction, 0.75)
     }
 
-    func testCapsBelowOneUntilEnd() {
+    /// ffmpeg prints `progress=end` even when it's killed on cancel, so the parser
+    /// never reports completion; `FFmpeg.run` does that after a successful exit.
+    func testCapsBelowOneAndIgnoresEnd() {
         let rec = ProgressRecorder()
         let p = FFmpegProgressParser(duration: 1, sink: ProgressSink { rec.add($0) })
         p.feed("out_time_us=5000000")
         XCTAssertEqual(rec.values, [0.999])
         p.feed("progress=end")
-        XCTAssertEqual(rec.values.last, 1)
+        XCTAssertEqual(rec.values, [0.999])
     }
 
-    func testNoDurationOnlyReportsEnd() {
+    func testNoDurationReportsNothing() {
         let rec = ProgressRecorder()
         let p = FFmpegProgressParser(duration: nil, sink: ProgressSink { rec.add($0) })
         p.feed("out_time_us=5000000")
         p.feed("progress=end")
-        XCTAssertEqual(rec.values, [1])
+        XCTAssertEqual(rec.values, [])
     }
 
     func testScaledSinkMapsPasses() {

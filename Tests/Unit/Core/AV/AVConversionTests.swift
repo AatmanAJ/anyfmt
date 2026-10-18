@@ -40,7 +40,7 @@ final class AVConversionTests: XCTestCase {
         try await check("sample.mp3", to: Formats.m4a, Expect(audio: "aac"))
         try await check("sample.m4a", to: Formats.mp3, Expect(audio: "mp3"))
         try await check("sample.wav", to: Formats.flac, Expect(audio: "flac"))
-        try await check("sample.flac", to: Formats.wav, Expect(audio: "pcm_s16le"))
+        try await check("sample.flac", to: Formats.wav, Expect(audio: "pcm_s24le")) // bit depth "keep": the 24-bit source stays 24-bit
         try await check("sample.ogg", to: Formats.opus, Expect(audio: "opus"))
         try await check("sample.opus", to: Formats.ogg, Expect(audio: "vorbis"))
         try await check("sample.aiff", to: Formats.caf, Expect(audio: "alac"))
@@ -66,7 +66,8 @@ final class AVConversionTests: XCTestCase {
         }
         let (_, hi) = try await check("edge-24bit.flac", to: Formats.wav, options: [OptionKey.bitDepth: .string("24")], Expect(audio: "pcm_s24le"))
         XCTAssertEqual(hi.primaryAudio?.sampleRate, 96000)
-        try await check("edge-24bit.flac", to: Formats.aiff, Expect(audio: "pcm_s16be"))
+        try await check("edge-24bit.flac", to: Formats.aiff, Expect(audio: "pcm_s24be")) // default keeps 24-bit
+        try await check("edge-24bit.flac", to: Formats.aiff, options: [OptionKey.bitDepth: .string("16")], Expect(audio: "pcm_s16be"))
         let (_, caf24) = try await check("edge-24bit.flac", to: Formats.caf, options: [OptionKey.bitDepth: .string("24")], Expect(audio: "alac"))
         XCTAssertEqual(caf24.primaryAudio?.bitDepth, 24)
         let (_, wav16) = try await check("edge-24bit.flac", to: Formats.wav, options: [OptionKey.bitDepth: .string("16")], Expect(audio: "pcm_s16le"))

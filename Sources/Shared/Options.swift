@@ -237,8 +237,8 @@ public enum StandardSchemas {
             OptionChoice("0", L("Keep")), OptionChoice("44100", "44.1 kHz"), OptionChoice("48000", "48 kHz"), OptionChoice("96000", "96 kHz"),
         ]), default: .string("0")),
         OptionSpec(OptionKey.bitDepth, L("Bit depth"), .choice([
-            OptionChoice("16", "16-bit"), OptionChoice("24", "24-bit"),
-        ]), default: .string("16")),
+            OptionChoice("keep", L("Keep")), OptionChoice("16", "16-bit"), OptionChoice("24", "24-bit"),
+        ]), default: .string("keep")),
         OptionSpec(OptionKey.channels, L("Channels"), .choice([
             OptionChoice("keep", L("Keep")), OptionChoice("mono", L("Mono")), OptionChoice("stereo", L("Stereo")),
         ]), default: .string("keep")),

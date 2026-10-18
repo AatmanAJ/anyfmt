@@ -25,12 +25,12 @@ this whole file first.
 export HALO_ENGINES_DIR=/Users/lives/Documents/Projects/Codename_Halo/Engines/dist   # bundled ffmpeg/ffprobe/resvg
 xcodegen generate --quiet
 xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug build -quiet 2>&1 | scripts/xcfilter.sh
-xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug test -only-testing:HaloCoreTests/<YourTestClass> 2>&1 | scripts/xcfilter.sh
+xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug test -only-testing:CoreTests/<YourTestClass> 2>&1 | scripts/xcfilter.sh
 # packages:
 cd Packages/<Name> && swift test
 ```
-Core tests live in `Tests/Unit/Core/<Lane>/` (target HaloCoreTests, `@testable import HaloCore`).
-App-hosted tests live in `Tests/Unit/App/<Lane>/` (target HaloAppTests, `@testable import HaloApp`).
+Core tests live in `Tests/Unit/Core/<Lane>/` (target `CoreTests`, `@testable import HaloCore`).
+App-hosted tests live in `Tests/Unit/App/<Lane>/` (target `AppTests`, `@testable import HaloApp`).
 Other lanes are building at the same time, so use `-quiet` and `-only-testing:` and don't loop full suites.
 
 ## Code rules (non-negotiable)

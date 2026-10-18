@@ -235,8 +235,10 @@ final class AVPlannerTests: XCTestCase {
 
     func testBitDepthAndDither() throws {
         let hi = AVInputFacts.Audio(index: 0, codec: "flac", sampleRate: 96000, channels: 2, bitDepth: 24)
-        let wav16 = try plan(facts(audio: [hi]), Formats.flac, Formats.wav)
+        let wav16 = try plan(facts(audio: [hi]), Formats.flac, Formats.wav, [OptionKey.bitDepth: .string("16")])
         XCTAssertTrue(args(wav16).contains("-c:a pcm_s16le -af aresample=dither_method=triangular"), "24 → 16 is dithered")
+        let kept = try plan(facts(audio: [hi]), Formats.flac, Formats.wav)
+        XCTAssertTrue(args(kept).contains("-c:a pcm_s24le"), "the default keeps the source bit depth")
         let wav24 = try plan(facts(audio: [hi]), Formats.flac, Formats.wav, [OptionKey.bitDepth: .string("24")])
         XCTAssertTrue(args(wav24).contains("-c:a pcm_s24le"))
         XCTAssertFalse(args(wav24).contains("dither"))
@@ -388,7 +390,7 @@ final class AVPlannerTests: XCTestCase {
         XCTAssertEqual(a.bitrate, 256)
         XCTAssertNil(a.sampleRate)
         XCTAssertNil(a.channels)
-        XCTAssertEqual(AVAudioOptions(StandardSchemas.audioLossless.defaults).bitDepth, 16)
+        XCTAssertNil(AVAudioOptions(StandardSchemas.audioLossless.defaults).bitDepth, "lossless default keeps the source depth")
         XCTAssertNil(AVAudioOptions(OptionValues([OptionKey.bitDepth: .string("keep")])).bitDepth)
         XCTAssertEqual(AVQualityPreset(option: "nonsense"), .balanced)
     }
