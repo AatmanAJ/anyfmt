@@ -140,8 +140,9 @@ reader (100) when installed.
 
 ## Tests
 
-`CoreTests` (HaloCoreTests): 68 tests in the lane F classes, 84 with the two
-existing suites, all green in 11 s (`xcodebuild … test -only-testing:CoreTests`).
+`CoreTests` (HaloCoreTests): 73 tests in the lane F classes, 89 with the two
+existing suites, all green in 12.5 s (`xcodebuild … test -only-testing:CoreTests`).
+The Debug `halo-matrix` skeleton prints `routes: 208` in this worktree.
 
 | Class | What it covers |
 |---|---|
@@ -199,6 +200,15 @@ Details in `docs/contract-changes/F-docs.md`:
 2. Matrix runner / CLI must keep an async `main` (WebKit and Quick Look engines need the main run loop).
 3. Rebuild the cached router when a pack is installed or the iWork opt-in changes.
 4. Settings hooks for the packs and the iWork toggle (information).
+
+## Observation for the orchestrator (not lane F code)
+
+The **Release** `halo-matrix` (hardened runtime, ad-hoc signed) fails to load the
+ad-hoc signed `HaloCore.framework`: dyld reports "mapping process and mapped file
+(non-platform) have different Team IDs" (library validation). The Debug build
+runs. `make matrix` builds Release, so Phase 4 needs either the same signing
+identity for both, `com.apple.security.cs.disable-library-validation` on the
+matrix/CLI tools, or no hardened runtime for these test tools.
 
 ## Blockers needing a human
 
