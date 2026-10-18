@@ -50,6 +50,10 @@ public struct Router: Sendable {
     public static let maxHops = 3
     public let table: CapabilityTable
     private let edges: [FormatID: [Capability]]
+    /// Per-instance memo of `allRoutes(from:)`. A Router is immutable, so its
+    /// answers never change and the memo never needs invalidating; a new table
+    /// means a new Router (see `cached(for:)`).
+    private let memo = RouteMemo()
 
     public init(table: CapabilityTable) {
         self.table = table
@@ -60,8 +64,16 @@ public struct Router: Sendable {
     }
 
     /// Router over the default table filtered to engines available right now.
+    /// Cheap to call repeatedly: while the available rows are unchanged the same
+    /// Router (with its warm route memo) is returned. Installing a pack or a
+    /// binary appearing changes the rows, which builds a fresh Router.
     public static func live(registry: EngineRegistry = .default) -> Router {
-        Router(table: CapabilityTable.default.available(in: registry))
+        cached(for: CapabilityTable.default.available(in: registry))
+    }
+
+    /// The memoised Router for `table`, rebuilt only when the rows change.
+    static func cached(for table: CapabilityTable) -> Router {
+        LiveRouterCache.shared.router(for: table)
     }
 
     static func cost(of hops: [Capability]) -> Double {
@@ -94,7 +106,13 @@ public struct Router: Sendable {
     }
 
     /// Best route to every reachable format from `from` (bounded Dijkstra over paths).
+    /// Memoised per start format.
     public func allRoutes(from start: FormatID) -> [FormatID: Route] {
+        memo.routes(from: start) { computeAllRoutes(from: start) }
+    }
+
+    /// The uncached search behind `allRoutes(from:)`.
+    func computeAllRoutes(from start: FormatID) -> [FormatID: Route] {
         var best: [FormatID: Route] = [:]
         // Frontier of partial paths. Small graph (≈70 nodes, ≤3 hops) → exhaustive is cheap.
         var frontier: [[Capability]] = (edges[start] ?? []).map { [$0] }
@@ -147,5 +165,45 @@ public struct Router: Sendable {
     public func optionCount(inputs: [FormatID]? = nil) -> Int {
         let starts = inputs ?? Array(Set(table.rows.map(\.from)))
         return starts.reduce(0) { $0 + allRoutes(from: $1).count }
+    }
+
+    /// Start formats already memoised (tests).
+    var memoizedStartCount: Int { memo.count }
+}
+
+/// Thread-safe memo of best routes per start format for one Router instance.
+final class RouteMemo: @unchecked Sendable {
+    private let lock = NSLock()
+    private var byStart: [FormatID: [FormatID: Route]] = [:]
+
+    func routes(from start: FormatID, compute: () -> [FormatID: Route]) -> [FormatID: Route] {
+        if let hit = lock.withLock({ byStart[start] }) { return hit }
+        // Computed outside the lock: two threads racing on a cold start format
+        // both do the same pure work once, which beats serialising every caller.
+        let fresh = compute()
+        lock.withLock { byStart[start] = fresh }
+        return fresh
+    }
+
+    var count: Int { lock.withLock { byStart.count } }
+}
+
+/// The Router `Router.live()` hands out, keyed by the exact available rows.
+final class LiveRouterCache: @unchecked Sendable {
+    static let shared = LiveRouterCache()
+    private let lock = NSLock()
+    private var rows: [Capability]?
+    private var router: Router?
+
+    func router(for table: CapabilityTable) -> Router {
+        lock.withLock {
+            // Array == is element-wise but short-circuits on shared storage, and
+            // rows share their static schemas, so this is microseconds.
+            if let rows, let router, rows == table.rows { return router }
+            let fresh = Router(table: table)
+            rows = table.rows
+            router = fresh
+            return fresh
+        }
     }
 }
