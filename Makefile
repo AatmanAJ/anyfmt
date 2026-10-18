@@ -10,6 +10,8 @@ ENGINES_DIST ?= $(if $(wildcard $(CURDIR)/Engines/dist/Helpers),$(CURDIR)/Engine
 export HALO_ENGINES_DIR := $(ENGINES_DIST)
 XCB          := xcodebuild -project Halo.xcodeproj -derivedDataPath $(DERIVED) ENGINES_DIST=$(ENGINES_DIST)
 PRODUCTS     := $(DERIVED)/Build/Products/$(CONFIG)
+NAME         := $(shell sed -n 's/^BRAND_NAME = //p' Config/Brand.xcconfig)
+SLUG         := $(shell echo $(NAME) | tr '[:upper:]' '[:lower:]')
 
 .PHONY: bootstrap engines generate build test test-packages test-unit check uitest matrix fixtures dmg clean gallery perf netcheck readme-formats
 
@@ -59,7 +61,7 @@ matrix: generate fixtures
 
 ## Wheel Gallery screenshots into docs/screens.
 gallery: build
-	$(PRODUCTS)/Halo.app/Contents/MacOS/Halo --render-gallery $(CURDIR)/docs/screens
+	$(PRODUCTS)/$(NAME).app/Contents/MacOS/$(NAME) --render-gallery $(CURDIR)/docs/screens
 
 perf: generate
 	$(XCB) -scheme Halo -configuration Release build -quiet
@@ -72,7 +74,7 @@ netcheck: generate
 
 ## Regenerates the README format table from the capability registry.
 readme-formats: build
-	$(PRODUCTS)/halo formats --markdown > docs/FORMATS.md
+	$(PRODUCTS)/$(SLUG) formats --markdown > docs/FORMATS.md
 
 dmg: generate
 	./packaging/make-dmg.sh
