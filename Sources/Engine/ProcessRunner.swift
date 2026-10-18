@@ -70,7 +70,10 @@ public enum ProcessRunner {
                     if box.wasCancelled {
                         cont.resume(throwing: CancellationError())
                     } else if checkExit && (p.terminationReason != .exit || status != 0) {
-                        cont.resume(throwing: ConversionError.engineFailed(executable.lastPathComponent, status: status, detail: r.stderr))
+                        // The command line first, so "Copy details" can reproduce the failure.
+                        let command = "$ " + ([executable.lastPathComponent] + (p.arguments ?? [])).map(ProcessRunner.shellQuoted).joined(separator: " ")
+                        cont.resume(throwing: ConversionError.engineFailed(executable.lastPathComponent, status: status,
+                                                                          detail: command + "\n" + r.stderr))
                     } else {
                         cont.resume(returning: r)
                     }
@@ -171,5 +174,15 @@ private final class OutputCollector: @unchecked Sendable {
             if !line.isEmpty { lines.append(String(decoding: line, as: UTF8.self)) }
         }
         return lines
+    }
+
+}
+
+extension ProcessRunner {
+    /// POSIX-shell quoting for a copy-pasteable command line.
+    static func shellQuoted(_ arg: String) -> String {
+        let safe = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:=,+@%")
+        if !arg.isEmpty, arg.unicodeScalars.allSatisfy({ safe.contains($0) }) { return arg }
+        return "'" + arg.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }
