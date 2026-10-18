@@ -38,12 +38,12 @@ final class ImageRoutesTests: XCTestCase {
             case Formats.pdf: XCTAssertEqual(r.schema, StandardSchemas.toPDF)
             default: break
             }
-            XCTAssertGreaterThanOrEqual(r.priority, 100, "native rows ≥ 100")
+            XCTAssertEqual(r.priority, r.to == Formats.gif ? 40 : 100, "native rows 100; ImageIO GIF is the fallback")
             XCTAssertEqual(r.flags.contains(.hiddenByDefault), ImageRoutes.extraOutputs.contains(r.to) || r.to == Formats.txt, "\(r)")
             if r.to == Formats.txt { XCTAssertTrue(r.flags.contains(.terminalOnly) && r.flags.contains(.lossyStructure), "\(r)") }
         }
         for r in rows where r.engine == EngineIDs.ffmpegImage {
-            XCTAssertEqual(r.priority, 60)
+            XCTAssertEqual(r.priority, r.to == Formats.gif ? 90 : 60)
             if r.to == Formats.webp { XCTAssertEqual(r.schema, StandardSchemas.imageLosslessCapable) }
         }
     }
@@ -64,6 +64,7 @@ final class ImageRoutesTests: XCTestCase {
         // Direct rows for every raster pair.
         XCTAssertEqual(router.route(from: Formats.heic, to: Formats.jpg)?.hops.count, 1)
         XCTAssertEqual(router.route(from: Formats.gif, to: Formats.webp)?.hops.first?.engine, EngineIDs.ffmpegImage)
+        XCTAssertEqual(router.route(from: Formats.png, to: Formats.gif)?.hops.first?.engine, EngineIDs.ffmpegImage, "palette GIF preferred")
         // PDF page renders never chain, and text is terminal.
         XCTAssertNil(router.route(from: Formats.pdf, to: Formats.ico))
         XCTAssertNil(router.route(from: Formats.pdf, to: Formats.gif))

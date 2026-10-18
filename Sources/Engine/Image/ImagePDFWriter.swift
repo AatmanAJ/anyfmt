@@ -31,7 +31,7 @@ enum ImagePDFWriter {
         let pages = input.isMultiPageDocument ? Array(0..<input.count) : [input.index]
         for i in pages {
             try Task.checkCancellation()
-            let decoded = try ImageOps.decode(input, index: i)
+            let decoded = ImageOps.sdr(try ImageOps.decode(input, index: i))
             let image = embeddable(decoded, lossySource: lossySources.contains(input.type))
             let dpi = dpi(of: input, index: i)
             let natural = CGSize(width: CGFloat(image.width) * 72 / dpi.x, height: CGFloat(image.height) * 72 / dpi.y)

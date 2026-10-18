@@ -60,7 +60,9 @@ enum ImageMetadata {
 
     /// Properties for `CGImageDestinationAddImage[AndMetadata]` describing an already
     /// oriented image of `width`×`height`.
-    static func destinationProperties(from source: [CFString: Any], policy: MetadataPolicy, width: Int, height: Int) -> [CFString: Any] {
+    /// `orientation` stays 1 except when pixels are copied unrotated (HDR gain-map path).
+    static func destinationProperties(from source: [CFString: Any], policy: MetadataPolicy, width: Int, height: Int,
+                                      orientation: Int = 1) -> [CFString: Any] {
         guard policy != .stripAll else { return [:] }
         var out: [CFString: Any] = [:]
         for name in carriedGroups {
@@ -70,7 +72,7 @@ enum ImageMetadata {
             if name == kCGImagePropertyTIFFDictionary as String {
                 for k in encodingTIFFKeys { dict.removeValue(forKey: k as CFString) }
                 if policy == .stripPrivate { for k in privateTIFFKeys { dict.removeValue(forKey: k as CFString) } }
-                dict[kCGImagePropertyTIFFOrientation] = 1
+                dict[kCGImagePropertyTIFFOrientation] = orientation
             } else if name == kCGImagePropertyExifDictionary as String {
                 // ImageIO writes the right ColorSpace tag for the profile it embeds.
                 dict.removeValue(forKey: kCGImagePropertyExifColorSpace)
@@ -85,12 +87,12 @@ enum ImageMetadata {
         }
         if let dpi = source[kCGImagePropertyDPIWidth] { out[kCGImagePropertyDPIWidth] = dpi }
         if let dpi = source[kCGImagePropertyDPIHeight] { out[kCGImagePropertyDPIHeight] = dpi }
-        out[kCGImagePropertyOrientation] = 1
+        out[kCGImagePropertyOrientation] = orientation
         return out
     }
 
     /// The full XMP/EXIF tree for `.keep`, with orientation and size updated. nil otherwise.
-    static func metadataTree(_ input: ImageInput, policy: MetadataPolicy, width: Int, height: Int) -> CGImageMetadata? {
+    static func metadataTree(_ input: ImageInput, policy: MetadataPolicy, width: Int, height: Int, orientation: Int = 1) -> CGImageMetadata? {
         guard policy == .keep, let tree = CGImageSourceCopyMetadataAtIndex(input.source, input.index, nil),
               let m = CGImageMetadataCreateMutableCopy(tree) else { return nil }
         // The tree mirrors the old file's TIFF encoding tags (HEIC reports its 512² grid
@@ -99,7 +101,7 @@ enum ImageMetadata {
                      "tiff:ImageWidth", "tiff:ImageLength", "tiff:BitsPerSample", "tiff:SamplesPerPixel"] {
             CGImageMetadataRemoveTagWithPath(m, nil, path as CFString)
         }
-        _ = CGImageMetadataSetValueMatchingImageProperty(m, kCGImagePropertyTIFFDictionary, kCGImagePropertyTIFFOrientation, 1 as CFNumber)
+        _ = CGImageMetadataSetValueMatchingImageProperty(m, kCGImagePropertyTIFFDictionary, kCGImagePropertyTIFFOrientation, orientation as CFNumber)
         _ = CGImageMetadataSetValueMatchingImageProperty(m, kCGImagePropertyExifDictionary, kCGImagePropertyExifPixelXDimension, width as CFNumber)
         _ = CGImageMetadataSetValueMatchingImageProperty(m, kCGImagePropertyExifDictionary, kCGImagePropertyExifPixelYDimension, height as CFNumber)
         return m

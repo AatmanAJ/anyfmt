@@ -122,6 +122,45 @@ final class FFmpegImageEngineTests: XCTestCase {
         XCTAssertEqual(try S.probeFrameCount(viaImageIO[0]), 5)
     }
 
+    func testStillGIFUsesOptimalPaletteAndKeepsTransparency() async throws {
+        let dir = try S.tempDir()
+        let ramp = S.image(256, 8) { ctx in
+            for x in 0..<256 {
+                ctx.setFillColor(S.color(CGFloat(x) / 255, CGFloat(x) / 255, CGFloat(x) / 255))
+                ctx.fill(CGRect(x: x, y: 2, width: 1, height: 6))
+            }
+            ctx.clear(CGRect(x: 0, y: 0, width: 256, height: 2)) // bottom two rows transparent
+        }
+        let src = S.write(ramp, to: dir.appendingPathComponent("ramp.png"), uti: "public.png")
+        let out = try await S.convert(engine, src, from: Formats.png, to: Formats.gif)
+        let img = try XCTUnwrap(S.decode(out[0]))
+        let levels = Set((0..<256).map { S.pixel(img, $0, 2)[0] })
+        XCTAssertGreaterThan(levels.count, 150, "a grey ramp keeps most of its 256 levels (got \(levels.count))")
+        XCTAssertEqual(S.pixel(img, 100, 7)[3], 0, "transparent rows stay transparent")
+    }
+
+    func testAnimatedWebPToGIFKeepsExactTiming() async throws {
+        let dir = try S.tempDir()
+        let gif = S.animatedGIF(at: dir.appendingPathComponent("a.gif"))
+        let webp = try await S.convert(engine, gif, from: Formats.gif, to: Formats.webp, in: dir.appendingPathComponent("w"))
+        let back = try await S.convert(engine, webp[0], from: Formats.webp, to: Formats.gif, in: dir.appendingPathComponent("g"))
+        XCTAssertEqual(GIFTiming.delays(try Data(contentsOf: back[0])), [10, 20, 30, 40, 50])
+        let anim = try XCTUnwrap(try ImageInput.open(back[0], format: Formats.gif).animation)
+        XCTAssertEqual(anim.frameCount, 5)
+        XCTAssertEqual(anim.loopCount, 0)
+        S.assertColor(S.pixel(try XCTUnwrap(S.decode(back[0], index: 2)), 16, 16), [0, 0, 255, 255], tolerance: 16, "frame 3 is blue")
+    }
+
+    func testGIFTimingRejectsMismatchedFrames() throws {
+        let dir = try S.tempDir()
+        let data = try Data(contentsOf: S.animatedGIF(at: dir.appendingPathComponent("a.gif")))
+        XCTAssertEqual(GIFTiming.frameCount(data), 5)
+        XCTAssertNil(GIFTiming.apply(data, delays: [0.1, 0.2], loopCount: 0))
+        let patched = try XCTUnwrap(GIFTiming.apply(data, delays: [1, 1, 1, 1, 2], loopCount: 7))
+        XCTAssertEqual(GIFTiming.delays(patched), [100, 100, 100, 100, 200])
+        XCTAssertNil(GIFTiming.frameCount(Data("GIF89a".utf8)))
+    }
+
     func testWorkFolderIsCleanedUp() async throws {
         let dir = try S.tempDir()
         let src = S.write(S.noise(16, 16), to: dir.appendingPathComponent("s.png"), uti: "public.png")

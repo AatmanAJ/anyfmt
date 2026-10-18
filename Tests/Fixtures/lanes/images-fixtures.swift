@@ -31,7 +31,10 @@ func card(width w: Int = 640, height h: Int = 480, space: CGColorSpace = p3, bit
         ctx.fill(CGRect(x: CGFloat(i) * barW, y: CGFloat(h) * 0.35, width: barW, height: CGFloat(h) * 0.65))
     }
     if let g = CGGradient(colorsSpace: space, colors: [CGColor(colorSpace: space, components: [0, 0, 0, 1])!, CGColor(colorSpace: space, components: [1, 1, 1, 1])!] as CFArray, locations: nil) {
+        ctx.saveGState()
+        ctx.clip(to: CGRect(x: 0, y: CGFloat(h) * 0.12, width: CGFloat(w), height: CGFloat(h) * 0.23))
         ctx.drawLinearGradient(g, start: CGPoint(x: 0, y: CGFloat(h) * 0.25), end: CGPoint(x: CGFloat(w), y: CGFloat(h) * 0.25), options: [])
+        ctx.restoreGState()
     }
     // Top-left orientation marker (CG origin is bottom-left).
     ctx.setFillColor(CGColor(colorSpace: space, components: [1, 0, 0, 1])!)
@@ -132,7 +135,7 @@ func pdf(_ name: String, pages: Int, rotateSecond: Bool = false, scanned: Bool =
             ctx.setStrokeColor(CGColor(colorSpace: srgb, components: [0.9, 0.2, 0.2, 1])!)
             ctx.setLineWidth(6)
             ctx.stroke(CGRect(x: 300, y: 620, width: 220, height: 140))
-            let font = CTFontCreateWithName("Helvetica" as CFString, 28, nil)
+            let font = CTFontCreateWithName("Helvetica" as CFString, 22, nil)
             for (n, line) in ["Halo fixture page \(i)", "The quick brown fox jumps over the lazy dog."].enumerated() {
                 let s = NSAttributedString(string: line, attributes: [NSAttributedString.Key(kCTFontAttributeName as String): font])
                 ctx.textPosition = CGPoint(x: 60, y: 520 - CGFloat(n) * 44)

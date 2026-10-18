@@ -1,9 +1,10 @@
 import Foundation
 import ImageIO
 
-/// WebP (stills and animations) and the AVIF fallback, through the bundled ffmpeg's
-/// libwebp / libwebp_anim / libaom-av1. ImageIO never encodes WebP, and only some
-/// macOS versions encode AVIF.
+/// WebP (stills and animations), high-quality GIF and the AVIF fallback, through the
+/// bundled ffmpeg's libwebp / libwebp_anim / palettegen+paletteuse / libaom-av1.
+/// ImageIO never encodes WebP, only some macOS versions encode AVIF, and ImageIO's
+/// GIF encoder bands visibly on gradients (it stays as the fallback row).
 ///
 /// Pixels always come from our own ImageIO pipeline (oriented, downscaled,
 /// colour-managed) as 8-bit PNG intermediates in a private work folder, so ffmpeg
@@ -16,7 +17,7 @@ public struct FFmpegImageEngine: ConversionEngine {
 
     public func isAvailable(_ capability: Capability) -> Bool {
         guard EngineLocator.shared.ffmpeg != nil else { return false }
-        guard capability.to == Formats.webp || capability.to == Formats.avif else { return false }
+        guard [Formats.webp, Formats.avif, Formats.gif].contains(capability.to) else { return false }
         return ImageIOSupport.canDecode(format: capability.from)
     }
 
@@ -36,6 +37,15 @@ public struct FFmpegImageEngine: ConversionEngine {
             } else {
                 let still = try StillPipeline.prepare(input, target: Self.intermediateTarget, options: request.options, policy: request.metadata)
                 try await Self.stillWebP(still, policy: request.metadata, options: request.options, to: out, work: work.url, ffmpeg: ffmpeg, progress: context.progress)
+            }
+        case Formats.gif:
+            if let anim = input.animation {
+                try await Self.animatedGIF(input, animation: anim, options: request.options, to: out, work: work.url, ffmpeg: ffmpeg, progress: context.progress)
+            } else {
+                var target = Self.intermediateTarget
+                target.color = .convertToSRGB
+                let still = try StillPipeline.prepare(input, target: target, options: request.options, policy: request.metadata)
+                try await Self.stillGIF(still.image, to: out, work: work.url, ffmpeg: ffmpeg, progress: context.progress)
             }
         case Formats.avif:
             if input.isAnimated && input.type == ImageUTI.gif {
@@ -118,6 +128,42 @@ public struct FFmpegImageEngine: ConversionEngine {
             try ImageWriter.write(srgb, to: url, uti: ImageUTI.png, options: [:])
             progress(Double(i + 1) / Double(animation.frameCount))
         }
+    }
+
+    // MARK: GIF
+
+    /// palettegen + paletteuse: an optimal 256-colour palette for the image and
+    /// error-diffusion dithering. ImageIO's GIF encoder bands badly on gradients.
+    static func paletteFilter(alpha: Bool, animated: Bool) -> String {
+        let gen = "palettegen=max_colors=256:reserve_transparent=\(alpha ? 1 : 0):stats_mode=full"
+        var use = "paletteuse=dither=sierra2_4a:alpha_threshold=128"
+        if animated { use += ":diff_mode=rectangle" }
+        return "[0:v]split[a][b];[a]\(gen)[p];[b][p]\(use)"
+    }
+
+    static func stillGIF(_ image: CGImage, to out: URL, work: URL, ffmpeg: FFmpeg, progress: ProgressSink) async throws {
+        let png = work.appendingPathComponent("frame.png")
+        try ImageWriter.write(image, to: png, uti: ImageUTI.png, options: [:])
+        try await ffmpeg.run(["-i", png.path, "-frames:v", "1", "-filter_complex", paletteFilter(alpha: ImageOps.hasAlpha(image), animated: false),
+                              "-f", "gif", out.path], duration: nil, progress: progress.scaled(0.2...0.95))
+    }
+
+    /// Any animation → GIF with one shared optimal palette. Frames go in at one per
+    /// centisecond so each source frame is one GIF frame; real delays and the loop
+    /// count are then written into the file (`GIFTiming`).
+    static func animatedGIF(_ input: ImageInput, animation: AnimationInfo, options: OptionValues, to out: URL,
+                            work: URL, ffmpeg: FFmpeg, progress: ProgressSink) async throws {
+        try writeFrames(input, animation: animation, maxDimension: options.int(OptionKey.maxDimension, default: 0),
+                        into: work, progress: progress.scaled(0...0.4))
+        let pattern = work.appendingPathComponent("f%06d.png").path
+        try await ffmpeg.run(["-framerate", "100", "-i", pattern, "-filter_complex", paletteFilter(alpha: true, animated: true),
+                              "-loop", String(animation.loopCount), "-f", "gif", out.path],
+                             duration: Double(animation.frameCount) / 100, progress: progress.scaled(0.4...0.95))
+        guard let data = try? Data(contentsOf: out),
+              let timed = GIFTiming.apply(data, delays: animation.delays, loopCount: animation.loopCount) else {
+            throw ConversionError.engineFailed("ffmpeg", status: 0, detail: "animated GIF frame count did not match the source")
+        }
+        try timed.write(to: out)
     }
 
     // MARK: AVIF

@@ -30,7 +30,9 @@ enum StillPipeline {
 
     static func prepare(_ input: ImageInput, target: Target, options: OptionValues, policy: MetadataPolicy) throws -> PreparedStill {
         let maxDim = max(0, options.int(OptionKey.maxDimension, default: 0))
-        let decoded = try ImageOps.decode(input, maxPixelSize: maxDim)
+        var decoded = try ImageOps.decode(input, maxPixelSize: maxDim)
+        // HDR/float sources roll highlights off instead of clipping, unless the target is float too (EXR).
+        if target.maxBits < 32 { decoded = ImageOps.sdr(decoded, sixteenBit: target.maxBits >= 16) }
         let background = target.keepsAlpha ? nil : ImageOps.opaqueColor(options.string(OptionKey.background, default: "#FFFFFF"))
         let space = colorSpace(for: decoded, target: target, policy: policy)
         let image = ImageOps.prepare(decoded, flattenOnto: background, colorSpace: space, maxBits: target.maxBits)

@@ -317,6 +317,52 @@ final class ImageIOEngineTests: XCTestCase {
         XCTAssertEqual(px[3], 128, accuracy: 6, "alpha kept")
     }
 
+    // MARK: HDR
+
+    /// Linear ramp 0 → 4.0 (two stops over SDR white) in a half-float image.
+    private func hdrRamp(width w: Int = 256, height h: Int = 16, alpha: Bool = true) -> CGImage {
+        let space = CGColorSpace(name: CGColorSpace.extendedLinearSRGB)!
+        let a = alpha ? CGImageAlphaInfo.premultipliedLast.rawValue : CGImageAlphaInfo.noneSkipLast.rawValue
+        let info = a | CGBitmapInfo.floatComponents.rawValue | CGBitmapInfo.byteOrder16Little.rawValue
+        let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 16, bytesPerRow: 0, space: space, bitmapInfo: info)!
+        for x in 0..<w {
+            let v = CGFloat(x) / CGFloat(w - 1) * 4
+            ctx.setFillColor(CGColor(colorSpace: space, components: [v, v, v, 1])!)
+            ctx.fill(CGRect(x: x, y: 0, width: 1, height: h))
+        }
+        return ctx.makeImage()!
+    }
+
+    func testHDRHighlightsRollOffInsteadOfClipping() async throws {
+        let dir = try S.tempDir()
+        let exr = S.write(hdrRamp(), to: dir.appendingPathComponent("hdr.exr"), uti: "com.ilm.openexr-image")
+        let out = try await S.convert(engine, exr, from: Formats.exr, to: Formats.jpg)
+        let img = try XCTUnwrap(S.decode(out[0]))
+        let reds = [32, 64, 128, 192, 250].map { S.pixel(img, $0, 8)[0] }
+        XCTAssertEqual(reds, reds.sorted(), "monotonic: \(reds)")
+        XCTAssertEqual(Set(reds).count, reds.count, "no clipped plateau: \(reds)")
+        XCTAssertGreaterThan(reds.last ?? 0, 235, "peak still near white")
+        // EXR → EXR-capable float target keeps the HDR values.
+        let tiff = try await S.convert(engine, exr, from: Formats.exr, to: Formats.exr, in: dir.appendingPathComponent("exr"))
+        XCTAssertNotNil(S.decode(tiff[0]))
+    }
+
+    func testGainMapKeptForUntouchedHDRPhotos() async throws {
+        guard #available(macOS 15.0, *) else { throw XCTSkip("ISO gain-map encoding needs macOS 15") }
+        let dir = try S.tempDir()
+        let heic = S.write(hdrRamp(width: 128, height: 128, alpha: false), to: dir.appendingPathComponent("hdr.heic"), uti: "public.heic",
+                           properties: [kCGImageDestinationEncodeRequest: kCGImageDestinationEncodeToISOGainmap])
+        let src = try XCTUnwrap(S.source(heic))
+        try XCTSkipIf(CGImageSourceCopyAuxiliaryDataInfoAtIndex(src, 0, kCGImageAuxiliaryDataTypeISOGainMap) == nil, "fixture has no gain map")
+        let kept = try await S.convert(engine, heic, from: Formats.heic, to: Formats.jpg, metadata: .keep, in: dir.appendingPathComponent("keep"))
+        let k = try XCTUnwrap(S.source(kept[0]))
+        XCTAssertNotNil(CGImageSourceCopyAuxiliaryDataInfoAtIndex(k, 0, kCGImageAuxiliaryDataTypeISOGainMap), "gain map survives HEIC → JPG")
+        // Resizing re-renders the pixels: SDR result, no stale gain map.
+        let small = try await S.convert(engine, heic, from: Formats.heic, to: Formats.jpg, options: [OptionKey.maxDimension: .int(64)],
+                                        in: dir.appendingPathComponent("small"))
+        XCTAssertEqual(S.decode(small[0])?.width, 64)
+    }
+
     func testTIFFIsLZWAndUntiledEvenFromHEIC() async throws {
         let dir = try S.tempDir()
         let heic = S.write(S.noise(300, 200), to: dir.appendingPathComponent("s.heic"), uti: "public.heic",

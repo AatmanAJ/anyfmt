@@ -2,8 +2,9 @@ import Foundation
 import ImageIO
 
 /// Apple's ImageIO: decodes everything macOS reads and encodes JPEG, PNG, HEIC/HEIF,
-/// TIFF, BMP, GIF (stills and animations), JPEG 2000, PSD, ICO, ICNS, TGA, OpenEXR,
-/// AVIF where the OS has an encoder, and PDF (one page per image). Zero size cost.
+/// TIFF, BMP, JPEG 2000, PSD, TGA, OpenEXR and AVIF (where the OS has an encoder),
+/// plus our own ICO, ICNS and PDF containers, image → TXT via Vision OCR, and GIF as
+/// the fallback when the bundled ffmpeg (better palettes) is missing. Zero size cost.
 public struct ImageIOEngine: ConversionEngine {
     public let id = EngineIDs.imageIO
     public init() {}
@@ -85,32 +86,38 @@ public struct ImageIOEngine: ConversionEngine {
 
     /// iPhone-style HDR photos carry a gain map next to the SDR base image. Redrawing
     /// pixels would drop it, so when nothing about the pixels has to change (keep
-    /// metadata, no resize, no flattening) we let ImageIO copy the image with its gain
-    /// map into JPEG/HEIC. Orientation stays a tag here, which JPEG/HEIC viewers honour.
+    /// metadata, no resize, no flattening) we write the untouched base image and copy
+    /// the gain map across (Apple and ISO 21496-1 kinds) into JPEG/HEIC. Orientation
+    /// stays a tag here, which every JPEG/HEIC viewer honours.
     private func writeKeepingGainMap(_ input: ImageInput, request: ConversionRequest, traits: ImageTargetTraits,
                                      uti: String, to url: URL) throws -> Bool {
-        guard #available(macOS 14.1, *) else { return false }
-        guard request.metadata == .keep, [Formats.jpg, Formats.heic, Formats.heif].contains(request.to),
-              Self.hasGainMap(input) else { return false }
+        guard request.metadata == .keep, [Formats.jpg, Formats.heic, Formats.heif].contains(request.to) else { return false }
+        let gainMaps = Self.gainMaps(input)
+        guard !gainMaps.isEmpty else { return false }
         let maxDim = request.options.int(OptionKey.maxDimension, default: 0)
         if maxDim > 0 && maxDim < input.longestEdge { return false }
         if input.hasAlpha && !traits.keepsAlpha { return false }
+        guard let base = CGImageSourceCreateImageAtIndex(input.source, input.index, nil) else { return false }
+        var props = ImageMetadata.destinationProperties(from: input.properties, policy: .keep, width: base.width, height: base.height,
+                                                        orientation: input.orientation)
+        props[kCGImageDestinationLossyCompressionQuality] = Self.quality(request.options)
+        let tree = ImageMetadata.metadataTree(input, policy: .keep, width: base.width, height: base.height, orientation: input.orientation)
         let dest = try ImageWriter.create(url, uti: uti, count: 1)
-        let options: [CFString: Any] = [
-            kCGImageDestinationLossyCompressionQuality: Self.quality(request.options),
-            kCGImageDestinationPreserveGainMap: true,
-        ]
-        CGImageDestinationAddImageFromSource(dest, input.source, input.index, options as CFDictionary)
+        if let tree {
+            CGImageDestinationAddImageAndMetadata(dest, base, tree, props as CFDictionary)
+        } else {
+            CGImageDestinationAddImage(dest, base, props as CFDictionary)
+        }
+        for (type, info) in gainMaps { CGImageDestinationAddAuxiliaryDataInfo(dest, type, info) }
         try ImageWriter.finalize(dest, url)
         return true
     }
 
-    static func hasGainMap(_ input: ImageInput) -> Bool {
-        if CGImageSourceCopyAuxiliaryDataInfoAtIndex(input.source, input.index, kCGImageAuxiliaryDataTypeHDRGainMap) != nil { return true }
-        if #available(macOS 15.0, *) {
-            return CGImageSourceCopyAuxiliaryDataInfoAtIndex(input.source, input.index, kCGImageAuxiliaryDataTypeISOGainMap) != nil
-        }
-        return false
+    /// Gain-map auxiliary images of the chosen image, by auxiliary type.
+    static func gainMaps(_ input: ImageInput) -> [(CFString, CFDictionary)] {
+        var types: [CFString] = [kCGImageAuxiliaryDataTypeHDRGainMap]
+        if #available(macOS 15.0, *) { types.append(kCGImageAuxiliaryDataTypeISOGainMap) }
+        return types.compactMap { t in CGImageSourceCopyAuxiliaryDataInfoAtIndex(input.source, input.index, t).map { (t, $0) } }
     }
 
     // MARK: Animated GIF

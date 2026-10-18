@@ -31,8 +31,11 @@ public enum ImageRoutes {
 
     // MARK: Row groups
 
+    /// ImageIO's GIF writer is the fallback (40): it bands on gradients. ffmpeg's
+    /// palettegen/paletteuse row (90) wins whenever the bundled ffmpeg is present.
     static let imageIORows: [Capability] = ImageIOEngine.outputs.flatMap { to in
-        Capability.grid(rasterInputs, [to], EngineIDs.imageIO, schema: schema(for:), priority: 100, cost: 1, flags: flags(for: to))
+        Capability.grid(rasterInputs, [to], EngineIDs.imageIO, schema: schema(for:), priority: to == Formats.gif ? 40 : 100,
+                        cost: 1, flags: flags(for: to))
     }
 
     /// Image → TXT with on-device Vision OCR (screenshots, photos of documents).
@@ -44,9 +47,11 @@ public enum ImageRoutes {
 
     /// WebP is ffmpeg-only (ImageIO never encodes it). AVIF here is the fallback for
     /// Macs whose ImageIO lacks an AVIF encoder; the ImageIO row wins when it's available.
+    /// GIF here is the preferred encoder (optimal palette + dithering).
     static let ffmpegRows: [Capability] =
         Capability.grid(rasterInputs, [Formats.webp], EngineIDs.ffmpegImage, schema: schema(for:), priority: 60, cost: 1.5, flags: flags(for: Formats.webp))
         + Capability.grid(rasterInputs, [Formats.avif], EngineIDs.ffmpegImage, schema: schema(for:), priority: 60, cost: 2.5, flags: flags(for: Formats.avif))
+        + Capability.grid(rasterInputs, [Formats.gif], EngineIDs.ffmpegImage, schema: schema(for:), priority: 90, cost: 1.5, flags: flags(for: Formats.gif))
 
     /// SVG renders to PNG; every other SVG target is a router hop through PNG.
     static let svgRows: [Capability] = [

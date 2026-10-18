@@ -121,6 +121,59 @@ enum ImageOps {
         return redraw(image, width: side, height: side, space: space, keepAlpha: true, background: nil, inset: rect)
     }
 
+    // MARK: HDR
+
+    /// Float or extended-range pixels (OpenEXR, HDR renders) that may exceed 1.0.
+    static func isExtendedRange(_ image: CGImage) -> Bool {
+        if image.bitmapInfo.contains(.floatComponents) { return true }
+        return image.colorSpace.map { CGColorSpaceUsesExtendedRange($0) } ?? false
+    }
+
+    /// `image`, tone-mapped to SDR first if it holds HDR values.
+    static func sdr(_ image: CGImage, sixteenBit: Bool = false) -> CGImage {
+        guard isExtendedRange(image) else { return image }
+        return toneMappedToSDR(image, sixteenBit: sixteenBit) ?? image
+    }
+
+    /// Brings extended-range pixels into SDR with an extended Reinhard curve on
+    /// luminance, white point at the 99.9th percentile, so highlights roll off instead
+    /// of clipping. Returns nil when nothing exceeds 1.0 (already SDR). Output is sRGB.
+    static func toneMappedToSDR(_ image: CGImage, sixteenBit: Bool) -> CGImage? {
+        let w = image.width, h = image.height
+        guard let linear = CGColorSpace(name: CGColorSpace.extendedLinearSRGB) else { return nil }
+        let info = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.floatComponents.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 32, bytesPerRow: w * 16, space: linear, bitmapInfo: info),
+              let base = ctx.data else { return nil }
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        // Rows are exactly w * 16 bytes, so the buffer is one contiguous run of RGBA floats.
+        let px = base.bindMemory(to: Float.self, capacity: w * h * 4)
+        func luminance(_ i: Int) -> Float {
+            let a = px[i + 3]
+            guard a > 0 else { return 0 }
+            return (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / a
+        }
+        // Robust peak from a sample of at most ~65k pixels.
+        let count = w * h
+        let step = max(1, count / 65_536)
+        var samples: [Float] = []
+        samples.reserveCapacity(count / step + 1)
+        for p in stride(from: 0, to: count, by: step) { samples.append(luminance(p * 4)) }
+        samples.sort()
+        let peak = samples[min(samples.count - 1, Int(Float(samples.count) * 0.999))]
+        guard peak > 1.0001 else { return nil }
+        let white2 = peak * peak
+        for p in 0..<count {
+            let i = p * 4
+            let l = luminance(i)
+            guard l > 0 else { continue }
+            let mapped = l * (1 + l / white2) / (1 + l)
+            let scale = mapped / l
+            for c in 0..<3 { px[i + c] = min(px[i + 3], max(0, px[i + c] * scale)) }
+        }
+        guard let made = ctx.makeImage() else { return nil }
+        return redraw(made, width: w, height: h, space: sRGB, sixteenBit: sixteenBit, keepAlpha: hasAlpha(image), background: nil)
+    }
+
     // MARK: Colour option
 
     /// Parses `#RGB`, `#RRGGBB` or `#RRGGBBAA` (the `background` option). The result

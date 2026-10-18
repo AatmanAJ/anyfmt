@@ -23,7 +23,7 @@ enum IconWriter {
     /// Square, sRGB, alpha-preserving master for icon resampling.
     static func master(_ input: ImageInput) throws -> CGImage {
         // Decode no larger than the biggest icon we can need (1024), oriented.
-        let decoded = try ImageOps.decode(input, maxPixelSize: 1024)
+        let decoded = ImageOps.sdr(try ImageOps.decode(input, maxPixelSize: 1024))
         let srgb = ImageOps.prepare(decoded, flattenOnto: nil, colorSpace: ImageOps.sRGB, maxBits: 8)
         guard let square = ImageOps.paddedToSquare(srgb) else {
             throw ConversionError.engineFailed("ImageIO", status: 0, detail: "could not pad icon canvas")
