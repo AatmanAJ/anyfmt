@@ -6,14 +6,15 @@ extension RadialMenuView {
     // MARK: Dragging destination
 
     public override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
-        dragOperation(for: sender)
+        answer(dragOperation(for: sender))
     }
 
     public override func draggingUpdated(_ sender: any NSDraggingInfo) -> NSDragOperation {
-        dragOperation(for: sender)
+        answer(dragOperation(for: sender))
     }
 
     public override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+        acceptsCurrentDrop = false
         clearHover()
         setDropZoneTargeted(false)
         delegate?.radialMenuDragDidExit(self)
@@ -32,6 +33,7 @@ extension RadialMenuView {
               delegate?.radialMenu(self, canAcceptDropOn: item, info: sender) ?? true else {
             // Dead zone, pager, disabled item or veto: the drop is refused (the
             // icon slides home) and the wheel closes.
+            acceptsCurrentDrop = false
             cancel()
             return false
         }
@@ -39,11 +41,17 @@ extension RadialMenuView {
     }
 
     public override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
+        acceptsCurrentDrop = false
         if isShowingDropZone {
             return delegate?.radialMenu(self, didDropOnEmptyRing: sender) ?? false
         }
         guard let item = highlightedItem else { return false }
         return delegate?.radialMenu(self, didDrop: sender, on: item) ?? false
+    }
+
+    private func answer(_ operation: NSDragOperation) -> NSDragOperation {
+        acceptsCurrentDrop = !operation.isEmpty
+        return operation
     }
 
     private func dragOperation(for info: any NSDraggingInfo) -> NSDragOperation {

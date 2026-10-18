@@ -44,8 +44,14 @@ final class AppCoordinator {
         jobs.onJobFinished = { [weak self] record in self?.jobFinished(record) }
         jobs.queue.onBatchFinished = { [weak self] _, progress in self?.batchFinished(progress) }
         sense.onEvent = { [weak self] event in self?.handle(event) }
+        sense.onStateChange = { [weak self] state in
+            if state == .cancelled { self?.wheel.dragDidEnd() }
+        }
         sense.start()
+        let prewarmStart = ProcessInfo.processInfo.systemUptime
         wheel.prewarm()
+        Log.app.debug("wheel prewarm \(Int((ProcessInfo.processInfo.systemUptime - prewarmStart) * 1000)) ms")
+        Task.detached(priority: .utility) { Router.warmLive() }
         CloudIntegration.start(wheel: wheel)
         _ = ActionPerformer.shared // purges stale received file promises
 
@@ -68,7 +74,7 @@ final class AppCoordinator {
 
     // MARK: Drag sensing → wheel
 
-    private func handle(_ event: DragSenseEvent) {
+    func handle(_ event: DragSenseEvent) {
         switch event {
         case .triggerTapped(let trigger, let info, let location):
             guard let kind = WheelKind(rawValue: trigger.id) else { return }
@@ -78,10 +84,12 @@ final class AppCoordinator {
                 let promised = info.promisedTypes.compactMap { UTType($0) }
                 wheel.show(kind: kind, urls: info.fileURLs, promisedTypes: promised, at: location)
             }
-        case .dragEnded:
-            // If the drop landed on the wheel, onSelect already ran and told DragSense.
-            wheel.dragDidEnd()
-            if sense.state != .idle { sense.cancelWheel() }
+        case .dragEnded(let location):
+            // Released over the wheel: AppKit's drop is still on its way, and
+            // onSelect will tell DragSense. If it never comes, DragSense cancels
+            // after dropResolutionTimeout and the state hook hides the wheel.
+            if wheel.dragDidEnd(at: location) { return }
+            if sense.state.openTriggerID != nil { sense.cancelWheel() }
         case .dragBegan, .dragMoved:
             break
         }

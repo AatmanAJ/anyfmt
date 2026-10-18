@@ -97,6 +97,13 @@ public struct Router: Sendable {
         LiveAvailability.shared.invalidate()
     }
 
+    /// Plans routes from every format the live table reads, so no drag pays a
+    /// cold search (≈10 ms for the first file of a format). Call off the main
+    /// thread; the work lands in the memo `live()` hands back.
+    public static func warmLive(registry: EngineRegistry = .default) {
+        _ = live(registry: registry).optionCount()
+    }
+
     /// The memoised Router for `table`, rebuilt only when the rows change.
     static func cached(for table: CapabilityTable) -> Router {
         LiveRouterCache.shared.router(for: table)
@@ -235,22 +242,62 @@ final class LiveRouterCache: @unchecked Sendable {
 }
 
 /// Availability of the default table, re-evaluated at most every `ttl` seconds.
-/// Checking ~650 rows (some stat bundled binaries) on every wheel show and every
-/// `live()` call added up; within a drag nothing about the Mac changes.
+/// Checking ~650 rows (some stat bundled binaries) costs a few milliseconds, too
+/// much for every wheel show; within a drag nothing about the Mac changes.
+/// An expired snapshot is still answered at once and refreshed in the
+/// background, so only the first call (or one after `invalidate()`) waits.
 final class LiveAvailability: @unchecked Sendable {
     static let shared = LiveAvailability()
     private let lock = NSLock()
-    private let ttl: TimeInterval = 2
+    private let ttl: TimeInterval
     private var snapshot: (ids: Set<EngineID>, at: TimeInterval, table: CapabilityTable)?
+    private var refreshing = false
+    /// Bumped by `invalidate()`, so a refresh that started earlier can't
+    /// overwrite what came after it.
+    private var generation = 0
+
+    init(ttl: TimeInterval = 2) { self.ttl = ttl }
+
+    /// When the current snapshot was taken (tests).
+    var snapshotTime: TimeInterval? { lock.withLock { snapshot?.at } }
 
     func table(registry: EngineRegistry) -> CapabilityTable {
         let now = ProcessInfo.processInfo.systemUptime
         let ids = registry.ids
-        if let s = lock.withLock({ snapshot }), s.ids == ids, now - s.at < ttl { return s.table }
+        if let s = lock.withLock({ snapshot }), s.ids == ids {
+            if now - s.at >= ttl { refreshInBackground(registry: registry, ids: ids) }
+            return s.table
+        }
+        return evaluate(registry: registry, ids: ids)
+    }
+
+    func invalidate() {
+        lock.withLock {
+            snapshot = nil
+            generation += 1
+        }
+    }
+
+    @discardableResult
+    private func evaluate(registry: EngineRegistry, ids: Set<EngineID>) -> CapabilityTable {
+        let started = lock.withLock { generation }
         let fresh = CapabilityTable.default.available(in: registry)
-        lock.withLock { snapshot = (ids, now, fresh) }
+        lock.withLock {
+            if generation == started { snapshot = (ids, ProcessInfo.processInfo.systemUptime, fresh) }
+        }
         return fresh
     }
 
-    func invalidate() { lock.withLock { snapshot = nil } }
+    private func refreshInBackground(registry: EngineRegistry, ids: Set<EngineID>) {
+        let start = lock.withLock { () -> Bool in
+            if refreshing { return false }
+            refreshing = true
+            return true
+        }
+        guard start else { return }
+        DispatchQueue.global(qos: .utility).async {
+            self.evaluate(registry: registry, ids: ids)
+            self.lock.withLock { self.refreshing = false }
+        }
+    }
 }

@@ -83,6 +83,20 @@ public final class WheelController: NSObject {
 
     /// Pays the panel's one-time window-server/Core Animation setup up front (call at launch).
     public func prewarm() {
+        // Both segment styles: format labels with a "via" line (Convert) and
+        // glyphs (Tools, Actions), so neither first wheel lays out text cold.
+        let labels = (0..<8).map {
+            RadialItem(id: "prewarm.\($0)", title: "WEBP", symbolName: "photo",
+                       subtitle: $0 == 0 ? "via PNG" : nil, prominence: .title)
+        }
+        menuView.setItems(labels, animated: false)
+        panel.prewarm()
+        // First-use costs a show would otherwise pay on the main thread: the
+        // file icon and size formatter behind the hub, and every format glyph.
+        if let file = Bundle.main.executableURL { _ = WheelHub.immediate(for: WheelInput(urls: [file])) }
+        for glyph in Set(Formats.all.map(\.glyph) + FileKind.allCases.map(\.glyph)) {
+            _ = WheelContentProvider.symbol(glyph)
+        }
         menuView.setItems(WheelContentProvider.items(for: provider.entries(for: WheelInput(), kind: .actions, preferences: preferences),
                                                      cloud: cloud), animated: false)
         panel.prewarm()
@@ -163,10 +177,32 @@ public final class WheelController: NSObject {
         commit(entry, urls: input.urls, promises: promises, at: NSEvent.mouseLocation)
     }
 
-    /// DragSense saw the drag end elsewhere (dropped outside the wheel, or Escape in Finder).
-    public func dragDidEnd() {
-        guard mode == .drag, isVisible else { return }
+    /// DragSense saw the button go up at `point`. A release on a segment (or
+    /// the options popover) waits: AppKit delivers that drop a beat after the
+    /// button goes up, and hiding the panel first would lose it. Anywhere else
+    /// (the hub, a gap, another app) no drop is coming, so the wheel hides.
+    /// Returns true when the wheel is waiting for the drop.
+    @discardableResult
+    public func dragDidEnd(at point: CGPoint) -> Bool {
+        guard mode == .drag, isVisible, kind != nil else { return false }
+        if expectsDrop(at: point) { return true }
         hide(animated: true)
+        return false
+    }
+
+    /// The drag ended without a drop on the wheel (DragSense gave up waiting,
+    /// or Escape in Finder).
+    public func dragDidEnd() {
+        guard mode == .drag, isVisible, kind != nil else { return }
+        hide(animated: true)
+    }
+
+    /// Whether AppKit will deliver a drop released at `point` (global
+    /// coordinates): the wheel last told it the drop would be accepted, or the
+    /// pointer is over the options popover, which takes any drop.
+    func expectsDrop(at point: CGPoint) -> Bool {
+        if let window = options.window, window.isVisible, window.frame.contains(point) { return true }
+        return menuView.acceptsCurrentDrop
     }
 
     // MARK: Internals

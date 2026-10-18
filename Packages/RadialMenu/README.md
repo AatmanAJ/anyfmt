@@ -95,6 +95,10 @@ final class Controller: RadialMenuViewDelegate {
   keeps focus.
 - Empty "drop here" ring: set `menuView.dropZone` with no items and implement
   `radialMenu(_:didDropOnEmptyRing:)`.
+- Watching the mouse button yourself? It goes up a few milliseconds before AppKit
+  delivers the drop, so don't close the panel then. If `menuView.acceptsCurrentDrop`
+  is true a drop is on its way. If it's false (released over the hub, a gap or a
+  disabled item), AppKit won't deliver one and you can close at once.
 - Options per item: return true from `radialMenu(_:hasOptionsFor:)`; right-click
   or a 600 ms hover dwell calls `radialMenu(_:didRequestOptionsFor:anchor:)`.
 - In your own window: `RadialMenuView(configuration:style:materialMode:)` is a

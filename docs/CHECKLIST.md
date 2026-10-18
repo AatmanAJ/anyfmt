@@ -7,11 +7,11 @@ true points at the BLOCKERS.md entry that explains it.
 | # | Item | Status | Evidence |
 |---|---|---|---|
 | 1 | Phase 0 decision documented with permissions and edge-case results | ✅ | `docs/DECISIONS.md` D-001…D-005. Zero-permission approach verified with all three TCC preflights false; latency/CPU self-tests. Real-drag edge cases listed with expected behaviour → **B-001** |
-| 2 | DragSense and RadialMenu build and test as standalone MIT packages | ✅ | `cd Packages/DragSense && swift test` (97), `cd Packages/RadialMenu && swift test` (47); each has LICENSE (MIT) + README |
+| 2 | DragSense and RadialMenu build and test as standalone MIT packages | ✅ | `cd Packages/DragSense && swift test` (106), `cd Packages/RadialMenu && swift test` (50); each has LICENSE (MIT) + README |
 | 3 | Cloud client complete against the mock server; openapi.yaml written; signed-out = zero requests | ✅ | `Server/openapi.yaml` (31 operations), `Tests/Mock/server.mjs`, 66 cloud tests incl. three-way zero-request proof |
 | 4 | No local feature consults Entitlements (grep-verified) | ✅ | `scripts/check-entitlements.sh` (part of `make test`) |
 | 5 | CONTRIBUTING.md with CLA/DCO decision; AGPL source offer covers our code + every bundled engine | ✅ | `CONTRIBUTING.md`, `CLA.md`, D-026, `LICENSES/NOTICE.md`, `Engines/VERSIONS.md`, release workflow attaches engine sources. Owner name + CLA Assistant setup → **B-008** |
-| 6 | Shift / Command / Control wheels open mid-drag from Finder, stay open after release, accept the drop | 🟡 | Built and unit-tested end to end (DragSense state machine, RadialMenu drop path, coordinator). Never physically performed, because the harness can't synthesise input → **B-001** |
+| 6 | Shift / Command / Control wheels open mid-drag from Finder, stay open after release, accept the drop | ✅ | Real hardware (B-001 sessions, Debug and Release): ⇧ opens the wheel mid-drag on key-down (D-035). It stays open after the key goes up, ⌘/⌃ switch it in place, and a drop on a segment writes the converted file. A release over the centre closes it (D-036). Opening straight onto ⌘/⌃ takes the same trigger path but wasn't tried by hand |
 | 7 | Enter-on-selection works (or is opt-in with the permission explained) | ✅ | Opt-in Finder Return shortcut (Accessibility + Automation) with the permissions coach; zero-permission Services item, menu item and ⌃⌥Space drop ring (D-004) |
 | 8 | Remappable keys | ✅ | Settings › Keys → `DragSenseConfiguration.triggers` live (AppCoordinator) |
 | 9 | ≥ 275 conversion options shipped, `docs/MATRIX.md` all green | ✅ | **793/793** routes pass (`make matrix`), 516 on the wheel by default |
@@ -22,7 +22,7 @@ true points at the BLOCKERS.md entry that explains it.
 | 14 | Onboarding with live demo + permission coach | ✅ | `docs/screens/onboarding-*.png`; tap-detector tests |
 | 15 | Settings complete | ✅ | 7 panes, `docs/screens/settings-*.png`; UI test written (`make uitest` → **B-003**) |
 | 16 | Light/dark/increased contrast/reduce motion/reduce transparency/VoiceOver all checked | 🟡 | Every surface rendered in each appearance (`make gallery`), Reduce Motion paths unit-tested, VoiceOver elements per segment/control. A live VoiceOver pass needs a person → **B-001** |
-| 17 | Perf budgets met and recorded | ✅ | `docs/PERF.md`: launch 111 ms, idle CPU 0.18 %, idle 22 MB, 12 MP HEIC→JPG 84 ms, tap→wheel ≈ 30 ms p95 (est.; live probe → **B-001**) |
+| 17 | Perf budgets met and recorded | ✅ | `docs/PERF.md`: launch 147 ms, idle CPU 0.22 %, idle 28 MB, 12 MP HEIC→JPG 88 ms, key → wheel visible 43–45 ms live in Release (n = 3; more samples for a p95 → **B-001**) |
 | 18 | Zero network calls without opt-in | ✅ | `make netcheck`: 0 sockets (lsof every 0.5 s + nettop) from the app, CLI and engines; ffmpeg `--disable-network`; cloud gate tests |
 | 19 | All engines bundled, licences + source offer in `LICENSES/`, app < 150 MB | ✅ | ffmpeg/ffprobe/libav*/resvg in the bundle; `LICENSES/` (also inside the app); **63 MB** app, **27 MB** DMG |
 | 20 | DMG builds; notarized if creds present | 🟡 | `make dmg` builds a styled, ad-hoc signed DMG. No Developer ID or notary profile on this machine → **B-002** |

@@ -57,6 +57,32 @@ final class RouterMemoTests: JobsTestCase {
         XCTAssertGreaterThan(Router.live().memoizedStartCount, 0, "live() hands back the warm router")
     }
 
+    /// A wheel show never waits for the availability re-check: an expired
+    /// snapshot answers at once and refreshes in the background.
+    func testExpiredAvailabilityAnswersAtOnceAndRefreshes() async throws {
+        let cache = LiveAvailability(ttl: 0)
+        let first = cache.table(registry: .default)
+        let stamp = try XCTUnwrap(cache.snapshotTime)
+        XCTAssertEqual(cache.table(registry: .default).rows, first.rows, "stale answer, same rows")
+        for _ in 0..<400 where cache.snapshotTime == stamp { try await Task.sleep(nanoseconds: 5_000_000) }
+        XCTAssertNotEqual(cache.snapshotTime, stamp, "refreshed in the background")
+        cache.invalidate()
+        XCTAssertNil(cache.snapshotTime)
+        XCTAssertEqual(cache.table(registry: .default).rows, first.rows, "after invalidate the next call re-checks itself")
+    }
+
+    /// Launch warms every start format so the first drag of a format isn't cold.
+    func testWarmLiveFillsTheMemo() {
+        Router.invalidateLive()
+        let start = Date()
+        Router.warmLive()
+        let elapsed = Date().timeIntervalSince(start)
+        let router = Router.live()
+        print(String(format: "PERF router warmLive rows=%d starts=%d %.1f ms", router.table.rows.count,
+                     router.memoizedStartCount, elapsed * 1000))
+        XCTAssertEqual(router.memoizedStartCount, Set(router.table.rows.map(\.from)).count)
+    }
+
     /// A table shaped like the shipped one (~400 rows over ~45 formats) to
     /// measure what memoisation buys a drag: wheel content = commonTargets.
     func testMemoisationPerformanceOnRealisticTable() {

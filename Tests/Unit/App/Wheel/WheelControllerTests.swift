@@ -1,6 +1,6 @@
 import AppKit
 import HaloCore
-import RadialMenu
+@testable import RadialMenu
 import XCTest
 @testable import HaloApp
 
@@ -161,6 +161,44 @@ final class WheelControllerTests: XCTestCase {
         XCTAssertEqual(controller.kind, .tools)
         controller.radialMenu(controller.menuView, didRequestNextMenu: false)
         XCTAssertEqual(controller.kind, .convert)
+    }
+
+    func testReleaseOnASegmentWaitsForTheDrop() {
+        let point = CGPoint(x: 400, y: 400)
+        controller.show(kind: .convert, urls: [jpg], at: point)
+        controller.menuView.acceptsCurrentDrop = true // the last draggingUpdated said .copy
+        // The button is up but AppKit hasn't delivered performDragOperation yet.
+        XCTAssertTrue(controller.dragDidEnd(at: point), "waits for the drop")
+        XCTAssertTrue(controller.isVisible)
+        XCTAssertEqual(controller.kind, .convert)
+        guard let first = controller.menuView.items.first else { return XCTFail("no items") }
+        controller.radialMenu(controller.menuView, didActivate: first)
+        XCTAssertEqual(selections.count, 1, "the late drop still converts")
+    }
+
+    func testReleaseOverTheHubHidesAtOnce() {
+        let point = CGPoint(x: 400, y: 400)
+        controller.show(kind: .convert, urls: [jpg], at: point)
+        // Over the hub or a gap the wheel answered [], so AppKit won't deliver a drop.
+        XCTAssertFalse(controller.dragDidEnd(at: point))
+        XCTAssertNil(controller.kind, "no lingering wheel")
+    }
+
+    func testReleaseAwayFromWheelHides() {
+        controller.show(kind: .convert, urls: [jpg], at: CGPoint(x: 400, y: 400))
+        let far = CGPoint(x: controller.panel.frame.maxX + 300, y: controller.panel.frame.midY)
+        XCTAssertFalse(controller.dragDidEnd(at: far))
+        XCTAssertNil(controller.kind, "session ended")
+        XCTAssertFalse(controller.dragDidEnd(at: far), "nothing left to end")
+    }
+
+    func testGivingUpOnTheDropHides() {
+        let point = CGPoint(x: 400, y: 400)
+        controller.show(kind: .convert, urls: [jpg], at: point)
+        controller.menuView.acceptsCurrentDrop = true
+        XCTAssertTrue(controller.dragDidEnd(at: point))
+        controller.dragDidEnd()
+        XCTAssertNil(controller.kind)
     }
 
     func testCancelCallsBack() {

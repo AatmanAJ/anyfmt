@@ -20,6 +20,28 @@ detection uses permission-free public API (D-001).
 session either: no computer-use tools are available. The detection, wheel, drop and job paths are all
 covered with fakes in unit tests, and every screen is rendered offscreen.
 
+**Progress: real-hardware sessions (2026-10-18, the user on the dev Mac, Debug then Release builds).**
+- ✅ File drags from Finder are detected with no permissions granted (drag
+  pasteboard read in 0.6–0.7 ms).
+- ✅ The wheel opens mid-drag on ⇧ key-down. The user expected tap *or hold*, so
+  key-down activation is now the default (D-035).
+- ✅ Drop on a segment → converted file beside the original (PDF → PNG in 148 ms),
+  after the lost-drop fix below.
+- ✅ Live key → wheel visible, **Release** build: 43.0 / 44.3 / 44.8 ms, all under
+  the 50 ms budget (n = 3, so not yet a p95; margin ≈ 5 ms). The Debug builds
+  measured 62.1 / 27.8 ms, then 90.5 / 61.6 ms after a per-show availability
+  re-check crept in (removed in D-037).
+- ✅ ⌘ and ⌃ switch the open wheel mid-drag: 8 switches between Convert, Tools and
+  Actions in one drag, each in the same poll sample as its key-down (the redraw
+  itself isn't timed). A release over the centre closes the wheel at once (D-036).
+- 🐞 Found and fixed: every drop on a segment was lost, because the wheel hid on
+  mouse-up before AppKit delivered the drop. Then a release over the hub left the
+  wheel open for up to 1 s (D-036). Also found: the wheel never saw packs installed
+  after launch (D-037), and the Finder Return shortcut also needs Input Monitoring
+  (D-004).
+- ⏳ Still to do by hand: opening straight onto ⌘ / ⌃ (only switching was tried), a
+  few more latency samples for a real p95, and steps 2–8 below.
+
 **Two ways to finish it:**
 - **Let Claude do it:** turn on *Settings → This computer → Computer use* in the Claude desktop
   app, then ask Claude to "run the BLOCKERS.md B-001 session". It can drag in Finder, tap the

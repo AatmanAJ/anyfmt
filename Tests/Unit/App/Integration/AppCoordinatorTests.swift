@@ -1,6 +1,7 @@
 import XCTest
 import DragSense
 import HaloCore
+@testable import RadialMenu
 @testable import HaloApp
 
 /// Settings must drive behaviour, not just persist (the wiring the UI relies on).
@@ -50,6 +51,23 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(AppSettings(defaults: defaults).shownFormats, ["docx", "epub"])
         settings.resetAll()
         XCTAssertEqual(settings.shownFormats, [])
+    }
+
+    /// Real hardware: the poll sees the button go up before AppKit delivers the
+    /// drop. Hiding the wheel then lost every drop.
+    func testMouseUpOverTheWheelDoesNotCancelBeforeTheDrop() {
+        let coordinator = AppCoordinator(settings: settings)
+        defer { coordinator.wheel.hide(animated: false) }
+        let point = CGPoint(x: 400, y: 400)
+        coordinator.wheel.show(kind: .actions, urls: [URL(fileURLWithPath: "/tmp/a.jpg")], at: point)
+        coordinator.wheel.menuView.acceptsCurrentDrop = true // released on a segment
+        coordinator.handle(.dragEnded(location: point))
+        XCTAssertTrue(coordinator.wheel.isVisible)
+        XCTAssertNotNil(coordinator.wheel.kind, "still waiting for performDragOperation")
+        coordinator.wheel.menuView.acceptsCurrentDrop = false // the drag left the wheel
+        let far = CGPoint(x: coordinator.wheel.panel.frame.maxX + 300, y: point.y)
+        coordinator.handle(.dragEnded(location: far))
+        XCTAssertNil(coordinator.wheel.kind, "a release with no drop coming closes it")
     }
 
     func testOutputPolicySnapshot() {

@@ -31,10 +31,13 @@ How A works:
    idle baseline rather than the mouse-down snapshot so a late wake-up can't miss
    Finder's write. We never fall back to "N drag events passed" (Daisy's
    heuristic, which summons the wheel on window moves and text drags).
-3. **Modifier tap**: press then release within the tap threshold (default
-   350 ms, user-adjustable) with no other modifier joining in. Chords and holds
-   never trigger, so Finder's own ⌘ (move) / ⌥ (copy) / ⌘⌥ (alias) drag
-   modifiers keep working.
+3. **Trigger key**: by default the wheel opens the moment a trigger key goes
+   down mid-drag, so a tap and a hold both work (D-035). Keys already held when
+   the button went down never count. The opt-in "Only on a quick tap" mode keeps
+   the original rule: press then release within the tap threshold (default
+   350 ms, user-adjustable) with no other modifier joining in. In that mode
+   chords and holds never trigger, so Finder's own ⌘ (move) / ⌥ (copy) / ⌘⌥
+   (alias) drag modifiers keep working.
 4. Polling continues while the pointer is still, because the OS sends no drag
    events then. This is why a timer is required at all.
 
@@ -89,11 +92,13 @@ alpha ≥ 0.01**, because fully transparent pixels never receive `draggingEntere
 
 ### D-004 "Enter on a Finder selection"
 
-Full parity (press Return in Finder → wheel) needs **two** grants: Accessibility
-(an active event tap to swallow Return before Finder starts renaming) and
-Automation → Finder (Apple Events to read the selection). We ship it as an
+Full parity (press Return in Finder → wheel) needs **three** grants:
+Accessibility and Input Monitoring (an active keyboard event tap to swallow
+Return before Finder starts renaming; on current macOS `CGEvent.tapCreate`
+fails without Input Monitoring even when Accessibility is granted, as found on
+real hardware) and Automation → Finder (Apple Events to read the selection). We ship it as an
 **opt-in "Finder shortcut" mode** in Settings › Keys, off by default. The coach
-explains both prompts in one sentence each. While it's on, Return opens the
+explains each prompt in one sentence, and a failed tap says which grant is missing. While it's on, Return opens the
 wheel only when Finder is frontmost, a selection exists, and Finder's focused
 element is not a text field (so rename still works).
 
@@ -260,3 +265,51 @@ install is refused until BLOCKERS B-011 is done.
 `scripts/sync-strings.py` runs after every `make build`. It keeps comments and
 translations and marks removed keys stale, so all 1,388 user-facing strings are in the
 two catalogs (HaloCore, app).
+
+### D-035 The wheel opens on key-down by default
+The first real-hardware session (B-001) found the quick-tap rule too strict: the
+user expected to *hold* ⇧ / ⌘ / ⌃ mid-drag, as in the reference app, and fell back
+to the Services menu. DragSense now has `TriggerActivation`: `.press` (the default)
+opens or switches the wheel on the sample where a trigger key goes down, and a key
+pressed before the drag was recognised opens it as soon as the drag is. `.tap` is
+the old behaviour. Settings › Keys › "Open the wheel" picks between them, and the
+tap-speed slider only shows in tap mode. Trade-off: in press mode, holding ⌘ to
+move a file in Finder opens the Tools wheel (⌥ copy is unaffected, it isn't a
+trigger). Dropping outside the wheel still moves the file. Users who rely on ⌘-move
+pick "Only on a quick tap" or remap the key. Confirmed on real hardware: the wheel
+opened mid-drag on ⇧ key-down.
+
+### D-036 A release on a segment waits for AppKit's drop
+DragSense polls the button, so it sees the button go up a few milliseconds
+*before* AppKit delivers `performDragOperation` to the wheel. The coordinator
+used to hide the wheel and cancel on `dragEnded`, which ordered the panel out
+before the drop arrived, so every drop was lost (found in the B-001 log: "awaiting
+host" then "cancelled" in the same millisecond). The fix keys off what AppKit will
+do. It delivers a drop only when the destination's last `draggingEntered` /
+`draggingUpdated` answer wasn't empty, and RadialMenu now records that answer as
+`acceptsCurrentDrop`. On `dragEnded`, if that answer was "accept" (a segment) or the
+pointer is over the options popover, the wheel waits, and `onSelect` reports the
+drop to DragSense. A release over the hub, a gap, a disabled segment or another
+app hides the wheel at once. A first version waited for any release inside the
+panel's frame, and the second hardware try showed the wheel lingering after a
+release over the hub, because AppKit sends no drop there. If an expected drop never
+arrives, DragSense gives up after `dropResolutionTimeout` (1 s) and its `.cancelled`
+state hides the wheel. Confirmed on real hardware: drop on a segment → PDF → PNG
+written in 148 ms.
+
+### D-037 The wheel asks the live router on every show
+`WheelContentProvider.live()` used to capture one Router at launch, so a pack
+installed later never reached the wheel even though the toast said it had. It now
+calls `Router.live()` per show, which returns the same memoised Router while
+availability is unchanged (availability is re-checked at most every 2 s, or at once
+after `Router.invalidateLive()`). Launch, and every pack install or
+removal, plans routes from all 59 start formats on a utility-priority task
+(`Router.warmLive()`, 188 ms in a Debug build), so the first drag of a format
+doesn't pay a cold search (≈ 9 ms). Asking per show exposed the availability
+re-check (7–13 ms in Debug) on most shows, since the 2 s cache had usually expired
+by the next drag. An expired snapshot is now answered at once and refreshed on a
+utility queue, so a show only waits after `invalidateLive()` (a pack change). The
+launch prewarm also draws the Convert label style, fetches a file icon, formats a
+size and loads every format glyph, so a first show does no one-off work on the
+main thread. Debug main-thread cost of a show: 8 ms first, 6 ms warm
+(`WheelShowPerfTests`).

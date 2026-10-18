@@ -30,10 +30,11 @@ public struct WheelContentProvider: Sendable {
         self.actions = actions
     }
 
-    /// Uses the live router (engines available right now), built once.
+    /// Uses the live router (engines available right now), asked on every show
+    /// so a pack installed after launch appears on the next wheel. `Router.live()`
+    /// hands back the same warm Router while availability is unchanged.
     public static func live() -> WheelContentProvider {
-        let router = Router.live()
-        return WheelContentProvider(targets: { router.commonTargets(for: $0) })
+        WheelContentProvider(targets: { Router.live().commonTargets(for: $0) })
     }
 
     public init(router: Router) {

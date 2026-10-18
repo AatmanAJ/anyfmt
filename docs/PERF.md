@@ -8,11 +8,11 @@ linked where they come from a dedicated benchmark.
 
 | Budget | Target | Measured | | Method |
 |---|---|---|---|---|
-| Key tap → wheel visible | < 50 ms p95 | **≈ 30 ms p95** (estimate) | ✅ | Poll interval ≤ 4.2 ms (240 Hz, [A](lanes/A-dragsense.md)) + build 22-item wheel p95 6.0 ms + `panel.show` → window-server visible p95 26 ms ([B](lanes/B-wheel.md), n = 40). The Phase 0 spike measured order-front → visible p95 14.8 ms (D-001). A real key tap needs a human (BLOCKERS B-001); the app records it live via `DragSense.diagnostics.latencySummary()`. |
-| Idle CPU | ~0 % | **0.18 %** of one core (whole app, 60 s idle after launch) | ✅ | `ps cputime` delta. The drag sensor alone: 0.04 % ([A](lanes/A-dragsense.md)). |
-| Idle memory | < 40 MB | **22 MB** `phys_footprint` (RSS 65 MB, which includes shared framework pages) | ✅ | `footprint -p` |
-| App launch → ready | < 300 ms | **111 ms** median of 5 | ✅ | `--perf-report`: kernel process start → end of `applicationDidFinishLaunching` with sensor, wheel prewarm, status item and services running |
-| 12 MP HEIC → JPG | < 400 ms | **84 ms** (CLI, start-up subtracted); 34 ms upright / 109 ms with EXIF rotation in-engine ([D](lanes/D-image.md)) | ✅ | 4032 × 3024 HEIC |
+| Key tap → wheel visible | < 50 ms p95 | **43.0 / 44.3 / 44.8 ms** (live, real hardware, **Release**, n = 3) | ✅ | In-app probe (`DragSense.diagnostics`): the poll sample where the key went down → window-server "visible", during the B-001 sessions. All three samples are under budget, but three is too few for a real p95 and the margin is about 5 ms. Nearly all of it is the window server: the main-thread part of a show is 6–8 ms in Debug (`WheelShowPerfTests`) and less in Release. The Debug builds measured 62.1 / 27.8 ms, then 90.5 / 61.6 ms once a per-show availability re-check had crept in. D-037 removed that re-check and the one-off first-show work. Offscreen parts: poll ≤ 4.2 ms (240 Hz, [A](lanes/A-dragsense.md)), build a 22-item wheel p95 6.0 ms, `panel.show` → visible p95 26 ms ([B](lanes/B-wheel.md), n = 40). |
+| Idle CPU | ~0 % | **0.22 %** of one core (whole app, 60 s idle after launch) | ✅ | `ps cputime` delta, sampled from 8 s after launch, so the one-off background route warm-up (D-037) isn't counted. The drag sensor alone: 0.04 % ([A](lanes/A-dragsense.md)). |
+| Idle memory | < 40 MB | **28 MB** `phys_footprint` (RSS 76 MB, which includes shared framework pages) | ✅ | `footprint -p`. The warm route memo adds nothing measurable (28 MB with and without it). The wider prewarm (D-037) costs about 2 MB (26 MB with the old one). |
+| App launch → ready | < 300 ms | **147 ms** median of 5 (`make perf` straight after a build: 167 ms) | ✅ | `--perf-report`: kernel process start → end of `applicationDidFinishLaunching` with sensor, wheel prewarm, status item and services running. The prewarm is 23–28 ms of that, about 10 ms more than before D-037, in exchange for a first wheel with no one-off work. The background route warm-up doesn't change it (147 ms either way). |
+| 12 MP HEIC → JPG | < 400 ms | **88 ms** (CLI, start-up subtracted); 34 ms upright / 109 ms with EXIF rotation in-engine ([D](lanes/D-image.md)) | ✅ | 4032 × 3024 HEIC |
 | 1 min 1080p MOV → MP4 | report; hardware where faster | see below | ✅ | |
 
 ## 1 minute 1080p30 H.264 MOV → MP4

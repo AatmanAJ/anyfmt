@@ -64,6 +64,7 @@ enum PackCatalog {
             do {
                 _ = try await PackInstaller(spec: e.spec).install(from: file)
                 Router.invalidateLive()
+                Task.detached(priority: .utility) { Router.warmLive() }
                 ToastHUD.show(String(localized: "\(e.spec.name) installed. New conversions are available."))
             } catch {
                 ToastHUD.show(error.localizedDescription, isError: true)
@@ -75,6 +76,7 @@ enum PackCatalog {
         do {
             try PackInstaller(spec: e.spec).uninstall()
             Router.invalidateLive()
+            Task.detached(priority: .utility) { Router.warmLive() }
             ToastHUD.show(String(localized: "\(e.spec.name) removed."))
         } catch {
             ToastHUD.show(error.localizedDescription, isError: true)

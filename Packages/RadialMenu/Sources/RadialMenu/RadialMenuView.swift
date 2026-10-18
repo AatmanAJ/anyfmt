@@ -82,6 +82,11 @@ public final class RadialMenuView: NSView {
     public var highlightedItem: RadialItem? { highlightedItemIndex.map { items[$0] } }
     /// The resolved appearance being drawn.
     public private(set) var resolvedAppearance: RadialAppearance
+    /// Whether the drag over the view would be accepted if released now: the
+    /// last answer given to AppKit by `draggingEntered`/`draggingUpdated`.
+    /// AppKit only delivers a drop when that answer wasn't empty, so a host that
+    /// sees the mouse button go up can tell whether a drop is still coming.
+    public internal(set) var acceptsCurrentDrop = false
 
     /// Centre of the wheel in view coordinates.
     public var wheelCenter: CGPoint { CGPoint(x: bounds.midX, y: bounds.midY) }
@@ -585,6 +590,7 @@ public final class RadialMenuView: NSView {
     public func prepareForDisplay() {
         isDismissing = false
         lastPointer = nil
+        acceptsCurrentDrop = false
         let all = nodes.flatMap(\.movingLayers) + hubNode.movingLayers + (dropZoneNode?.movingLayers ?? [])
         LayerAnimation.withoutActions {
             for l in all + [shadowView.content, overlayView.content, maskRoot] {
