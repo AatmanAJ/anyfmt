@@ -1,7 +1,20 @@
-import Foundation
+import AppKit
 import HaloCore
 
-// Matrix runner skeleton. Phase 4 fills this in: every route on its fixture,
-// validated by actually opening the output; writes docs/MATRIX.md.
-let router = Router.live()
-FileHandle.standardOutput.write(Data("routes: \(router.optionCount())\n".utf8))
+// halo-matrix: runs every shipped route on its fixture, validates each output by
+// opening it (ImageIO decode, ffprobe probe + duration, PDFKit pages, archive
+// listing, re-parse for text formats), and writes docs/MATRIX.md.
+//
+//   halo-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
+//               [--only <from-format>] [--jobs N] [--json path]
+
+MainActor.assumeIsolated {
+    let app = NSApplication.shared
+    app.setActivationPolicy(.prohibited)
+    let args = Array(CommandLine.arguments.dropFirst())
+    Task { @MainActor in
+        let code = await MatrixRunner(args: args).run()
+        exit(code)
+    }
+    app.run()
+}
