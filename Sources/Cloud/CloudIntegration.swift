@@ -9,6 +9,9 @@ import HaloCore
 enum CloudIntegration {
     private static var observer: UUID?
     private static var syncChanges: AnyCancellable?
+    /// The optional Pro licence key (offline-verified, Keychain). Feeds only the cloud entitlements.
+    static let licences = LicenceStore()
+    private static var licenceLink: UUID?
 
     /// Start background cloud services only when they were opted into (inbox/sync).
     /// Touching `.shared` makes no request while signed out (CloudNetworkGate).
@@ -17,9 +20,15 @@ enum CloudIntegration {
         wheel.cloud.entitlements = services.entitlements
         wheel.cloud.onProTapWhileSignedOut = { CloudPanels.showProExplainer(for: $0) }
         wheel.cloud.onProTapWithoutPlan = { CloudPanels.showProExplainer(for: $0) }
+        if licenceLink == nil { licenceLink = licences.connect(to: services.state) }
         if syncChanges == nil {
             // Sync stays inert unless signed in, entitled and switched on (SyncEngine.isActive).
             services.setSyncSource(SettingsSyncSource(settings: .shared))
+            PresetSync.document = { PresetStore.shared.syncDocument() }
+            PresetSync.apply = { try PresetStore.shared.applySyncDocument($0) }
+            PresetStore.shared.onChange = {
+                Task { @MainActor in services.noteLocalChange(.presets) }
+            }
             syncChanges = SettingsSyncSource.changes(of: .shared).sink { namespace in
                 services.noteLocalChange(namespace)
             }

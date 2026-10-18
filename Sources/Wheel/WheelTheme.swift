@@ -35,6 +35,9 @@ public enum WheelTheme {
         c.screenEdgeInset = w.screenEdgeInset
         c.topExclusion = w.topExclusion
         c.minimumHitAlpha = w.minimumHitAlpha
+        // Configuring happens after the drop (tune lip / ⌥), never by hovering mid-drag (D-038).
+        c.optionsDwell = 0
+        c.presetBand = 46
         return c
     }
 

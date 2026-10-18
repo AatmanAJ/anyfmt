@@ -15,6 +15,7 @@ final class AppCoordinator {
     let sense: DragSense
     let wheel: WheelController
     let updater = UpdaterController()
+    let optionsPanel = OptionsPanelController()
     private let services = ServicesProvider()
     private var statusItem: StatusItemController?
     private var hotKey: GlobalHotKey?
@@ -39,6 +40,20 @@ final class AppCoordinator {
             self?.handle(selection, urls: urls, promises: promises, at: point)
         }
         wheel.onCancel = { [weak self] in self?.sense.cancelWheel() }
+        wheel.onTune = { [weak self] target, urls, promises, point in self?.tune(target, urls: urls, promises: promises, at: point) }
+        optionsPanel.onConvert = { [weak self] target, values, urls, promises, point in
+            PresetStore.shared.recordLastUsed(values, for: target.format)
+            self?.handle(.convert(target, options: values), urls: urls, promises: promises, at: point)
+        }
+        optionsPanel.estimator = { url, format, values in
+            guard let e = try? await Estimator.estimate(input: url, target: format, options: values) else { return nil }
+            return OptionsPanelController.Estimate(bytes: e.bytes, duration: e.duration, frames: e.frames,
+                                                   inputBytes: e.inputBytes, isExact: e.isExact)
+        }
+        optionsPanel.onRememberDefault = { [weak self] format, values in
+            self?.settings.formatDefaults[format] = values
+            self?.wheel.rememberedOptions[format] = values
+        }
         wheel.markVisible = { [weak self] in self?.sense.markWheelVisible() }
         wheel.rememberedOptions = settings.formatDefaults
         jobs.onJobFinished = { [weak self] record in self?.jobFinished(record) }
@@ -95,6 +110,20 @@ final class AppCoordinator {
         case .dragBegan, .dragMoved:
             break
         }
+    }
+
+    // MARK: Configure first (tune lip, ⌥-drop, ⌥-Return)
+
+    func tune(_ target: RouteTarget, urls: [URL], promises: [NSFilePromiseReceiver], at point: CGPoint) {
+        sense.wheelDidAcceptDrop()
+        let values = settings.defaultOptions(for: target.format)
+            .merging(wheel.rememberedOptions[target.format] ?? OptionValues())
+        optionsPanel.show(target: target, values: values, files: urls, promises: promises, near: point)
+    }
+
+    /// ⌥ means "configure" at the drop unless it's a trigger key (then the lip still works).
+    static func tuneModifier(_ settings: AppSettings) -> NSEvent.ModifierFlags? {
+        senseConfiguration(settings).triggers.contains { $0.key == .option } ? nil : .option
     }
 
     // MARK: Selection → work
@@ -254,6 +283,7 @@ final class AppCoordinator {
     /// Settings that apply without rebuilding anything.
     private func applyLiveSettings() {
         wheel.hapticsEnabled = settings.hapticsEnabled
+        wheel.menuView.tuneModifier = Self.tuneModifier(settings)
         sense.diagnostics.isVerbose = settings.verboseLogging
         jobs.queue.limits = Self.limits(for: settings)
     }

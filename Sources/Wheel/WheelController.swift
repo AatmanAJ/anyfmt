@@ -25,6 +25,13 @@ public final class WheelController: NSObject {
     public var onSelect: ((WheelSelection, [URL], [NSFilePromiseReceiver], CGPoint) -> Void)?
     /// Escape, a drop in the hub, a click outside in keyboard mode.
     public var onCancel: (() -> Void)?
+    /// A drop on the tune lip, with ⌥ held, or ⌥-Return: configure this target
+    /// first. The wheel has closed; the host opens the options panel.
+    public var onTune: ((RouteTarget, [URL], [NSFilePromiseReceiver], CGPoint) -> Void)?
+    /// Presets shown as chips (and "Last used").
+    public var presetStore: PresetStore = .shared
+    /// Chip id for the last options used with a format.
+    public static let lastUsedPresetID = "halo.last-used"
     /// Timing hook: called when the window server reports the panel visible.
     public var markVisible: (() -> Void)?
     /// The visible wheel changed (including fallbacks to Actions).
@@ -413,6 +420,61 @@ extension WheelController: RadialMenuViewDelegate {
             self.loadThumbnail()
         }
         return true
+    }
+
+    public func radialMenu(_ menu: RadialMenuView, presetsFor item: RadialItem) -> [RadialPreset] {
+        guard mode == .drag, case .convert(let target)? = entry(for: item.id), !target.schema.specs.isEmpty else { return [] }
+        var chips = presetStore.presets(for: target.format).prefix(2).map { RadialPreset(id: $0.id, title: $0.title) }
+        if presetStore.lastUsed(for: target.format) != nil {
+            chips.append(RadialPreset(id: Self.lastUsedPresetID,
+                                      title: String(localized: "Last used", comment: "Preset chip: the options used most recently for this format")))
+        }
+        return chips
+    }
+
+    public func radialMenu(_ menu: RadialMenuView, didDrop info: NSDraggingInfo, on item: RadialItem,
+                           target dropTarget: RadialDropTarget) -> Bool {
+        guard let entry = entry(for: item.id), case .convert(let target) = entry else {
+            return radialMenu(menu, didDrop: info, on: item)
+        }
+        switch dropTarget {
+        case .item:
+            return radialMenu(menu, didDrop: info, on: item)
+        case .preset(_, let presetID):
+            guard let values = presetValues(presetID, format: target.format) else { return radialMenu(menu, didDrop: info, on: item) }
+            let (urls, received) = WheelController.files(from: info)
+            presetStore.recordLastUsed(values, for: target.format)
+            commit(entry, urls: urls.isEmpty ? input.urls : urls, promises: received, at: screenPoint(info), options: values)
+            return true
+        case .tune:
+            let (urls, received) = WheelController.files(from: info)
+            tune(target, urls: urls.isEmpty ? input.urls : urls, promises: received, at: screenPoint(info), confirm: true)
+            return true
+        }
+    }
+
+    public func radialMenu(_ menu: RadialMenuView, didRequestTuneFor item: RadialItem) {
+        guard case .convert(let target)? = entry(for: item.id) else { return }
+        tune(target, urls: input.urls, promises: promises, at: panel.wheelCenterOnScreen, confirm: false)
+    }
+
+    /// Values for a chip: a stored preset, or the last options used.
+    func presetValues(_ id: String, format: FormatID) -> OptionValues? {
+        if id == Self.lastUsedPresetID { return presetStore.lastUsed(for: format) }
+        return presetStore.presets(for: format).first { $0.id == id }?.values
+    }
+
+    private func tune(_ target: RouteTarget, urls: [URL], promises received: [NSFilePromiseReceiver], at point: CGPoint, confirm: Bool) {
+        let handler = onTune
+        options.close()
+        thumbnailTask?.cancel()
+        if confirm {
+            panel.confirmDrop(at: point)
+            endSession()
+        } else {
+            hide(animated: true)
+        }
+        handler?(target, urls, received, point)
     }
 
     public func radialMenuDidCancel(_ menu: RadialMenuView) {
