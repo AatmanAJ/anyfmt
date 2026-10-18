@@ -91,12 +91,12 @@ private struct OptionRow: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
                 Text(verbatim: spec.label)
                     .font(.system(size: DesignTokens.TypeRamp.label - 1, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                 content()
                 if let help = spec.help {
                     Text(verbatim: help)
                         .font(.system(size: DesignTokens.TypeRamp.caption))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.haloSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -181,7 +181,7 @@ private struct NumberSlider: View {
                 .frame(minWidth: compact ? 120 : 150, maxWidth: compact ? .infinity : 240)
             Text(verbatim: readout)
                 .font(.system(size: compact ? DesignTokens.TypeRamp.label - 1 : DesignTokens.TypeRamp.body).monospacedDigit())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.haloSecondaryText)
                 .frame(minWidth: compact ? 38 : 48, alignment: .trailing)
         }
         .accessibilityElement(children: .combine)
@@ -208,7 +208,7 @@ private struct IntegerField: View {
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 72)
             if let unit, !unit.isEmpty {
-                Text(verbatim: unit).foregroundStyle(.secondary)
+                Text(verbatim: unit).foregroundStyle(Color.haloSecondaryText)
             }
             Stepper("", value: $value, in: range)
                 .labelsHidden()
@@ -270,16 +270,13 @@ private struct ValidatedTextField: View {
 
     var body: some View {
         let issue = validate(text)
-        VStack(alignment: compact ? .leading : .trailing, spacing: 3) {
+        VStack(alignment: compact ? .leading : .trailing, spacing: DesignTokens.Space.xs) {
             TextField("", text: $text, prompt: prompt.isEmpty ? nil : Text(verbatim: prompt))
                 .labelsHidden()
                 .textFieldStyle(.roundedBorder)
                 .frame(minWidth: compact ? 120 : 180, maxWidth: compact ? .infinity : 240)
             if let issue {
-                Text(verbatim: issue)
-                    .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloDanger)
-                    .fixedSize(horizontal: false, vertical: true)
+                OptionIssue(text: issue)
             }
         }
     }
@@ -342,10 +339,10 @@ private struct RectFields: View {
     var body: some View {
         let parts = OptionsFormLogic.parseRect(text) ?? [0, 0, 1, 1]
         let names = [String(localized: "X"), String(localized: "Y"), String(localized: "W"), String(localized: "H")]
-        VStack(alignment: .trailing, spacing: 3) {
+        VStack(alignment: .trailing, spacing: DesignTokens.Space.xs) {
             HStack(spacing: DesignTokens.Space.s) {
                 ForEach(0..<4, id: \.self) { i in
-                    VStack(spacing: 2) {
+                    VStack(spacing: DesignTokens.Space.xxs) {
                         TextField("", value: Binding(get: { parts[i] }, set: { new in
                             var p = parts
                             p[i] = OptionsFormLogic.clamp(new, 0, 1)
@@ -357,15 +354,33 @@ private struct RectFields: View {
                             .frame(width: 54)
                         Text(verbatim: names[i])
                             .font(.system(size: DesignTokens.TypeRamp.caption))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.haloSecondaryText)
                     }
                 }
             }
             if let issue = OptionsFormLogic.validateRect(text) {
-                Text(verbatim: issue)
-                    .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloDanger)
+                OptionIssue(text: issue)
             }
         }
+    }
+}
+
+/// An inline problem with a value: warning glyph + text in the error colour,
+/// so it never relies on colour alone.
+private struct OptionIssue: View {
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.xs) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .imageScale(.small)
+                .accessibilityHidden(true)
+            Text(verbatim: text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
+        .foregroundStyle(Color.haloDanger)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Problem: \(text)", comment: "VoiceOver prefix for an invalid option value"))
     }
 }

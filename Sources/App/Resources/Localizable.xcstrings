@@ -24,6 +24,7 @@
     "%@ options" : {
       "comment" : "Title of the conversion options popover, e.g. MP4 options"
     },
+    "%@ progress" : {},
     "%@ px" : {},
     "%@ removed." : {},
     "%@ to %@" : {},
@@ -51,6 +52,7 @@
     "%lld areas · saved copy is permanently redacted" : {},
     "%lld audio files" : {},
     "%lld bleeps · %@ muted" : {},
+    "%lld bundled engines. Everything here runs on your Mac." : {},
     "%lld by %lld pixels" : {},
     "%lld changes" : {},
     "%lld channels" : {},
@@ -153,6 +155,7 @@
     },
     "Add %@ to Favourites" : {},
     "Add a key to go with the modifiers." : {},
+    "Add a password of at least 4 characters first" : {},
     "Add a split at the playhead (M)" : {},
     "Add Frame" : {},
     "Add the frame on screen" : {},
@@ -182,6 +185,7 @@
     "Annotation canvas" : {},
     "Annotation text" : {},
     "another Mac" : {},
+    "Anyone with the link can download. Choose how long it lasts." : {},
     "App Exposé" : {},
     "Appearance" : {
       "comment" : "Gallery control"
@@ -237,6 +241,7 @@
     "Check Now" : {},
     "Checking keyframes…" : {},
     "Checking now asks the update server once, even with automatic checks off." : {},
+    "Checking…" : {},
     "Checks %@ daily. Nothing else is sent." : {},
     "Checks every %lld minutes while %@ is running." : {},
     "Choose" : {},
@@ -251,6 +256,7 @@
     "Clear search" : {},
     "Clear Shelf" : {},
     "Click a mark to select it, then drag it or its handles. Delete removes it; arrow keys nudge. Hover a tool for its shortcut." : {},
+    "Click, then press the new shortcut" : {},
     "Clip %lld, %@, %@" : {},
     "clip.mp4" : {},
     "clip.mp4 → GIF" : {},
@@ -260,7 +266,10 @@
     "Close Shelf" : {},
     "Close Window" : {},
     "Cloud conversion" : {},
-    "Cloud features are optional" : {},
+    "Cloud features are optional" : {
+      "extractionState" : "stale"
+    },
+    "Cloud is optional" : {},
     "Code from the sign-in page" : {},
     "Collapse" : {},
     "Colour" : {},
@@ -278,6 +287,7 @@
       "comment" : "Modifier key name"
     },
     "Conversions at once" : {},
+    "Conversions still work. Reinstalling %@ restores the list." : {},
     "Convert" : {
       "comment" : "Options popover button that runs the conversion"
     },
@@ -315,6 +325,7 @@
     "Couldn’t create the link: %@" : {},
     "Couldn’t find a terminal app." : {},
     "Couldn’t get the dragged files from the app they came from." : {},
+    "Couldn’t install: %@ Use Copy Command and run it in Terminal instead." : {},
     "Couldn’t move the item." : {},
     "Couldn’t move “%@”." : {},
     "Couldn’t open %@." : {},
@@ -344,6 +355,8 @@
     "Different codec" : {},
     "Different frame rate" : {},
     "Different size" : {},
+    "Dismiss" : {},
+    "Dismiss this message" : {},
     "Documents" : {},
     "Domain" : {},
     "Done" : {},
@@ -359,7 +372,9 @@
     "Drag across the waveform to mark what to bleep" : {},
     "Drag clips to reorder" : {},
     "Drag it, then press a trigger key. Or use the actions to open a wheel." : {},
-    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {},
+    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {
+      "extractionState" : "stale"
+    },
     "Drag on the image to cover an area. Drag an area to move it, or its corner to resize." : {},
     "Drag order" : {},
     "Drag over anything you want to hide" : {},
@@ -387,7 +402,9 @@
     },
     "Drop ring" : {},
     "Drop ring shortcut" : {},
-    "Duration" : {},
+    "Duration" : {
+      "comment" : "Options panel estimate tile"
+    },
     "Each file is compressed to this share of its own size." : {},
     "Each page is exactly the size of its image. JPEGs are embedded without recompression." : {},
     "Each value is a fraction from 0 to 1" : {},
@@ -403,6 +420,9 @@
     },
     "Enlarge images with a machine-learning model that runs on the server." : {},
     "Enter a server address." : {},
+    "esc" : {
+      "comment" : "Escape key cap, shown as a cancel hint"
+    },
     "Estimated size" : {
       "comment" : "Options panel estimate tile"
     },
@@ -411,6 +431,7 @@
     "Every local feature is free, with no account and no time limit." : {},
     "Every setting goes back to its default. Your files, launch at login and System Settings permissions aren’t touched." : {},
     "Everything here runs on your Mac." : {},
+    "Everything local works offline" : {},
     "Every…" : {},
     "Exact size" : {},
     "Expires" : {},
@@ -453,7 +474,9 @@
     "Formats this file can become" : {},
     "Frame" : {},
     "Frame %lld" : {},
-    "Frames" : {},
+    "Frames" : {
+      "comment" : "Options panel estimate tile"
+    },
     "Free" : {},
     "Free and open source (AGPL-3.0). You can read every line." : {},
     "Free and open source. Everything on your Mac stays free, with no account." : {},
@@ -519,7 +542,9 @@
     "Insert" : {},
     "Insert %@" : {},
     "Install" : {},
+    "Install %@" : {},
     "Install %@ %@" : {},
+    "Install the command-line tool" : {},
     "Installed %@" : {},
     "Installed at %@" : {},
     "Join order" : {},
@@ -577,6 +602,7 @@
       "comment" : "Gallery caption"
     },
     "Loading" : {},
+    "Local conversions keep working after you sign out" : {},
     "Location" : {},
     "Lock Screen" : {},
     "Logs" : {},
@@ -647,6 +673,7 @@
       "comment" : "Hub text when a file has no conversion targets"
     },
     "No files were selected." : {},
+    "No formats match “%@”" : {},
     "No frames yet, so the middle frame will be saved. Scrub to a frame and press F to add it." : {},
     "No image chosen" : {},
     "No keyframe within 1 second of a cut, so this trim re-encodes to stay frame-exact." : {},
@@ -697,6 +724,7 @@
       "comment" : "VoiceOver hint of an editor tool"
     },
     "Opens at the dropped folder, or at a file’s folder." : {},
+    "Opens your plan on %@ in your browser" : {},
     "Option" : {
       "comment" : "Modifier key name"
     },
@@ -740,6 +768,7 @@
     "Paste" : {
       "comment" : "Pastes a licence key from the clipboard"
     },
+    "Pastes a key from the clipboard" : {},
     "Pause" : {},
     "Pause (Space)" : {},
     "PDF" : {},
@@ -800,6 +829,9 @@
     "Pro. Uploads the file to the cloud." : {
       "comment" : "VoiceOver hint for cloud segments"
     },
+    "Problem: %@" : {
+      "comment" : "VoiceOver prefix for an invalid option value"
+    },
     "Progress" : {},
     "px" : {},
     "Quality" : {},
@@ -822,6 +854,7 @@
     "Recent Conversions" : {},
     "Recent Move folders" : {},
     "Recipes" : {},
+    "Recording. Press the new shortcut, or Escape to cancel." : {},
     "Red" : {},
     "Redaction canvas" : {},
     "Redo" : {},
@@ -834,6 +867,7 @@
     },
     "Remember as default for GIF" : {},
     "Remove" : {},
+    "Remove %@" : {},
     "Remove %@ from Favourites" : {},
     "Remove All" : {},
     "Remove all" : {},
@@ -852,6 +886,7 @@
     "Remove selected bleep" : {},
     "Remove split at %@" : {},
     "Remove the ? or # part of the address." : {},
+    "Remove the command-line tool" : {},
     "Remove “%@” from Shelf" : {},
     "Removed" : {},
     "Removes everything the format allows, including orientation and colour profile." : {},
@@ -966,11 +1001,14 @@
       "comment" : "VoiceOver hint of the More segment"
     },
     "Sign in to use %@ Cloud. Everything on your Mac keeps working without it." : {},
-    "Sign In…" : {},
+    "Sign In…" : {
+      "comment" : "Onboarding activation page"
+    },
     "Sign Out" : {},
     "Sign-in didn’t finish. Try again." : {},
     "Sign-in was cancelled." : {},
     "Signed in as" : {},
+    "Signing in" : {},
     "Signing in opens %@ in your browser and emails you a link." : {},
     "Signing in…" : {},
     "Silence" : {},
@@ -1026,7 +1064,10 @@
     "Sync Now" : {},
     "Tap" : {},
     "Tap %@ or %@ mid-drag for the other wheels." : {},
-    "Tap detected ✓ %@" : {},
+    "Tap detected ✓ %@" : {
+      "extractionState" : "stale"
+    },
+    "Tap detected: %@" : {},
     "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two." : {},
     "Tap speed" : {},
     "Tap ⌃ Control: AirDrop, Float, Copy, Move, Path, Terminal" : {
@@ -1055,6 +1096,7 @@
     "The cloud couldn’t process this file. The original is untouched." : {},
     "The connection dropped. Try again when you’re back online." : {},
     "The end must come after the start" : {},
+    "The engine list couldn’t be read" : {},
     "The file leaves this Mac to be processed or shared. You’ll only see this once for this server." : {},
     "The file was damaged in transit. Please try again." : {},
     "The files leave this Mac to be processed or shared. You’ll only see this once for this server." : {},
@@ -1088,7 +1130,12 @@
     "This month’s share links are used up. They renew at the start of next month." : {},
     "This sign-in link didn’t match. Start again from Settings." : {},
     "This sign-in link is from an earlier attempt. Start again from Settings." : {},
-    "This uploads to %@." : {},
+    "This uploads" : {
+      "comment" : "Upload notice headline"
+    },
+    "This uploads to %@." : {
+      "extractionState" : "stale"
+    },
     "Time %@ of %@" : {},
     "Title" : {},
     "To" : {},
@@ -1098,16 +1145,22 @@
     "Tools" : {},
     "Transcription" : {},
     "Troubleshooting" : {},
+    "Try a file extension such as heic or mp4." : {},
     "Try Another" : {},
     "Try it: tap a trigger key now" : {},
     "Turn speech in audio or video into SRT or VTT subtitles, using GPUs on the server." : {},
     "Two-pass encode that lands within a few percent of the size, sound included." : {},
-    "Type shortcut…" : {},
+    "Type a shortcut" : {},
+    "Type shortcut…" : {
+      "extractionState" : "stale"
+    },
     "Undo" : {},
     "Unit" : {},
     "Unlimited share links" : {},
     "Updates" : {},
     "Upload" : {},
+    "Uploads and copies the link" : {},
+    "Uploads to %@" : {},
     "Uploads to %@ so anyone with the link can download it." : {},
     "Uploads to %@. Results come back to your Mac." : {},
     "Uploads to %@. The link is copied when it’s ready." : {},
@@ -1117,6 +1170,7 @@
     "Use #RRGGBB or #RRGGBBAA" : {},
     "Use an https:// address. Plain http only works for servers on this Mac." : {},
     "Use as Defaults" : {},
+    "Use at least 4 characters so the link stays private." : {},
     "Use four numbers: x, y, width, height" : {},
     "Use one key on its own." : {},
     "Use page numbers and ranges, like 1-3, 5" : {},

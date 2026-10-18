@@ -22,6 +22,7 @@ struct AccountSettingsView: View {
             serverSection
         }
         .formStyle(.grouped)
+        .toggleStyle(HaloSwitchStyle())
         .frame(minWidth: 480, idealWidth: 520)
         .onAppear { serverText = session.serverURL.absoluteString }
         .onChange(of: session.serverURL) { serverText = $0.absoluteString }
@@ -49,8 +50,7 @@ struct AccountSettingsView: View {
                 HStack {
                     Spacer()
                     Button(String(localized: "Sign In…")) { session.signIn() }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
+                        .buttonStyle(.haloPrimary)
                         .accessibilityHint(Text("Opens \(session.serverDisplayName) in your browser"))
                 }
             case .waitingForBrowser, .signingIn:
@@ -59,9 +59,13 @@ struct AccountSettingsView: View {
                 signedInRows
             }
             if let error = session.lastError {
-                Label(error, systemImage: "exclamationmark.circle")
-                    .font(.system(size: TypeRamp.body))
-                    .foregroundStyle(CloudStyle.danger)
+                HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                    CloudStatusLine(text: error, tone: .error)
+                    Spacer(minLength: Space.s)
+                    Button(String(localized: "Dismiss")) { session.lastError = nil }
+                        .buttonStyle(.haloQuiet)
+                        .accessibilityLabel(Text("Dismiss this message"))
+                }
             }
         } header: {
             Text("Account")
@@ -69,25 +73,22 @@ struct AccountSettingsView: View {
     }
 
     private var signedOutHeader: some View {
-        HStack(alignment: .top, spacing: Space.m) {
-            Image(systemName: "icloud")
-                .font(.system(size: 26, weight: .regular))
-                .foregroundStyle(CloudStyle.iris)
-                .frame(width: 36)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: Space.xs) {
-                Text("\(Brand.name) Cloud is optional")
-                    .font(.system(size: TypeRamp.title, weight: .semibold))
-                Text("Share links, cloud conversion, sync and an inbox for files from your phone. Everything that runs on your Mac stays free and works offline.")
-                    .font(.system(size: TypeRamp.body))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("Signing in opens \(session.serverDisplayName) in your browser and emails you a link.")
-                    .font(.system(size: TypeRamp.caption + 1))
-                    .foregroundStyle(.secondary)
-            }
+        VStack(alignment: .leading, spacing: Space.s) {
+            DisplayText(String(localized: "\(Brand.name) Cloud is optional"), size: DesignTokens.Component.Cloud.headlineCompact)
+                .foregroundStyle(CloudStyle.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text("Share links, cloud conversion, sync and an inbox for files from your phone. Everything that runs on your Mac stays free and works offline.")
+                .font(.system(size: TypeRamp.body))
+                .foregroundStyle(CloudStyle.mist)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Signing in opens \(session.serverDisplayName) in your browser and emails you a link.")
+                .font(.system(size: TypeRamp.label))
+                .foregroundStyle(CloudStyle.mist)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, Space.xs)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 
@@ -95,10 +96,12 @@ struct AccountSettingsView: View {
         VStack(alignment: .leading, spacing: Space.s) {
             HStack(spacing: Space.s) {
                 ProgressView().controlSize(.small)
+                    .accessibilityLabel(Text("Signing in"))
                 Text(session.status == .signingIn ? String(localized: "Signing in…") : String(localized: "Finish signing in in your browser…"))
                     .font(.system(size: TypeRamp.body))
                 Spacer()
                 Button(String(localized: "Cancel")) { session.cancelSignIn() }
+                    .buttonStyle(.haloQuiet)
             }
             .accessibilityElement(children: .combine)
             if session.status == .waitingForBrowser {
@@ -113,7 +116,7 @@ struct AccountSettingsView: View {
                 } else {
                     Button(String(localized: "Opened the link on another device?")) { showCodeField = true }
                         .buttonStyle(.link)
-                        .font(.system(size: TypeRamp.caption + 1))
+                        .font(.system(size: TypeRamp.label))
                 }
             }
         }
@@ -135,7 +138,7 @@ struct AccountSettingsView: View {
         if let usage = session.entitlements.usageLine {
             LabeledContent(String(localized: "Usage")) {
                 HStack(spacing: Space.s) {
-                    Text(usage).foregroundStyle(.secondary)
+                    Text(usage).foregroundStyle(CloudStyle.mist)
                     Button {
                         Task { await session.refreshAccount() }
                     } label: {
@@ -151,6 +154,8 @@ struct AccountSettingsView: View {
         HStack {
             Spacer()
             Button(String(localized: "Sign Out")) { Task { await session.signOut() } }
+                .buttonStyle(.haloQuiet)
+                .accessibilityHint(Text("Local conversions keep working after you sign out"))
         }
     }
 
@@ -166,7 +171,7 @@ struct AccountSettingsView: View {
             .disabled(!session.entitlements.can(.sync))
             if session.syncEnabled && session.entitlements.can(.sync) {
                 HStack {
-                    Text(lastSyncedText).foregroundStyle(.secondary).font(.system(size: TypeRamp.body))
+                    Text(lastSyncedText).foregroundStyle(CloudStyle.mist).font(.system(size: TypeRamp.body))
                     Spacer()
                     Button(String(localized: "Sync Now")) { Task { await session.syncNow() } }
                 }
@@ -209,7 +214,8 @@ struct AccountSettingsView: View {
                 LabeledContent(String(localized: "Save to")) {
                     HStack(spacing: Space.s) {
                         Image(nsImage: NSWorkspace.shared.icon(forFile: session.inboxFolder.path))
-                            .resizable().frame(width: 16, height: 16)
+                            .resizable()
+                            .frame(width: DesignTokens.Component.Cloud.inboxIcon, height: DesignTokens.Component.Cloud.inboxIcon)
                             .accessibilityHidden(true)
                         Text(abbreviated(session.inboxFolder))
                             .lineLimit(1).truncationMode(.middle)
@@ -218,7 +224,7 @@ struct AccountSettingsView: View {
                 }
                 HStack {
                     Text(String(localized: "Checks every \(session.inboxIntervalMinutes) minutes while \(Brand.name) is running."))
-                        .font(.system(size: TypeRamp.caption + 1)).foregroundStyle(.secondary)
+                        .font(.system(size: TypeRamp.label)).foregroundStyle(CloudStyle.mist)
                     Spacer()
                     Button(String(localized: "Check Now")) { Task { await session.checkInboxNow() } }
                 }
@@ -266,8 +272,8 @@ struct AccountSettingsView: View {
                 .disabled(session.isDefaultServer && !serverTextDiffers)
             }
             Text("Self-hosting? Point \(Brand.name) at your own server. Each server keeps its own sign-in.")
-                .font(.system(size: TypeRamp.caption + 1))
-                .foregroundStyle(.secondary)
+                .font(.system(size: TypeRamp.label))
+                .foregroundStyle(CloudStyle.mist)
         } header: {
             Text("Server")
         }
@@ -281,16 +287,17 @@ struct AccountSettingsView: View {
     @ViewBuilder private var serverCheckView: some View {
         switch session.serverCheck {
         case .idle: EmptyView()
-        case .checking: ProgressView().controlSize(.small)
+        case .checking:
+            HStack(spacing: Space.xs) {
+                ProgressView().controlSize(.small)
+                Text("Checking…").font(.system(size: TypeRamp.label)).foregroundStyle(CloudStyle.mist)
+            }
+            .accessibilityElement(children: .combine)
         case .ok(let name):
-            Label(name, systemImage: "checkmark.circle.fill")
-                .foregroundStyle(CloudStyle.success)
-                .font(.system(size: TypeRamp.body))
+            CloudStatusLine(text: name, tone: .success)
                 .lineLimit(1)
         case .failed(let message):
-            Label(message, systemImage: "xmark.circle.fill")
-                .foregroundStyle(CloudStyle.danger)
-                .font(.system(size: TypeRamp.body))
+            CloudStatusLine(text: message, tone: .error)
                 .lineLimit(2)
         }
     }
@@ -304,8 +311,8 @@ struct AccountSettingsView: View {
                 if !session.entitlements.can(feature) { CloudProChip() }
             }
             Text(detail)
-                .font(.system(size: TypeRamp.caption + 1))
-                .foregroundStyle(.secondary)
+                .font(.system(size: TypeRamp.label))
+                .foregroundStyle(CloudStyle.mist)
         }
     }
 }

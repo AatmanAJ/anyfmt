@@ -41,7 +41,9 @@ struct OutputPane: View {
                     if let folder = settings.outputFolderURL {
                         Text(verbatim: (folder.path as NSString).abbreviatingWithTildeInPath)
                     } else if settings.outputFolderBookmark != nil {
+                        // The words carry the problem; the colour only draws the eye.
                         Text("The chosen folder is missing. Files are saved beside the original until you choose another.")
+                            .foregroundStyle(Color.haloDanger)
                     } else {
                         Text("Right next to the file you dropped, like Finder’s Duplicate.")
                     }
@@ -164,12 +166,7 @@ struct NamingPatternRow: View {
                         let joiner = base.isEmpty || base.hasSuffix(" ") || base.hasSuffix("-") || base.hasSuffix("_") ? "" : " "
                         pattern = base + joiner + token.token
                     } label: {
-                        Text(verbatim: token.token)
-                            .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium, design: .monospaced))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(Color.iris.opacity(0.12)))
-                            .foregroundStyle(Color.accentText)
+                        SettingsTokenPill(text: token.token)
                     }
                     .buttonStyle(.plain)
                     .help(Text(verbatim: token.title))
@@ -179,17 +176,19 @@ struct NamingPatternRow: View {
         } label: {
             Text("Insert")
         }
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
+            HStack(spacing: DesignTokens.Space.s) {
                 Image(systemName: "eye")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
+                    .accessibilityHidden(true)
                 Text(verbatim: NamingPreview.line(pattern: pattern, date: date))
                     .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))
                     .textSelection(.enabled)
                     .accessibilityIdentifier("output.namePreview")
             }
             if let issue = NamingPreview.issue(pattern: pattern) {
-                FootnoteText(text: issue, symbol: "exclamationmark.triangle")
+                StatusBadge(tone: .waiting, text: issue)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.vertical, 2)

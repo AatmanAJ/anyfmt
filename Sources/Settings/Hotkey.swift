@@ -51,14 +51,20 @@ struct Hotkey: Equatable, Sendable {
     var isValid: Bool { issue == nil }
 
     /// "⌃⌥Space", in Apple's modifier order.
-    var displayString: String {
-        var s = ""
-        if modifiers.contains(.control) { s += "⌃" }
-        if modifiers.contains(.option) { s += "⌥" }
-        if modifiers.contains(.shift) { s += "⇧" }
-        if modifiers.contains(.command) { s += "⌘" }
-        return s + Self.keyName(keyCode)
+    var displayString: String { displayParts.joined() }
+
+    /// One entry per key cap: ["⌃", "⌥", "Space"], in Apple's modifier order.
+    var displayParts: [String] {
+        var parts: [String] = []
+        if modifiers.contains(.control) { parts.append("⌃") }
+        if modifiers.contains(.option) { parts.append("⌥") }
+        if modifiers.contains(.shift) { parts.append("⇧") }
+        if modifiers.contains(.command) { parts.append("⌘") }
+        return parts + [Self.keyName(keyCode)]
     }
+
+    /// "Control Option Space", for VoiceOver.
+    var spokenString: String { displayParts.map(KeyCap.spoken).joined(separator: " ") }
 
     // MARK: Tables
 
@@ -138,8 +144,10 @@ struct HotkeyRecorder: View {
     @State private var issue: Hotkey.Issue?
     @State private var monitor: LocalKeyMonitor?
 
+    @Environment(\.isEnabled) private var isEnabled
+
     var body: some View {
-        VStack(alignment: .trailing, spacing: 4) {
+        VStack(alignment: .trailing, spacing: DesignTokens.Space.xs) {
             HStack(spacing: DesignTokens.Space.s) {
                 if hotkey != .default && !recording {
                     Button {
@@ -153,31 +161,47 @@ struct HotkeyRecorder: View {
                     .help(Text("Restore \(Hotkey.default.displayString)"))
                     .accessibilityLabel(Text("Restore default shortcut"))
                 }
-                Button(action: toggleRecording) {
-                    Text(verbatim: recording ? String(localized: "Type shortcut…") : hotkey.displayString)
-                        .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium, design: recording ? .default : .rounded))
-                        .foregroundStyle(recording ? Color.iris : Color.primary)
-                        .frame(minWidth: 96)
-                }
-                .buttonStyle(.bordered)
-                .tint(nil)
-                .overlay {
-                    if recording {
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .strokeBorder(Color.iris, lineWidth: 1.5)
-                    }
-                }
-                .accessibilityIdentifier("keys.hotkeyRecorder")
-                .accessibilityLabel(Text("Drop ring shortcut"))
-                .accessibilityValue(Text(verbatim: hotkey.displayString))
+                Button(action: toggleRecording) { field }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("keys.hotkeyRecorder")
+                    .accessibilityLabel(Text("Drop ring shortcut"))
+                    .accessibilityValue(recording ? Text("Recording. Press the new shortcut, or Escape to cancel.")
+                                                  : Text(verbatim: hotkey.spokenString))
+                    .accessibilityHint(Text("Click, then press the new shortcut"))
             }
             if let issue {
-                Text(verbatim: issue.message)
-                    .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloDanger)
+                StatusBadge(tone: .warning, text: issue.message)
+                    .accessibilityLabel(Text("Problem: \(issue.message)"))
             }
         }
         .onDisappear(perform: stop)
+    }
+
+    /// The current shortcut as key caps; while recording, a pill-shaped well
+    /// with a cobalt ring and an esc hint.
+    private var field: some View {
+        HStack(spacing: DesignTokens.Space.xs) {
+            if recording {
+                Image(systemName: "record.circle")
+                    .foregroundStyle(Color.accentText)
+                    .accessibilityHidden(true)
+                Text("Type a shortcut")
+                    .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
+                    .foregroundStyle(Color.accentText)
+                KeyCap(text: String(localized: "esc", comment: "Escape key cap, shown as a cancel hint"), compact: true)
+            } else {
+                ForEach(Array(hotkey.displayParts.enumerated()), id: \.offset) { _, part in
+                    KeyCap(text: part)
+                }
+            }
+        }
+        .padding(.horizontal, recording ? DesignTokens.Space.m : 0)
+        .frame(minHeight: DesignTokens.Component.Pill.height)
+        .background { if recording { Capsule().fill(Color.haloTile) } }
+        .haloBorder(Capsule(), recording ? Color.token(DesignTokens.Semantic.focusRing) : .clear,
+                    width: DesignTokens.Component.Focus.ringWidth)
+        .contentShape(Capsule())
+        .opacity(isEnabled ? 1 : 0.45)
     }
 
     private func toggleRecording() {

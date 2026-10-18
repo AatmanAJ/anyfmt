@@ -3,7 +3,8 @@ import SwiftUI
 import HaloCore
 
 // Small shared controls for Halo's SwiftUI windows (settings, onboarding,
-// about, the wheel's options popover).
+// about, the wheel's options popover). Phase 2 language: ink tiles, cobalt
+// for "on", one tile radius or a pill, icons beside every coloured state.
 
 // MARK: - Snapshot rendering
 
@@ -43,7 +44,7 @@ extension View {
     func snapshotActiveAppearance() -> some View { modifier(SnapshotActiveAppearance()) }
 }
 
-/// The standard switch, except in snapshot renders (see `isSnapshot`).
+/// The standard switch tinted cobalt, except in snapshot renders (see `isSnapshot`).
 struct HaloSwitchStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         HaloSwitchBody(configuration: configuration)
@@ -78,9 +79,8 @@ struct SnapshotSwitch: View {
         ZStack(alignment: isOn ? .trailing : .leading) {
             Capsule().fill(isOn ? Color.iris : Color(nsColor: .tertiaryLabelColor).opacity(0.55))
             Capsule()
-                .fill(Color.white)
+                .fill(Color(hex: DesignTokens.Primitive.paper0))
                 .frame(width: w * 0.6, height: h - 3)
-                .shadow(color: .black.opacity(0.18), radius: 0.8, y: 0.5)
                 .padding(.horizontal, 1.5)
         }
         .frame(width: w, height: h)
@@ -98,12 +98,12 @@ struct CardToggle: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: DesignTokens.Space.l) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                 Text(verbatim: subtitle)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -116,55 +116,120 @@ struct CardToggle: View {
     }
 }
 
+// MARK: - Borders
+
+extension View {
+    /// A border on `shape` drawn as a ring of fill (outer shape minus the
+    /// inset shape) instead of a stroked path. Stroked rounded paths pick up
+    /// notches where arcs meet edges in offscreen captures (docs/screens);
+    /// fills don't, and look identical on screen.
+    func haloBorder<S: InsettableShape>(_ shape: S, _ color: Color,
+                                        width: CGFloat = DesignTokens.Shape.hairline) -> some View {
+        overlay {
+            BorderRing(shape: shape, width: width)
+                .fill(color, style: FillStyle(eoFill: true))
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+/// The outline of `shape` as an even-odd ring: the shape minus itself inset.
+private struct BorderRing<S: InsettableShape>: Shape {
+    let shape: S
+    let width: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var p = shape.path(in: rect)
+        p.addPath(shape.inset(by: width).path(in: rect))
+        return p
+    }
+}
+
 // MARK: - Key caps
 
-/// A key as printed on an Apple keyboard: "⇧ Shift" on a small cap.
+/// A key as a small ink tile: "⇧ Shift", "⌘", "Space". One radius
+/// (`Shape.tile`), a hairline instead of a shadow. `prominent` is the key
+/// that's live right now: cobalt with white text (5.0:1).
 struct KeyCap: View {
     let text: String
     var prominent = false
     var compact = false
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    private typealias T = DesignTokens.Component.KeyCap
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
         Text(verbatim: text)
-            .font(.system(size: compact ? 11 : 12, weight: .semibold, design: .rounded))
-            .foregroundStyle(prominent ? Color.white : Color.primary)
-            .padding(.horizontal, compact ? 6 : 8)
-            .padding(.vertical, compact ? 2 : 3)
-            .frame(minWidth: compact ? 20 : 26)
-            .background {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(prominent ? AnyShapeStyle(Color.iris) : AnyShapeStyle(Color(nsColor: .controlBackgroundColor)))
-                    .shadow(color: .black.opacity(prominent ? 0.25 : 0.12), radius: 0, y: 1)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(prominent ? Color.clear : Color.primary.opacity(0.14), lineWidth: 0.5)
-            }
+            .font(.system(size: compact ? T.compactFontSize : T.fontSize, weight: .semibold))
+            .lineLimit(1)
+            .fixedSize()
+            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+            .padding(.horizontal, compact ? T.compactHorizontalPadding : T.horizontalPadding)
+            .frame(minWidth: compact ? T.compactMinWidth : T.minWidth,
+                   minHeight: compact ? T.compactHeight : T.height)
+            .background(shape.fill(prominent ? Color.iris : Color.token(T.fill)))
+            .haloBorder(shape, prominent ? Color.clear : strokeColor)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: KeyCap.spoken(text)))
+    }
+
+    private var strokeColor: Color {
+        contrast == .increased ? Color.haloInk : Color.token(T.stroke)
+    }
+
+    /// VoiceOver reads modifier symbols as words; it would otherwise skip "⌃".
+    nonisolated static func spoken(_ text: String) -> String {
+        let names: [Character: String] = [
+            "⌃": String(localized: "Control", comment: "Key name read by VoiceOver"),
+            "⌥": String(localized: "Option", comment: "Key name read by VoiceOver"),
+            "⇧": String(localized: "Shift", comment: "Key name read by VoiceOver"),
+            "⌘": String(localized: "Command", comment: "Key name read by VoiceOver"),
+        ]
+        guard text.count == 1, let c = text.first, let name = names[c] else { return text }
+        return name
     }
 }
 
 // MARK: - Status
 
-/// Coloured dot + label, e.g. "● Granted".
+/// Icon + label, e.g. a check and "Granted". The icon's shape carries the
+/// state as well as its colour, so nothing rides on colour alone.
 struct StatusBadge: View {
     enum Tone { case good, waiting, off, warning }
     let tone: Tone
     let text: String
 
+    private typealias T = DesignTokens.Component.StatusBadge
+
     var body: some View {
-        HStack(spacing: 5) {
-            Circle().fill(color).frame(width: 7, height: 7)
-            Text(verbatim: text).foregroundStyle(.secondary)
+        HStack(spacing: T.spacing) {
+            Image(systemName: symbol)
+                .font(.system(size: T.iconSize, weight: .semibold))
+                .foregroundStyle(color)
+                .accessibilityHidden(true)
+            Text(verbatim: text)
+                .foregroundStyle(tone == .off ? Color.haloSecondaryText : Color.haloInk)
         }
-        .font(.system(size: DesignTokens.TypeRamp.label))
+        .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
         .accessibilityElement(children: .combine)
+    }
+
+    /// SF Symbol for the tone (also used by tests and the docs).
+    var symbol: String {
+        switch tone {
+        case .good: "checkmark.circle.fill"
+        case .waiting: "clock.fill"
+        case .off: "minus.circle"
+        case .warning: "exclamationmark.triangle.fill"
+        }
     }
 
     private var color: Color {
         switch tone {
         case .good: .haloSuccess
-        case .waiting: Color(nsColor: .systemYellow)
-        case .off: Color(nsColor: .tertiaryLabelColor)
+        case .waiting: Color.token(T.waiting)
+        case .off: .haloSecondaryText
         case .warning: .haloDanger
         }
     }
@@ -176,47 +241,61 @@ struct FootnoteText: View {
     var symbol: String?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.xs + DesignTokens.Space.xxs) {
             if let symbol {
-                Image(systemName: symbol).foregroundStyle(.secondary).imageScale(.small)
+                Image(systemName: symbol)
+                    .foregroundStyle(Color.haloSecondaryText)
+                    .imageScale(.small)
+                    .accessibilityHidden(true)
             }
             Text(verbatim: text)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.haloSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: DesignTokens.TypeRamp.label))
+        .accessibilityElement(children: .combine)
     }
 }
 
-/// Short format label in a rounded chip ("JPG").
+/// Short format label in a pill ("JPG"). Families share four fills (cobalt,
+/// orange, flame, ink); the label itself always says what it is.
 struct FormatChip: View {
     let label: String
     var kind: FileKind = .other
-    var size: CGFloat = 10.5
+    var size: CGFloat = DesignTokens.Component.FormatChip.defaultSize
 
     var body: some View {
         Text(verbatim: label)
-            .font(.system(size: size, weight: .bold, design: .rounded))
+            .font(.system(size: size, weight: .bold))
             .lineLimit(1)
-            .foregroundStyle(Color.white)
-            .padding(.horizontal, size * 0.55)
-            .padding(.vertical, size * 0.2)
+            .foregroundStyle(FormatChip.onTint(for: kind))
+            .padding(.horizontal, size * 0.6)
+            .padding(.vertical, size * 0.22)
             .frame(minWidth: size * 3.6)
-            .background(RoundedRectangle(cornerRadius: size * 0.45, style: .continuous).fill(FormatChip.tint(for: kind)))
+            .background(Capsule().fill(FormatChip.tint(for: kind)))
+            .accessibilityLabel(Text(verbatim: label))
     }
 
-    /// One calm hue per family, all from the iris/mint palette family.
+    /// The family fill.
     static func tint(for kind: FileKind) -> Color {
+        let t = DesignTokens.Component.FormatChip.self
         switch kind {
-        case .image, .vector: .iris
-        case .video: Color(nsColor: .halo((light: 0x5B4BD6, dark: 0x7A6CF0)))
-        case .audio: .mint
-        case .pdf: Color(nsColor: .halo((light: 0xD14D72, dark: 0xF06A8F)))
-        case .document, .ebook: Color(nsColor: .halo((light: 0x3B82C4, dark: 0x5EA2E6)))
-        case .slides: Color(nsColor: .halo((light: 0x8E5BD0, dark: 0xA97BEB)))
-        case .spreadsheet: Color(nsColor: .halo((light: 0x2E9E6A, dark: 0x45BE85)))
-        case .subtitle: Color(nsColor: .halo((light: 0x6B6977, dark: 0x8E8C99)))
-        case .archive, .folder, .other: Color(nsColor: .halo((light: 0x7A7484, dark: 0x8F8999)))
+        case .image, .vector: return .iris
+        case .video, .audio: return Color(hex: DesignTokens.Primitive.orange500)
+        case .pdf: return Color(hex: DesignTokens.Primitive.flame500)
+        case .document, .ebook, .slides, .spreadsheet, .subtitle: return Color.token(t.neutralFill)
+        case .archive, .folder, .other: return Color.token(t.quietFill)
+        }
+    }
+
+    /// Text or glyph colour on `tint(for:)`, AA in both appearances: white on
+    /// cobalt (5.0:1) and grey, black on orange (9.6:1) and flame (6.3:1).
+    static func onTint(for kind: FileKind) -> Color {
+        switch kind {
+        case .image, .vector, .archive, .folder, .other: return Color(hex: DesignTokens.Semantic.onAccentPrimary)
+        case .video, .audio, .pdf: return Color(hex: DesignTokens.Semantic.onAccentSecondary)
+        case .document, .ebook, .slides, .spreadsheet, .subtitle:
+            return Color.token(DesignTokens.Component.FormatChip.neutralText)
         }
     }
 }

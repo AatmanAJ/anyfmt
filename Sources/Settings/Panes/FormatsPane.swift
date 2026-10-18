@@ -50,33 +50,43 @@ private struct FormatsBrowser: View {
         let catalog = model.formatCatalog
         HStack(spacing: 0) {
             VStack(spacing: 0) {
-                HStack(spacing: 6) {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                HStack(spacing: DesignTokens.Space.s) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(Color.haloSecondaryText)
+                        .accessibilityHidden(true)
                     TextField("", text: $search, prompt: Text("Search formats"))
                         .textFieldStyle(.plain)
+                        .accessibilityLabel(Text("Search formats"))
                         .accessibilityIdentifier("formats.search")
                     if !search.isEmpty {
                         Button { search = "" } label: { Image(systemName: "xmark.circle.fill") }
                             .buttonStyle(.plain)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.haloSecondaryText)
                             .accessibilityLabel(Text("Clear search"))
                     }
                 }
                 .font(.system(size: DesignTokens.TypeRamp.body))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
-                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.06)))
+                .padding(.horizontal, DesignTokens.Space.m)
+                .frame(minHeight: DesignTokens.Component.Settings.searchHeight)
+                .background(Capsule().fill(Color.token(DesignTokens.Component.Settings.chipFill)))
                 .padding(.horizontal, DesignTokens.Space.m)
                 .padding(.top, DesignTokens.Space.m)
                 .padding(.bottom, DesignTokens.Space.s)
 
                 List(selection: $selection) {
+                    if !search.isEmpty && groups(catalog).isEmpty {
+                        SettingsStateRow(kind: .empty,
+                                         title: String(localized: "No formats match “\(search)”"),
+                                         detail: String(localized: "Try a file extension such as heic or mp4."))
+                            .listRowSeparator(.hidden)
+                            .accessibilityIdentifier("formats.noResults")
+                    }
                     if search.isEmpty {
                         Section {
                             if settings.favouriteFormats.isEmpty {
                                 Text("Star a format to pin it to the start of the ring.")
                                     .font(.system(size: DesignTokens.TypeRamp.label))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.haloSecondaryText)
                                     .listRowSeparator(.hidden)
                             }
                             ForEach(settings.favouriteFormats, id: \.self) { id in
@@ -108,7 +118,7 @@ private struct FormatsBrowser: View {
                 .scrollContentBackground(.hidden)
                 .accessibilityIdentifier("formats.list")
             }
-            .frame(width: 272)
+            .frame(width: DesignTokens.Component.Settings.sidebarWidth)
 
             Divider()
 
@@ -168,18 +178,19 @@ private struct FormatSidebarRow: View {
             Text(verbatim: format.name)
                 .lineLimit(1)
                 .foregroundStyle(hidden ? .secondary : .primary)
-            Spacer(minLength: 4)
+            Spacer(minLength: DesignTokens.Space.xs)
             if hidden {
                 Image(systemName: "eye.slash")
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .help(Text("Hidden from the wheel"))
+                    .accessibilityLabel(Text("Hidden from the wheel"))
             }
             Button {
                 if favourite { settings.favouriteFormats.removeAll { $0 == format.id } }
                 else { settings.favouriteFormats.append(format.id) }
             } label: {
                 Image(systemName: favourite ? "star.fill" : "star")
-                    .foregroundStyle(favourite ? Color.iris : Color.secondary.opacity(0.6))
+                    .foregroundStyle(favourite ? Color.accentText : Color.haloSecondaryText)
             }
             .buttonStyle(.plain)
             .help(favourite ? Text("Remove from Favourites") : Text("Add to Favourites"))
@@ -207,23 +218,26 @@ private struct FormatDetail: View {
     var body: some View {
         Form {
             Section {
-                HStack(spacing: DesignTokens.Space.m) {
-                    Image(systemName: format.glyph)
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(Color.white)
-                        .frame(width: 44, height: 44)
-                        .background(RoundedRectangle(cornerRadius: 11, style: .continuous).fill(FormatChip.tint(for: format.kind).gradient))
-                    VStack(alignment: .leading, spacing: 2) {
+                // Editorial header, like the options panel: the format name
+                // set huge, the plain description underneath.
+                HStack(alignment: .lastTextBaseline, spacing: DesignTokens.Space.m) {
+                    VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
+                        DisplayText(format.label, size: DesignTokens.Component.Settings.formatTitleSize)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityLabel(Text(verbatim: "\(format.label), \(format.name)"))
                         Text(verbatim: format.name)
                             .font(.system(size: DesignTokens.TypeRamp.title, weight: .semibold))
-                        Text(verbatim: "\(format.kind.sectionTitle) · " + format.extensions.prefix(4).map { ".\($0)" }.joined(separator: " "))
-                            .font(.system(size: DesignTokens.TypeRamp.label))
-                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                     }
                     Spacer()
-                    FormatChip(label: format.label, kind: format.kind, size: 12)
+                    VStack(alignment: .trailing, spacing: DesignTokens.Space.xs) {
+                        FormatChip(label: format.kind.sectionTitle, kind: format.kind)
+                        Text(verbatim: format.extensions.prefix(4).map { ".\($0)" }.joined(separator: " "))
+                            .font(.system(size: DesignTokens.TypeRamp.label).monospaced())
+                            .foregroundStyle(Color.haloSecondaryText)
+                    }
                 }
-                .padding(.vertical, 2)
+                .padding(.vertical, DesignTokens.Space.xs)
 
                 Toggle(isOn: Binding(get: { !settings.hiddenFormats.contains(format.id) }, set: { on in
                     if on { settings.hiddenFormats.remove(format.id) } else { settings.hiddenFormats.insert(format.id) }
@@ -254,7 +268,7 @@ private struct FormatDetail: View {
             Section {
                 if schema.specs.isEmpty {
                     Text("Nothing to set: converting to \(format.label) has no options.")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.haloSecondaryText)
                 } else {
                     OptionsForm(schema: schema, values: valuesBinding)
                 }
@@ -306,7 +320,7 @@ private struct PresetsSection: View {
         Section {
             if model.presets.isEmpty {
                 Text("No presets for \(format.label) yet.")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
             }
             ForEach(model.presets) { preset in
                 PresetRow(preset: preset, model: model) {
@@ -316,6 +330,7 @@ private struct PresetsSection: View {
             }
             HStack {
                 Button("Save Current Defaults as Preset") { model.saveAsPreset(currentValues) }
+                    .buttonStyle(.haloSecondary)
                     .accessibilityIdentifier("formats.presets.save")
                 Spacer()
             }
@@ -359,18 +374,18 @@ private struct PresetRow: View {
                 if !summary.isEmpty {
                     Text(verbatim: summary)
                         .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.haloSecondaryText)
                         .lineLimit(1)
                 }
             }
             Spacer(minLength: DesignTokens.Space.s)
             if preset.isBuiltIn {
                 Text("Built-in")
-                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
+                    .foregroundStyle(Color.haloSecondaryText)
                     .padding(.horizontal, DesignTokens.Space.s)
                     .padding(.vertical, DesignTokens.Space.xxs)
-                    .background(Capsule().fill(Color.primary.opacity(0.06)))
+                    .background(Capsule().fill(Color.token(DesignTokens.Component.Settings.chipFill)))
             }
             Menu {
                 menuItems
@@ -502,14 +517,15 @@ private struct ToolsList: View {
                             })) {
                                 HStack(spacing: DesignTokens.Space.m) {
                                     Image(systemName: tool.glyph)
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(.system(size: DesignTokens.TypeRamp.title, weight: .medium))
                                         .foregroundStyle(Color.accentText)
-                                        .frame(width: 22)
-                                    VStack(alignment: .leading, spacing: 1) {
+                                        .frame(width: DesignTokens.Component.Settings.rowIconWidth)
+                                        .accessibilityHidden(true)
+                                    VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                                         Text(verbatim: tool.title)
                                         Text(tool.needsEditor ? "Opens an editor with a live preview" : "Runs straight away with your defaults")
                                             .font(.system(size: DesignTokens.TypeRamp.label))
-                                            .foregroundStyle(.secondary)
+                                            .foregroundStyle(Color.haloSecondaryText)
                                     }
                                 }
                             }
