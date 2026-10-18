@@ -20,7 +20,7 @@ mkdir -p "$OUT"
 
 sign_args=(CODE_SIGN_IDENTITY=- OTHER_CODE_SIGN_FLAGS=--timestamp=none)
 if [[ -n "${DEVELOPER_ID:-}" ]]; then
-  sign_args=(CODE_SIGN_IDENTITY="$DEVELOPER_ID" DEVELOPMENT_TEAM="${TEAM_ID:-}" OTHER_CODE_SIGN_FLAGS=--timestamp)
+  sign_args=(CODE_SIGN_IDENTITY="$DEVELOPER_ID" DEVELOPMENT_TEAM="${TEAM_ID:-}" OTHER_CODE_SIGN_FLAGS=--timestamp HALO_HARDENED_RUNTIME=YES)
   echo "▸ signing with $DEVELOPER_ID"
 else
   echo "▸ no DEVELOPER_ID: building ad-hoc signed (not notarizable)"

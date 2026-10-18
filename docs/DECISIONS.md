@@ -215,3 +215,24 @@ a short licence grant (not an assignment) with an explicit relicensing clause
 and a promise that each contribution also stays available under AGPL. Enforced
 by hosted CLA Assistant, one click per contributor. DCO-plus-clause was
 rejected because a sign-off doesn't show that the extra clause was seen.
+
+---
+
+## Integration
+
+### D-030 Lane decisions
+Each lane recorded its decisions in its notes file; they're part of this log by reference:
+[A DragSense](lanes/A-dragsense.md) (A-1…A-13) · [B Wheel](lanes/B-wheel.md) (D-B01…D-B12) ·
+[C Jobs](lanes/C-jobs.md) (D-C1…D-C14) · [D Image + PDF](lanes/D-image.md) (D-D1…D-D15) ·
+[E Audio/Video/Subtitles](lanes/E-av.md) · [H Actions](lanes/H-actions.md) (H-1…H-9) ·
+[I Cloud](lanes/I-cloud.md) (D-I1…D-I12), plus F, G1, G2 and the UI lane as they land.
+The ones that changed a shared contract are applied in the code and listed in `docs/contract-changes/`.
+
+### D-031 Hardened runtime only on Developer ID builds
+With hardened runtime on, dyld's library validation refuses to map an ad-hoc-signed
+`HaloCore.framework` or libav dylib into an ad-hoc-signed process ("different Team IDs"),
+so a local Release build couldn't even launch its CLI or the embedded ffmpeg. Every
+Developer ID build (`make dmg` with `DEVELOPER_ID`, the release workflow) sets
+`HALO_HARDENED_RUNTIME=YES` and signs every nested binary with `--options runtime`, as
+notarization requires. Local ad-hoc builds leave it off. Nothing is weakened for
+distributed builds. No `disable-library-validation` entitlement is used.

@@ -31,7 +31,8 @@ identity="${EXPANDED_CODE_SIGN_IDENTITY:--}"
 [[ -z "$identity" ]] && identity="-"
 sign() {
   if [[ "$identity" == "-" ]]; then
-    codesign --force --sign - --options runtime "$@"
+    # Ad-hoc: no hardened runtime, or library validation blocks our own dylibs.
+    codesign --force --sign - "$@"
   else
     codesign --force --sign "$identity" --options runtime --timestamp "$@"
   fi
