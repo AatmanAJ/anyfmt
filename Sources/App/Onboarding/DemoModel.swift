@@ -94,7 +94,8 @@ final class DemoModel: ObservableObject {
 
     enum Staging { case wheel(DemoWheelKind), done }
 
-    static let stageSize = CGSize(width: 640, height: 252)
+    static let stageSize = CGSize(width: DesignTokens.Component.Onboarding.stageWidth,
+                                  height: DesignTokens.Component.Onboarding.stageHeight)
     static let fileName = "Sample.heic"
     /// The demo ring is a touch smaller than the real one so it fits the window.
     static let scale: CGFloat = 0.9
@@ -125,8 +126,8 @@ final class DemoModel: ObservableObject {
         self.thumbnail = SampleArtwork.thumbnail(size: 168)
     }
 
-    static var homeCenter: CGPoint { CGPoint(x: stageSize.width * 0.24, y: stageSize.height / 2) }
-    static var resultCenter: CGPoint { CGPoint(x: stageSize.width * 0.52, y: stageSize.height / 2) }
+    static var homeCenter: CGPoint { CGPoint(x: stageSize.width * 0.26, y: stageSize.height * 0.4) }
+    static var resultCenter: CGPoint { CGPoint(x: stageSize.width * 0.66, y: stageSize.height * 0.4) }
 
     var triggers: TriggerAssignment {
         TriggerAssignment(convert: TriggerKey.parse(settings.convertKey, fallback: .shift),
@@ -153,7 +154,7 @@ final class DemoModel: ObservableObject {
                 DemoSegment(id: "jpg", title: "JPG", glyph: "photo"),
                 DemoSegment(id: "png", title: "PNG", glyph: "square.on.square.dashed"),
                 DemoSegment(id: "webp", title: "WebP", glyph: "globe"),
-                DemoSegment(id: "avif", title: "AVIF", glyph: "sparkles"),
+                DemoSegment(id: "avif", title: "AVIF", glyph: "photo.artframe"),
                 DemoSegment(id: "pdf", title: "PDF", glyph: "doc.richtext"),
                 DemoSegment(id: "tiff", title: "TIFF", glyph: "printer"),
                 DemoSegment(id: "gif", title: "GIF", glyph: "photo.stack"),
@@ -311,7 +312,7 @@ final class DemoModel: ObservableObject {
         switch staging {
         case .wheel(let kind):
             // Wheel in the middle, pointer just past the 3 o'clock segment.
-            wheelCenter = CGPoint(x: Self.stageSize.width * 0.46, y: Self.stageSize.height / 2)
+            wheelCenter = CGPoint(x: Self.stageSize.width * 0.42, y: Self.stageSize.height / 2)
             let n = Self.segments(kind).count
             let a = DemoHitTest.midAngle(n / 4, count: n) + 0.12
             pointer = CGPoint(x: wheelCenter.x + cos(a) * (Self.outerRadius + 34), y: wheelCenter.y + sin(a) * (Self.outerRadius + 34))

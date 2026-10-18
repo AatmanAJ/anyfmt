@@ -1,167 +1,327 @@
 import SwiftUI
 import HaloCore
 
-/// Screen 2: no permissions needed; the opt-in Finder shortcut explains its two.
-struct OnboardingPermissionsPage: View {
-    @ObservedObject var model: OnboardingModel
-    @ObservedObject var settings: AppSettings
+// Every page: a heavy uppercase headline at the top left, a plain subtitle, then
+// at most one charcoal tile of controls. The page's band column (if any) is drawn
+// by `OnboardingView`; nothing here adds colour of its own. The quieter pages set
+// the headline at the top and the controls at the foot, like a poster.
 
+/// Screen 1. The heat band column on the right is the page's spotlight.
+struct OnboardingWelcomePage: View {
     var body: some View {
-        VStack(spacing: DesignTokens.Space.xl) {
-            PageIcon(symbol: "checkmark.shield", tint: .haloSuccess)
-            PageHeader(title: String(localized: "No permissions needed"),
-                       subtitle: String(localized: "The wheel works without any special access. There’s nothing to approve."))
-            Card {
-                CardToggle(title: String(localized: "Optional: press Return in Finder to open the wheel"),
-                           subtitle: String(localized: "Select files and press Return instead of dragging. This one extra needs two permissions:"),
-                           isOn: Binding(get: { settings.finderShortcutEnabled }, set: { model.setFinderShortcut($0) }),
-                           identifier: "onboarding.finderShortcut")
-                Divider()
-                PermissionsCoachList(coach: model.coach)
-                    .opacity(settings.finderShortcutEnabled ? 1 : 0.45)
-                    .disabled(!settings.finderShortcutEnabled)
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeadline(text: String(localized: "Convert\nwhile you\ndrag.", comment: "Onboarding welcome headline; keep each line short"),
+                               size: DesignTokens.Component.Onboarding.headlineWelcome)
+            OnboardingSubtitle(text: String(localized: "Convert, edit and share files from the drag you're already doing. Press a key mid-drag and a wheel of options opens around the pointer."))
+                .padding(.top, DesignTokens.Space.l + DesignTokens.Space.xxs)
+            Spacer(minLength: DesignTokens.Space.l)
+            OnboardingTile(spacing: DesignTokens.Space.s + DesignTokens.Space.xxs) {
+                FactLine(tag: String(localized: "Local", comment: "Onboarding welcome fact tag"),
+                         text: String(localized: "Hundreds of conversions, on this Mac, with nothing to install."))
+                OnboardingDivider()
+                FactLine(tag: String(localized: "Private", comment: "Onboarding welcome fact tag"),
+                         text: String(localized: "Files never leave your Mac unless you choose a cloud feature."))
+                OnboardingDivider()
+                FactLine(tag: String(localized: "Free", comment: "Onboarding welcome fact tag"),
+                         text: String(localized: "Every local feature is free, with no account and no time limit."))
             }
-            FootnoteText(text: String(localized: "Prefer no permissions at all? Right-click files › Services › Open in \(Brand.name) Wheel does the same."),
-                         symbol: "contextualmenu.and.cursorarrow")
         }
-        .animation(.easeOut(duration: DesignTokens.Motion.crossfade), value: settings.finderShortcutEnabled)
     }
 }
 
-/// Screen 3: launch at login.
+/// A short display tag and one plain sentence.
+private struct FactLine: View {
+    let tag: String
+    let text: String
+
+    private typealias T = DesignTokens.Component.Onboarding
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.m) {
+            Text(verbatim: tag.localizedUppercase)
+                .font(.haloDisplay(T.tagSize))
+                .displayTracking(T.tagSize)
+                .frame(width: T.tagWidth, alignment: .leading)
+            Text(verbatim: text)
+                .font(.system(size: DesignTokens.TypeRamp.body))
+                .foregroundStyle(Color.haloSecondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Screen 3: no permissions needed; the opt-in Finder shortcut explains its own.
+/// The cobalt band column is the page's spotlight.
+struct OnboardingPermissionsPage: View {
+    @ObservedObject var model: OnboardingModel
+    @ObservedObject var settings: AppSettings
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeadline(text: String(localized: "No permissions\nneeded.", comment: "Onboarding permissions headline; keep each line short"),
+                               size: DesignTokens.Typeface.Size.displayL)
+            OnboardingSubtitle(text: String(localized: "The wheel works without any special access. There’s nothing to approve."))
+                .padding(.top, DesignTokens.Space.m)
+            Spacer(minLength: DesignTokens.Space.l)
+            OnboardingTile {
+                OnboardingToggleRow(title: String(localized: "Optional: press Return in Finder to open the wheel"),
+                                    subtitle: String(localized: "Select files and press Return instead of dragging. This one extra needs the permissions below.",
+                                                     comment: "Onboarding: the Finder shortcut toggle"),
+                                    isOn: Binding(get: { settings.finderShortcutEnabled }, set: { model.setFinderShortcut($0) }),
+                                    identifier: "onboarding.finderShortcut")
+                if settings.finderShortcutEnabled {
+                    OnboardingDivider()
+                    PermissionsCoachList(coach: model.coach)
+                        .transition(.opacity)
+                }
+            }
+            OnboardingFootnote(text: String(localized: "Prefer no permissions at all? Right-click files › Services › Open in \(Brand.name) Wheel does the same."))
+                .padding(.top, DesignTokens.Space.m)
+        }
+        .animation(OnboardingMotion.page(reduceMotion: reduceMotion), value: settings.finderShortcutEnabled)
+    }
+}
+
+/// Screen 4: launch at login. Restraint: type and one tile.
 struct OnboardingLaunchPage: View {
     @ObservedObject var model: OnboardingModel
 
     var body: some View {
-        VStack(spacing: DesignTokens.Space.xl) {
-            PageIcon(symbol: "menubar.arrow.up.rectangle", tint: .iris)
-            PageHeader(title: String(localized: "Ready when you drag"),
-                       subtitle: String(localized: "\(Brand.name) lives in the menu bar, with no Dock icon and no window. Start it with your Mac so the wheel is always there."))
-            Card {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeadline(text: String(localized: "Ready when\nyou drag.", comment: "Onboarding launch-at-login headline; keep each line short"))
+            OnboardingSubtitle(text: String(localized: "\(Brand.name) lives in the menu bar, with no Dock icon and no window. Start it with your Mac so the wheel is always there."))
+                .padding(.top, DesignTokens.Space.l + DesignTokens.Space.xxs)
+            Spacer(minLength: DesignTokens.Space.xl)
+            OnboardingTile {
                 LaunchAtLoginRow(model: model.loginItem, card: true)
             }
-            FootnoteText(text: String(localized: "You can change this any time in Settings › General, or in System Settings › General › Login Items."))
+            OnboardingFootnote(text: String(localized: "You can change this any time in Settings › General, or in System Settings › General › Login Items."))
+                .padding(.top, DesignTokens.Space.m)
         }
     }
 }
 
-/// Screen 4: update checks (off by default) and finish.
+/// Screen 5: update checks (off by default).
 struct OnboardingUpdatesPage: View {
     @ObservedObject var model: OnboardingModel
     @ObservedObject var settings: AppSettings
 
     var body: some View {
-        VStack(spacing: DesignTokens.Space.xl) {
-            PageIcon(symbol: "arrow.down.circle", tint: .iris)
-            PageHeader(title: String(localized: "Stay up to date"),
-                       subtitle: String(localized: "\(Brand.name) never connects to the internet unless you ask it to."))
-            Card {
-                CardToggle(title: String(localized: "Check for updates automatically"),
-                           subtitle: model.info.updateLine,
-                           isOn: Binding(get: { settings.updateChecksEnabled }, set: { model.setUpdateChecks($0) }),
-                           identifier: "onboarding.updateChecks")
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeadline(text: String(localized: "Stay up\nto date.", comment: "Onboarding updates headline; keep each line short"))
+            OnboardingSubtitle(text: String(localized: "\(Brand.name) never connects to the internet unless you ask it to."))
+                .padding(.top, DesignTokens.Space.l + DesignTokens.Space.xxs)
+            Spacer(minLength: DesignTokens.Space.xl)
+            OnboardingTile {
+                OnboardingToggleRow(title: String(localized: "Check for updates automatically"),
+                                    subtitle: model.info.updateLine,
+                                    isOn: Binding(get: { settings.updateChecksEnabled }, set: { model.setUpdateChecks($0) }),
+                                    identifier: "onboarding.updateChecks")
             }
-            FootnoteText(text: String(localized: "Free and open source. Everything on your Mac stays free, with no account."),
-                         symbol: "heart")
+            OnboardingFootnote(text: String(localized: "Free and open source. Everything on your Mac stays free, with no account."))
+                .padding(.top, DesignTokens.Space.m)
         }
     }
 }
 
-struct OnboardingWelcomePage: View {
-    var body: some View {
-        VStack(spacing: DesignTokens.Space.xl) {
-            PageIcon(symbol: "circle.dashed", tint: .iris)
-            PageHeader(title: String(localized: "Welcome to \(Brand.name)"),
-                       subtitle: String(localized: "Convert, edit and share files from the drag you're already doing. Press a key mid-drag and a wheel of options opens around the pointer."))
-            Card {
-                VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-                    WelcomeLine(symbol: "arrow.triangle.2.circlepath", text: String(localized: "Hundreds of conversions, on this Mac, with nothing to install."))
-                    WelcomeLine(symbol: "lock.shield", text: String(localized: "Files never leave your Mac unless you choose a cloud feature."))
-                    WelcomeLine(symbol: "gift", text: String(localized: "Every local feature is free, with no account and no time limit."))
-                }
-                .padding(DesignTokens.Space.m)
-            }
-        }
-    }
-}
-
-private struct WelcomeLine: View {
-    let symbol: String
-    let text: String
-    var body: some View {
-        Label {
-            Text(verbatim: text).fixedSize(horizontal: false, vertical: true)
-        } icon: {
-            Image(systemName: symbol).foregroundStyle(Color.accentText)
-        }
-        .font(.system(size: DesignTokens.TypeRamp.body))
-    }
-}
-
-/// Optional, last, guilt-free: "Start Using Halo" skips it.
+/// Screen 6: optional, last, guilt-free. The quiet page: one sentence, a key
+/// field with an Activate pill, and "Start Using Halo" as the default, which skips.
 struct OnboardingActivatePage: View {
     @ObservedObject var model: OnboardingModel
     @ObservedObject var licence: LicenceActivationModel
 
     var body: some View {
-        VStack(spacing: DesignTokens.Space.xl) {
-            PageIcon(symbol: "key", tint: .iris)
-            PageHeader(title: String(localized: "Have a Pro key or account?"),
-                       subtitle: String(localized: "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account."))
-            Card {
-                VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
-                    LicenceActivationView(model: licence, compact: true)
-                    Divider()
-                    HStack {
-                        Text("Or sign in to your account", comment: "Onboarding activation page")
-                            .font(.system(size: DesignTokens.TypeRamp.body))
-                        Spacer()
-                        Button(String(localized: "Sign In…", comment: "Onboarding activation page")) { model.signIn() }
-                            .accessibilityIdentifier("onboarding.signIn")
-                    }
-                }
-                .padding(DesignTokens.Space.m)
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeadline(text: String(localized: "Got a\nPro key?", comment: "Onboarding activation headline; keep each line short"))
+            OnboardingSubtitle(text: String(localized: "Optional. Pro adds cloud features like share links and cloud conversions. Nothing local ever needs a key, so skipping changes nothing.",
+                                            comment: "Onboarding activation page"))
+                .padding(.top, DesignTokens.Space.l + DesignTokens.Space.xxs)
+            Spacer(minLength: DesignTokens.Space.xl)
+            KeyEntry(licence: licence)
+                .frame(maxWidth: DesignTokens.Component.Onboarding.tileWidth, alignment: .leading)
+            HStack(spacing: DesignTokens.Space.xs) {
+                Text("Or sign in to your account", comment: "Onboarding activation page")
+                    .font(.system(size: DesignTokens.TypeRamp.body))
+                    .foregroundStyle(Color.haloSecondaryText)
+                Button(String(localized: "Sign In…", comment: "Onboarding activation page")) { model.signIn() }
+                    .buttonStyle(AccentTextButtonStyle())
+                    .accessibilityIdentifier("onboarding.signIn")
+                Text(verbatim: "·").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
+                Text("You can do this later in Settings › Account.", comment: "Onboarding activation page")
+                    .font(.system(size: DesignTokens.TypeRamp.body))
+                    .foregroundStyle(Color.haloSecondaryText)
             }
-            FootnoteText(text: String(localized: "Nothing local ever needs a key. Skipping changes nothing."), symbol: "checkmark.circle")
+            .padding(.top, DesignTokens.Space.l)
+        }
+    }
+}
+
+/// The licence field as a pill, Paste, and the Activate pill. Uses the same
+/// model (and strings) as Settings › Account.
+private struct KeyEntry: View {
+    @ObservedObject var licence: LicenceActivationModel
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
+            if let status = licence.status {
+                Label {
+                    Text(verbatim: status.message)
+                } icon: {
+                    Image(systemName: status.isValid ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(status.isValid ? Color.accentText : Color.haloDanger)
+                }
+                .font(.system(size: DesignTokens.TypeRamp.body))
+                .accessibilityElement(children: .combine)
+            }
+            HStack(spacing: DesignTokens.Space.s) {
+                TextField(String(localized: "HALO1-…", comment: "Placeholder for the licence key field"), text: $licence.keyText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))
+                    .focused($focused)
+                    .padding(.horizontal, DesignTokens.Space.l)
+                    .frame(height: DesignTokens.Component.Pill.largeHeight)
+                    .background(PillBorder(fill: Color.haloTile,
+                                           border: focused ? Color.token(DesignTokens.Semantic.focusRing) : Color.haloHairline,
+                                           width: focused ? DesignTokens.Component.Focus.ringWidth : DesignTokens.Shape.hairline))
+                    .onSubmit { if licence.canActivate { licence.activate() } }
+                    .accessibilityLabel(Text("Licence key", comment: "VoiceOver label of the licence key field"))
+                Button(String(localized: "Paste", comment: "Pastes a licence key from the clipboard")) { licence.pasteFromClipboard() }
+                    .buttonStyle(HaloPillButtonStyle(kind: .quiet, large: true))
+                Button(String(localized: "Activate", comment: "Activates a pasted licence key")) { licence.activate() }
+                    // Quiet until there's a key to activate, then the orange pill.
+                    .buttonStyle(HaloPillButtonStyle(kind: licence.canActivate ? .secondary : .quiet, large: true))
+                    .disabled(!licence.canActivate)
+                    .accessibilityIdentifier("onboarding.activate")
+            }
+            if let message = licence.message {
+                Label {
+                    Text(verbatim: message)
+                } icon: {
+                    Image(systemName: licence.isError ? "exclamationmark.circle" : "checkmark.circle")
+                }
+                .font(.system(size: DesignTokens.TypeRamp.label))
+                .foregroundStyle(licence.isError ? Color.haloDanger : Color.haloSecondaryText)
+            }
+            OnboardingFootnote(text: String(localized: "Keys are checked on this Mac, offline. A key only unlocks cloud features; every local conversion, tool and action is free without one.",
+                                            comment: "Explains what a licence key does"))
         }
     }
 }
 
 // MARK: - Pieces
 
-struct PageIcon: View {
-    let symbol: String
-    let tint: Color
+/// Heavy uppercase display lines set tight, like a poster. Lines come from the
+/// localized string (one per `\n`) so translators choose the breaks.
+struct OnboardingHeadline: View {
+    let text: String
+    var size: CGFloat = DesignTokens.Component.Onboarding.headline
 
     var body: some View {
-        Image(systemName: symbol)
-            .font(.system(size: 30, weight: .medium))
-            .foregroundStyle(tint)
-            .frame(width: 64, height: 64)
-            .background(Circle().fill(tint.opacity(0.12)))
-            .overlay(Circle().strokeBorder(tint.opacity(0.2), lineWidth: 1))
+        let lines = text.split(separator: "\n").map(String.init)
+        VStack(alignment: .leading, spacing: size * DesignTokens.Component.Onboarding.headlineLeading) {
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                Text(verbatim: line.localizedUppercase)
+                    .font(.haloDisplay(size))
+                    .displayTracking(size)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+        }
+        .foregroundStyle(Color.haloInk)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: lines.joined(separator: " ")))
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// The plain sentence under a headline.
+struct OnboardingSubtitle: View {
+    let text: String
+
+    var body: some View {
+        Text(verbatim: text)
+            .font(.system(size: DesignTokens.Component.Onboarding.subtitleSize))
+            .foregroundStyle(Color.haloSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: DesignTokens.Component.Onboarding.subtitleWidth, alignment: .leading)
+    }
+}
+
+/// A charcoal tile for a page's controls (the one tile radius).
+struct OnboardingTile<Content: View>: View {
+    var spacing: CGFloat = DesignTokens.Space.m
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: spacing) {
+            content
+        }
+        .padding(DesignTokens.Space.l)
+        .frame(maxWidth: DesignTokens.Component.Onboarding.tileWidth, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+    }
+}
+
+struct OnboardingDivider: View {
+    var body: some View {
+        Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline)
             .accessibilityHidden(true)
     }
 }
 
-/// Grouped-form-style card for onboarding controls.
-struct Card<Content: View>: View {
-    @ViewBuilder var content: Content
-    @Environment(\.colorScheme) private var colorScheme
+/// Small print under a tile.
+struct OnboardingFootnote: View {
+    let text: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
-            content
+        Text(verbatim: text)
+            .font(.system(size: DesignTokens.TypeRamp.label))
+            .foregroundStyle(Color.haloSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: DesignTokens.Component.Onboarding.tileWidth, alignment: .leading)
+    }
+}
+
+/// Title, subtitle and a trailing switch, in the page's own colours.
+struct OnboardingToggleRow: View {
+    let title: String
+    let subtitle: String
+    @Binding var isOn: Bool
+    var identifier: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: DesignTokens.Space.l) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
+                Text(verbatim: title)
+                    .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+                    .foregroundStyle(Color.haloInk)
+                Text(verbatim: subtitle)
+                    .font(.system(size: DesignTokens.TypeRamp.label))
+                    .foregroundStyle(Color.haloSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Toggle(isOn: $isOn) { Text(verbatim: title) }
+                .labelsHidden()
+                .toggleStyle(HaloSwitchStyle())
+                .accessibilityIdentifier(identifier)
+                .accessibilityHint(Text(verbatim: subtitle))
         }
-        .padding(DesignTokens.Space.l)
-        .frame(width: 540, alignment: .leading)
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .fill(Color.primary.opacity(colorScheme == .dark ? 0.06 : 0.035))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
-        }
+    }
+}
+
+/// An inline text button in the accent text colour (AA on both surfaces).
+private struct AccentTextButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+            .foregroundStyle(Color.accentText)
+            .padding(.vertical, DesignTokens.Space.xs)
+            .contentShape(Rectangle())
+            .opacity(configuration.isPressed ? 0.7 : 1)
     }
 }

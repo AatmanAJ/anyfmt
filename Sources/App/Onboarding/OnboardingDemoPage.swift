@@ -2,26 +2,41 @@ import AppKit
 import SwiftUI
 import HaloCore
 
-/// Screen 1: drag Sample.heic around a small stage and press the real trigger keys.
+/// Screen 2: drag Sample.heic around a small stage and press the real trigger keys.
+/// Editorial split: the headline, instructions and key legend on the left; the
+/// live stage (a charcoal tile) on the right. The hovered wedge's heat band is
+/// this page's one spotlight.
 struct OnboardingDemoPage: View {
     @ObservedObject var demo: DemoModel
     @ObservedObject var settings: AppSettings
     let wheelHook: ((DemoWheelContext) -> AnyView)?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private typealias T = DesignTokens.Component.Onboarding
+
     var body: some View {
         let triggers = demo.triggers
-        VStack(spacing: DesignTokens.Space.m) {
-            PageHeader(title: settings.opensOnPress ? String(localized: "Drag. Press. Drop.") : String(localized: "Drag. Tap. Drop."),
-                       subtitle: settings.opensOnPress
-                           ? String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, press \(triggers[.convert].displayName). Tap it or hold it.")
-                           : String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, tap \(triggers[.convert].displayName)."))
-                .padding(.bottom, DesignTokens.Space.xs)
-            DemoStage(demo: demo, wheelHook: wheelHook, reduceMotion: reduceMotion)
-            KeyLegend(triggers: triggers, active: demo.openKind?.role, pressing: demo.pressing)
-                .padding(.top, DesignTokens.Space.xxs)
-            HintLine(hint: demo.hint, triggers: triggers, threshold: settings.tapThreshold, press: settings.opensOnPress)
-                .frame(height: 16)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.l + DesignTokens.Space.xxs) {
+                OnboardingHeadline(text: settings.opensOnPress
+                                       ? String(localized: "Drag.\nPress.\nDrop.", comment: "Onboarding demo headline, one word per line")
+                                       : String(localized: "Drag.\nTap.\nDrop.", comment: "Onboarding demo headline, one word per line"),
+                                   size: T.headlineCompact)
+                OnboardingSubtitle(text: settings.opensOnPress
+                    ? String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, press \(triggers[.convert].displayName). Tap it or hold it.")
+                    : String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, tap \(triggers[.convert].displayName)."))
+                KeyLegend(triggers: triggers, active: demo.openKind?.role, pressing: demo.pressing)
+                    .padding(.top, DesignTokens.Space.xs)
+            }
+            .frame(width: T.demoColumn, alignment: .leading)
+
+            Spacer(minLength: DesignTokens.Space.l)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
+                DemoStage(demo: demo, wheelHook: wheelHook, reduceMotion: reduceMotion)
+                HintLine(hint: demo.hint, triggers: triggers, threshold: settings.tapThreshold, press: settings.opensOnPress)
+                    .frame(width: T.stageWidth, alignment: .leading)
+            }
         }
         .onAppear { demo.start() }
         .onDisappear { demo.stop() }
@@ -32,19 +47,15 @@ private struct DemoStage: View {
     @ObservedObject var demo: DemoModel
     let wheelHook: ((DemoWheelContext) -> AnyView)?
     let reduceMotion: Bool
-    @Environment(\.colorScheme) private var colorScheme
 
-    private var spring: Animation {
-        reduceMotion ? .easeOut(duration: DesignTokens.Motion.crossfade)
+    private var settle: Animation {
+        reduceMotion ? .easeOut(duration: DesignTokens.Curve.reducedCrossfade)
             : .spring(response: DesignTokens.Motion.hoverResponse, dampingFraction: DesignTokens.Motion.hoverDamping)
     }
 
     var body: some View {
         let size = DemoModel.stageSize
         ZStack(alignment: .topLeading) {
-            DotGrid()
-                .foregroundStyle(Color.primary.opacity(colorScheme == .dark ? 0.09 : 0.08))
-
             // Result file appears beside the original.
             if let r = demo.result, let name = r.outputName {
                 FileTile(image: demo.thumbnail, name: name, badge: r.outputBadge, selected: false, isNew: true)
@@ -59,14 +70,13 @@ private struct DemoStage: View {
                     .id(kind)
             }
 
-            // The dragged file: a translucent drag image while a wheel is open.
+            // The dragged file: smaller and translucent while a wheel is open, like a drag image.
             FileTile(image: demo.thumbnail, name: DemoModel.fileName, badge: nil,
                      selected: demo.phase != .idle && demo.result == nil, isNew: false)
-                .scaleEffect(demo.openKind != nil ? 0.72 : (demo.phase == .dragging ? 1.04 : 1))
+                .scaleEffect(demo.openKind != nil ? 0.72 : (demo.phase == .dragging && !reduceMotion ? 1.04 : 1))
                 .opacity(demo.openKind != nil ? 0.82 : 1)
-                .shadow(color: .black.opacity(demo.phase == .dragging ? 0.25 : 0), radius: 10, y: 6)
                 .position(demo.tileCenter)
-                .animation(demo.phase == .dragging || demo.openKind != nil ? .interactiveSpring(response: 0.12) : spring, value: demo.tileCenter)
+                .animation(demo.phase == .dragging || demo.openKind != nil ? .interactiveSpring(response: 0.12) : settle, value: demo.tileCenter)
                 .accessibilityElement()
                 .accessibilityLabel(Text("\(DemoModel.fileName), a sample photo"))
                 .accessibilityHint(Text("Drag it, then press a trigger key. Or use the actions to open a wheel."))
@@ -75,32 +85,23 @@ private struct DemoStage: View {
                 .accessibilityAction(named: Text("Open the Actions wheel")) { demo.openForAccessibility(.actions) }
 
             if let r = demo.result {
-                ResultCard(result: r) { withAnimation(spring) { demo.reset() } }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, DesignTokens.Space.l)
-                    .frame(height: size.height, alignment: .bottom)
-                    .padding(.bottom, DesignTokens.Space.m)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                ResultCard(result: r) { withAnimation(settle) { demo.reset() } }
+                    .padding(DesignTokens.Space.m)
+                    .frame(width: size.width, height: size.height, alignment: .bottom)
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
             }
         }
         .frame(width: size.width, height: size.height)
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.large, style: .continuous)
-                .fill(Color.primary.opacity(colorScheme == .dark ? 0.05 : 0.035))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.large, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.large, style: .continuous))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
         .coordinateSpace(name: "stage")
         .gesture(
             DragGesture(minimumDistance: 1, coordinateSpace: .named("stage"))
                 .onChanged { v in demo.dragChanged(start: v.startLocation, location: v.location) }
-                .onEnded { v in withAnimation(spring) { demo.dragEnded(location: v.location) } }
+                .onEnded { v in withAnimation(settle) { demo.dragEnded(location: v.location) } }
         )
-        .animation(spring, value: demo.openKind)
-        .animation(spring, value: demo.result)
+        .animation(settle, value: demo.openKind)
+        .animation(settle, value: demo.result)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("onboarding.demoStage")
     }
@@ -111,7 +112,7 @@ private struct DemoStage: View {
             pointer: CGPoint(x: demo.pointer.x - demo.wheelCenter.x, y: demo.pointer.y - demo.wheelCenter.y),
             thumbnail: demo.thumbnail, reduceMotion: reduceMotion,
             innerRadius: DemoModel.innerRadius, outerRadius: DemoModel.outerRadius,
-            select: { id in withAnimation(spring) { demo.select(id) } })
+            select: { id in withAnimation(settle) { demo.select(id) } })
         if let wheelHook {
             wheelHook(ctx)
         } else {
@@ -120,7 +121,7 @@ private struct DemoStage: View {
     }
 }
 
-/// A Finder-style file icon: photo with a white border, name underneath.
+/// A Finder-style image icon: the photo in a thin white mount, the name under it.
 private struct FileTile: View {
     let image: NSImage
     let name: String
@@ -128,37 +129,44 @@ private struct FileTile: View {
     let selected: Bool
     let isNew: Bool
 
+    private typealias T = DesignTokens.Component.Onboarding
+
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: DesignTokens.Space.s - DesignTokens.Space.xxs) {
             Image(nsImage: image)
                 .resizable()
                 .interpolation(.high)
-                .frame(width: 76, height: 76)
-                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-                .padding(3)
-                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.white))
-                .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                .frame(width: T.fileIcon, height: T.fileIcon)
+                .padding(T.fileBorder)
+                .background(Color(hex: DesignTokens.Primitive.paper0))
+                .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
                 .overlay(alignment: .bottomTrailing) {
                     if let badge {
-                        FormatChip(label: badge, kind: .image, size: 10)
-                            .offset(x: 8, y: 6)
+                        Text(verbatim: badge.localizedUppercase)
+                            .font(.haloDisplay(DesignTokens.Typeface.Size.label))
+                            .foregroundStyle(Color(hex: DesignTokens.Semantic.onAccentPrimary))
+                            .padding(.horizontal, DesignTokens.Space.s)
+                            .padding(.vertical, DesignTokens.Space.xxs)
+                            .background(Capsule().fill(Color.iris))
+                            .offset(x: DesignTokens.Space.s + DesignTokens.Space.xxs, y: DesignTokens.Space.s - DesignTokens.Space.xxs)
                     }
                 }
                 .overlay(alignment: .topTrailing) {
                     if isNew {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: DesignTokens.Typeface.Size.title, weight: .semibold))
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.white, Color.haloSuccess)
-                            .offset(x: 9, y: -9)
+                            .foregroundStyle(Color(hex: DesignTokens.Semantic.onAccentPrimary), Color.iris)
+                            .offset(x: DesignTokens.Space.s, y: -DesignTokens.Space.s)
+                            .accessibilityLabel(Text("New file"))
                     }
                 }
             Text(verbatim: name)
-                .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
-                .foregroundStyle(selected ? Color.white : Color.primary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 1.5)
-                .background(RoundedRectangle(cornerRadius: 4, style: .continuous).fill(selected ? Color.iris : Color.clear))
+                .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
+                .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+                .padding(.horizontal, DesignTokens.Space.s - DesignTokens.Space.xxs)
+                .padding(.vertical, DesignTokens.Space.xxs)
+                .background(Capsule().fill(selected ? Color.iris : Color.clear))
                 .fixedSize()
         }
     }
@@ -169,59 +177,82 @@ private struct ResultCard: View {
     let again: () -> Void
 
     var body: some View {
-        HStack(spacing: DesignTokens.Space.m) {
+        HStack(alignment: .center, spacing: DesignTokens.Space.m) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(Color.haloSuccess)
-            VStack(alignment: .leading, spacing: 1) {
+                .font(.system(size: DesignTokens.Typeface.Size.title, weight: .semibold))
+                .foregroundStyle(Color.accentText)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: result.title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+                    .foregroundStyle(Color.haloInk)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(verbatim: result.detail)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: DesignTokens.Space.s)
-            Button("Try Another", action: again)
-                .controlSize(.small)
+            Spacer(minLength: DesignTokens.Space.xs)
+            Button(String(localized: "Try Another"), action: again)
+                .buttonStyle(.haloQuiet)
                 .accessibilityIdentifier("onboarding.tryAgain")
         }
-        .padding(.horizontal, DesignTokens.Space.l)
+        .padding(.leading, DesignTokens.Space.l)
+        .padding(.trailing, DesignTokens.Space.s)
         .padding(.vertical, DesignTokens.Space.m)
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
-                .shadow(color: .black.opacity(0.14), radius: 10, y: 3)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        }
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloRaised))
+        .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
+            .strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("onboarding.result")
     }
 }
 
-/// Which key opens which wheel, read from Settings.
+/// Which key opens which wheel, read from Settings. One row per wheel.
 private struct KeyLegend: View {
     let triggers: TriggerAssignment
     let active: TriggerRole?
     let pressing: TriggerKey?
 
+    private typealias T = DesignTokens.Component.Onboarding
+
     var body: some View {
-        HStack(spacing: DesignTokens.Space.xl) {
+        VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
             ForEach(TriggerRole.allCases) { role in
                 let key = triggers[role]
-                HStack(spacing: DesignTokens.Space.s) {
-                    KeyCap(text: key.displayName, prominent: active == role || pressing == key)
-                    Text(verbatim: role.title)
-                        .font(.system(size: DesignTokens.TypeRamp.body, weight: active == role ? .semibold : .regular))
-                        .foregroundStyle(active == role ? Color.primary : Color.secondary)
+                let on = active == role || pressing == key
+                HStack(spacing: DesignTokens.Space.m) {
+                    DemoKeyCap(text: key.displayName, prominent: on)
+                    Text(verbatim: role.title.localizedUppercase)
+                        .font(.haloDisplay(T.tagSize, black: false))
+                        .displayTracking(T.tagSize)
+                        .foregroundStyle(active == role ? Color.haloInk : Color.haloSecondaryText)
                 }
-                .animation(.easeOut(duration: DesignTokens.Motion.crossfade), value: active)
+                .animation(.easeOut(duration: DesignTokens.Curve.reducedCrossfade), value: on)
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel(Text("\(key.name) opens \(role.title)"))
+                .accessibilityAddTraits(active == role ? .isSelected : [])
             }
         }
+    }
+}
+
+/// A key as a pill: charcoal at rest, cobalt while it's down or its wheel is open
+/// (and the role name beside it turns primary, so colour isn't the only signal).
+private struct DemoKeyCap: View {
+    let text: String
+    let prominent: Bool
+
+    var body: some View {
+        Text(verbatim: text)
+            .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
+            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+            .lineLimit(1)
+            .padding(.horizontal, DesignTokens.Space.m)
+            .frame(minWidth: DesignTokens.Component.Onboarding.keyCapWidth, alignment: .leading)
+            .frame(height: DesignTokens.Component.Onboarding.keyCapHeight)
+            .background(PillBorder(fill: prominent ? Color.iris : Color.haloTile,
+                                   border: prominent ? Color.iris : Color.haloHairline))
     }
 }
 
@@ -233,11 +264,12 @@ private struct HintLine: View {
 
     var body: some View {
         Text(verbatim: text)
-            .font(.system(size: DesignTokens.TypeRamp.label))
-            .foregroundStyle(.secondary)
+            .font(.system(size: DesignTokens.TypeRamp.body))
+            .foregroundStyle(Color.haloSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
             .id(text)
             .transition(.opacity)
-            .animation(.easeOut(duration: DesignTokens.Motion.crossfade), value: text)
+            .animation(.easeOut(duration: DesignTokens.Curve.reducedCrossfade), value: text)
             .accessibilityIdentifier("onboarding.hint")
     }
 
@@ -263,41 +295,15 @@ private struct HintLine: View {
     }
 }
 
-/// Faint dot grid, like a desktop.
-private struct DotGrid: View {
-    var body: some View {
-        Canvas { ctx, size in
-            let step: CGFloat = 16
-            var y = step / 2
-            while y < size.height {
-                var x = step / 2
-                while x < size.width {
-                    ctx.fill(Path(ellipseIn: CGRect(x: x - 0.9, y: y - 0.9, width: 1.8, height: 1.8)), with: .foreground)
-                    x += step
-                }
-                y += step
-            }
-        }
-        .accessibilityHidden(true)
-    }
-}
-
-/// Title + subtitle used at the top of every onboarding screen.
-struct PageHeader: View {
-    let title: String
-    let subtitle: String
+/// A filled pill with a hairline edge, drawn as two fills (a stroked capsule
+/// renders uneven ends at this size).
+struct PillBorder: View {
+    let fill: Color
+    let border: Color
+    var width: CGFloat = DesignTokens.Shape.hairline
 
     var body: some View {
-        VStack(spacing: DesignTokens.Space.xs + 2) {
-            Text(verbatim: title)
-                .font(.system(size: DesignTokens.TypeRamp.display, weight: .bold))
-                .accessibilityAddTraits(.isHeader)
-            Text(verbatim: subtitle)
-                .font(.system(size: DesignTokens.TypeRamp.title))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: 560)
-        }
+        Capsule().fill(border)
+            .overlay(Capsule().fill(fill).padding(width))
     }
 }

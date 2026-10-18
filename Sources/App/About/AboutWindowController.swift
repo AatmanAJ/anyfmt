@@ -16,7 +16,8 @@ final class AboutWindowController: NSWindowController, NSWindowDelegate {
         controller.window?.makeKeyAndOrderFront(nil)
     }
 
-    static let contentSize = NSSize(width: 420, height: 580)
+    static let contentSize = NSSize(width: DesignTokens.Component.Onboarding.aboutWidth,
+                                    height: DesignTokens.Component.Onboarding.aboutHeight)
 
     let info: AppInfo
     let engines: [EngineInfo]
@@ -56,114 +57,127 @@ final class AboutWindowController: NSWindowController, NSWindowDelegate {
     }
 }
 
+/// A record sleeve: a strip of the heat band across the top (the one
+/// spotlight), then the name set big at the top left, the open-source line, and
+/// the engine credits in a charcoal tile.
 struct AboutView: View {
     let info: AppInfo
     let engines: [EngineInfo]
 
+    private typealias T = DesignTokens.Component.Onboarding
+    private var margin: CGFloat { DesignTokens.Space.xxl }
+
     var body: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: DesignTokens.Space.m) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Pale end on the left so the window buttons stay legible over it.
+            BandGradient(bands: DesignTokens.Band.heat.reversed(), flat: DesignTokens.Band.heatFlat)
+                .frame(height: T.aboutBand)
+                .padding(.horizontal, -margin) // full bleed
+                .accessibilityHidden(true)
+
+            HStack(alignment: .bottom, spacing: DesignTokens.Space.l) {
+                Text(verbatim: Brand.name.localizedUppercase)
+                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayXL))
+                    .displayTracking(DesignTokens.Typeface.Size.displayXL)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer(minLength: 0)
                 Image(nsImage: NSApp.applicationIconImage ?? NSImage())
                     .resizable()
                     .interpolation(.high)
-                    .frame(width: 112, height: 112)
-                    .shadow(color: Color.iris.opacity(0.25), radius: 18, y: 8)
+                    .frame(width: T.aboutIcon, height: T.aboutIcon)
                     .accessibilityHidden(true)
-                VStack(spacing: 3) {
-                    Text(verbatim: Brand.name)
-                        .font(.system(size: DesignTokens.TypeRamp.display, weight: .bold))
-                    Text("Version \(info.version) (\(info.build))")
-                        .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                }
-                VStack(spacing: DesignTokens.Space.xs) {
-                    Text("Free and open source (AGPL-3.0). You can read every line.")
-                        .font(.system(size: DesignTokens.TypeRamp.body))
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if let url = Brand.sourceURL {
-                        Link(destination: url) {
-                            Text(verbatim: url.host.map { $0 + url.path } ?? url.absoluteString)
-                                .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
-                        }
-                        .foregroundStyle(Color.accentText)
-                        .accessibilityIdentifier("about.source")
-                    }
-                }
-                .padding(.horizontal, DesignTokens.Space.xl)
             }
-            .padding(.top, 44)
-            .padding(.bottom, DesignTokens.Space.l)
+            .padding(.top, DesignTokens.Space.xl)
+
+            Text("Version \(info.version) (\(info.build))")
+                .font(.system(size: DesignTokens.TypeRamp.body).monospacedDigit())
+                .foregroundStyle(Color.haloSecondaryText)
+                .textSelection(.enabled)
+                .padding(.top, DesignTokens.Space.xxs)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
+                Text("Free and open source (AGPL-3.0). You can read every line.")
+                    .font(.system(size: DesignTokens.TypeRamp.title))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let url = Brand.sourceURL {
+                    Link(destination: url) {
+                        Text(verbatim: url.host.map { $0 + url.path } ?? url.absoluteString)
+                            .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
+                    }
+                    .foregroundStyle(Color.accentText)
+                    .accessibilityIdentifier("about.source")
+                }
+            }
+            .padding(.top, DesignTokens.Space.l)
 
             credits
+                .padding(.top, DesignTokens.Space.l)
 
-            VStack(spacing: DesignTokens.Space.s) {
+            HStack(alignment: .center) {
                 Button("Licences…") { BundledEngines.revealLicences() }
-                    .controlSize(.regular)
+                    .buttonStyle(.haloSecondary)
                     .accessibilityIdentifier("about.licences")
+                Spacer(minLength: DesignTokens.Space.s)
                 Text("Copyright © 2026 the \(Brand.name) contributors.")
                     .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.haloSecondaryText)
             }
             .padding(.vertical, DesignTokens.Space.l)
         }
-        .frame(width: AboutWindowController.contentSize.width, height: AboutWindowController.contentSize.height)
+        .padding(.horizontal, margin)
+        .frame(width: AboutWindowController.contentSize.width, height: AboutWindowController.contentSize.height, alignment: .top)
+        .foregroundStyle(Color.haloInk)
         .ignoresSafeArea()
-        .background(
-            ZStack {
-                Color(nsColor: .windowBackgroundColor)
-                RadialGradient(colors: [Color.iris.opacity(0.14), .clear], center: UnitPoint(x: 0.5, y: 0.05),
-                               startRadius: 0, endRadius: 260)
-            }
-            .ignoresSafeArea()
-        )
+        .haloWindowBackground()
     }
 
     private var credits: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Built with")
-                .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .font(.haloDisplay(DesignTokens.Component.Onboarding.tagSize))
+                .displayTracking(DesignTokens.Component.Onboarding.tagSize)
                 .textCase(.uppercase)
-                .padding(.horizontal, DesignTokens.Space.m)
-                .padding(.top, DesignTokens.Space.m)
-                .padding(.bottom, DesignTokens.Space.xs)
+                .padding(.horizontal, DesignTokens.Space.l)
+                .padding(.top, DesignTokens.Space.l)
+                .padding(.bottom, DesignTokens.Space.s)
+                .accessibilityAddTraits(.isHeader)
             ScrollView {
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: DesignTokens.Space.xs + 1) {
                     ForEach(engines) { e in
                         HStack(alignment: .firstTextBaseline) {
                             Text(verbatim: e.shortName)
-                                .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
+                                .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
                                 .lineLimit(1)
                             Text(verbatim: e.version)
                                 .font(.system(size: DesignTokens.TypeRamp.label).monospacedDigit())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.haloSecondaryText)
                             Spacer(minLength: DesignTokens.Space.s)
                             Text(verbatim: e.licence)
                                 .font(.system(size: DesignTokens.TypeRamp.caption))
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(Color.haloSecondaryText)
                                 .lineLimit(1)
                                 .help(Text(verbatim: e.licence))
                         }
+                        .accessibilityElement(children: .combine)
                     }
                     Text("And macOS’s \(BundledEngines.systemFrameworks.joined(separator: ", ")).")
                         .font(.system(size: DesignTokens.TypeRamp.caption))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.haloSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, 3)
+                        .padding(.top, DesignTokens.Space.xs)
                 }
-                .padding(.horizontal, DesignTokens.Space.m)
-                .padding(.bottom, DesignTokens.Space.m)
+                .padding(.horizontal, DesignTokens.Space.l)
+                .padding(.bottom, DesignTokens.Space.l)
             }
             // Fade the last rows so it reads as scrollable.
             .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.85),
                                          .init(color: .black.opacity(0), location: 1)],
                                  startPoint: .top, endPoint: .bottom))
         }
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous).fill(Color.primary.opacity(0.04)))
-        .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous).strokeBorder(Color.primary.opacity(0.07)))
-        .padding(.horizontal, DesignTokens.Space.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Credits"))
     }
