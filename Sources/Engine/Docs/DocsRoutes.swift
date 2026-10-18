@@ -74,7 +74,7 @@ public enum DocsRoutes {
     /// Slides through Quick Look's Office generator (best effort, low priority).
     static let slideRows: [Capability] = [
         Capability(F.pptx, F.pdf, EngineIDs.quickLook, schema: .none, priority: 40, cost: 3, flags: [.terminalOnly]),
-        Capability(F.pptx, F.png, EngineIDs.quickLook, schema: DocsSchemas.slideImages, priority: 40, cost: 4, flags: [.multiOutput]),
+        Capability(F.pptx, F.png, EngineIDs.quickLook, schema: DocsSchemas.slideImagesLossless, priority: 40, cost: 4, flags: [.multiOutput]),
         Capability(F.pptx, F.jpg, EngineIDs.quickLook, schema: DocsSchemas.slideImages, priority: 40, cost: 4, flags: [.multiOutput]),
     ]
 
@@ -120,7 +120,7 @@ public enum DocsRoutes {
         var rows: [Capability] = []
         for from in [F.pptx, F.ppt, F.key, F.odp] {
             rows.append(Capability(from, F.pdf, e, priority: 110, cost: 5, flags: [.needsPack]))
-            rows.append(Capability(from, F.png, e, schema: DocsSchemas.slideImages, priority: 110, cost: 6, flags: [.needsPack, .multiOutput]))
+            rows.append(Capability(from, F.png, e, schema: DocsSchemas.slideImagesLossless, priority: 110, cost: 6, flags: [.needsPack, .multiOutput]))
             rows.append(Capability(from, F.jpg, e, schema: DocsSchemas.slideImages, priority: 110, cost: 6, flags: [.needsPack, .multiOutput]))
         }
         for from in [F.ppt, F.key, F.odp] { rows.append(Capability(from, F.pptx, e, priority: 110, cost: 5, flags: [.needsPack])) }
