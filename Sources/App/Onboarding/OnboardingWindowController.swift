@@ -10,7 +10,8 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
     static var hooks = OnboardingHooks()
     private static var instance: OnboardingWindowController?
 
-    static let contentSize = NSSize(width: 720, height: 520)
+    static let contentSize = NSSize(width: DesignTokens.Component.Onboarding.windowWidth,
+                                    height: DesignTokens.Component.Onboarding.windowHeight)
 
     /// Shows onboarding (single instance). The app delegate calls this at
     /// launch when `AppSettings.onboardingCompleted` is false.
@@ -97,9 +98,7 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
     }
 
     private var pageAnimation: Animation {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-            ? .easeOut(duration: DesignTokens.Motion.crossfade)
-            : .spring(response: 0.38, dampingFraction: 0.86)
+        OnboardingMotion.page(reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
     }
 
     func windowWillClose(_ notification: Notification) {
@@ -116,28 +115,95 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
     }
 }
 
-/// Pages, progress dots and the footer buttons.
+/// Page motion: the `glide` curve, or a short crossfade under Reduce Motion.
+enum OnboardingMotion {
+    static func page(reduceMotion: Bool) -> Animation {
+        if reduceMotion { return .easeOut(duration: DesignTokens.Curve.reducedCrossfade) }
+        let g = DesignTokens.Curve.glide
+        return .timingCurve(g.c1.x, g.c1.y, g.c2.x, g.c2.y, duration: g.duration)
+    }
+
+    static func snap(reduceMotion: Bool) -> Animation {
+        if reduceMotion { return .easeOut(duration: DesignTokens.Curve.reducedCrossfade) }
+        let s = DesignTokens.Curve.snap
+        return .timingCurve(s.c1.x, s.c1.y, s.c2.x, s.c2.y, duration: s.duration)
+    }
+}
+
+/// The one banded gradient a page may carry, as a full-height column on the right.
+enum OnboardingSpotlight: Equatable {
+    case none, heat, cobalt
+
+    init(_ page: OnboardingPage) {
+        switch page {
+        case .welcome: self = .heat
+        case .permissions: self = .cobalt
+        case .demo, .launch, .updates, .activate: self = .none
+        }
+    }
+
+    var width: CGFloat {
+        switch self {
+        case .none: 0
+        case .heat: DesignTokens.Component.Onboarding.heatColumn
+        case .cobalt: DesignTokens.Component.Onboarding.cobaltColumn
+        }
+    }
+}
+
+/// Full-bleed pages: the page column on the left, the footer under it, and the
+/// page's band column (if any) running the full height on the right.
 struct OnboardingView: View {
     @ObservedObject var model: OnboardingModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                page(model.page)
-                    .id(model.page)
-                    .transition(transition)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.top, 30) // below the transparent title bar
-            .clipped()
+    private typealias T = DesignTokens.Component.Onboarding
 
-            footer
+    var body: some View {
+        let spotlight = OnboardingSpotlight(model.page)
+        ZStack(alignment: .topLeading) {
+            Color.haloWindow
+
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                band(spotlight)
+                    .frame(width: spotlight.width)
+                    .clipped()
+                    .accessibilityHidden(true)
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack(alignment: .topLeading) {
+                    page(model.page)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .id(model.page)
+                        .transition(transition)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.top, T.top)
+                .padding(.bottom, DesignTokens.Space.m)
+                .padding(.horizontal, T.margin)
+                .clipped()
+
+                footer
+            }
+            .padding(.trailing, spotlight.width)
         }
         .frame(width: OnboardingWindowController.contentSize.width, height: OnboardingWindowController.contentSize.height)
-        .background(background)
+        .foregroundStyle(Color.haloInk)
         .ignoresSafeArea()
         .toggleStyle(HaloSwitchStyle())
+        .animation(animation, value: spotlight)
+    }
+
+    @ViewBuilder private func band(_ s: OnboardingSpotlight) -> some View {
+        switch s {
+        case .none: Color.clear
+        case .heat: BandGradient(bands: DesignTokens.Band.heat, flat: DesignTokens.Band.heatFlat).id(s)
+                .transition(.opacity)
+        case .cobalt: BandGradient(bands: T.cobaltBands, flat: DesignTokens.Band.cobaltFlat).id(s)
+                .transition(.opacity)
+        }
     }
 
     @ViewBuilder private func page(_ p: OnboardingPage) -> some View {
@@ -159,77 +225,64 @@ struct OnboardingView: View {
                            removal: .move(edge: outEdge).combined(with: .opacity))
     }
 
-    private var animation: Animation {
-        reduceMotion ? .easeOut(duration: DesignTokens.Motion.crossfade) : .spring(response: 0.38, dampingFraction: 0.86)
-    }
+    private var animation: Animation { OnboardingMotion.page(reduceMotion: reduceMotion) }
 
+    /// Skip (quiet, bottom left), progress, then Back and the one blue pill.
     private var footer: some View {
-        HStack {
-            Button("Skip") { model.finish() }
-                .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
+        HStack(spacing: DesignTokens.Space.l) {
+            Button(String(localized: "Skip")) { model.finish() }
+                .buttonStyle(.haloQuiet)
                 .opacity(model.page.isLast ? 0 : 1)
                 .disabled(model.page.isLast)
                 .accessibilityIdentifier("onboarding.skip")
-                .frame(width: 200, alignment: .leading)
+                .padding(.leading, -DesignTokens.Space.s) // align the text, not the hit area, with the page edge
 
-            Spacer()
-            ProgressDots(count: OnboardingPage.allCases.count, current: model.page.rawValue) { i in
+            Spacer(minLength: DesignTokens.Space.s)
+            ProgressDots(count: OnboardingPage.allCases.count, current: model.page.rawValue, reduceMotion: reduceMotion) { i in
                 if let p = OnboardingPage(rawValue: i) { withAnimation(animation) { model.go(to: p) } }
             }
-            Spacer()
+            Spacer(minLength: DesignTokens.Space.s)
 
-            HStack(spacing: DesignTokens.Space.s) {
+            HStack(spacing: DesignTokens.Space.xs) {
                 if model.page.previous != nil {
-                    Button("Back") { withAnimation(animation) { model.goBack() } }
-                        .controlSize(.large)
+                    Button(String(localized: "Back")) { withAnimation(animation) { model.goBack() } }
+                        .buttonStyle(HaloPillButtonStyle(kind: .quiet, large: true))
                         .accessibilityIdentifier("onboarding.back")
                 }
                 Button {
                     withAnimation(animation) { model.goNext() }
                 } label: {
                     Text(model.page.isLast ? "Start Using \(Brand.name)" : "Continue")
-                        .frame(minWidth: model.page.isLast ? 140 : 84)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.iris)
-                .controlSize(.large)
+                .buttonStyle(HaloPillButtonStyle(kind: .primary, large: true))
                 .keyboardShortcut(.defaultAction)
                 .accessibilityIdentifier(model.page.isLast ? "onboarding.finish" : "onboarding.continue")
             }
-            .frame(width: 200, alignment: .trailing)
         }
-        .padding(.horizontal, DesignTokens.Space.xl)
-        .padding(.top, DesignTokens.Space.s)
-        .padding(.bottom, DesignTokens.Space.xl)
-    }
-
-    private var background: some View {
-        ZStack {
-            Color(nsColor: .windowBackgroundColor)
-            RadialGradient(colors: [Color.iris.opacity(0.16), Color.iris.opacity(0)],
-                           center: UnitPoint(x: 0.5, y: -0.15), startRadius: 0, endRadius: 420)
-            RadialGradient(colors: [Color.mint.opacity(0.08), Color.mint.opacity(0)],
-                           center: UnitPoint(x: 1.0, y: 1.1), startRadius: 0, endRadius: 360)
-        }
-        .ignoresSafeArea()
+        .padding(.horizontal, T.margin)
+        .padding(.top, DesignTokens.Space.m)
+        .padding(.bottom, DesignTokens.Space.xl + DesignTokens.Space.xs)
     }
 }
 
+/// Step dots: the current one is cobalt and wider (shape carries the state too).
 private struct ProgressDots: View {
     let count: Int
     let current: Int
+    let reduceMotion: Bool
     let go: (Int) -> Void
 
+    private typealias T = DesignTokens.Component.Onboarding
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: T.dotSpacing) {
             ForEach(0..<count, id: \.self) { i in
                 Capsule()
-                    .fill(i == current ? Color.iris : Color.primary.opacity(0.18))
-                    .frame(width: i == current ? 20 : 7, height: 7)
-                    .contentShape(Rectangle().inset(by: -4))
+                    .fill(i == current ? Color.iris : Color.token(T.dotRest))
+                    .frame(width: i == current ? T.dotCurrentWidth : T.dotSize, height: T.dotSize)
+                    .contentShape(Rectangle().inset(by: -DesignTokens.Space.xs))
                     .onTapGesture { go(i) }
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: current)
+                    .animation(OnboardingMotion.page(reduceMotion: reduceMotion), value: current)
             }
         }
         .accessibilityElement()

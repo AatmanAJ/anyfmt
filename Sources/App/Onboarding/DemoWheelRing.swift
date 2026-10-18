@@ -2,26 +2,29 @@ import AppKit
 import SwiftUI
 import HaloCore
 
-/// Fallback wheel for the onboarding demo, used until lane B's
-/// `RadialMenuView` is wired through `OnboardingHooks.demoWheel`. Same
-/// geometry and motion tokens as the real wheel (DesignTokens.Wheel/Motion).
+/// Fallback wheel for the onboarding demo, used until the real `RadialMenuView`
+/// is wired through `OnboardingHooks.demoWheel`. Drawn in the phase 2 wheel look:
+/// a black disc, charcoal wedges, heavy uppercase labels, and the heat band on the
+/// wedge under the pointer, like a stage light swinging onto it. Nothing glows,
+/// nothing is blurred. Same geometry and motion tokens as the real wheel.
 struct DemoWheelRing: View {
     let context: DemoWheelContext
     @State private var appeared = false
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    private typealias T = DesignTokens.Component.Onboarding
 
     private var inner: CGFloat { context.innerRadius }
     private var outer: CGFloat { context.outerRadius }
-    private var side: CGFloat { (outer + DesignTokens.Wheel.hoverLift + 14) * 2 }
+    private var side: CGFloat { (outer + T.wheelRim + DesignTokens.Wheel.hoverLift + DesignTokens.Space.s) * 2 }
 
     var body: some View {
         let n = context.segments.count
         ZStack {
-            // Soft disc behind the ring so it reads on any background.
             Circle()
-                .fill(ringBase.opacity(colorScheme == .dark ? 0.5 : 0.65))
-                .frame(width: outer * 2 + 10, height: outer * 2 + 10)
-                .blur(radius: 6)
+                .fill(Color(hex: T.wheelDisc))
+                .frame(width: (outer + T.wheelRim) * 2, height: (outer + T.wheelRim) * 2)
                 .opacity(appeared ? 1 : 0)
 
             ForEach(Array(context.segments.enumerated()), id: \.element.id) { i, seg in
@@ -31,24 +34,19 @@ struct DemoWheelRing: View {
             hub
         }
         .frame(width: side, height: side)
-        .compositingGroup()
-        .shadow(color: .black.opacity(colorScheme == .dark ? 0.45 : 0.18), radius: 14, y: 6)
         .onAppear {
-            if context.reduceMotion {
-                withAnimation(.easeOut(duration: DesignTokens.Motion.crossfade)) { appeared = true }
-            } else {
-                withAnimation(.spring(response: DesignTokens.Motion.hoverResponse, dampingFraction: DesignTokens.Motion.hoverDamping)) {
-                    appeared = true
-                }
+            withAnimation(context.reduceMotion ? .easeOut(duration: DesignTokens.Curve.reducedCrossfade)
+                          : .spring(response: DesignTokens.Motion.hoverResponse, dampingFraction: DesignTokens.Motion.hoverDamping)) {
+                appeared = true
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("\(context.kind.role.title) wheel"))
     }
 
-    private var ringBase: Color {
-        colorScheme == .dark ? Color(nsColor: NSColor(hex: 0x2A2832)) : Color(nsColor: NSColor(hex: 0xFFFFFF))
-    }
+    /// Bands are flat when transparency is reduced or contrast is increased; an
+    /// outline then marks the hot wedge as well as the fill.
+    private var flatBands: Bool { reduceTransparency || contrast == .increased }
 
     @ViewBuilder
     private func wedge(_ i: Int, _ n: Int, _ seg: DemoSegment) -> some View {
@@ -57,14 +55,22 @@ struct DemoWheelRing: View {
         let lift = hot && !context.reduceMotion ? DesignTokens.Wheel.hoverLift : 0
         let delay = context.reduceMotion ? 0 : DesignTokens.Motion.openStaggerPerSegment * Double(i)
         let shape = WedgeShape(index: i, count: n, inner: inner, outer: outer,
-                               gap: 3, cornerRadius: DesignTokens.Wheel.segmentCornerRadius * 0.75)
+                               gap: T.wheelGap, cornerRadius: DesignTokens.Shape.segment * 0.5)
+        let box = shape.path(in: CGRect(x: 0, y: 0, width: side, height: side)).boundingRect
         ZStack {
-            shape
-                .fill(hot ? AnyShapeStyle(LinearGradient(colors: [Color.iris, Color.iris.opacity(0.82)],
-                                                         startPoint: .top, endPoint: .bottom))
-                          : AnyShapeStyle(ringBase))
-            shape
-                .stroke(hot ? Color.white.opacity(0.18) : Color.primary.opacity(colorScheme == .dark ? 0.1 : 0.07), lineWidth: 0.75)
+            if hot {
+                // The heat band laid across this wedge's own bounds, so all six bands show.
+                BandGradient(bands: DesignTokens.Band.heat, flat: DesignTokens.Band.heatFlat)
+                    .frame(width: box.width, height: box.height)
+                    .position(x: box.midX, y: box.midY)
+                    .frame(width: side, height: side)
+                    .mask(shape)
+                if flatBands {
+                    shape.stroke(Color(hex: T.wheelLabelOnBand), lineWidth: DesignTokens.Component.Focus.ringWidth)
+                }
+            } else {
+                shape.fill(Color(hex: T.wheelWedge))
+            }
             label(seg, hot: hot)
                 .position(x: side / 2 + cos(mid) * (inner + outer) / 2, y: side / 2 + sin(mid) * (inner + outer) / 2)
         }
@@ -73,8 +79,9 @@ struct DemoWheelRing: View {
         .offset(x: cos(mid) * lift, y: sin(mid) * lift)
         .scaleEffect(appeared || context.reduceMotion ? 1 : 0.55)
         .opacity(appeared ? 1 : 0)
-        .animation(.spring(response: DesignTokens.Motion.hoverResponse, dampingFraction: DesignTokens.Motion.hoverDamping), value: hot)
-        .animation(context.reduceMotion ? .easeOut(duration: DesignTokens.Motion.crossfade)
+        .animation(context.reduceMotion ? .easeOut(duration: DesignTokens.Curve.reducedCrossfade)
+                   : .spring(response: DesignTokens.Motion.hoverResponse, dampingFraction: DesignTokens.Motion.hoverDamping), value: hot)
+        .animation(context.reduceMotion ? .easeOut(duration: DesignTokens.Curve.reducedCrossfade)
                    : .spring(response: 0.22, dampingFraction: 0.82).delay(delay), value: appeared)
         .contentShape(shape)
         .onTapGesture { context.select(seg.id) }
@@ -84,20 +91,19 @@ struct DemoWheelRing: View {
         .accessibilityAction { context.select(seg.id) }
     }
 
+    /// Format names set big, like a record label; tool and action names smaller,
+    /// on up to two lines. Black on the band (5:1 or better on every band).
     private func label(_ seg: DemoSegment, hot: Bool) -> some View {
         let isFormat = context.kind == .convert
-        return VStack(spacing: 3) {
-            Image(systemName: seg.glyph)
-                .font(.system(size: DesignTokens.Wheel.glyphSize * (isFormat ? 0.82 : 0.9), weight: .medium))
-            Text(verbatim: seg.title)
-                .font(.system(size: isFormat ? DesignTokens.Wheel.labelSize : DesignTokens.Wheel.toolLabelSize,
-                              weight: isFormat ? .bold : .semibold, design: isFormat ? .rounded : .default))
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-                .frame(width: 58)
-        }
-        .foregroundStyle(hot ? Color.white : Color.primary.opacity(0.85))
+        let size = isFormat ? T.formatLabel : T.toolLabel
+        return Text(verbatim: seg.title.localizedUppercase)
+            .font(.haloDisplay(size, black: isFormat))
+            .displayTracking(size)
+            .multilineTextAlignment(.center)
+            .lineLimit(isFormat ? 1 : 2)
+            .minimumScaleFactor(0.7)
+            .frame(width: T.toolLabelWidth)
+            .foregroundStyle(Color(hex: hot ? T.wheelLabelOnBand : T.wheelLabel))
     }
 
     private var hub: some View {
@@ -106,11 +112,10 @@ struct DemoWheelRing: View {
             .resizable()
             .interpolation(.high)
             .aspectRatio(contentMode: .fill)
-            .frame(width: r * 2 - 10, height: r * 2 - 10)
+            .frame(width: r * 2 - DesignTokens.Space.s * 2, height: r * 2 - DesignTokens.Space.s * 2)
             .clipShape(Circle())
-            .overlay(Circle().strokeBorder(Color.white.opacity(0.9), lineWidth: 2))
             .frame(width: r * 2, height: r * 2)
-            .background(Circle().fill(ringBase))
+            .background(Circle().fill(Color(hex: DesignTokens.Primitive.ink900)))
             .scaleEffect(appeared || context.reduceMotion ? 1 : 0.7)
             .opacity(appeared ? 1 : 0)
             .accessibilityHidden(true)

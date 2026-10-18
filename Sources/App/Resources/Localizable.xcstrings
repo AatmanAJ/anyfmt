@@ -281,6 +281,9 @@
     "Convert" : {
       "comment" : "Options popover button that runs the conversion"
     },
+    "Convert\nwhile you\ndrag." : {
+      "comment" : "Onboarding welcome headline; keep each line short"
+    },
     "Convert to %@" : {
       "comment" : "VoiceOver label of a conversion segment"
     },
@@ -359,7 +362,9 @@
     "Drag across the waveform to mark what to bleep" : {},
     "Drag clips to reorder" : {},
     "Drag it, then press a trigger key. Or use the actions to open a wheel." : {},
-    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {},
+    "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {
+      "extractionState" : "stale"
+    },
     "Drag on the image to cover an area. Drag an area to move it, or its corner to resize." : {},
     "Drag order" : {},
     "Drag over anything you want to hide" : {},
@@ -371,8 +376,18 @@
     "Drag to cover an area. Select an area and press Delete to remove it." : {},
     "Drag to move every item out of the shelf. Press to show them all." : {},
     "Drag to move or resize. Arrow keys nudge by one pixel, with Shift by ten." : {},
-    "Drag. Press. Drop." : {},
-    "Drag. Tap. Drop." : {},
+    "Drag.\nPress.\nDrop." : {
+      "comment" : "Onboarding demo headline, one word per line"
+    },
+    "Drag.\nTap.\nDrop." : {
+      "comment" : "Onboarding demo headline, one word per line"
+    },
+    "Drag. Press. Drop." : {
+      "extractionState" : "stale"
+    },
+    "Drag. Tap. Drop." : {
+      "extractionState" : "stale"
+    },
     "Draw" : {},
     "Drop files" : {
       "comment" : "Hub text of the empty drop ring"
@@ -454,7 +469,9 @@
     "Frame" : {},
     "Frame %lld" : {},
     "Frames" : {},
-    "Free" : {},
+    "Free" : {
+      "comment" : "Onboarding welcome fact tag"
+    },
     "Free and open source (AGPL-3.0). You can read every line." : {},
     "Free and open source. Everything on your Mac stays free, with no account." : {},
     "Free aspect ratio" : {},
@@ -469,6 +486,9 @@
     "Ghostty opens a new tab. Set macos-dock-drop-behavior = new-window in Ghostty for a window." : {},
     "GIF" : {},
     "Good for sharing and email" : {},
+    "Got a\nPro key?" : {
+      "comment" : "Onboarding activation headline; keep each line short"
+    },
     "Gradient" : {},
     "Gradient preset" : {},
     "Granted" : {},
@@ -479,7 +499,9 @@
       "comment" : "Placeholder for the licence key field"
     },
     "Haptic feedback" : {},
-    "Have a Pro key or account?" : {},
+    "Have a Pro key or account?" : {
+      "extractionState" : "stale"
+    },
     "Height" : {},
     "Held %@ for %@ — not a tap" : {},
     "Hidden formats stay available from the command line." : {},
@@ -577,6 +599,9 @@
       "comment" : "Gallery caption"
     },
     "Loading" : {},
+    "Local" : {
+      "comment" : "Onboarding welcome fact tag"
+    },
     "Location" : {},
     "Lock Screen" : {},
     "Logs" : {},
@@ -639,6 +664,7 @@
     },
     "Name pattern" : {},
     "Never" : {},
+    "New file" : {},
     "New files are saved to a folder you choose, then removed from the server." : {},
     "Next frame (→)" : {},
     "No changes yet" : {},
@@ -654,7 +680,12 @@
     "No options for this format." : {
       "comment" : "Options popover with nothing to set"
     },
-    "No permissions needed" : {},
+    "No permissions\nneeded." : {
+      "comment" : "Onboarding permissions headline; keep each line short"
+    },
+    "No permissions needed" : {
+      "extractionState" : "stale"
+    },
     "No permissions? Use the Services menu" : {},
     "No presets for %@ yet." : {},
     "no sound" : {},
@@ -667,7 +698,9 @@
     "Not granted" : {},
     "Not Now" : {},
     "Not synced yet" : {},
-    "Nothing local ever needs a key. Skipping changes nothing." : {},
+    "Nothing local ever needs a key. Skipping changes nothing." : {
+      "extractionState" : "stale"
+    },
     "Nothing to convert" : {},
     "Nothing to set: converting to %@ has no options." : {},
     "Nothing yet" : {},
@@ -701,7 +734,12 @@
       "comment" : "Modifier key name"
     },
     "Optional packs" : {},
-    "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account." : {},
+    "Optional. Pro adds cloud features like share links and cloud conversions. Nothing local ever needs a key, so skipping changes nothing." : {
+      "comment" : "Onboarding activation page"
+    },
+    "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account." : {
+      "extractionState" : "stale"
+    },
     "Optional: press Return in Finder to open the wheel" : {},
     "Options" : {},
     "Or sign in to your account" : {
@@ -786,6 +824,9 @@
     "Previous / next frame" : {},
     "Previous frame (←)" : {},
     "Privacy" : {},
+    "Private" : {
+      "comment" : "Onboarding welcome fact tag"
+    },
     "PRO" : {},
     "Pro" : {
       "comment" : "Chip on wheel segments that use the paid cloud service"
@@ -817,7 +858,12 @@
     "Reading clips…" : {},
     "Reading metadata…" : {},
     "Reading…" : {},
-    "Ready when you drag" : {},
+    "Ready when\nyou drag." : {
+      "comment" : "Onboarding launch-at-login headline; keep each line short"
+    },
+    "Ready when you drag" : {
+      "extractionState" : "stale"
+    },
     "Receive files from your phone or browser" : {},
     "Recent Conversions" : {},
     "Recent Move folders" : {},
@@ -926,7 +972,12 @@
     "Select" : {},
     "Select All" : {},
     "Select all" : {},
-    "Select files and press Return instead of dragging. This one extra needs two permissions:" : {},
+    "Select files and press Return instead of dragging. This one extra needs the permissions below." : {
+      "comment" : "Onboarding: the Finder shortcut toggle"
+    },
+    "Select files and press Return instead of dragging. This one extra needs two permissions:" : {
+      "extractionState" : "stale"
+    },
     "Select files in Finder first, or drop files on the ring." : {},
     "Selection" : {},
     "Selects the new file in a Finder window." : {},
@@ -966,7 +1017,9 @@
       "comment" : "VoiceOver hint of the More segment"
     },
     "Sign in to use %@ Cloud. Everything on your Mac keeps working without it." : {},
-    "Sign In…" : {},
+    "Sign In…" : {
+      "comment" : "Onboarding activation page"
+    },
     "Sign Out" : {},
     "Sign-in didn’t finish. Try again." : {},
     "Sign-in was cancelled." : {},
@@ -1009,7 +1062,12 @@
     "Start signing in again, then enter the new code." : {},
     "Start Using %@" : {},
     "Starts quietly in the menu bar when you log in." : {},
-    "Stay up to date" : {},
+    "Stay up\nto date." : {
+      "comment" : "Onboarding updates headline; keep each line short"
+    },
+    "Stay up to date" : {
+      "extractionState" : "stale"
+    },
     "Step %lld of %lld" : {},
     "stereo" : {},
     "Stereo" : {},
@@ -1169,6 +1227,9 @@
     "Y" : {},
     "Yellow" : {},
     "You can change this any time in Settings › General, or in System Settings › General › Login Items." : {},
+    "You can do this later in Settings › Account." : {
+      "comment" : "Onboarding activation page"
+    },
     "You don’t have permission to move “%@”." : {},
     "You were signed out. Sign in again to continue." : {},
     "Your browser will download the official file from %@. When it’s done, choose the downloaded file here. %@ checks it against the official checksum before installing. Nothing is sent anywhere." : {},
