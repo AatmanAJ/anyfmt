@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select newest Xcode
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+        run: sudo xcode-select -s "$(find /Applications -maxdepth 1 -name "Xcode*.app" | sort -V | tail -1)"
       - name: Tools
         run: brew install xcodegen meson ninja nasm pkg-config autoconf automake libtool
       - name: Engines from pinned sources
@@ -28,8 +28,8 @@ jobs:
           security create-keychain -p "" "$KC"
           security set-keychain-settings "$KC"
           security unlock-keychain -p "" "$KC"
-          echo "$CERT_P12_BASE64" | base64 --decode > $RUNNER_TEMP/cert.p12
-          security import $RUNNER_TEMP/cert.p12 -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          echo "$CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KC"
           security list-keychains -d user -s "$KC" login.keychain
 
@@ -39,8 +39,8 @@ jobs:
           AC_API_ISSUER: ${{ secrets.AC_API_ISSUER }}
           AC_API_KEY_P8: ${{ secrets.AC_API_KEY_P8 }}
         run: |
-          echo "$AC_API_KEY_P8" > $RUNNER_TEMP/key.p8
-          xcrun notarytool store-credentials halo-notary --key $RUNNER_TEMP/key.p8 --key-id "$AC_API_KEY_ID" --issuer "$AC_API_ISSUER"
+          echo "$AC_API_KEY_P8" > "$RUNNER_TEMP/key.p8"
+          xcrun notarytool store-credentials halo-notary --key "$RUNNER_TEMP/key.p8" --key-id "$AC_API_KEY_ID" --issuer "$AC_API_ISSUER"
 
       - name: Signed + notarized DMG
         env:
@@ -51,7 +51,7 @@ jobs:
         run: make dmg
 
       - name: Engine sources archive (GPL source offer)
-        run: tar -czf dist/halo-${GITHUB_REF_NAME#v}-engine-sources.tar.gz -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
+        run: tar -czf "dist/halo-${GITHUB_REF_NAME#v}-engine-sources.tar.gz" -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
 
       - name: Appcast
         env:
