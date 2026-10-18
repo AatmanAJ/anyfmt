@@ -177,6 +177,12 @@ public final class WheelController: NSObject {
         commit(entry, urls: input.urls, promises: promises, at: NSEvent.mouseLocation)
     }
 
+    /// ⌥ tapped mid-drag: lock the highlighted segment so drift can't change it (or unlock).
+    public func toggleLock() {
+        guard mode == .drag, isVisible else { return }
+        menuView.toggleLock()
+    }
+
     /// DragSense saw the button go up at `point`. A release on a segment (or
     /// the options popover) waits: AppKit delivers that drop a beat after the
     /// button goes up, and hiding the panel first would lose it. Anywhere else

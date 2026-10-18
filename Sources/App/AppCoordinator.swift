@@ -90,6 +90,8 @@ final class AppCoordinator {
             // after dropResolutionTimeout and the state hook hides the wheel.
             if wheel.dragDidEnd(at: location) { return }
             if sense.state.openTriggerID != nil { sense.cancelWheel() }
+        case .lockKeyTapped:
+            wheel.toggleLock()
         case .dragBegan, .dragMoved:
             break
         }

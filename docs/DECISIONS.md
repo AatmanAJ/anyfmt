@@ -313,3 +313,32 @@ launch prewarm also draws the Convert label style, fetches a file icon, formats 
 size and loads every format glyph, so a first show does no one-off work on the
 main thread. Debug main-thread cost of a show: 8 ms first, 6 ms warm
 (`WheelShowPerfTests`).
+
+### D-038 Aiming mid-drag: sticky selection, ⌥ lock, configure after the drop
+Mid-drag the same pointer aimed and configured: the only way into a format's
+options was a 0.6 s hover dwell, so moving toward the popover often picked a
+neighbouring segment. Aiming now happens during the drag and configuring after it.
+- **Sticky selection** (RadialMenu). Once a segment is highlighted, the pointer must
+  go `max(30 % of the wedge, 10°)` past its edge to leave it, capped at 45 % so a
+  neighbour is always reachable. For 8 inner segments that's 13.5°; outer-ring wedges
+  get the 10° floor. The new segment must also hold for **60 ms** (`switchDelay`)
+  before it takes, and the ring boundary has ±6 pt of slack. Moves into the hub or
+  off the wheel stay immediate, so cancelling never lags. These are starting values,
+  to be tuned by hand on hardware (BLOCKERS B-001).
+- **Lock: ⌥ tap.** Space was the first idea, but mid-drag Finder is the key app and
+  our panel never becomes key, so key events never reach us. Reading Space's state
+  from outside needs Input Monitoring, which breaks the no-permission promise (D-001).
+  Modifier state is free to read, and ⌥ isn't a default trigger, so DragSense reports
+  a quick ⌥ tap while a wheel is open as `lockKeyTapped`. Locked, drift and even the
+  hub can't change the target, and a drop anywhere on the wheel lands on it. A cobalt
+  outline, the hub pill ("GIF · Locked") and a VoiceOver announcement show the state.
+  If ⌥ is remapped as a trigger, the lock key is ignored. In keyboard mode, Space locks.
+- **Configure after the drop.** ⌥ *held* at the drop, or a drop on the **tune lip**
+  (the outer 12 pt of segments that have options; the pill reads "GIF · Options"),
+  asks the host to configure instead of run (`RadialDropTarget.tune`). The drag is
+  over by then, so there's nothing left to mis-aim. In keyboard mode, ⌥-Return does
+  the same.
+- **Preset chips.** Up to three chips outside the rim, shown when locked or after a
+  400 ms dwell. Dropping on one runs with that preset. The hit area grows to cover the
+  band out to the chips while they show, and a corridor keeps the segment selected on
+  the way there, so the drag can't fall through to the window below.

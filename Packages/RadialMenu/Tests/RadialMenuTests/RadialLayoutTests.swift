@@ -147,18 +147,35 @@ final class RadialLayoutTests: XCTestCase {
 
     func testHysteresisKeepsCurrentNearEdges() {
         let layout = RadialLayout(itemCount: 8, configuration: config)
-        // 23° is in slot 1, but while slot 0 is hovered a 1° wobble keeps it.
+        // Slot 0 spans ±22.5°. 23° is in slot 1, but while slot 0 is hovered it's
+        // sticky: max(30 % of 45°, 10°) = 13.5° past the edge, so up to 36°.
         XCTAssertEqual(layout.hitTest(point(deg: 23, r: 90)), .slot(1))
         XCTAssertEqual(layout.hitTest(point(deg: 23, r: 90), current: 0), .slot(0))
-        XCTAssertEqual(layout.hitTest(point(deg: 25, r: 90), current: 0), .slot(1))
+        XCTAssertEqual(layout.hitTest(point(deg: 35, r: 90), current: 0), .slot(0))
+        XCTAssertEqual(layout.hitTest(point(deg: 37, r: 90), current: 0), .slot(1))
+        XCTAssertEqual(layout.hitTest(point(deg: -35, r: 90), current: 0), .slot(0), "both edges")
         // Radial hysteresis between rings.
         let two = RadialLayout(itemCount: 16, configuration: config)
         let boundary = (config.innerRing.outer + config.outerRing.inner) / 2
         guard case .slot(let outer) = two.hitTest(point(deg: 0, r: boundary + 1)) else { return XCTFail("slot") }
         XCTAssertEqual(two.slots[outer].ring, 1)
         XCTAssertEqual(two.hitTest(point(deg: 0, r: boundary - 1), current: outer), .slot(outer))
-        guard case .slot(let inner) = two.hitTest(point(deg: 0, r: boundary - 4), current: outer) else { return XCTFail("slot") }
+        XCTAssertEqual(two.hitTest(point(deg: 0, r: boundary - 5), current: outer), .slot(outer), "±6 pt ring slack")
+        guard case .slot(let inner) = two.hitTest(point(deg: 0, r: boundary - 7), current: outer) else { return XCTFail("slot") }
         XCTAssertEqual(two.slots[inner].ring, 0)
+    }
+
+    func testStickySlackRule() {
+        let eight = RadialLayout(itemCount: 8, configuration: config)
+        XCTAssertEqual(eight.stickySlack(for: eight.slots[0]) * 180 / .pi, 13.5, accuracy: 0.01, "30 % of a 45° wedge")
+        var small = config
+        small.maxPerInnerRing = 8
+        let twenty = RadialLayout(itemCount: 20, configuration: small)
+        for slot in twenty.slots {
+            let slack = twenty.stickySlack(for: slot)
+            XCTAssertGreaterThanOrEqual(slack * 180 / .pi, min(10, 0.45 * slot.span * 180 / .pi) - 0.001, "10° floor")
+            XCTAssertLessThanOrEqual(slack, 0.45 * slot.span + 1e-9, "neighbours stay reachable")
+        }
     }
 
     func testAngleHelpers() {

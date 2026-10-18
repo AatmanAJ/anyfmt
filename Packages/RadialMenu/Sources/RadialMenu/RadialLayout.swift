@@ -160,16 +160,15 @@ public struct RadialLayout: Equatable, Sendable {
         }
         if distance > outerRadius + configuration.outerTolerance { return .outside }
         let angle = RadialLayout.clockAngle(of: point)
-        let slack = configuration.hysteresisDegrees * .pi / 180
 
         var boundary = ringBoundary
         if let current, slots.indices.contains(current) {
-            boundary += slots[current].ring == 1 ? -3 : 3
+            boundary += slots[current].ring == 1 ? -configuration.ringHysteresis : configuration.ringHysteresis
         }
         let ring = hasOuterRing && distance >= boundary ? 1 : 0
 
         if let current, slots.indices.contains(current), slots[current].ring == ring,
-           slots[current].contains(angle: angle, slack: slack) {
+           slots[current].contains(angle: angle, slack: stickySlack(for: slots[current])) {
             return .slot(current)
         }
         if let index = slots.firstIndex(where: { $0.ring == ring && $0.contains(angle: angle) }) {
@@ -179,6 +178,16 @@ public struct RadialLayout: Equatable, Sendable {
             return .slot(index)
         }
         return .outside
+    }
+
+    /// How far past its edges the highlighted segment keeps the pointer (radians).
+    /// max(stickyFraction × width, stickyMinimumDegrees, hysteresisDegrees), never more than 45 % of the width.
+    public func stickySlack(for slot: RadialSlot) -> CGFloat {
+        let width = slot.span
+        let wanted = max(configuration.stickyFraction * width,
+                         configuration.stickyMinimumDegrees * .pi / 180,
+                         configuration.hysteresisDegrees * .pi / 180)
+        return min(wanted, 0.45 * width)
     }
 
     // MARK: Keyboard order

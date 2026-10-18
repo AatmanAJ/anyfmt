@@ -62,6 +62,12 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
     /// or hold) or only on a quick tap (`.tap`). Default `.press`.
     public var activation: TriggerActivation
 
+    /// A modifier whose quick tap, while a wheel is open, is reported as
+    /// ``DragSenseEvent/lockKeyTapped(location:)`` (the host locks the
+    /// highlighted segment). Ignored if it's also a trigger key. nil disables.
+    /// Default ⌥ Option, which no default trigger uses.
+    public var lockKey: ModifierKey?
+
     public static let tapThresholdRange: ClosedRange<TimeInterval> = 0.15...0.8
     public static let idlePollIntervalRange: ClosedRange<TimeInterval> = 0.05...2
     public static let activePollRateRange: ClosedRange<Double> = 30...1000
@@ -86,7 +92,8 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         dropResolutionTimeout: TimeInterval = 1,
         dragMovedInterval: TimeInterval = 1.0 / 60.0,
         retapBehavior: RetapBehavior = .ignore,
-        activation: TriggerActivation = .press
+        activation: TriggerActivation = .press,
+        lockKey: ModifierKey? = .option
     ) {
         self.triggers = triggers
         self.tapThreshold = tapThreshold
@@ -100,6 +107,7 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         self.dragMovedInterval = dragMovedInterval
         self.retapBehavior = retapBehavior
         self.activation = activation
+        self.lockKey = lockKey
     }
 
     public static let `default` = DragSenseConfiguration()
@@ -144,7 +152,7 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
     private enum CodingKeys: String, CodingKey {
         case triggers, tapThreshold, idlePollInterval, activePollRate, requireFileTypes
         case topExclusionHeight, minimumDragDistance, pasteboardReadTimeout
-        case dropResolutionTimeout, dragMovedInterval, retapBehavior, activation
+        case dropResolutionTimeout, dragMovedInterval, retapBehavior, activation, lockKey
     }
 
     public init(from decoder: any Decoder) throws {
@@ -162,7 +170,8 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
             dropResolutionTimeout: try c.decodeIfPresent(TimeInterval.self, forKey: .dropResolutionTimeout) ?? d.dropResolutionTimeout,
             dragMovedInterval: try c.decodeIfPresent(TimeInterval.self, forKey: .dragMovedInterval) ?? d.dragMovedInterval,
             retapBehavior: try c.decodeIfPresent(RetapBehavior.self, forKey: .retapBehavior) ?? d.retapBehavior,
-            activation: try c.decodeIfPresent(TriggerActivation.self, forKey: .activation) ?? d.activation
+            activation: try c.decodeIfPresent(TriggerActivation.self, forKey: .activation) ?? d.activation,
+            lockKey: c.contains(.lockKey) ? try c.decodeIfPresent(ModifierKey.self, forKey: .lockKey) : d.lockKey
         )
     }
 
@@ -180,5 +189,6 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         try c.encode(dragMovedInterval, forKey: .dragMovedInterval)
         try c.encode(retapBehavior, forKey: .retapBehavior)
         try c.encode(activation, forKey: .activation)
+        try c.encode(lockKey, forKey: .lockKey) // null = disabled on purpose
     }
 }

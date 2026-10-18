@@ -70,6 +70,20 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertNil(coordinator.wheel.kind, "a release with no drop coming closes it")
     }
 
+    /// ⌥ tap mid-drag (DragSense.lockKeyTapped) locks the highlighted segment.
+    func testLockKeyTapLocksTheHighlightedSegment() {
+        let coordinator = AppCoordinator(settings: settings)
+        defer { coordinator.wheel.hide(animated: false) }
+        coordinator.wheel.show(kind: .actions, urls: [URL(fileURLWithPath: "/tmp/a.jpg")], at: CGPoint(x: 400, y: 400))
+        coordinator.handle(.lockKeyTapped(location: .zero))
+        XCTAssertFalse(coordinator.wheel.menuView.isLocked, "nothing highlighted yet")
+        coordinator.wheel.menuView.highlightItem(at: 1, animated: false)
+        coordinator.handle(.lockKeyTapped(location: .zero))
+        XCTAssertTrue(coordinator.wheel.menuView.isLocked)
+        coordinator.handle(.lockKeyTapped(location: .zero))
+        XCTAssertFalse(coordinator.wheel.menuView.isLocked, "a second tap unlocks")
+    }
+
     func testOutputPolicySnapshot() {
         settings.metadataPolicy = .stripPrivate
         settings.namePattern = "{name} ({format})"

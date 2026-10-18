@@ -250,6 +250,8 @@ public final class DragSense: ObservableObject {
     private var phase: Phase = .idle
     private var baseline: Int?
     private var taps = TapDetector()
+    /// Set by `feedTaps` when the lock key was tapped in the latest sample.
+    private var lockTapped = false
     private var rate: Rate = .stopped
     private var readGeneration = 0
     private var outbox: [Output] = []
@@ -364,7 +366,12 @@ public final class DragSense: ObservableObject {
                 diagnostics.verbose("mouse up with wheel \(trigger.id) open; awaiting host")
                 emit(.dragEnded(location: location))
             } else {
+                lockTapped = false
                 for tap in feedTaps(at: now) { handle(tap, location: location, now: now) }
+                if lockTapped {
+                    lockTapped = false
+                    emit(.lockKeyTapped(location: location))
+                }
                 emitMoveIfNeeded(location: location, now: now)
             }
 
@@ -501,10 +508,19 @@ public final class DragSense: ObservableObject {
     /// Trigger key activity in this sample: key-downs for `.press` activation,
     /// completed taps for `.tap`.
     private func feedTaps(at now: TimeInterval) -> [TapDetector.Tap] {
-        let found = taps.feed(flags: input.modifierFlags, at: now, threshold: config.tapThreshold)
+        var found = taps.feed(flags: input.modifierFlags, at: now, threshold: config.tapThreshold)
+        // The lock key's taps are never triggers: set them aside for an open wheel.
+        if let lock = config.lockKey, config.trigger(for: lock) == nil {
+            if found.contains(where: { $0.key == lock }) {
+                lockTapped = true
+                diagnostics.verbose("lock key tapped")
+            }
+            found.removeAll { $0.key == lock }
+        }
         if config.activation == .press {
-            for press in taps.newPresses { diagnostics.verbose("key down \(press.key.rawValue)") }
-            return taps.newPresses
+            let presses = taps.newPresses.filter { $0.key != config.lockKey || config.trigger(for: $0.key) != nil }
+            for press in presses { diagnostics.verbose("key down \(press.key.rawValue)") }
+            return presses
         }
         for tap in found {
             diagnostics.verbose("tap \(tap.key.rawValue) (\(Int(((tap.releasedAt - tap.pressedAt) * 1000).rounded())) ms)")

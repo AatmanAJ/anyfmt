@@ -15,6 +15,7 @@ extension RadialMenuView {
 
     public override func draggingExited(_ sender: (any NSDraggingInfo)?) {
         acceptsCurrentDrop = false
+        dropTarget = nil
         clearHover()
         setDropZoneTargeted(false)
         delegate?.radialMenuDragDidExit(self)
@@ -46,7 +47,9 @@ extension RadialMenuView {
             return delegate?.radialMenu(self, didDropOnEmptyRing: sender) ?? false
         }
         guard let item = highlightedItem else { return false }
-        return delegate?.radialMenu(self, didDrop: sender, on: item) ?? false
+        let target = finalDropTarget(for: item)
+        dropTarget = nil
+        return delegate?.radialMenu(self, didDrop: sender, on: item, target: target) ?? false
     }
 
     private func answer(_ operation: NSDragOperation) -> NSDragOperation {
@@ -63,7 +66,8 @@ extension RadialMenuView {
             return inside ? .copy : []
         }
         updateHover(at: point)
-        guard let item = highlightedItem, item.isEnabled,
+        dropTarget = resolveDropTarget()
+        guard dropTarget != nil, let item = highlightedItem,
               delegate?.radialMenu(self, canAcceptDropOn: item, info: info) ?? true else { return [] }
         // Copy, never move: the original always stays where it is.
         return .copy
@@ -157,7 +161,14 @@ extension RadialMenuView {
         case 124: moveSelection(by: 1)                      // →
         case 126: radialLayout.hasOuterRing ? moveAcrossRing(outward: true) : moveSelection(by: -1)  // ↑
         case 125: radialLayout.hasOuterRing ? moveAcrossRing(outward: false) : moveSelection(by: 1)  // ↓
-        case 36, 76: activateHighlighted()                  // Return, Enter
+        case 36, 76:                                        // Return, Enter (⌥: configure first)
+            if event.modifierFlags.contains(.option), let item = highlightedItem, item.isEnabled,
+               delegate?.radialMenu(self, hasOptionsFor: item) == true {
+                delegate?.radialMenu(self, didRequestTuneFor: item)
+            } else {
+                activateHighlighted()
+            }
+        case 49: toggleLock()                               // Space
         case 53: cancel()                                   // Escape
         case 48: delegate?.radialMenu(self, didRequestNextMenu: !shift) // Tab
         case 116: showPage(radialLayout.page - 1, animated: true) // Page Up

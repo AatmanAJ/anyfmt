@@ -62,4 +62,7 @@ public enum DragSenseEvent: Sendable, Equatable {
     /// ``DragSense/cancelWheel()`` (DragSense cancels by itself after
     /// ``DragSenseConfiguration/dropResolutionTimeout``).
     case dragEnded(location: CGPoint)
+    /// The ``DragSenseConfiguration/lockKey`` was tapped while a wheel is open:
+    /// lock (or unlock) the highlighted segment.
+    case lockKeyTapped(location: CGPoint)
 }

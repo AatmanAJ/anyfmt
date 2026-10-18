@@ -24,6 +24,15 @@ public protocol RadialMenuViewDelegate: AnyObject {
     func radialMenu(_ menu: RadialMenuView, didRequestOptionsFor item: RadialItem, anchor: NSRect)
     /// The drag left the wheel.
     func radialMenuDragDidExit(_ menu: RadialMenuView)
+    /// Up to three presets shown as chips outside `item` when it's locked or dwelled on.
+    func radialMenu(_ menu: RadialMenuView, presetsFor item: RadialItem) -> [RadialPreset]
+    /// A drop with its intent: run, configure first (tune lip or ⌥), or a preset chip.
+    /// The default forwards `.item` (and anything unhandled) to `radialMenu(_:didDrop:on:)`.
+    func radialMenu(_ menu: RadialMenuView, didDrop info: NSDraggingInfo, on item: RadialItem, target: RadialDropTarget) -> Bool
+    /// The lock was set or cleared (⌥ tap mid-drag, Space in keyboard mode).
+    func radialMenu(_ menu: RadialMenuView, didChangeLock locked: Bool)
+    /// ⌥-Return in keyboard mode: configure the highlighted item before running it.
+    func radialMenu(_ menu: RadialMenuView, didRequestTuneFor item: RadialItem)
 }
 
 public extension RadialMenuViewDelegate {
@@ -37,6 +46,41 @@ public extension RadialMenuViewDelegate {
     func radialMenu(_ menu: RadialMenuView, hasOptionsFor item: RadialItem) -> Bool { false }
     func radialMenu(_ menu: RadialMenuView, didRequestOptionsFor item: RadialItem, anchor: NSRect) {}
     func radialMenuDragDidExit(_ menu: RadialMenuView) {}
+    func radialMenu(_ menu: RadialMenuView, presetsFor item: RadialItem) -> [RadialPreset] { [] }
+    func radialMenu(_ menu: RadialMenuView, didDrop info: NSDraggingInfo, on item: RadialItem, target: RadialDropTarget) -> Bool {
+        radialMenu(menu, didDrop: info, on: item)
+    }
+    func radialMenu(_ menu: RadialMenuView, didChangeLock locked: Bool) {}
+    func radialMenu(_ menu: RadialMenuView, didRequestTuneFor item: RadialItem) {
+        radialMenu(menu, didRequestOptionsFor: item, anchor: .zero)
+    }
+}
+
+/// A saved set of options shown as a chip outside a segment.
+public struct RadialPreset: Equatable, Sendable, Identifiable {
+    public let id: String
+    public let title: String
+    public init(id: String, title: String) {
+        self.id = id
+        self.title = title
+    }
+}
+
+/// Where a drop lands, by intent.
+public enum RadialDropTarget: Equatable, Sendable {
+    /// The segment body: run with the remembered settings.
+    case item(String)
+    /// The tune lip, or ⌥ held at the drop: configure first.
+    case tune(String)
+    /// A preset chip.
+    case preset(item: String, preset: String)
+
+    public var itemID: String {
+        switch self {
+        case .item(let id), .tune(let id): id
+        case .preset(let id, _): id
+        }
+    }
 }
 
 /// Text the menu draws itself. Hosts pass localised versions.
@@ -45,6 +89,13 @@ public struct RadialMenuStrings: Equatable, Sendable {
     public var morePagesHint: String = "Shows the next page of options"
     public var pageFormat: String = "Page %d of %d"
     public var menuHint: String = "Arrow keys move, Return chooses, Escape cancels, Tab switches wheels"
+    /// Hub pill over the tune lip, e.g. "GIF · Options".
+    public var tuneFormat: String = "%@ · Options"
+    /// Hub pill while locked, e.g. "GIF · Locked".
+    public var lockedFormat: String = "%@ · Locked"
+    /// Spoken when the lock changes.
+    public var lockedAnnouncement: String = "%@ locked. Drop anywhere on the wheel."
+    public var unlockedAnnouncement: String = "Unlocked"
     public init() {}
 }
 
@@ -95,26 +146,45 @@ public final class RadialMenuView: NSView {
         (items.isEmpty ? configuration.innerRing.outer : radialLayout.outerRadius) + configuration.hoverLift
     }
 
+    /// Locked: pointer movement can't change the selection, and a drop anywhere
+    /// on the wheel (hub included) lands on it. Cleared when the items change.
+    public internal(set) var isLocked = false
+    /// Where a drop released now would land (nil = nowhere). Updated during drags.
+    public internal(set) var dropTarget: RadialDropTarget?
+    /// Held at the drop, this asks for `.tune` instead of `.item` (nil disables).
+    /// Hosts that bind ⌥ as a trigger key set it to nil and rely on the lip.
+    public var tuneModifier: NSEvent.ModifierFlags? = .option
+
+    // Aiming state (RadialMenuView+Aim.swift)
+    var pendingSwitch: (slot: Int, since: TimeInterval)?
+    var switchTask: Task<Void, Never>?
+    var isInLip = false
+    var chipNodes: [ChipNode] = []
+    var chipsSlot: Int?
+    var hoveredChip: Int?
+    let lockLayer = CAShapeLayer()
+    let lipLayer = CAShapeLayer()
+
     // Layer trees
     private let shadowView = LayerHostView()
-    private let overlayView = LayerHostView()
+    let overlayView = LayerHostView()
     private var materialView: NSVisualEffectView?
     private let maskRoot = CALayer()
     private let hitLayer = CAShapeLayer()
-    private var nodes: [SegmentNode] = []
+    private(set) var nodes: [SegmentNode] = []
     private var hubNode: HubNode
     private var dropZoneNode: DropZoneNode?
     private(set) var palette: RadialPalette
 
     // Interaction state
     private(set) var highlightedSlot: Int?
-    private var lastPointer: CGPoint?
+    var lastPointer: CGPoint?
     private var dwell: Task<Void, Never>?
     private var dropZoneTargeted = false
     var scrollAccumulatorValue: CGFloat = 0
     private var segmentElements: [RadialSegmentElement] = []
     private var renderScale: CGFloat = 2
-    private var isDismissing = false
+    private(set) var isDismissing = false
 
     public init(configuration: RadialMenuConfiguration = RadialMenuConfiguration(),
                 style: RadialMenuStyle = RadialMenuStyle(), materialMode: MaterialMode = .live) {
@@ -153,6 +223,7 @@ public final class RadialMenuView: NSView {
         hitLayer.actions = SegmentNode.noActions
         shadowView.content.addSublayer(hitLayer)
         hubNode.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
+        installAimLayers()
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
         refreshAppearance()
@@ -278,6 +349,7 @@ public final class RadialMenuView: NSView {
         }
         highlightedSlot = nil
         cancelDwell()
+        resetAim()
         radialLayout = RadialLayout(itemCount: items.count, configuration: configuration, page: requestedPage)
         requestedPage = radialLayout.page
         let center = wheelCenter
@@ -354,8 +426,11 @@ public final class RadialMenuView: NSView {
         }
     }
 
-    private func updateHitArea() {
-        let r = (items.isEmpty ? configuration.innerRing.outer : radialLayout.outerRadius) + configuration.outerTolerance
+    func updateHitArea() {
+        let base = (items.isEmpty ? configuration.innerRing.outer : radialLayout.outerRadius) + configuration.outerTolerance
+        // While chips show, the band out to them is painted too, so the drag can't
+        // fall through to the window below on its way to a chip.
+        let r = chipNodes.isEmpty ? base : max(base, chipReach + 6)
         let c = wheelCenter
         LayerAnimation.withoutActions {
             hitLayer.frame = canvas
@@ -439,7 +514,7 @@ public final class RadialMenuView: NSView {
         applyPill(animated: animated)
     }
 
-    private func applyPill(animated: Bool) {
+    func applyPill(animated: Bool) {
         if items.isEmpty, let zone = dropZone {
             hubNode.setPill(zone.title, highlighted: dropZoneTargeted, config: configuration, palette: palette,
                             scale: renderScale, animated: animated)
@@ -447,7 +522,14 @@ public final class RadialMenuView: NSView {
         }
         if let slot = highlightedSlot {
             let item = item(for: radialLayout.slots[slot])
-            let title = style.uppercaseTitleProminence && item.prominence == .title ? item.title.localizedUppercase : item.title
+            var title = style.uppercaseTitleProminence && item.prominence == .title ? item.title.localizedUppercase : item.title
+            if let chip = hoveredChip, chipNodes.indices.contains(chip) {
+                title = chipNodes[chip].preset.title
+            } else if isInLip {
+                title = String(format: strings.tuneFormat, title)
+            } else if isLocked {
+                title = String(format: strings.lockedFormat, title)
+            }
             hubNode.setPill(title, highlighted: item.isEnabled, config: configuration, palette: palette,
                             scale: renderScale, animated: animated)
         } else {
@@ -475,14 +557,13 @@ public final class RadialMenuView: NSView {
             }
             movementGuard = nil
         }
-        switch radialLayout.hitTest(relative(point), current: highlightedSlot) {
-        case .slot(let s): setHighlightedSlot(s, animated: animated)
-        case .deadZone, .outside: setHighlightedSlot(nil, animated: animated)
-        }
+        aimHover(at: point, animated: animated)
     }
 
     func clearHover() {
         lastPointer = nil
+        guard !isLocked else { return }
+        cancelPendingSwitch()
         setHighlightedSlot(nil, animated: true)
     }
 
@@ -503,6 +584,8 @@ public final class RadialMenuView: NSView {
                 if hapticsEnabled { NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now) }
             }
         }
+        if chipsSlot != nil && chipsSlot != highlightedSlot { hideChips() }
+        setLip(false)
         applyPill(animated: animated)
         scheduleDwell()
         for e in segmentElements { e.refreshSelection() }
@@ -526,6 +609,10 @@ public final class RadialMenuView: NSView {
                 menu.showPage(menu.radialLayout.page + 1, animated: true)
                 if let p = menu.lastPointer { menu.updateHover(at: p) }
             }
+        } else if let index = target.itemIndex, configuration.presetBand > 0, items[index].isEnabled,
+                  !(delegate?.radialMenu(self, presetsFor: items[index]) ?? []).isEmpty {
+            delay = configuration.presetDwell
+            action = { menu in menu.showChips(forSlot: slot) }
         } else if let index = target.itemIndex, configuration.optionsDwell > 0,
                   delegate?.radialMenu(self, hasOptionsFor: items[index]) == true {
             delay = configuration.optionsDwell
@@ -543,7 +630,7 @@ public final class RadialMenuView: NSView {
         }
     }
 
-    private func cancelDwell() {
+    func cancelDwell() {
         dwell?.cancel()
         dwell = nil
     }
@@ -591,6 +678,7 @@ public final class RadialMenuView: NSView {
         isDismissing = false
         lastPointer = nil
         acceptsCurrentDrop = false
+        resetAim()
         let all = nodes.flatMap(\.movingLayers) + hubNode.movingLayers + (dropZoneNode?.movingLayers ?? [])
         LayerAnimation.withoutActions {
             for l in all + [shadowView.content, overlayView.content, maskRoot] {

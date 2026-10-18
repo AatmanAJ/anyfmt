@@ -274,7 +274,7 @@ final class SegmentNode {
 
     /// Hovered shape: reaches outward by the lift plus the scale, and widens a
     /// touch into the gaps so it reads as sitting above its neighbours.
-    private func lifted(_ config: RadialMenuConfiguration) -> WedgePath.Spec {
+    func lifted(_ config: RadialMenuConfiguration) -> WedgePath.Spec {
         var s = restSpec
         let depth = s.outer - s.inner
         s.outer += config.hoverLift + depth * (config.hoverScale - 1)
@@ -283,6 +283,24 @@ final class SegmentNode {
         s.start -= widen
         s.end += widen
         return s
+    }
+
+    /// The segment's current outline (lifted while highlighted), for the lock ring.
+    func outlinePath(config: RadialMenuConfiguration, center: CGPoint) -> CGPath {
+        WedgePath.path(isHighlighted && isEnabled ? lifted(config) : restSpec, center: center)
+    }
+
+    /// The outer `depth` points of the current shape, for the tune lip.
+    func lipPath(config: RadialMenuConfiguration, center: CGPoint, depth: CGFloat) -> CGPath {
+        var s = isHighlighted && isEnabled ? lifted(config) : restSpec
+        s.inner = max(s.inner, s.outer - depth)
+        s.corner = min(s.corner, depth / 2)
+        return WedgePath.path(s, center: center)
+    }
+
+    /// Outer radius of the current shape.
+    func currentOuterRadius(config: RadialMenuConfiguration) -> CGFloat {
+        (isHighlighted && isEnabled ? lifted(config) : restSpec).outer
     }
 
     /// Brief fill pulse when a drop lands on this segment.

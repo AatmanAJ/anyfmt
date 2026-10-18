@@ -34,7 +34,27 @@ public struct RadialMenuConfiguration: Equatable, Sendable {
     /// Drop/hover tolerance beyond the outermost ring, so a slight overshoot keeps the target.
     public var outerTolerance: CGFloat = 18
     /// Angular hysteresis before hover moves to a neighbour (degrees). Stops flicker on edges.
+    /// The sticky rule below usually dominates; this is the floor.
     public var hysteresisDegrees: CGFloat = 1.5
+    /// Sticky selection: to leave the highlighted segment the pointer must go this
+    /// fraction of the segment's angle past its edge, or `stickyMinimumDegrees`,
+    /// whichever is larger (capped at 45 % of the segment so neighbours stay
+    /// reachable). Small drift while aiming never changes the target.
+    public var stickyFraction: CGFloat = 0.3
+    public var stickyMinimumDegrees: CGFloat = 10
+    /// Radial slack on the boundary between the inner and outer ring (points).
+    public var ringHysteresis: CGFloat = 6
+    /// A move to another segment must hold this long before it takes (seconds).
+    /// 0 switches at once. Moves into the hub or off the wheel are always immediate.
+    public var switchDelay: Double = 0.06
+    /// Depth of the "tune" lip on the outer edge of segments that have options (points).
+    /// A drop there asks the host to configure instead of run. 0 disables the lip.
+    public var lipDepth: CGFloat = 12
+    /// Room outside the rim for preset chips (points). 0 disables presets.
+    public var presetBand: CGFloat = 0
+    public var presetChipHeight: CGFloat = 24
+    /// Hover this long on a segment with presets to show its chips (they show at once when locked).
+    public var presetDwell: Double = 0.4
     public var thumbnailSize: CGFloat = 56
 
     // MARK: Type (points)
@@ -71,8 +91,8 @@ public struct RadialMenuConfiguration: Equatable, Sendable {
 
     public init() {}
 
-    /// Room around the outermost ring for lift, shadow and glow.
-    public var decorationMargin: CGFloat { hoverLift + 26 }
+    /// Room around the outermost ring for lift, shadow and glow (and preset chips when enabled).
+    public var decorationMargin: CGFloat { hoverLift + 26 + presetBand }
 
     /// Side of the square panel/view that fits the largest wheel this configuration can draw.
     public var canvasSide: CGFloat { ceil((outerRing.outer + decorationMargin) * 2) }
