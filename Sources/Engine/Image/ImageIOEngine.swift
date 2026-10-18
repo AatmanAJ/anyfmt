@@ -48,7 +48,7 @@ public struct ImageIOEngine: ConversionEngine {
         case Formats.icns:
             try IconWriter.writeICNS(input, to: out, maxDimension: maxDim)
         case Formats.gif where input.isAnimated:
-            try writeAnimatedGIF(input, to: out, maxDimension: maxDim, progress: context.progress)
+            try Self.writeAnimatedGIF(input, to: out, maxDimension: maxDim, progress: context.progress)
         case Formats.avif where input.isAnimated && input.type == ImageUTI.gif && FFmpeg(locator: context.locator).isAvailable:
             // ImageIO can't write AVIF sequences; hand animated GIFs to ffmpeg so they stay animated.
             return try await FFmpegImageEngine().convert(request, context: context)
@@ -124,7 +124,7 @@ public struct ImageIOEngine: ConversionEngine {
 
     /// Any animated source (GIF, WebP, APNG, AVIF sequence) → animated GIF with the
     /// same frame timing and loop count. ImageIO hands us fully composited frames.
-    private func writeAnimatedGIF(_ input: ImageInput, to url: URL, maxDimension: Int, progress: ProgressSink) throws {
+    static func writeAnimatedGIF(_ input: ImageInput, to url: URL, maxDimension: Int, progress: ProgressSink) throws {
         guard let anim = input.animation else { return }
         let dest = try ImageWriter.create(url, uti: ImageUTI.gif, count: anim.frameCount)
         CGImageDestinationSetProperties(dest, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: anim.loopCount]] as CFDictionary)

@@ -151,6 +151,18 @@ final class FFmpegImageEngineTests: XCTestCase {
         S.assertColor(S.pixel(try XCTUnwrap(S.decode(back[0], index: 2)), 16, 16), [0, 0, 255, 255], tolerance: 16, "frame 3 is blue")
     }
 
+    func testAPNGWithDuplicateFramesToGIFKeepsEveryDelay() async throws {
+        let dir = try S.tempDir()
+        let red = S.solid(16, 16, S.color(1, 0, 0)), green = S.solid(16, 16, S.color(0, 1, 0)), blue = S.solid(16, 16, S.color(0, 0, 1))
+        let props = [0.1, 0.2, 0.3, 0.4].map { [kCGImagePropertyPNGDictionary: [kCGImagePropertyAPNGDelayTime: $0]] as [CFString: Any] }
+        let apng = S.write([red, green, green, blue], to: dir.appendingPathComponent("a.png"), uti: "public.png", frameProperties: props,
+                           container: [kCGImagePropertyPNGDictionary: [kCGImagePropertyAPNGLoopCount: 0]])
+        let out = try await S.convert(engine, apng, from: Formats.png, to: Formats.gif)
+        let anim = try XCTUnwrap(try ImageInput.open(out[0], format: Formats.gif).animation)
+        XCTAssertEqual(anim.delays.reduce(0, +), 1.0, accuracy: 0.02, "total time kept: \(anim.delays)")
+        XCTAssertEqual(anim.frameCount, 4)
+    }
+
     func testGIFTimingRejectsMismatchedFrames() throws {
         let dir = try S.tempDir()
         let data = try Data(contentsOf: S.animatedGIF(at: dir.appendingPathComponent("a.gif")))

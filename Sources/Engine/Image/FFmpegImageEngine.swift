@@ -161,7 +161,10 @@ public struct FFmpegImageEngine: ConversionEngine {
                              duration: Double(animation.frameCount) / 100, progress: progress.scaled(0.4...0.95))
         guard let data = try? Data(contentsOf: out),
               let timed = GIFTiming.apply(data, delays: animation.delays, loopCount: animation.loopCount) else {
-            throw ConversionError.engineFailed("ffmpeg", status: 0, detail: "animated GIF frame count did not match the source")
+            // ffmpeg changed the frame structure: ImageIO's writer keeps timing exactly (coarser palette).
+            try? FileManager.default.removeItem(at: out)
+            try ImageIOEngine.writeAnimatedGIF(input, to: out, maxDimension: options.int(OptionKey.maxDimension, default: 0), progress: progress)
+            return
         }
         try timed.write(to: out)
     }
