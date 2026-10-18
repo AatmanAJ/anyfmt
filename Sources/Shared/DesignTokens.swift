@@ -49,9 +49,9 @@ public enum DesignTokens {
         public static let hoverResponse: Double = 0.25
         public static let hoverDamping: Double = 0.8
         /// Whole open animation budget (segments staggered inside it).
-        public static let openTotal: Double = 0.17
-        public static let openStaggerPerSegment: Double = 0.012
-        public static let close: Double = 0.12
+        public static let openTotal: Double = 0.15
+        public static let openStaggerPerSegment: Double = 0.008
+        public static let close: Double = 0.11
         public static let morph: Double = 0.16
         public static let dropConfirm: Double = 0.09
         public static let crossfade: Double = 0.12
@@ -60,18 +60,26 @@ public enum DesignTokens {
     /// Wheel geometry in points. Starting values informed by
     /// research/INTERACTION_NOTES.md; see docs/DECISIONS.md.
     public enum Wheel {
-        public static let hubRadius: CGFloat = 44
-        public static let hubDeadZone: CGFloat = 36
-        public static let ringInner: CGFloat = 58
-        public static let ringOuter: CGFloat = 138
-        public static let secondRingOuter: CGFloat = 206
-        public static let segmentGapDegrees: CGFloat = 1.6
+        public static let hubRadius: CGFloat = 40
+        public static let hubDeadZone: CGFloat = 34
+        public static let thumbnailSize: CGFloat = 56
+        public static let ringInner: CGFloat = 52
+        public static let ringOuter: CGFloat = 124
+        public static let secondRingInner: CGFloat = 130
+        public static let secondRingOuter: CGFloat = 192
+        public static let segmentGapDegrees: CGFloat = 2
         public static let segmentCornerRadius: CGFloat = 8
         public static let maxPerInnerRing = 8
-        public static let maxPerOuterRing = 14
+        public static let maxPerOuterRing = 12
         public static let hoverScale: CGFloat = 1.06
-        public static let hoverLift: CGFloat = 6
-        public static let glyphSize: CGFloat = 20
+        public static let hoverLift: CGFloat = 5
+        public static let glyphSize: CGFloat = 18
+        public static let labelSize: CGFloat = 11.5
+        public static let toolLabelSize: CGFloat = 9.5
         public static let screenEdgeInset: CGFloat = 8
+        /// Keep the wheel out of the Mission Control / menu bar drag band.
+        public static let topExclusion: CGFloat = 24
+        /// Minimum alpha painted on every hit area so drags are delivered (D-003).
+        public static let minimumHitAlpha: CGFloat = 0.01
     }
 }
