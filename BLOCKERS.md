@@ -39,9 +39,18 @@ covered with fakes in unit tests, and every screen is rendered offscreen.
   wheel open for up to 1 s (D-036). Also found: the wheel never saw packs installed
   after launch (D-037), and the Finder Return shortcut also needs Input Monitoring
   (D-004).
-- ⏳ Still to do by hand: opening straight onto ⌘ / ⌃ (only switching was tried), a
-  few more latency samples for a real p95, and steps 2–8 below.
-- ⏳ **Phase 2 feel checks** (unit-tested, but only hands can judge; D-038):
+- ⏳ Still to do by hand: steps 2–8 below (multi-file, actions besides Copy, editors, options in keyboard mode, Services/hotkey, look over a busy wallpaper, stacked cards).
+- ✅ **Phase 2 hands-on, Release build in the new look (2026-10-18, by you):**
+  - Selection stickiness is sticky enough.
+  - Choosing a frame rate in the options panel felt janky. After the chip and
+    instant-estimate rework it feels smooth.
+  - The ⌥-tap lock holds through drift and the hub. Dropping on a preset chip converts.
+  - ⌘ and ⌃ open their wheels directly, a release in the centre cancels, Actions › Copy
+    pastes in Finder, and the tune lip opens the options panel.
+  - Key → wheel visible: n = 7, median 37.6 ms, max 48.3 ms (under the 50 ms budget).
+- ⏳ **Phase 2 feel checks** (unit-tested, but only hands can judge; D-038). The items
+  below are confirmed by the session above, except the dwell timing (0.4 s) for chips
+  shown without a lock:
   - **Sticky aim:** with the GIF segment highlighted, wobble toward a neighbour.
     It should hold until you're clearly inside the next wedge. Tell me if it feels
     sluggish (lower `stickyFraction` 0.3 / `switchDelay` 60 ms) or still twitchy.
