@@ -218,6 +218,141 @@ def rar4(path, files):
         f.write(out)
 rar4(os.path.join(OUT, 'sample.rar'), [('sample', None), ('sample/readme.txt', b'Hello from a RAR archive.\n'), ('sample/data', None), ('sample/data/numbers.csv', b'a,b\n1,2\n')])
 
+# --- XLS: Excel 97-2003 BIFF8 workbook in an OLE2 compound file (version 3, 512-byte
+# sectors), written from the published record/container layouts. The shared-string
+# table is big enough to need CONTINUE records, with one string split across them.
+def biff_rec(t, data):
+    return struct.pack('<HH', t, len(data)) + data
+
+def xl_ustr(s, length_bytes=2):
+    wide = any(ord(ch) > 0xFF for ch in s)
+    body = s.encode('utf-16-le') if wide else s.encode('latin-1')
+    head = struct.pack('<B' if length_bytes == 1 else '<H', len(s)) + bytes([1 if wide else 0])
+    return head + body
+
+def sst_records(strings):
+    MAX = 8224
+    recs, cur = [], bytearray(struct.pack('<II', len(strings) + 3, len(strings)))
+    rtype = 0x00FC
+    def flush():
+        nonlocal cur, rtype
+        recs.append(biff_rec(rtype, bytes(cur)))
+        cur, rtype = bytearray(), 0x003C
+    for s in strings:
+        wide = any(ord(ch) > 0xFF for ch in s)
+        rest, size = s, (2 if wide else 1)
+        if len(cur) + 3 + size > MAX:  # header plus at least one character stay together
+            flush()
+        cur += struct.pack('<H', len(s)) + bytes([1 if wide else 0])
+        while rest:
+            room = (MAX - len(cur)) // size
+            if room <= 0:
+                flush()
+                cur += bytes([1 if wide else 0])  # continued characters restate the option byte
+                continue
+            part, rest = rest[:room], rest[room:]
+            cur += part.encode('utf-16-le' if wide else 'latin-1')
+    if cur or rtype == 0x00FC:
+        flush()
+    return b''.join(recs)
+
+def rk_int(v):
+    return struct.pack('<I', ((v << 2) | 0x02) & 0xFFFFFFFF)
+
+def xf(fmt, style):
+    flags = 0xFFF5 if style else 0x0001
+    return biff_rec(0x00E0, struct.pack('<HHHBBBBIIH', 0, fmt, flags, 0x20, 0, 0, 0 if style else 0xF8, 0, 0, 0x20C0))
+
+shared_xls = ['Name', 'Amount', 'Count', 'Date', 'Active', 'Doubled', 'Label']
+shared_xls += ['Item %03d' % k for k in range(400)]
+shared_xls += ['Zoë café – ünïcødé', 'L' + 'o' * 6000 + 'ng']
+sst = sst_records(shared_xls)
+def sidx(s):
+    return shared_xls.index(s)
+
+def sheet_stream(rows_fn):
+    return biff_rec(0x0809, struct.pack('<HHHHII', 0x0600, 0x0010, 0x0DBB, 0x07CC, 0x41, 6)) + rows_fn() + \
+        biff_rec(0x023E, struct.pack('<HHHHHHHHH', 0x06B6, 0, 0, 0x40, 0, 0, 0, 0, 0)) + biff_rec(0x000A, b'')
+
+def data_rows():
+    out = biff_rec(0x0200, struct.pack('<IIHHH', 0, 302, 0, 7, 0))
+    out += b''.join(biff_rec(0x00FD, struct.pack('<HHHI', 0, c, 15, sidx(n))) for c, n in enumerate(['Name', 'Amount', 'Count', 'Date', 'Active', 'Doubled', 'Label']))
+    for r in range(1, 301):
+        out += biff_rec(0x00FD, struct.pack('<HHHI', r, 0, 15, sidx('Item %03d' % (r - 1))))
+        out += biff_rec(0x0203, struct.pack('<HHHd', r, 1, 15, r * 1.5))
+        out += biff_rec(0x027E, struct.pack('<HHH', r, 2, 15) + rk_int(r * 10))
+        out += biff_rec(0x0203, struct.pack('<HHHd', r, 3, 16, 45366.0 + r))      # dates, custom yyyy-mm-dd
+        out += biff_rec(0x0205, struct.pack('<HHHBB', r, 4, 15, r % 2, 0))
+        out += biff_rec(0x0006, struct.pack('<HHHdHIH', r, 5, 15, r * 3.0, 0, 0, 3) + bytes([0x1E]) + struct.pack('<H', r * 3))
+        if r == 1:  # string formula result + following STRING record
+            out += biff_rec(0x0006, struct.pack('<HHH', r, 6, 15) + bytes([0, 0, 0, 0, 0, 0, 0xFF, 0xFF]) + struct.pack('<HIH', 0, 0, 3) + bytes([0x1E, 1, 0]))
+            out += biff_rec(0x0207, xl_ustr('from formula'))
+        elif r == 2:
+            out += biff_rec(0x0204, struct.pack('<HHH', r, 6, 15) + xl_ustr('inline label'))
+    # One MULRK row and the non-ASCII + long shared strings.
+    out += biff_rec(0x00BD, struct.pack('<HH', 301, 1) + struct.pack('<H', 15) + rk_int(7) + struct.pack('<H', 15) + struct.pack('<I', 0x3FF00000) + struct.pack('<H', 2))  # cells at cols 1-2
+    out += biff_rec(0x00FD, struct.pack('<HHHI', 301, 0, 15, sidx('Zoë café – ünïcødé')))
+    out += biff_rec(0x00FD, struct.pack('<HHHI', 301, 6, 15, sidx(shared_xls[-1])))
+    return out
+
+def notes_rows():
+    return biff_rec(0x0200, struct.pack('<IIHHH', 0, 2, 0, 1, 0)) + biff_rec(0x0204, struct.pack('<HHH', 0, 0, 15) + xl_ustr('Notes sheet')) + \
+        biff_rec(0x0204, struct.pack('<HHH', 1, 0, 15) + xl_ustr('Ünïcødé note'))
+
+font = biff_rec(0x0031, struct.pack('<HHHHHBBBB', 200, 0, 0x7FFF, 400, 0, 0, 0, 0, 0) + xl_ustr('Arial', 1))
+def globals_stream(offsets):
+    g = biff_rec(0x0809, struct.pack('<HHHHII', 0x0600, 0x0005, 0x0DBB, 0x07CC, 0x41, 6))
+    g += biff_rec(0x0042, struct.pack('<H', 1200))
+    g += biff_rec(0x003D, struct.pack('<HHHHHHHHH', 0, 0, 0x3000, 0x1E00, 0x38, 0, 0, 1, 0x258))
+    g += biff_rec(0x0022, struct.pack('<H', 0))
+    g += font * 5
+    g += biff_rec(0x041E, struct.pack('<H', 164) + xl_ustr('yyyy-mm-dd'))
+    g += b''.join(xf(0, True) for _ in range(15)) + xf(0, False) + xf(164, False)
+    g += biff_rec(0x0293, struct.pack('<HBB', 0x8000, 0, 0xFF))
+    for name, off in zip(['Data', 'Notes'], offsets):
+        g += biff_rec(0x0085, struct.pack('<IBB', off, 0, 0) + xl_ustr(name, 1))
+    g += sst
+    g += biff_rec(0x000A, b'')
+    return g
+
+sheets_xls = [sheet_stream(data_rows), sheet_stream(notes_rows)]
+base_len = len(globals_stream([0, 0]))
+offsets = [base_len, base_len + len(sheets_xls[0])]
+workbook = globals_stream(offsets) + b''.join(sheets_xls)
+
+def compound_file(name, stream):
+    SECT = 512
+    data = stream + b'\x00' * ((-len(stream)) % SECT)
+    n_stream, n_dir = len(data) // SECT, 1
+    n_fat = 1
+    while n_fat * 128 < n_fat + n_dir + n_stream:
+        n_fat += 1
+    fat = [0xFFFFFFFD] * n_fat + [0xFFFFFFFE]
+    start = n_fat + n_dir
+    fat += [start + k + 1 if k < n_stream - 1 else 0xFFFFFFFE for k in range(n_stream)]
+    fat += [0xFFFFFFFF] * (n_fat * 128 - len(fat))
+    header = bytearray(512)
+    header[0:8] = b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1'
+    struct.pack_into('<HHHHH', header, 24, 0x003E, 0x0003, 0xFFFE, 9, 6)
+    struct.pack_into('<IIIIIIII', header, 44, n_fat, n_fat, 0, 4096, 0xFFFFFFFE, 0, 0xFFFFFFFE, 0)
+    for k in range(109):
+        struct.pack_into('<I', header, 76 + 4 * k, k if k < n_fat else 0xFFFFFFFF)
+    def dirent(nm, typ, first, size, child=0xFFFFFFFF):
+        e = bytearray(128)
+        enc = (nm + '\x00').encode('utf-16-le') if nm else b''
+        e[0:len(enc)] = enc
+        struct.pack_into('<HBB', e, 64, len(enc), typ, 1)
+        struct.pack_into('<III', e, 68, 0xFFFFFFFF, 0xFFFFFFFF, child)
+        struct.pack_into('<II', e, 116, first, size)
+        return bytes(e)
+    directory = dirent('Root Entry', 5, 0xFFFFFFFE, 0, child=1) + dirent(name, 2, start, len(stream)) + dirent('', 0, 0, 0) * 2
+    return bytes(header) + b''.join(struct.pack('<I', v) for v in fat) + directory + data
+
+with open(os.path.join(OUT, 'sample.xls'), 'wb') as f:
+    f.write(compound_file('Workbook', workbook))
+with open(os.path.join(OUT, 'edge-html-table.xls'), 'w') as f:
+    f.write('<html><body><table><tr><th>City</th><th>Pop</th></tr><tr><td>Oslo</td><td>709000</td></tr></table></body></html>')
+
 # --- Edge archives: path traversal attempts (must never escape the extraction folder).
 with zipfile.ZipFile(os.path.join(OUT, 'edge-zipslip.zip'), 'w') as z:
     z.writestr('../evil.txt', 'should never be written outside')

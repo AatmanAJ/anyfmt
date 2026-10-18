@@ -91,6 +91,40 @@ final class SheetTests: XCTestCase {
         XCTAssertEqual(wb.sheets[1].rows[1], [], "sparse rows are padded")
     }
 
+    func testXLSFixtureBIFF8() throws {
+        let wb = try SheetIO.read(try DocsFixtures.url("sample.xls"), format: Formats.xls)
+        XCTAssertEqual(wb.sheets.map(\.name), ["Data", "Notes"])
+        let r = wb.sheets[0].rows
+        XCTAssertEqual(r.count, 302)
+        guard r.count == 302, r[1].count >= 7, r[301].count >= 7 else { return XCTFail("\(r.prefix(3))") }
+        XCTAssertEqual(r[0].map(\.text), ["Name", "Amount", "Count", "Date", "Active", "Doubled", "Label"])
+        XCTAssertEqual(r[1][0], .string("Item 000"))
+        XCTAssertEqual(r[1][1], .number(1.5), "NUMBER")
+        XCTAssertEqual(r[1][2], .number(10), "RK integer")
+        XCTAssertEqual(r[1][3].text, "2024-03-16", "custom yyyy-mm-dd FORMAT → date")
+        XCTAssertEqual(r[1][4], .bool(true), "BOOLERR")
+        XCTAssertEqual(r[1][5], .number(3), "cached FORMULA number")
+        XCTAssertEqual(r[1][6], .string("from formula"), "FORMULA string result via STRING record")
+        XCTAssertEqual(r[2][6], .string("inline label"), "LABEL")
+        XCTAssertEqual(r[301][0], .string("Zoë café – ünïcødé"), "UTF-16 shared string")
+        XCTAssertEqual(r[301][1], .number(7), "MULRK integer")
+        XCTAssertEqual(r[301][2], .number(1), "MULRK float")
+        XCTAssertEqual(r[301][6].text.count, 6003, "shared string split across CONTINUE records")
+        XCTAssertEqual(wb.sheets[1].rows.map { $0.map(\.text) }, [["Notes sheet"], ["Ünïcødé note"]])
+        // An HTML table saved as .xls (common web-app export) reads as a table.
+        let html = try SheetIO.read(try DocsFixtures.url("edge-html-table.xls"), format: Formats.xls)
+        XCTAssertEqual(html.sheets.first?.rows, [[.string("City"), .string("Pop")], [.string("Oslo"), .number(709000)]])
+        XCTAssertThrowsError(try XLSReader.parse(Data([1, 2, 3, 4])))
+        XCTAssertThrowsError(try CompoundFile(data: Data(count: 1024)))
+    }
+
+    func testRKDecoding() {
+        XCTAssertEqual(XLSReader.rk(UInt32(bitPattern: (-5 << 2) | 0x02)), -5)
+        XCTAssertEqual(XLSReader.rk((1234 << 2) | 0x03), 12.34, "integer ÷ 100")
+        XCTAssertEqual(XLSReader.rk(0x3FF0_0000), 1.0)
+        XCTAssertEqual(XLSReader.rk(0x3FF0_0001), 0.01, "float ÷ 100")
+    }
+
     func testODSRoundTripAndFixtureRepeats() throws {
         let data = try ODSWriter(zipOptions: .init(deterministic: true)).write(workbook)
         let zip = try ZipReader(data: data)

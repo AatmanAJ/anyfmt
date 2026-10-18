@@ -1,7 +1,7 @@
 import Foundation
 
 public enum SheetIO {
-    public static let readable: [FormatID] = [Formats.xlsx, Formats.ods, Formats.csv, Formats.tsv, Formats.json]
+    public static let readable: [FormatID] = [Formats.xlsx, Formats.xls, Formats.ods, Formats.csv, Formats.tsv, Formats.json]
     public static let writable: [FormatID] = [Formats.xlsx, Formats.ods, Formats.csv, Formats.tsv, Formats.json, Formats.html, Formats.pdf]
 
     public static func read(_ url: URL, format: FormatID) throws -> Workbook {
@@ -9,6 +9,7 @@ public enum SheetIO {
             switch format {
             case Formats.xlsx: return try XLSXReader.read(ZipReader(url: url))
             case Formats.ods: return try ODSReader.read(ZipReader(url: url))
+            case Formats.xls: return try XLSReader.read(url)
             case Formats.csv, Formats.tsv:
                 let data = try Data(contentsOf: url)
                 let sheet = CSVReader.read(data, delimiter: format == Formats.tsv ? "\t" : nil, name: url.deletingPathExtension().lastPathComponent)

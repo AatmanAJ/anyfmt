@@ -39,7 +39,7 @@ final class RobustnessTests: XCTestCase {
 
     func testCorruptSheetsAndPackagesNeverTrap() throws {
         var seed: UInt64 = 100
-        for (name, format) in [("sample.xlsx", Formats.xlsx), ("sample.ods", Formats.ods), ("sample.csv", Formats.csv), ("sample.json", Formats.json), ("sample.tsv", Formats.tsv)] {
+        for (name, format) in [("sample.xlsx", Formats.xlsx), ("sample.xls", Formats.xls), ("sample.ods", Formats.ods), ("sample.csv", Formats.csv), ("sample.json", Formats.json), ("sample.tsv", Formats.tsv)] {
             let original = try Data(contentsOf: try DocsFixtures.url(name))
             for v in Self.variants(original, seed: seed) {
                 seed += 1

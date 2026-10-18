@@ -34,6 +34,18 @@ final class OfficeInteropTests: XCTestCase {
         XCTAssertTrue(html.contains("2023-05-01"), "date cell shown with our ISO format")
     }
 
+    /// Keeps the BIFF8 fixture writer honest: Apple's Office generator must accept it.
+    func testQuickLookAcceptsTheXLSFixture() async throws {
+        let html = try await preview(try DocsFixtures.url("sample.xls"))
+        XCTAssertTrue(html.contains("Attachment") || html.contains("from formula"), "Quick Look rendered the workbook")
+        let dir = try tempDir("qlx")
+        let url = try await QuickLookEngine.preview(try DocsFixtures.url("sample.xls"), into: dir)
+        let all = try FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "html" }.map { TextDecoding.decode((try? Data(contentsOf: $0)) ?? Data()) }.joined()
+        XCTAssertTrue(all.contains("from formula"))
+        XCTAssertTrue(all.contains("2024-03-16"), "custom date format applied")
+    }
+
     func testQuickLookRendersOurPPTX() async throws {
         let pdf = try await PDFRouteTests.longPDF()
         let out = try await runEngine(OOXMLEngine(), pdf, from: Formats.pdf, to: Formats.pptx)

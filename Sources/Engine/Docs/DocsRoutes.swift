@@ -79,12 +79,12 @@ public enum DocsRoutes {
     ]
 
     static let sheetRows: [Capability] = {
-        let inputs: [FormatID] = [F.xlsx, F.ods, F.csv, F.tsv, F.json]
+        let inputs: [FormatID] = [F.xlsx, F.xls, F.ods, F.csv, F.tsv, F.json]
         let outputs: [FormatID] = [F.xlsx, F.ods, F.csv, F.tsv, F.json, F.html, F.pdf]
         var rows: [Capability] = []
         for from in inputs {
             for to in outputs where to != from {
-                let multiSheet = (from == F.xlsx || from == F.ods) && [F.csv, F.tsv, F.json].contains(to)
+                let multiSheet = (from == F.xlsx || from == F.xls || from == F.ods) && [F.csv, F.tsv, F.json].contains(to)
                 let schema: OptionsSchema
                 switch to {
                 case F.csv, F.tsv: schema = multiSheet ? DocsSchemas.delimited : OptionsSchema("sheet.bom", [DocsSchemas.delimited.specs[1]])
