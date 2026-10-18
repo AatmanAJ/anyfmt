@@ -107,17 +107,13 @@ final class HubNode {
                                                                        config: config, maxWidth: pillMaxWidth(config),
                                                                        scale: scale)
             pillCache[key] = rendered
-            if animated {
-                let fade = CATransition()
-                fade.type = .fade
-                fade.duration = 0.08
-                pill.add(fade, forKey: "contents")
-            }
-            pill.set("bounds", to: CGRect(origin: .zero, size: rendered.1), animation: animated ? LayerAnimation.basic(0.12) : nil)
+            // Instant swap, like the segment fill: a crossfade would overlap two labels.
             LayerAnimation.withoutActions {
+                pill.bounds = CGRect(origin: .zero, size: rendered.1)
                 pill.contents = rendered.0
                 pill.isHidden = text.isEmpty
             }
+            _ = animated
         }
     }
 

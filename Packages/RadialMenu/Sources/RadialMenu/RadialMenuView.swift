@@ -146,8 +146,8 @@ public final class RadialMenuView: NSView {
         }
         addSubview(overlayView)
         hitLayer.actions = SegmentNode.noActions
-        shadowView.root.addSublayer(hitLayer)
-        hubNode.install(shadowRoot: shadowView.root, maskRoot: liveMaskRoot, overlayRoot: overlayView.root)
+        shadowView.content.addSublayer(hitLayer)
+        hubNode.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
         refreshAppearance()
@@ -284,7 +284,7 @@ public final class RadialMenuView: NSView {
             } else {
                 let node = SegmentNode(slot: slot, itemID: item.id, canvas: canvas, scale: renderScale)
                 node.applyPalette(palette, liveMaterial: materialMode == .live && !resolvedAppearance.reduceTransparency)
-                node.install(shadowRoot: shadowView.root, maskRoot: liveMaskRoot, overlayRoot: overlayView.root)
+                node.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
                 node.update(slot: slot, itemID: item.id, enabled: item.isEnabled, images: imgs, layout: radialLayout,
                             center: center, palette: palette, animation: nil)
                 if let animation { node.growFromSliver(center: center, animation: animation) }
@@ -323,7 +323,7 @@ public final class RadialMenuView: NSView {
         let fade = CATransition()
         fade.type = .fade
         fade.duration = configuration.crossfadeDuration
-        for v in [shadowView, overlayView] { v.root.add(fade, forKey: "crossfade") }
+        for v in [shadowView, overlayView] { v.content.add(fade, forKey: "crossfade") }
         maskRoot.add(fade, forKey: "crossfade")
         rebuild(animation: nil)
     }
@@ -332,7 +332,7 @@ public final class RadialMenuView: NSView {
         if items.isEmpty, let zone = dropZone {
             let node = dropZoneNode ?? {
                 let n = DropZoneNode(canvas: canvas, scale: renderScale)
-                n.install(shadowRoot: shadowView.root, maskRoot: liveMaskRoot, overlayRoot: overlayView.root)
+                n.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
                 dropZoneNode = n
                 return n
             }()
@@ -407,7 +407,11 @@ public final class RadialMenuView: NSView {
 
     public override func layout() {
         super.layout()
-        LayerAnimation.withoutActions { maskRoot.frame = bounds }
+        LayerAnimation.withoutActions {
+            maskRoot.frame = bounds
+            shadowView.content.frame = bounds
+            overlayView.content.frame = bounds
+        }
     }
 
     // MARK: Hub
@@ -556,11 +560,11 @@ public final class RadialMenuView: NSView {
         lastPointer = nil
         let all = nodes.flatMap(\.movingLayers) + hubNode.movingLayers + (dropZoneNode?.movingLayers ?? [])
         LayerAnimation.withoutActions {
-            for l in all + [shadowView.root, overlayView.root, maskRoot] {
+            for l in all + [shadowView.content, overlayView.content, maskRoot] {
                 l.removeAllAnimations()
                 l.opacity = 1
             }
-            for l in [shadowView.root, overlayView.root, maskRoot] { l.transform = CATransform3DIdentity }
+            for l in [shadowView.content, overlayView.content, maskRoot] { l.transform = CATransform3DIdentity }
         }
         setHighlightedSlot(nil, animated: false)
     }
@@ -572,7 +576,7 @@ public final class RadialMenuView: NSView {
         let segments = nodes.map(\.movingLayers) + [dropZoneNode?.movingLayers ?? []]
         if resolvedAppearance.reduceMotion {
             let fade = LayerAnimation.basic(configuration.crossfadeDuration, LayerAnimation.easeInOut)
-            for l in [shadowView.root, overlayView.root, maskRoot] { l.animate("opacity", from: Float(0), animation: fade) }
+            for l in [shadowView.content, overlayView.content, maskRoot] { l.animate("opacity", from: Float(0), animation: fade) }
             return
         }
         let timing = configuration.openTiming(segmentCount: max(1, nodes.count))
@@ -596,7 +600,7 @@ public final class RadialMenuView: NSView {
     public func playCloseAnimation(toward point: NSPoint? = nil, completion: (@MainActor () -> Void)? = nil) {
         isDismissing = true
         cancelDwell()
-        let roots = [shadowView.root, overlayView.root, maskRoot]
+        let roots = [shadowView.content, overlayView.content, maskRoot]
         let duration = configuration.closeDuration
         CATransaction.begin()
         CATransaction.setCompletionBlock { completion?() }
@@ -623,7 +627,7 @@ public final class RadialMenuView: NSView {
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: wait)
             guard let self else { return }
-            let roots = [self.shadowView.root, self.overlayView.root, self.maskRoot]
+            let roots = [self.shadowView.content, self.overlayView.content, self.maskRoot]
             CATransaction.begin()
             CATransaction.setCompletionBlock { completion?() }
             let fade = LayerAnimation.basic(self.configuration.closeDuration, LayerAnimation.easeIn)
@@ -689,15 +693,26 @@ public final class RadialMenuView: NSView {
 }
 
 /// A view whose layer tree we own (layer-hosting), so AppKit never touches sublayers.
+/// Everything lives in `content`, a plain canvas-sized layer with a centred
+/// anchor: AppKit gives a view's own layer a (0, 0) anchor, which would make
+/// collapse transforms pivot around the corner.
 @MainActor
 final class LayerHostView: NSView {
     let root = CALayer()
+    let content = CALayer()
 
     init() {
         super.init(frame: .zero)
         root.actions = SegmentNode.noActions
+        content.actions = SegmentNode.noActions
+        root.addSublayer(content)
         layer = root
         wantsLayer = true
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        LayerAnimation.withoutActions { content.frame = CGRect(origin: .zero, size: newSize) }
     }
 
     @available(*, unavailable)

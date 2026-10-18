@@ -28,11 +28,12 @@ public enum RadialMenuSnapshot {
                               dropZone: RadialDropZone? = nil,
                               strings: RadialMenuStrings = RadialMenuStrings(),
                               backdrop: Backdrop = .wallpaper,
+                              cropToWheel: Bool = false,
                               scale: CGFloat = 2) -> NSImage {
         let view = makeView(items: items, configuration: configuration, style: style, appearance: appearance,
                             hoveredIndex: hoveredIndex, hub: hub, page: page, dropZone: dropZone,
                             strings: strings, scale: scale)
-        return render(view: view, size: size, backdrop: backdrop, scale: scale)
+        return render(view: view, size: size, backdrop: backdrop, cropToWheel: cropToWheel, scale: scale)
     }
 
     /// Builds a painted-material view in its final state (exposed for tests and hosts
@@ -54,10 +55,13 @@ public enum RadialMenuSnapshot {
         return view
     }
 
+    /// `cropToWheel` trims the canvas to what's drawn (plus room for shadows) at 1:1
+    /// instead of scaling the whole canvas into `size`.
     public static func render(view: RadialMenuView, size: CGSize? = nil, backdrop: Backdrop = .wallpaper,
-                              scale: CGFloat = 2) -> NSImage {
+                              cropToWheel: Bool = false, scale: CGFloat = 2) -> NSImage {
         let canvas = view.bounds.size
-        let out = size ?? canvas
+        let cropSide = ceil(2 * (view.wheelRadius + 22))
+        let out = cropToWheel ? CGSize(width: cropSide, height: cropSide) : (size ?? canvas)
         let w = max(1, Int((out.width * scale).rounded())), h = max(1, Int((out.height * scale).rounded()))
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
               let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: space,
@@ -65,7 +69,7 @@ public enum RadialMenuSnapshot {
         else { return NSImage(size: out) }
         ctx.scaleBy(x: scale, y: scale)
         drawBackdrop(backdrop, in: CGRect(origin: .zero, size: out), dark: view.resolvedAppearance.isDark, ctx: ctx)
-        let fit = min(out.width / canvas.width, out.height / canvas.height)
+        let fit = cropToWheel ? 1 : min(out.width / canvas.width, out.height / canvas.height)
         ctx.translateBy(x: (out.width - canvas.width * fit) / 2, y: (out.height - canvas.height * fit) / 2)
         ctx.scaleBy(x: fit, y: fit)
         for layer in view.snapshotLayers {

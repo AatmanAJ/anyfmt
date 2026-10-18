@@ -175,8 +175,8 @@ struct RadialPalette {
             secondaryContent = NSColor(srgbHex: a.increaseContrast ? 0xDAD8E3 : 0xA19FAD)
             disabledContent = white.withAlphaComponent(a.increaseContrast ? 0.5 : 0.28)
             shadowColor = black.cgColor
-            shadowOpacity = 0.5
-            shadowRadius = 10
+            shadowOpacity = 0.32
+            shadowRadius = 8
             glowOpacity = a.increaseContrast ? 0.25 : 0.55
             pillFill = black.withAlphaComponent(a.increaseContrast ? 0.95 : 0.62).cgColor
             disabledHighlightFill = white.withAlphaComponent(0.14).cgColor
@@ -191,8 +191,8 @@ struct RadialPalette {
             secondaryContent = NSColor(srgbHex: a.increaseContrast ? 0x3E3C47 : 0x6B6977)
             disabledContent = ink.withAlphaComponent(a.increaseContrast ? 0.5 : 0.3)
             shadowColor = NSColor(srgbHex: 0x1C1B33).cgColor
-            shadowOpacity = 0.16
-            shadowRadius = 9
+            shadowOpacity = 0.13
+            shadowRadius = 8
             glowOpacity = a.increaseContrast ? 0.2 : 0.42
             pillFill = ink.withAlphaComponent(a.increaseContrast ? 1 : 0.8).cgColor
             disabledHighlightFill = ink.withAlphaComponent(0.1).cgColor
