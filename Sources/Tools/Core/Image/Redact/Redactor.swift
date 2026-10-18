@@ -43,8 +43,11 @@ public enum Redactor {
             Int((Double(min(imageWidth, imageHeight)) / 64).rounded(.up)))
     }
 
+    /// - Parameter referenceSize: full-resolution size when `image` is a
+    ///   downsampled preview, so blocks scale exactly like the saved file's.
     public static func apply(_ image: CGImage, regions: [CGRect], style: Style,
-                             fill: CGColor = CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 1)) throws -> CGImage {
+                             fill: CGColor = CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 1),
+                             referenceSize: CGSize? = nil) throws -> CGImage {
         guard !regions.isEmpty else { return image }
         let w = image.width, h = image.height
         let cs = ImageSupport.colorSpace(of: image)
@@ -68,7 +71,15 @@ public enum Redactor {
                 ctx.fill(CGRect(x: r.x0, y: h - r.y1, width: r.x1 - r.x0, height: r.y1 - r.y0))
                 ctx.restoreGState()
             case .pixelate, .blur:
-                let block = blockSize(regionWidth: r.x1 - r.x0, regionHeight: r.y1 - r.y0, imageWidth: w, imageHeight: h)
+                let block: Int
+                if let ref = referenceSize, ref.width > 0, ref.height > 0 {
+                    let full = pixelRect(region, width: Int(ref.width), height: Int(ref.height))
+                    let fullBlock = blockSize(regionWidth: full.x1 - full.x0, regionHeight: full.y1 - full.y0,
+                                              imageWidth: Int(ref.width), imageHeight: Int(ref.height))
+                    block = max(1, Int((Double(fullBlock) * Double(w) / Double(ref.width)).rounded()))
+                } else {
+                    block = blockSize(regionWidth: r.x1 - r.x0, regionHeight: r.y1 - r.y0, imageWidth: w, imageHeight: h)
+                }
                 let grid = averages(px, rowBytes: rowBytes, r, block: block, seed: UInt64(index + 1))
                 if style == .pixelate {
                     paintBlocks(px, rowBytes: rowBytes, r, block: block, grid: grid)

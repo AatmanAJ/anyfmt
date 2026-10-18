@@ -163,11 +163,14 @@ public struct ImageAdjustments: Sendable, Hashable {
             img = f.outputImage ?? img
         }
         if contrast != 1 || saturation != 1, let f = CIFilter(name: "CIColorControls") {
-            f.setValue(img, forKey: kCIInputImageKey)
+            // Contrast pivots on mid-grey, which only looks right in a
+            // perceptual (gamma-encoded) space; in linear light it crushes
+            // shadows to pure primaries. Hop to sRGB-encoded values and back.
+            f.setValue(img.applyingFilter("CILinearToSRGBToneCurve"), forKey: kCIInputImageKey)
             f.setValue(contrast, forKey: kCIInputContrastKey)
             f.setValue(saturation, forKey: kCIInputSaturationKey)
             f.setValue(0, forKey: kCIInputBrightnessKey)
-            img = f.outputImage ?? img
+            img = f.outputImage?.applyingFilter("CISRGBToneCurveToLinear") ?? img
         }
         return img.cropped(to: input.extent)
     }

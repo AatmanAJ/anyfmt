@@ -44,11 +44,11 @@ enum ImageMetadataIO {
         add("copyright", L("Copyright"), "TIFF",
             string(t[kCGImagePropertyTIFFCopyright as String]) ?? string(i[kCGImagePropertyIPTCCopyrightNotice as String]), editable: canEdit)
         add("dateTaken", L("Date taken"), "EXIF", string(e[kCGImagePropertyExifDateTimeOriginal as String]).map(displayDate),
-            editable: canEdit, placeholder: "2026-10-18 14:30:00")
+            editable: canEdit, placeholder: L("e.g. 2026-10-18 14:30:00"))
         add("gpsLatitude", L("Latitude"), "GPS", coordinate(g, kCGImagePropertyGPSLatitude, kCGImagePropertyGPSLatitudeRef, negative: "S"),
-            editable: canEdit, placeholder: "48.858370")
+            editable: canEdit, placeholder: L("e.g. 48.858370"))
         add("gpsLongitude", L("Longitude"), "GPS", coordinate(g, kCGImagePropertyGPSLongitude, kCGImagePropertyGPSLongitudeRef, negative: "W"),
-            editable: canEdit, placeholder: "2.294481")
+            editable: canEdit, placeholder: L("e.g. 2.294481"))
         if let alt = (g[kCGImagePropertyGPSAltitude as String] as? NSNumber)?.doubleValue {
             let below = (g[kCGImagePropertyGPSAltitudeRef as String] as? NSNumber)?.intValue == 1
             add("gps.altitude", L("Altitude"), "GPS", String(format: "%.0f m", below ? -alt : alt))

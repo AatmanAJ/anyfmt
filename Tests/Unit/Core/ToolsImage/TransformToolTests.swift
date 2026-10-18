@@ -168,6 +168,16 @@ final class TransformToolTests: XCTestCase {
         XCTAssertLessThan(spreadAfter, spreadBefore, "lower contrast narrows the range")
     }
 
+    func testContrastAndSaturationDontCrushShadows() async throws {
+        // Dark navy: in linear light a contrast pivot would push R and G to zero.
+        let input = try png(G1.solid(width: 32, height: 32, r: 46, g: 51, b: 115), "navy.png")
+        let out = try await G1.run(ToolIDs.adjustImage, inputs: [input],
+                                   options: OptionValues(["contrast": .double(1.12), "saturation": .double(1.25)]), in: dir)
+        let p = G1.pixel(G1.pixels(try G1.decode(out[0])), width: 32, x: 16, y: 16)
+        XCTAssertGreaterThan(p.r, 20); XCTAssertGreaterThan(p.g, 20)
+        XCTAssertEqual(p.b, 115, accuracy: 25)
+    }
+
     func testAdjustOptionsRoundTrip() {
         let a = ImageAdjustments(exposure: 0.5, contrast: 1.2, saturation: 0.3, warmth: -0.4)
         XCTAssertEqual(ImageAdjustments(options: a.options), a)

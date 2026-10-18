@@ -83,12 +83,14 @@ public enum ImageSupport {
     /// Applies an EXIF orientation by remapping pixels (exact, no resampling).
     static func oriented(_ image: CGImage, _ orientation: CGImagePropertyOrientation) throws -> CGImage {
         guard orientation != .up else { return image }
-        let ci = CIImage(cgImage: image, options: [.colorSpace: NSNull()]).oriented(orientation)
+        // RGB sources pass through untouched; grey, indexed and CMYK ones are converted to sRGB.
+        let rgb = image.colorSpace?.model == .rgb
+        let ci = CIImage(cgImage: image, options: rgb ? [.colorSpace: NSNull()] : nil).oriented(orientation)
         let moved = ci.transformed(by: CGAffineTransform(translationX: -ci.extent.minX, y: -ci.extent.minY))
         let w = image.width, h = image.height
         let size = orientation.swapsAxes ? (h, w) : (w, h)
         return try render(moved, width: size.0, height: size.1, colorSpace: colorSpace(of: image), like: image,
-                          opaque: !hasAlpha(image), context: passthroughContext, managed: false)
+                          opaque: !hasAlpha(image), context: rgb ? passthroughContext : managedContext, managed: !rgb)
     }
 
     // MARK: Colour

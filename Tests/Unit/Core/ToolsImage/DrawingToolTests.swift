@@ -147,7 +147,7 @@ final class DrawingToolTests: XCTestCase {
         let centre = G1.pixel(px, width: 360, x: 180, y: 130)
         let srcCentre = G1.pixel(G1.pixels(G1.photo(width: 300, height: 200)), width: 300, x: 150, y: 100)
         XCTAssertEqual(centre.r, srcCentre.r, accuracy: 3)
-        XCTAssertEqual(BackgroundComposer.canvasSize(for: CGSize(width: 300, height: 200), style: BackgroundStyle(options: opts)),
+        XCTAssertEqual(BackgroundComposer.canvasSize(for: CGSize(width: 300, height: 200), style: BackdropStyle(options: opts)),
                        CGSize(width: 360, height: 260))
     }
 
@@ -155,7 +155,7 @@ final class DrawingToolTests: XCTestCase {
         let input = try png(G1.photo(width: 200, height: 200))
         let out = try await G1.run(ToolIDs.addBackground, inputs: [input],
                                    options: OptionValues(["fill": .string("gradient"), "color1": .string("#FF0000"), "color2": .string("#0000FF"),
-                                                          "angle": .double(0), "padding": .int(20)]), in: dir)
+                                                          "angle": .double(90), "padding": .int(20)]), in: dir)
         let img = try G1.decode(out[0])
         XCTAssertEqual(img.width, 280)
         let px = G1.pixels(img)

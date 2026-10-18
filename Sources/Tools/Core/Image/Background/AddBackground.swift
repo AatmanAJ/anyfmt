@@ -6,8 +6,8 @@ import ImageIO
 /// solid, gradient or image fill with padding, rounded corners and a soft
 /// shadow. Padding is a percentage of the image's longest edge, the corner
 /// radius a percentage of its shortest edge. Option "angle" (degrees, editor
-/// only, default 135) sets the gradient direction.
-public struct BackgroundStyle: Sendable, Hashable {
+/// only, default 135, CSS convention: 0° up, 90° right) sets the gradient direction.
+public struct BackdropStyle: Sendable, Hashable {
     public enum Fill: String, Sendable, CaseIterable { case solid, gradient, image }
 
     public var fill: Fill
@@ -39,18 +39,18 @@ public struct BackgroundStyle: Sendable, Hashable {
 
 public enum BackgroundComposer {
     /// Padding in pixels for a subject of `size`.
-    public static func paddingPixels(for size: CGSize, style: BackgroundStyle) -> Int {
+    public static func paddingPixels(for size: CGSize, style: BackdropStyle) -> Int {
         Int((max(size.width, size.height) * CGFloat(style.padding) / 100).rounded())
     }
 
-    public static func canvasSize(for size: CGSize, style: BackgroundStyle) -> CGSize {
+    public static func canvasSize(for size: CGSize, style: BackdropStyle) -> CGSize {
         let pad = CGFloat(paddingPixels(for: size, style: style))
         return CGSize(width: size.width + 2 * pad, height: size.height + 2 * pad)
     }
 
     /// Composites `subject` onto the styled canvas. `backgroundImage` is used
     /// for `.image` fills (aspect-filled); missing images fall back to the gradient.
-    public static func compose(subject: CGImage, style: BackgroundStyle, backgroundImage: CGImage? = nil) throws -> CGImage {
+    public static func compose(subject: CGImage, style: BackdropStyle, backgroundImage: CGImage? = nil) throws -> CGImage {
         let size = CGSize(width: subject.width, height: subject.height)
         let pad = CGFloat(paddingPixels(for: size, style: style))
         let canvas = canvasSize(for: size, style: style)
@@ -95,7 +95,7 @@ public enum BackgroundComposer {
         return out
     }
 
-    static func paintFill(_ style: BackgroundStyle, in ctx: CGContext, rect: CGRect, backgroundImage: CGImage?) {
+    static func paintFill(_ style: BackdropStyle, in ctx: CGContext, rect: CGRect, backgroundImage: CGImage?) {
         switch style.fill {
         case .solid:
             ctx.setFillColor(HexColor.cgColor(style.color1))
@@ -109,9 +109,10 @@ public enum BackgroundComposer {
         case .gradient, .image:
             let colors = [HexColor.cgColor(style.color1), HexColor.cgColor(style.color2)] as CFArray
             guard let gradient = CGGradient(colorsSpace: ImageSupport.srgb, colors: colors, locations: [0, 1]) else { return }
-            // Angle in screen terms (0° = left → right, 90° = top → bottom), spanning the whole rect.
+            // CSS convention: 0° = towards the top, 90° = towards the right,
+            // 135° = towards the bottom-right. The gradient spans the whole rect.
             let rad = style.angle * .pi / 180
-            let dx = CGFloat(cos(rad)), dy = CGFloat(-sin(rad)) // y up in CG
+            let dx = CGFloat(sin(rad)), dy = CGFloat(cos(rad)) // y up in CG
             let half = (abs(dx) * rect.width + abs(dy) * rect.height) / 2
             let c = CGPoint(x: rect.midX, y: rect.midY)
             ctx.drawLinearGradient(gradient, start: CGPoint(x: c.x - dx * half, y: c.y - dy * half),
@@ -125,7 +126,7 @@ struct AddBackgroundRunner: ToolRunner {
     let id = ToolIDs.addBackground
 
     func run(_ request: ToolRequest, context: EngineContext) async throws -> ConversionOutput {
-        let style = BackgroundStyle(options: request.options)
+        let style = BackdropStyle(options: request.options)
         var backgroundImage: CGImage?
         if style.fill == .image {
             guard !style.imagePath.isEmpty else {

@@ -132,8 +132,13 @@ public enum AnnotationRenderer {
             ctx.strokeEllipse(in: r)
         case .highlight:
             guard let r = rect(pts) else { return }
+            // Multiply keeps text under the marker crisp; a light normal-blend
+            // tint on top keeps the mark visible on dark backgrounds too.
             ctx.setBlendMode(.multiply)
-            ctx.setFillColor(color.copy(alpha: min(color.alpha, 0.45)) ?? color)
+            ctx.setFillColor(color.copy(alpha: min(color.alpha, 0.5)) ?? color)
+            ctx.fill(r)
+            ctx.setBlendMode(.normal)
+            ctx.setFillColor(color.copy(alpha: min(color.alpha, 0.14)) ?? color)
             ctx.fill(r)
         case .freehand:
             guard pts.count >= 2 else {
