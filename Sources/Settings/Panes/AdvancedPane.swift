@@ -72,7 +72,10 @@ struct AdvancedPane: View {
                 if let helpers = model.info.helpersURL {
                     let cli = helpers.appendingPathComponent(Brand.cliName)
                     LabeledContent {
-                        copyButton(id: "cli", text: "ln -s '\(cli.path)' /usr/local/bin/\(Brand.cliName)", title: String(localized: "Copy Command"))
+                        HStack {
+                            CLIInstallButton()
+                            copyButton(id: "cli", text: "ln -s '\(cli.path)' /usr/local/bin/\(Brand.cliName)", title: String(localized: "Copy Command"))
+                        }
                     } label: {
                         Text("Command-line tool")
                         Text("Link `\(Brand.cliName)` into your PATH to convert from Terminal: `\(Brand.cliName) convert photo.heic --to jpg`.")
@@ -122,5 +125,37 @@ struct AdvancedPane: View {
             }
         }
         .frame(minWidth: 120)
+    }
+}
+
+/// One click puts `halo` on the PATH (no admin: a writable PATH folder such as
+/// /opt/homebrew/bin or ~/.local/bin). Shows where it's installed, or removes it.
+private struct CLIInstallButton: View {
+    @State private var status = CLIInstaller.status()
+    @State private var message: String?
+
+    var body: some View {
+        Group {
+            switch status {
+            case .installed(let link):
+                Button(String(localized: "Remove")) {
+                    CLIInstaller.uninstall()
+                    status = CLIInstaller.status()
+                }
+                .help(String(localized: "Installed at \(link.path)"))
+            case .notInstalled, .linkPointsElsewhere:
+                Button(String(localized: "Install")) {
+                    do {
+                        let link = try CLIInstaller.install()
+                        message = String(localized: "Installed at \(link.path)")
+                    } catch {
+                        message = error.localizedDescription
+                    }
+                    status = CLIInstaller.status()
+                }
+                .help(message ?? String(localized: "Links the bundled tool into a folder on your PATH. No password needed."))
+            }
+        }
+        .accessibilityIdentifier("advanced.installCLI")
     }
 }

@@ -204,12 +204,15 @@ public final class RadialMenuView: NSView {
         rebuild(animation: animated && !resolvedAppearance.reduceMotion
                 ? LayerAnimation.basic(configuration.morphDuration, LayerAnimation.easeInOut) : nil)
         if animated {
-            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            if hapticsEnabled { NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now) }
             announce(String(format: strings.pageFormat, radialLayout.page + 1, radialLayout.pageCount))
         }
     }
 
     private var requestedPage = 0
+
+    /// Haptic ticks on segment and page changes (the host's Settings switch).
+    public var hapticsEnabled = true
 
     /// Item index under a point in view coordinates.
     public func itemIndex(at point: NSPoint) -> Int? {
@@ -492,7 +495,7 @@ public final class RadialMenuView: NSView {
                                       reduceMotion: reduce, animated: animated)
             if animated {
                 // Best effort: AppKit ignores haptics while our app isn't active (mid-drag).
-                NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+                if hapticsEnabled { NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now) }
             }
         }
         applyPill(animated: animated)

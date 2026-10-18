@@ -224,6 +224,15 @@ private struct FormatDetail: View {
                     Text("Hidden formats stay available from the command line.")
                 }
                 .accessibilityIdentifier("formats.showOnWheel")
+                if OptInTargets.contains(format.id) && !settings.hiddenFormats.contains(format.id) {
+                    Toggle(isOn: Binding(get: { settings.shownFormats.contains(format.id) }, set: { on in
+                        if on { settings.shownFormats.insert(format.id) } else { settings.shownFormats.remove(format.id) }
+                    })) {
+                        Text("Also offer it for other kinds of files")
+                        Text("For example a photo → \(format.label) through PDF and text recognition. Off by default to keep the wheel focused.")
+                    }
+                    .accessibilityIdentifier("formats.showOptIn")
+                }
                 Toggle(isOn: Binding(get: { settings.favouriteFormats.contains(format.id) }, set: { on in
                     if on { if !settings.favouriteFormats.contains(format.id) { settings.favouriteFormats.append(format.id) } }
                     else { settings.favouriteFormats.removeAll { $0 == format.id } }
@@ -380,5 +389,22 @@ enum FormatSchemaFallback {
         case Formats.csv, Formats.tsv, Formats.json: StandardSchemas.sheet
         default: .none
         }
+    }
+}
+
+/// Target formats that some input reaches only through an opt-in route.
+@MainActor
+enum OptInTargets {
+    private static var cache: Set<FormatID>?
+
+    static func contains(_ format: FormatID) -> Bool {
+        if let cache { return cache.contains(format) }
+        let router = Router.live()
+        var set = Set<FormatID>()
+        for from in Set(router.table.rows.map(\.from)) {
+            for (to, route) in router.allRoutes(from: from) where !route.isShownByDefault { set.insert(to) }
+        }
+        cache = set
+        return set.contains(format)
     }
 }

@@ -38,6 +38,11 @@ public final class WheelController: NSObject {
     public private(set) var input = WheelInput()
     public private(set) var entries: [WheelEntry] = []
     public var isVisible: Bool { panel.isVisible }
+    /// Settings › General › Haptics.
+    public var hapticsEnabled: Bool {
+        get { menuView.hapticsEnabled }
+        set { menuView.hapticsEnabled = newValue }
+    }
 
     let panel: RadialMenuPanel
     var menuView: RadialMenuView { panel.menuView }

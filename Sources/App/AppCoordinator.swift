@@ -42,6 +42,7 @@ final class AppCoordinator {
         wheel.markVisible = { [weak self] in self?.sense.markWheelVisible() }
         wheel.rememberedOptions = settings.formatDefaults
         jobs.onJobFinished = { [weak self] record in self?.jobFinished(record) }
+        jobs.queue.onBatchFinished = { [weak self] _, progress in self?.batchFinished(progress) }
         sense.onEvent = { [weak self] event in self?.handle(event) }
         sense.start()
         wheel.prewarm()
@@ -54,6 +55,7 @@ final class AppCoordinator {
         applyHotKey()
         applyFinderShortcut()
         updater.apply(enabled: settings.updateChecksEnabled)
+        applyLiveSettings()
         observeSettings()
         Log.app.info("ready")
     }
@@ -218,9 +220,26 @@ final class AppCoordinator {
     func settingsChanged() {
         sense.configuration = Self.senseConfiguration(settings)
         wheel.preferences = Self.wheelPreferences(settings)
+        applyLiveSettings()
         applyHotKey()
         applyFinderShortcut()
         updater.apply(enabled: settings.updateChecksEnabled)
+    }
+
+    /// Settings that apply without rebuilding anything.
+    private func applyLiveSettings() {
+        wheel.hapticsEnabled = settings.hapticsEnabled
+        sense.diagnostics.isVerbose = settings.verboseLogging
+        jobs.queue.limits = Self.limits(for: settings)
+    }
+
+    /// Settings › General › Sounds: a quiet confirmation when a batch ends.
+    private func batchFinished(_ progress: BatchProgress) {
+        guard settings.soundsEnabled, progress.total > 0, progress.running == 0, progress.queued == 0 else { return }
+        let name: NSSound.Name? = progress.failed > 0 ? "Basso" : (progress.succeeded > 0 ? "Glass" : nil)
+        guard let name, let sound = NSSound(named: name) else { return }
+        sound.volume = 0.35
+        sound.play()
     }
 
     static func senseConfiguration(_ s: AppSettings) -> DragSenseConfiguration {
@@ -236,7 +255,8 @@ final class AppCoordinator {
     }
 
     static func wheelPreferences(_ s: AppSettings) -> WheelPreferences {
-        WheelPreferences(favouriteFormats: s.favouriteFormats, hiddenFormats: s.hiddenFormats, hiddenTools: s.hiddenTools)
+        WheelPreferences(favouriteFormats: s.favouriteFormats, hiddenFormats: s.hiddenFormats,
+                         shownFormats: s.shownFormats, hiddenTools: s.hiddenTools)
     }
 
     static func limits(for s: AppSettings) -> ConcurrencyLimits {

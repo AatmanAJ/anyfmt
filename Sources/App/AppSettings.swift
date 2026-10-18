@@ -48,6 +48,9 @@ final class AppSettings: ObservableObject {
     /// Favourites sit first on the ring, in this order.
     @Published var favouriteFormats: [FormatID] = [] { didSet { defaults.set(favouriteFormats.map(\.rawValue), forKey: Key.favourites) } }
     @Published var hiddenFormats: Set<FormatID> = [] { didSet { defaults.set(hiddenFormats.map(\.rawValue).sorted(), forKey: Key.hiddenFormats) } }
+    /// Targets the user switched on for routes that are opt-in by default
+    /// (`Route.isShownByDefault`, e.g. photo → DOCX via PDF + text recognition).
+    @Published var shownFormats: Set<FormatID> = [] { didSet { defaults.set(shownFormats.map(\.rawValue).sorted(), forKey: Key.shownFormats) } }
     @Published var hiddenTools: Set<ToolID> = [] { didSet { defaults.set(hiddenTools.map(\.rawValue).sorted(), forKey: Key.hiddenTools) } }
     /// Per-target default options (e.g. jpg quality 80), keyed by FormatID.
     @Published var formatDefaults: [FormatID: OptionValues] = [:] { didSet { saveFormatDefaults() } }
@@ -93,11 +96,12 @@ final class AppSettings: ObservableObject {
         static let outputFolder = "output.folderBookmark", namePattern = "output.namePattern", metadata = "output.metadata"
         static let preserveDates = "output.preserveDates", reveal = "output.reveal"
         static let favourites = "formats.favourites", hiddenFormats = "formats.hidden", hiddenTools = "tools.hidden"
+        static let shownFormats = "formats.shown"
         static let formatDefaults = "formats.defaults"
         static let concurrency = "advanced.cpuConcurrency", verbose = "advanced.verboseLogging"
         static let all = [sounds, haptics, updateChecks, convertKey, toolsKey, actionsKey, tapThreshold, finderShortcut,
                           dropRingKeyCode, dropRingModifiers, dropRingEnabled, outputFolder, namePattern, metadata,
-                          preserveDates, reveal, favourites, hiddenFormats, hiddenTools, formatDefaults, concurrency, verbose]
+                          preserveDates, reveal, favourites, hiddenFormats, shownFormats, hiddenTools, formatDefaults, concurrency, verbose]
     }
 
     private static let registered: [String: Any] = [
@@ -134,6 +138,7 @@ final class AppSettings: ObservableObject {
         revealInFinder = d.bool(forKey: Key.reveal)
         favouriteFormats = (d.stringArray(forKey: Key.favourites) ?? []).map { FormatID($0) }
         hiddenFormats = Set((d.stringArray(forKey: Key.hiddenFormats) ?? []).map { FormatID($0) })
+        shownFormats = Set((d.stringArray(forKey: Key.shownFormats) ?? []).map { FormatID($0) })
         hiddenTools = Set((d.stringArray(forKey: Key.hiddenTools) ?? []).map { ToolID(rawValue: $0) })
         if let data = d.data(forKey: Key.formatDefaults),
            let decoded = try? JSONDecoder().decode([String: OptionValues].self, from: data) {

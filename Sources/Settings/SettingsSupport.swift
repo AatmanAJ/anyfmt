@@ -124,6 +124,7 @@ enum Diagnostics {
             "output.reveal": s.revealInFinder,
             "formats.favourites": s.favouriteFormats.map(\.rawValue),
             "formats.hidden": s.hiddenFormats.map(\.rawValue).sorted(),
+            "formats.shown": s.shownFormats.map(\.rawValue).sorted(),
             "tools.hidden": s.hiddenTools.map(\.rawValue).sorted(),
             "formats.defaults": defaults,
             "advanced.cpuConcurrency": s.cpuConcurrency,
