@@ -12,22 +12,18 @@ struct AccountPane: View {
         } else {
             Form {
                 Section {
-                    VStack(spacing: DesignTokens.Space.m) {
-                        Image(systemName: "icloud")
-                            .font(.system(size: 34, weight: .light))
-                            .foregroundStyle(Color.accentText)
-                            .padding(.top, DesignTokens.Space.s)
-                        Text("Cloud features are optional")
-                            .font(.system(size: DesignTokens.TypeRamp.title, weight: .semibold))
+                    VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
+                        DisplayText(String(localized: "Cloud is optional"),
+                                    size: DesignTokens.Component.Settings.headlineSize)
+                            .accessibilityAddTraits(.isHeader)
                         Text("Every conversion, tool and action runs on your Mac, free, with no account. Sign-in for share links and sync will appear here when it’s available.")
                             .font(.system(size: DesignTokens.TypeRamp.body))
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
+                            .foregroundStyle(Color.haloSecondaryText)
                             .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: 420)
-                            .padding(.bottom, DesignTokens.Space.s)
+                        StatusBadge(tone: .good, text: String(localized: "Everything local works offline"))
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, DesignTokens.Space.s)
                 }
             }
             .formStyle(.grouped)

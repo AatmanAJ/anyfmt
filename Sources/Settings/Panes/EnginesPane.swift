@@ -10,25 +10,34 @@ struct EnginesPane: View {
         let engines = model.hooks.engineVersions()
         Form {
             Section {
-                HStack(spacing: DesignTokens.Space.m) {
-                    Image(systemName: "lock.laptopcomputer")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(Color.accentText)
-                        .frame(width: 36, height: 36)
-                        .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.iris.opacity(0.12)))
-                    VStack(alignment: .leading, spacing: 2) {
+                // The pane's one key numeral: how many engines ship inside.
+                HStack(alignment: .center, spacing: DesignTokens.Space.l) {
+                    Text(verbatim: "\(engines.count)")
+                        .font(.haloDisplay(DesignTokens.Component.Settings.numeralSize))
+                        .displayTracking(DesignTokens.Component.Settings.numeralSize)
+                        .monospacedDigit()
+                        .foregroundStyle(Color.haloInk)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                         Text("Everything here runs on your Mac.")
                             .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                         Text("These ship inside \(Brand.name), so it works with nothing else installed. Your files never leave your Mac.")
                             .font(.system(size: DesignTokens.TypeRamp.label))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.haloSecondaryText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .padding(.vertical, 2)
+                .padding(.vertical, DesignTokens.Space.xxs)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("\(engines.count) bundled engines. Everything here runs on your Mac."))
             }
 
             Section {
+                if engines.isEmpty {
+                    SettingsStateRow(kind: .problem,
+                                     title: String(localized: "The engine list couldn’t be read"),
+                                     detail: String(localized: "Conversions still work. Reinstalling \(Brand.name) restores the list."))
+                } else {
                 Grid(alignment: .leading, horizontalSpacing: DesignTokens.Space.l, verticalSpacing: 7) {
                     GridRow {
                         Text("Engine")
@@ -37,7 +46,7 @@ struct EnginesPane: View {
                         Color.clear.frame(width: 1, height: 1).gridCellUnsizedAxes([.horizontal, .vertical])
                     }
                     .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .textCase(.uppercase)
                     ForEach(engines) { engine in
                         GridRow {
@@ -45,10 +54,10 @@ struct EnginesPane: View {
                                 .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                             Text(verbatim: engine.version)
                                 .font(.system(size: DesignTokens.TypeRamp.label).monospacedDigit())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.haloSecondaryText)
                             Text(verbatim: engine.licence)
                                 .font(.system(size: DesignTokens.TypeRamp.label))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.haloSecondaryText)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 .help(Text(verbatim: engine.licence))
@@ -67,6 +76,7 @@ struct EnginesPane: View {
                 }
                 .padding(.vertical, DesignTokens.Space.xs)
                 .accessibilityIdentifier("engines.table")
+                }
             } header: {
                 HStack {
                     Text("Bundled engines")
@@ -81,8 +91,7 @@ struct EnginesPane: View {
 
             Section {
                 if packs.isEmpty {
-                    Text("No optional packs are offered in this build.")
-                        .foregroundStyle(.secondary)
+                    SettingsStateRow(kind: .empty, title: String(localized: "No optional packs are offered in this build."))
                 } else {
                     ForEach(packs) { pack in
                         PackRow(pack: pack, refresh: refresh)
@@ -116,12 +125,9 @@ private struct PackRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: DesignTokens.Space.m) {
-            Image(systemName: pack.installed ? "shippingbox.fill" : "shippingbox")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(pack.installed ? Color.haloSuccess : Color.iris)
-                .frame(width: 30)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
+            SettingsGlyphTile(symbol: pack.installed ? "shippingbox.fill" : "shippingbox", quiet: !pack.installed)
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
+                HStack(spacing: DesignTokens.Space.s) {
                     Text(verbatim: pack.name).font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                     if pack.installed {
                         StatusBadge(tone: .good, text: String(localized: "Installed \(pack.version)"))
@@ -129,23 +135,34 @@ private struct PackRow: View {
                 }
                 Text(verbatim: pack.summary)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(verbatim: detail)
                     .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.haloSecondaryText)
             }
             Spacer(minLength: DesignTokens.Space.s)
             if let p = pack.progress {
-                ProgressView(value: p)
-                    .frame(width: 90)
+                VStack(alignment: .trailing, spacing: DesignTokens.Space.xxs) {
+                    ProgressView(value: p)
+                        .tint(Color.iris)
+                        .frame(width: DesignTokens.Component.Settings.recorderMinWidth)
+                    Text(verbatim: p.formatted(.percent.precision(.fractionLength(0))))
+                        .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(Color.haloSecondaryText)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("\(pack.name) progress"))
+                .accessibilityValue(Text(verbatim: p.formatted(.percent.precision(.fractionLength(0)))))
             } else if pack.installed {
                 Button("Remove") { pack.remove(); refresh() }
+                    .buttonStyle(.haloQuiet)
+                    .accessibilityLabel(Text("Remove \(pack.name)"))
                     .accessibilityIdentifier("engines.pack.\(pack.id).remove")
             } else {
                 Button("Install") { pack.install(); refresh() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.iris)
+                    .buttonStyle(.haloPrimary)
+                    .accessibilityLabel(Text("Install \(pack.name)"))
                     .accessibilityIdentifier("engines.pack.\(pack.id).install")
             }
         }

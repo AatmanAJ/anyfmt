@@ -74,41 +74,36 @@ struct LicenceActivationView: View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
             if let status = model.status {
                 HStack(spacing: DesignTokens.Space.s) {
-                    Image(systemName: status.isValid ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                        .foregroundStyle(status.isValid ? Color.accentColor : CloudStyle.danger)
-                        .accessibilityHidden(true)
-                    Text(verbatim: status.message)
-                        .font(.system(size: DesignTokens.TypeRamp.body))
+                    CloudStatusLine(text: status.message, tone: status.isValid ? .success : .error)
                     Spacer()
                     if !compact {
                         Button(String(localized: "Remove Licence…", comment: "Settings › Account button")) { model.deactivate() }
+                            .buttonStyle(.haloQuiet)
                     }
                 }
-                .accessibilityElement(children: .combine)
             }
             HStack(spacing: DesignTokens.Space.s) {
-                TextField(String(localized: "HALO1-…", comment: "Placeholder for the licence key field"), text: $model.keyText)
+                // Prompt, not title: in a grouped Form a title becomes a stray row label.
+                TextField("", text: $model.keyText,
+                          prompt: Text(String(localized: "HALO1-…", comment: "Placeholder for the licence key field")))
+                    .labelsHidden()
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))
                     .onSubmit { if model.canActivate { model.activate() } }
                     .accessibilityLabel(Text("Licence key", comment: "VoiceOver label of the licence key field"))
                 Button(String(localized: "Paste", comment: "Pastes a licence key from the clipboard")) { model.pasteFromClipboard() }
+                    .accessibilityHint(Text("Pastes a key from the clipboard"))
                 Button(String(localized: "Activate", comment: "Activates a pasted licence key")) { model.activate() }
+                    .buttonStyle(.haloPrimary)
                     .disabled(!model.canActivate)
             }
             if let message = model.message {
-                Label {
-                    Text(verbatim: message)
-                } icon: {
-                    Image(systemName: model.isError ? "exclamationmark.circle" : "checkmark.circle")
-                }
-                .font(.system(size: DesignTokens.TypeRamp.caption))
-                .foregroundStyle(model.isError ? CloudStyle.danger : Color.secondary)
+                CloudStatusLine(text: message, tone: model.isError ? .error : .success, size: DesignTokens.TypeRamp.label)
             }
             Text("Keys are checked on this Mac, offline. A key only unlocks cloud features; every local conversion, tool and action is free without one.",
                  comment: "Explains what a licence key does")
-                .font(.system(size: DesignTokens.TypeRamp.caption))
-                .foregroundStyle(.secondary)
+                .font(.system(size: DesignTokens.TypeRamp.label))
+                .foregroundStyle(CloudStyle.mist)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

@@ -7,6 +7,7 @@ struct AdvancedPane: View {
     @ObservedObject var settings: AppSettings
     @State private var confirmReset = false
     @State private var copied: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(model: SettingsModel) {
         self.model = model
@@ -111,15 +112,17 @@ struct AdvancedPane: View {
     private func copyButton(id: String, text: @autoclosure @escaping () -> String, title: String) -> some View {
         Button {
             NSPasteboard.general.copyString(text())
-            withAnimation { copied = id }
+            let fade: Animation? = reduceMotion ? nil : .easeOut(duration: DesignTokens.Motion.crossfade)
+            withAnimation(fade) { copied = id }
             Task {
                 try? await Task.sleep(for: .seconds(1.6))
-                withAnimation { if copied == id { copied = nil } }
+                withAnimation(fade) { if copied == id { copied = nil } }
             }
         } label: {
             if copied == id {
                 Label { Text("Copied") } icon: { Image(systemName: "checkmark") }
                     .labelStyle(.titleAndIcon)
+                    .foregroundStyle(Color.accentText)
             } else {
                 Text(verbatim: title)
             }
@@ -133,29 +136,43 @@ struct AdvancedPane: View {
 private struct CLIInstallButton: View {
     @State private var status = CLIInstaller.status()
     @State private var message: String?
+    @State private var failed = false
 
     var body: some View {
-        Group {
-            switch status {
-            case .installed(let link):
-                Button(String(localized: "Remove")) {
-                    CLIInstaller.uninstall()
-                    status = CLIInstaller.status()
-                }
-                .help(String(localized: "Installed at \(link.path)"))
-            case .notInstalled, .linkPointsElsewhere:
-                Button(String(localized: "Install")) {
-                    do {
-                        let link = try CLIInstaller.install()
-                        message = String(localized: "Installed at \(link.path)")
-                    } catch {
-                        message = error.localizedDescription
+        VStack(alignment: .trailing, spacing: DesignTokens.Space.xs) {
+            Group {
+                switch status {
+                case .installed(let link):
+                    Button(String(localized: "Remove")) {
+                        CLIInstaller.uninstall()
+                        status = CLIInstaller.status()
+                        failed = false
+                        message = nil
                     }
-                    status = CLIInstaller.status()
+                    .help(String(localized: "Installed at \(link.path)"))
+                    .accessibilityLabel(Text("Remove the command-line tool"))
+                case .notInstalled, .linkPointsElsewhere:
+                    Button(String(localized: "Install")) {
+                        do {
+                            let link = try CLIInstaller.install()
+                            failed = false
+                            message = String(localized: "Installed at \(link.path)")
+                        } catch {
+                            failed = true
+                            message = String(localized: "Couldn’t install: \(error.localizedDescription) Use Copy Command and run it in Terminal instead.")
+                        }
+                        status = CLIInstaller.status()
+                    }
+                    .help(String(localized: "Links the bundled tool into a folder on your PATH. No password needed."))
+                    .accessibilityLabel(Text("Install the command-line tool"))
                 }
-                .help(message ?? String(localized: "Links the bundled tool into a folder on your PATH. No password needed."))
+            }
+            .accessibilityIdentifier("advanced.installCLI")
+            if let message {
+                StatusBadge(tone: failed ? .warning : .good, text: message)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 260, alignment: .trailing)
             }
         }
-        .accessibilityIdentifier("advanced.installCLI")
     }
 }

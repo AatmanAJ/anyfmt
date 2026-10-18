@@ -37,6 +37,9 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSW
                                 styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: true)
         window.title = self.pane.title
         window.toolbarStyle = .preference
+        // Near-black in dark (the hero), white in light: the token window surface.
+        window.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
+        window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
         window.contentView = container
         window.tabbingMode = .disallowed
@@ -192,7 +195,10 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSW
     }
 }
 
-/// Root of one pane: fixed width, iris accent, Halo's switch style.
+/// Root of one pane: fixed width, Halo's cobalt switch style. Menus, focus
+/// rings and list selection keep the person's own system accent, as every
+/// Mac Settings window does; Halo's own controls (switches, sliders, pills)
+/// carry the cobalt.
 private struct SettingsPaneRoot: View {
     let pane: SettingsPane
     let model: SettingsModel
@@ -200,6 +206,8 @@ private struct SettingsPaneRoot: View {
     var body: some View {
         content
             .toggleStyle(HaloSwitchStyle())
+            .scrollContentBackground(.hidden)
+            .background(Color.haloWindow)
             .frame(width: pane.width)
             .frame(height: pane.fixedHeight)
     }

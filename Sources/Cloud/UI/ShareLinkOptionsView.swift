@@ -16,9 +16,11 @@ struct ShareLinkOptionsView: View {
     @State private var password = ""
     @State private var limitDownloads = false
     @State private var downloads = 10
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private typealias Space = DesignTokens.Space
     private typealias TypeRamp = DesignTokens.TypeRamp
+    private typealias T = DesignTokens.Component.Cloud
 
     init(entitlements: CloudEntitlements, fileCount: Int, serverName: String,
          initial: ShareLinkOptions? = nil,
@@ -33,17 +35,25 @@ struct ShareLinkOptionsView: View {
 
     private var expiries: [Int?] { ShareLinkOptions.allowedExpiries(for: entitlements) }
     private var downloadCap: Int { entitlements.quotas.shareLinkMaxDownloads ?? 1000 }
-    private var passwordTooShort: Bool { usePassword && password.count < 4 }
+    static let minimumPasswordLength = 4
+    private var passwordTooShort: Bool { usePassword && password.count < Self.minimumPasswordLength }
+    private var reveal: Animation? { reduceMotion ? nil : .easeOut(duration: DesignTokens.Motion.crossfade) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: Space.s) {
-                Image(systemName: "link.icloud")
-                    .font(.system(size: 20))
-                    .foregroundStyle(CloudStyle.iris)
-                    .accessibilityHidden(true)
-                Text(fileCount == 1 ? String(localized: "Share 1 file") : String(localized: "Share \(fileCount) files"))
-                    .font(.system(size: TypeRamp.title, weight: .semibold))
+            VStack(alignment: .leading, spacing: Space.s) {
+                HStack(alignment: .top) {
+                    DisplayText(fileCount == 1 ? String(localized: "Share 1 file") : String(localized: "Share \(fileCount) files"),
+                                size: T.headlineCompact)
+                        .foregroundStyle(CloudStyle.ink)
+                        .accessibilityAddTraits(.isHeader)
+                    Spacer()
+                    CloudPlanBadge(plan: entitlements.plan)
+                }
+                Text("Anyone with the link can download. Choose how long it lasts.")
+                    .font(.system(size: TypeRamp.body))
+                    .foregroundStyle(CloudStyle.mist)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding([.horizontal, .top], Space.xl)
 
@@ -53,14 +63,21 @@ struct ShareLinkOptionsView: View {
                         Text(ShareLinkOptions.expiryLabel(hours)).tag(hours)
                     }
                 }
-                Toggle(String(localized: "Require a password"), isOn: $usePassword.animation(.easeOut(duration: DesignTokens.Motion.crossfade)))
+                Toggle(String(localized: "Require a password"), isOn: $usePassword.animation(reveal))
                 if usePassword {
-                    SecureField(String(localized: "Password"), text: $password, prompt: Text("At least 4 characters"))
+                    VStack(alignment: .leading, spacing: Space.xs) {
+                        SecureField(String(localized: "Password"), text: $password, prompt: Text("At least 4 characters"))
+                        if passwordTooShort && !password.isEmpty {
+                            CloudStatusLine(text: String(localized: "Use at least 4 characters so the link stays private."),
+                                            tone: .error, size: TypeRamp.label)
+                        }
+                    }
                 }
-                Toggle(String(localized: "Limit downloads"), isOn: $limitDownloads.animation(.easeOut(duration: DesignTokens.Motion.crossfade)))
+                Toggle(String(localized: "Limit downloads"), isOn: $limitDownloads.animation(reveal))
                 if limitDownloads {
                     Stepper(value: $downloads, in: 1...downloadCap) {
                         Text(downloads == 1 ? String(localized: "1 download") : String(localized: "\(downloads) downloads"))
+                            .monospacedDigit()
                     }
                 }
                 if entitlements.can(.shareLinkCustomDomain), !entitlements.customDomains.isEmpty {
@@ -74,6 +91,8 @@ struct ShareLinkOptionsView: View {
             }
             .formStyle(.grouped)
             .scrollDisabled(true)
+            .scrollContentBackground(.hidden)
+            .toggleStyle(HaloSwitchStyle())
 
             VStack(alignment: .leading, spacing: Space.xs) {
                 Label(String(localized: "Uploads to \(serverName). The link is copied when it’s ready."), systemImage: "icloud.and.arrow.up")
@@ -81,13 +100,14 @@ struct ShareLinkOptionsView: View {
                     Label(usage, systemImage: "chart.bar")
                 }
             }
-            .font(.system(size: TypeRamp.caption + 1))
-            .foregroundStyle(.secondary)
+            .font(.system(size: TypeRamp.label))
+            .foregroundStyle(CloudStyle.mist)
             .padding(.horizontal, Space.xl)
 
-            HStack {
+            HStack(spacing: Space.s) {
                 Spacer()
                 Button(String(localized: "Cancel"), action: onCancel)
+                    .buttonStyle(.haloQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(String(localized: "Create Link")) {
                     var o = options
@@ -95,12 +115,14 @@ struct ShareLinkOptionsView: View {
                     o.maxDownloads = limitDownloads ? downloads : nil
                     onCreate(o.clamped(to: entitlements))
                 }
+                .buttonStyle(.haloPrimary)
                 .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
                 .disabled(passwordTooShort)
+                .accessibilityHint(passwordTooShort ? Text("Add a password of at least 4 characters first") : Text("Uploads and copies the link"))
             }
             .padding(Space.xl)
         }
-        .frame(width: 420)
+        .frame(width: T.shareWidth)
+        .background(CloudStyle.window)
     }
 }

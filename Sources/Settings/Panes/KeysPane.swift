@@ -43,20 +43,22 @@ struct KeysPane: View {
             Section {
                 LabeledContent {
                     HStack(spacing: DesignTokens.Space.s) {
-                        Text("Quick").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(.secondary)
+                        Text("Quick").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
                         Slider(value: Binding(get: { settings.tapThreshold }, set: { new in
                             settings.tapThreshold = OptionsFormLogic.snap(new, min: 0.15, max: 0.8, step: 0.05)
                             model.hooks.onTriggerKeysChanged?()
                         }), in: 0.15...0.8)
                         .labelsHidden()
                         .tint(Color.iris)
-                        .frame(width: 170)
+                        .frame(width: DesignTokens.Component.Settings.tapSliderWidth)
+                        .accessibilityLabel(Text("Tap speed"))
+                        .accessibilityValue(Text(verbatim: OptionsFormLogic.display(settings.tapThreshold, decimals: 2, unit: "s")))
                         .accessibilityIdentifier("keys.tapThreshold")
-                        Text("Relaxed").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(.secondary)
+                        Text("Relaxed").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
                         Text(verbatim: OptionsFormLogic.display(settings.tapThreshold, decimals: 2, unit: "s"))
-                            .font(.system(size: DesignTokens.TypeRamp.body).monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .frame(width: 46, alignment: .trailing)
+                            .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold).monospacedDigit())
+                            .frame(width: DesignTokens.Component.Settings.readoutWidth, alignment: .trailing)
+                            .accessibilityHidden(true)
                     }
                 } label: {
                     Text("Tap speed")
@@ -133,16 +135,12 @@ private struct TriggerRow: View {
             .accessibilityIdentifier("keys.trigger.\(role.rawValue)")
         } label: {
             HStack(spacing: DesignTokens.Space.m) {
-                Image(systemName: role.glyph)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.white)
-                    .frame(width: 26, height: 26)
-                    .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.iris.gradient))
-                VStack(alignment: .leading, spacing: 1) {
+                SettingsGlyphTile(symbol: role.glyph)
+                VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                     Text(verbatim: role.title)
                     Text(verbatim: role.summary)
                         .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.haloSecondaryText)
                 }
             }
         }
@@ -153,17 +151,13 @@ private struct TriggerRow: View {
 private struct ServicesNote: View {
     var body: some View {
         HStack(alignment: .top, spacing: DesignTokens.Space.m) {
-            Image(systemName: "contextualmenu.and.cursorarrow")
-                .font(.system(size: 15))
-                .foregroundStyle(Color.accentText)
-                .frame(width: 28, height: 28)
-                .background(Circle().fill(Color.iris.opacity(0.12)))
-            VStack(alignment: .leading, spacing: 3) {
+            SettingsGlyphTile(symbol: "contextualmenu.and.cursorarrow", quiet: true)
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text("No permissions? Use the Services menu")
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                 Text("Right-click files › Services › Open in \(Brand.name) Wheel. Give it a shortcut in Keyboard Shortcuts › Services › Files and Folders.")
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: DesignTokens.Space.s)
@@ -237,6 +231,7 @@ private struct TapTestArea: View {
     let threshold: TimeInterval
     let triggers: TriggerAssignment
     @StateObject private var tester: TapTester
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(threshold: TimeInterval, triggers: TriggerAssignment) {
         self.threshold = threshold
@@ -245,32 +240,28 @@ private struct TapTestArea: View {
     }
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
         HStack(spacing: DesignTokens.Space.m) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: DesignTokens.Component.Settings.tapTestIcon, weight: .semibold))
                 .foregroundStyle(tint)
-                .frame(width: 30)
+                .frame(width: DesignTokens.Component.Settings.glyphTile)
                 .contentTransition(.opacity)
-            VStack(alignment: .leading, spacing: 2) {
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: title)
-                    .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
+                    .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                 Text(verbatim: subtitle)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
             }
             Spacer()
         }
-        .padding(.horizontal, DesignTokens.Space.m)
-        .padding(.vertical, DesignTokens.Space.m)
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .fill(tint.opacity(0.08))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.medium, style: .continuous)
-                .strokeBorder(tint.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: tester.result == .idle ? [4, 3] : []))
-        }
-        .animation(.easeOut(duration: DesignTokens.Motion.crossfade), value: tester.result)
+        .padding(DesignTokens.Space.m)
+        .background(shape.fill(Color.haloTile))
+        .haloBorder(shape, tester.result == .idle ? Color.haloHairline : tint,
+                    width: tester.result == .idle ? DesignTokens.Shape.hairline : DesignTokens.Component.Focus.ringWidth)
+        .animation(reduceMotion ? nil : .easeOut(duration: DesignTokens.Motion.crossfade), value: tester.result)
         .onAppear { tester.threshold = threshold; tester.start() }
         .onDisappear { tester.stop() }
         .onChangeCompat(of: threshold) { tester.threshold = $0 }
@@ -286,7 +277,7 @@ private struct TapTestArea: View {
         switch tester.result {
         case .idle: String(localized: "Try it: tap a trigger key now")
         case .pressing(let k): String(localized: "Holding \(k.displayName)…")
-        case .tap(let k, _): String(localized: "Tap detected ✓ \(k.displayName)")
+        case .tap(let k, _): String(localized: "Tap detected: \(k.displayName)")
         case .held(let k, let d): String(localized: "Held \(k.displayName) for \(seconds(d)) — not a tap")
         case .chord(let ks): String(localized: "\(ks.sorted { $0.rawValue < $1.rawValue }.map(\.symbol).joined(separator: " + ")) together — not a tap")
         }
@@ -322,9 +313,9 @@ private struct TapTestArea: View {
 
     private var tint: Color {
         switch tester.result {
-        case .idle, .pressing: .iris
+        case .idle, .pressing: .accentText
         case .tap: .haloSuccess
-        case .held, .chord: .haloMist
+        case .held, .chord: Color.token(DesignTokens.Component.StatusBadge.waiting)
         }
     }
 
