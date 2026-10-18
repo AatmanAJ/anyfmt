@@ -200,6 +200,27 @@ final class PasteboardTests: XCTestCase {
         XCTAssertEqual(h.sense.state, .idle)
     }
 
+    func testDragEndedDuringSlowReadIsNeverDetectedAgain() {
+        let h = Harness()
+        h.sys.readsAreManual = true
+        h.beginFileDrag()
+        h.mouseUp()
+        // The real source reports the pasteboard unavailable while a read is
+        // in flight, so the idle baseline can't be refreshed.
+        h.sys.changeCountAvailable = false
+        h.ticks(1)
+        h.sys.completePendingReads()
+        h.sys.readsAreManual = false
+        h.sys.changeCountAvailable = true
+        // A new press and move right away, before any idle poll, with no new write.
+        h.mouseDown()
+        h.move(20)
+        h.ticks(10)
+        XCTAssertTrue(h.events.isEmpty, "the old drag's stale contents must not open a session: \(h.events)")
+        XCTAssertEqual(h.sense.state, .idle)
+        XCTAssertEqual(h.sys.readCount, 1)
+    }
+
     func testContentsAreReadOncePerDrag() {
         let h = Harness()
         h.openWheel()

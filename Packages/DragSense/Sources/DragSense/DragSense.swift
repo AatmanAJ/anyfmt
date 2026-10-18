@@ -432,6 +432,10 @@ public final class DragSense: ObservableObject {
     }
 
     private func startReading(press: Press, changeCount: Int, types: [String], now: TimeInterval) {
+        // Consume this count now: however the session ends, and even if the
+        // pasteboard stays unreadable for a while (slow read in flight), the
+        // same drag can never be detected twice.
+        baseline = changeCount
         readGeneration += 1
         let generation = readGeneration
         let info = DragInfo(
