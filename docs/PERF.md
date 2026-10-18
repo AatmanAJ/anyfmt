@@ -49,8 +49,8 @@ When no re-encode is needed, nothing is re-encoded at all.
 
 | | Size |
 |---|---|
-| Halo.app on disk | see `make dmg` output (46 MB at the first integration build) |
-| DMG (ULFO compressed) | 22 MB at the first integration build |
+| Halo.app on disk | **63 MB** (all engines + every lane) |
+| DMG (ULFO compressed) | **27 MB** |
 | Bundled engines (ffmpeg, ffprobe, libav*, resvg) | 39 MB |
 
 Budget: < 150 MB. The reference app ships at 97.6 MB.

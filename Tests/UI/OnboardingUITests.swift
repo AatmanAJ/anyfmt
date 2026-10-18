@@ -2,6 +2,7 @@ import XCTest
 
 /// UI tests need macOS Automation Mode (see BLOCKERS.md). They are run by
 /// `make uitest`, not `make test`, so an unattended machine stays green.
+@MainActor
 final class OnboardingUITests: XCTestCase {
     func testOnboardingFlow() throws {
         let app = XCUIApplication()

@@ -90,6 +90,7 @@ enum AppShell {
                                       onboarding: { OnboardingWindowController.show(settings: .shared) })
         // --show-onboarding is handled by AppShellUI.handleLaunchArguments().
         if !launch.noOnboarding && !launch.showOnboarding { AppShellUI.showOnboardingIfNeeded() }
+        if CommandLine.arguments.contains("--show-settings") { AppShellUI.showSettings() }
     }
 
     /// Settings, onboarding and About screenshots for `make gallery`.

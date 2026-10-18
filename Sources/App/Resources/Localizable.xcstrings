@@ -8,6 +8,7 @@
     "%@ changed here and on %@. Kept this Mac’s version." : {},
     "%@ Cloud is optional" : {},
     "%@ floats on a shelf until you drag it out" : {},
+    "%@ installed. New conversions are available." : {},
     "%@ is copied: paste it into any folder" : {},
     "%@ isn’t a token. Use {name}, {format} or {date}." : {},
     "%@ isn’t assigned to a wheel. Change keys in Settings › Keys." : {},
@@ -21,6 +22,7 @@
       "comment" : "Title of the conversion options popover, e.g. MP4 options"
     },
     "%@ px" : {},
+    "%@ removed." : {},
     "%@ to %@" : {},
     "%@ together — not a tap" : {},
     "%@ wheel" : {},
@@ -228,6 +230,7 @@
     "Choose a background image" : {},
     "Choose Folder…" : {},
     "Choose image…" : {},
+    "Choose the downloaded %@ file" : {},
     "Choose…" : {},
     "Clear" : {},
     "Clear all" : {},
@@ -331,6 +334,9 @@
     "Double-click the slider to reset" : {},
     "Double-click to reset" : {},
     "Drag %@ and, while you hold the mouse button, tap %@." : {},
+    "Drag a file, tap ⇧ Shift: every format it can become" : {
+      "comment" : "Demo GIF caption"
+    },
     "Drag across the waveform to mark a bleep" : {},
     "Drag across the waveform to mark what to bleep" : {},
     "Drag clips to reorder" : {},
@@ -384,6 +390,7 @@
     "Exact size" : {},
     "Expires" : {},
     "Exposure" : {},
+    "Faithful PowerPoint, Keynote, legacy Office and OpenDocument conversions (LibreOffice)." : {},
     "Favourite" : {},
     "Favourites" : {},
     "Favourites sit first on the ring, in the order of the Favourites list." : {},
@@ -456,6 +463,7 @@
     "Hovered segment: %lld" : {
       "comment" : "Gallery control"
     },
+    "I Already Have It…" : {},
     "Image" : {},
     "Image %lld: %@" : {},
     "Image on its new background" : {},
@@ -475,6 +483,7 @@
     "Insert" : {},
     "Insert %@" : {},
     "Install" : {},
+    "Install %@ %@" : {},
     "Installed %@" : {},
     "Join order" : {},
     "JPG" : {},
@@ -612,6 +621,7 @@
     "Only photos and scans are recompressed. Text stays sharp and searchable." : {},
     "Open" : {},
     "Open a drop ring with a shortcut" : {},
+    "Open Download Page" : {},
     "Open link…" : {},
     "Open Login Items" : {},
     "Open System Settings" : {},
@@ -659,6 +669,7 @@
     "Pages are copied as they are: text stays selectable and nothing is turned into images. Bookmarks are kept for pages you keep." : {},
     "pages fit each image" : {},
     "pandoc pack" : {},
+    "pandoc’s document conversions for DOCX, ODT and EPUB." : {},
     "pandoc’s document conversions, for the highest-fidelity DOCX, EPUB and ODT." : {},
     "Part %lld, %@" : {},
     "Part length" : {},
@@ -921,6 +932,12 @@
     "Tap detected ✓ %@" : {},
     "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two." : {},
     "Tap speed" : {},
+    "Tap ⌃ Control: AirDrop, Float, Copy, Move, Path, Terminal" : {
+      "comment" : "Demo GIF caption"
+    },
+    "Tap ⌘ Command: tools for this file" : {
+      "comment" : "Demo GIF caption"
+    },
     "Target size" : {},
     "Target size in megabytes" : {},
     "Terminal opens in the folder of %@" : {},
@@ -1004,6 +1021,7 @@
     "Used every time. You can still change them for one file in the wheel’s options." : {},
     "Validate" : {},
     "Vector" : {},
+    "Verify & Install" : {},
     "Version" : {},
     "Version %@ (%@)" : {},
     "Versions, macOS, engines and settings. No file names or paths." : {},
@@ -1043,6 +1061,7 @@
     "You can change this any time in Settings › General, or in System Settings › General › Login Items." : {},
     "You don’t have permission to move “%@”." : {},
     "You were signed out. Sign in again to continue." : {},
+    "Your browser will download the official file from %@. When it’s done, choose the downloaded file here. %@ checks it against the official checksum before installing. Nothing is sent anywhere." : {},
     "Your current plan doesn’t include this." : {},
     "Your favourites, presets and settings are stored on %@." : {},
     "You’re offline. Nothing was uploaded." : {},

@@ -71,9 +71,10 @@ public enum OutputNamer {
         var n = 1
         while n < 10_000 {
             let dest = candidate(directory, base, ext, n)
-            let rc = source.withUnsafeFileSystemRepresentation { src in
+            let rc: Int32 = source.withUnsafeFileSystemRepresentation { src in
                 dest.withUnsafeFileSystemRepresentation { dst in
-                    renamex_np(src!, dst!, UInt32(RENAME_EXCL))
+                    guard let src, let dst else { errno = EINVAL; return -1 }
+                    return renamex_np(src, dst, UInt32(RENAME_EXCL))
                 }
             }
             if rc == 0 { return dest }
