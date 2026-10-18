@@ -15,8 +15,17 @@ drop or click was ever performed, even though every path is unit-tested, every
 screen is rendered offscreen, and latency, CPU and memory were measured. All
 detection uses permission-free public API (D-001).
 
-**Do this** (on the dev Mac; optionally again on a fresh user account to
-confirm no permission prompt appears):
+**What was tried.** Synthesising input from the build harness (`CGPreflightPostEventAccess()` = false,
+`AXIsProcessTrusted()` = false). Desktop control (computer use) isn't enabled for the build
+session either: no computer-use tools are available. The detection, wheel, drop and job paths are all
+covered with fakes in unit tests, and every screen is rendered offscreen.
+
+**Two ways to finish it:**
+- **Let Claude do it:** turn on *Settings → This computer → Computer use* in the Claude desktop
+  app, then ask Claude to "run the BLOCKERS.md B-001 session". It can drag in Finder, tap the
+  keys and screenshot the results.
+- **Do it yourself** (about 15 minutes, on the dev Mac; optionally again on a fresh user account
+  to confirm no permission prompt appears):
 
 ```bash
 make build && open build/DerivedData/Build/Products/Debug/Halo.app
