@@ -55,6 +55,9 @@ targets:
       - path: Sources/Actions
       - path: Sources/Jobs/UI
       - path: Sources/Settings
+      - path: LICENSES
+        type: folder
+        buildPhase: resources
     dependencies:
       - target: HaloCore
         embed: true
