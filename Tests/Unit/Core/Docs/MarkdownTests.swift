@@ -100,6 +100,16 @@ final class MarkdownTests: XCTestCase {
         XCTAssertEqual(t.rows[2].cells.count, 2, "short rows are padded")
     }
 
+    func testFootnotesAreKeptNotSwallowed() {
+        let doc = MarkdownReader.parse("Claim one[^a] and two[^b].\n\n[^a]: First source.\n[^b]: Second source\n    with a second line.\n\n[^nope] stays literal.\n")
+        XCTAssertEqual(doc.blocks[0], .paragraph([.text("Claim one[1] and two[2].")]))
+        XCTAssertEqual(doc.blocks[1], .paragraph([.text("[^nope] stays literal.")]))
+        XCTAssertEqual(doc.blocks[2], .horizontalRule)
+        guard case .list(let notes) = doc.blocks[3] else { return XCTFail("notes list: \(doc.blocks)") }
+        XCTAssertTrue(notes.ordered)
+        XCTAssertEqual(notes.items.map { $0.blocks.map(\.plainText).joined() }, ["First source.", "Second source with a second line."])
+    }
+
     func testFrontMatterAndHTMLBlock() {
         let doc = MarkdownReader.parse("---\ntitle: \"My: Doc\"\nauthor: Me\n---\n\n<div>\n<p>Raw <b>html</b></p>\n</div>\n\nAfter.\n")
         XCTAssertEqual(doc.metadata.title, "My: Doc")

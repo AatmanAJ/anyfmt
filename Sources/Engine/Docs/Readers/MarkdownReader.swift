@@ -15,8 +15,20 @@ public enum MarkdownReader {
         stripFrontMatter(&lines, into: &meta)
         var parser = BlockParser()
         let raw = parser.parse(lines[...])
-        let inline = InlineContext(refs: parser.refs, baseURL: baseURL)
-        let blocks = raw.flatMap { inline.convert($0) }
+        // Footnotes are numbered in definition order; references become "[n]" and
+        // the notes follow the text as a numbered list (the model has no footnotes).
+        var numbers: [String: Int] = [:]
+        for (k, f) in parser.footnotes.enumerated() { numbers[f.label] = k + 1 }
+        let inline = InlineContext(refs: parser.refs, footnotes: numbers, baseURL: baseURL)
+        var blocks = raw.flatMap { inline.convert($0) }
+        if !parser.footnotes.isEmpty {
+            blocks.append(.horizontalRule)
+            let items = parser.footnotes.map { f -> DocListItem in
+                var sub = BlockParser()
+                return DocListItem(sub.parse(f.lines[...]).flatMap { inline.convert($0) })
+            }
+            blocks.append(.list(DocList(ordered: true, items: items)))
+        }
         return DocModel(metadata: meta, blocks: blocks)
     }
 
@@ -100,6 +112,8 @@ struct ListMarker {
 
 struct BlockParser {
     var refs: [String: LinkRef] = [:]
+    /// GFM footnote definitions `[^label]: text` (plus indented continuation lines), in order.
+    var footnotes: [(label: String, lines: [String])] = []
 
     static let htmlBlockTags: Set<String> = [
         "address", "article", "aside", "blockquote", "center", "details", "dialog", "dd", "div", "dl", "dt",
@@ -189,6 +203,7 @@ struct BlockParser {
                 var sub = BlockParser()
                 let blocks = sub.parse(inner[...])
                 refs.merge(sub.refs) { a, _ in a }
+                for f in sub.footnotes where !footnotes.contains(where: { $0.label == f.label }) { footnotes.append(f) }
                 out.append(.quote(blocks))
                 continue
             }
@@ -231,6 +246,19 @@ struct BlockParser {
                     if isComment, html.last?.contains("-->") == true { break }
                 }
                 out.append(.html(html.joined(separator: "\n")))
+                continue
+            }
+
+            if t.hasPrefix("[^"), let close = t.firstIndex(of: "]"), t[t.index(after: close)...].hasPrefix(":") {
+                flush()
+                let label = BlockParser.normalizeLabel(String(t[t.index(t.startIndex, offsetBy: 2)..<close]))
+                var body = [String(t[t.index(close, offsetBy: 2)...]).trimmingCharacters(in: .whitespaces)]
+                i += 1
+                while i < end, Self.isBlank(lines[i]) ? (i + 1 < end && Self.indent(lines[i + 1]) >= 4) : Self.indent(lines[i]) >= 4 {
+                    body.append(Self.isBlank(lines[i]) ? "" : Self.dropIndent(lines[i], 4))
+                    i += 1
+                }
+                if !footnotes.contains(where: { $0.label == label }) { footnotes.append((label, body)) }
                 continue
             }
 
@@ -286,6 +314,7 @@ struct BlockParser {
             var sub = BlockParser()
             let blocks = sub.parse(content[...])
             refs.merge(sub.refs) { a, _ in a }
+            for f in sub.footnotes where !footnotes.contains(where: { $0.label == f.label }) { footnotes.append(f) }
             items.append((blocks, checked))
             // Next item of the same list?
             var j = i
@@ -481,7 +510,15 @@ struct BlockParser {
 
 struct InlineContext {
     let refs: [String: LinkRef]
+    /// Footnote label → number.
+    var footnotes: [String: Int] = [:]
     let baseURL: URL?
+
+    init(refs: [String: LinkRef], footnotes: [String: Int] = [:], baseURL: URL?) {
+        self.refs = refs
+        self.footnotes = footnotes
+        self.baseURL = baseURL
+    }
 
     func convert(_ b: RawBlock) -> [DocBlock] {
         switch b {
@@ -614,6 +651,12 @@ private struct InlineParser {
                     flushText(); toks.append(.bracket(Bracket(isImage: true, active: true, start: i + 2))); i += 2
                 } else { buf.append(c); i += 1 }
             case "[":
+                if i + 1 < chars.count, chars[i + 1] == "^", let close = chars[(i + 2)...].prefix(100).firstIndex(of: "]"),
+                   let n = ctx.footnotes[BlockParser.normalizeLabel(String(chars[(i + 2)..<close]))] {
+                    buf += "[\(n)]"
+                    i = close + 1
+                    continue
+                }
                 flushText(); toks.append(.bracket(Bracket(isImage: false, active: true, start: i + 1))); i += 1
             case "]":
                 closeBracket()
