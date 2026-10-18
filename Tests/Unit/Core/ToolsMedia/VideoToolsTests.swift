@@ -69,6 +69,25 @@ final class VideoToolsTests: XCTestCase {
         XCTAssertEqual(i.duration, 4, accuracy: 0.1)
     }
 
+    func testCropAndSnapshotUseDisplayOrientation() async throws {
+        let clip = try await MediaFixtures.url("clip.mp4")
+        let dir = try makeOutputDirectory()
+        let rotated = dir.appendingPathComponent("portrait.mp4")
+        try await TestEngines.ffmpeg(["-display_rotation:v:0", "90", "-i", clip.path, "-c", "copy", rotated.path])
+        let src = try await info(rotated)
+        XCTAssertEqual(src.video?.rotation, 90)
+        XCTAssertEqual(src.video?.displayWidth, 240)
+        XCTAssertEqual(src.video?.displayHeight, 320)
+        let (out, _) = try await runTool(CropVideoRunner(), [rotated], ["rect": .string("0,0,0.5,1")])
+        let c = try await info(try XCTUnwrap(out.files.first))
+        XCTAssertEqual(c.video?.displayWidth, 120)
+        XCTAssertEqual(c.video?.displayHeight, 320)
+        let (shot, _) = try await runTool(SnapshotVideoRunner(), [rotated], ["times": .string("1")])
+        let img = try XCTUnwrap(CGImageSourceCreateWithURL(try XCTUnwrap(shot.files.first) as CFURL, nil).flatMap { CGImageSourceCreateImageAtIndex($0, 0, nil) })
+        XCTAssertEqual(img.width, 240)
+        XCTAssertEqual(img.height, 320)
+    }
+
     // MARK: 14 Speed
 
     func testSpeedChangesDuration() async throws {

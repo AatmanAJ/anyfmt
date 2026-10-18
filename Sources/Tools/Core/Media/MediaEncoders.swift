@@ -145,8 +145,13 @@ public enum MediaEncoders {
             out.append(EncoderAttempt(label: "libx264", args: ["-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p"], hardware: false, twoPass: true))
         case .vp9:
             var a = ["-c:v", "libvpx-vp9", "-row-mt", "1", "-deadline", "good", "-cpu-used", "4"]
-            a += bitRate.map { ["-b:v", String($0)] } ?? ["-crf", String(quality.vp9CRF), "-b:v", "0"]
-            a += vbv
+            if let bitRate {
+                a += ["-b:v", String(bitRate)]
+            } else {
+                // libvpx rejects a VBV cap in pure CRF mode (-b:v 0); constrained quality
+                // uses -b:v as the ceiling instead.
+                a += ["-crf", String(quality.vp9CRF), "-b:v", maxRate.map(String.init) ?? "0"]
+            }
             out.append(EncoderAttempt(label: "libvpx-vp9", args: a, hardware: false, twoPass: true))
         case .mpeg4:
             var a = ["-c:v", "mpeg4", "-tag:v", "XVID"]

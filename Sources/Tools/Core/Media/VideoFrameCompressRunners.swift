@@ -117,8 +117,11 @@ public struct CompressVideoRunner: ToolRunner {
             defer { run.cleanup(scratch) }
             let log = scratch.appendingPathComponent("pass").path
             let vf = filters.isEmpty ? [] : ["-vf", filters.joined(separator: ",")]
+            // Pass 1 goes through the real muxer (into scratch): containers differ in
+            // frame-rate handling, and both passes must see the same frames.
+            let pass1Out = scratch.appendingPathComponent("pass1.\(run.keptExtension(of: run.input))").path
             let pass1 = ["-i", run.input.path, "-map", "0:\(video.index)"] + vf + enc.args
-                + ["-pass", "1", "-passlogfile", log, "-an", "-f", "null", "-"]
+                + ["-pass", "1", "-passlogfile", log, "-an", "-f", container.muxer, pass1Out]
             try await run.ffmpeg.run(pass1, duration: info.duration, progress: context.progress.scaled(0...0.45))
             let pass2 = ["-i", run.input.path] + maps + vf + enc.args + ["-pass", "2", "-passlogfile", log] + audio + meta
                 + MediaRun.muxerFlags(container) + [out.path]
