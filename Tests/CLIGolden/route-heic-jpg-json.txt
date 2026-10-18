@@ -1,0 +1,16 @@
+$ halo route heic jpg --json
+exit: 0
+--- stdout
+{
+  "from" : "heic",
+  "hops" : [
+    {
+      "engine" : "imageio",
+      "from" : "heic",
+      "to" : "jpg"
+    }
+  ],
+  "shownByDefault" : true,
+  "to" : "jpg"
+}
+--- stderr

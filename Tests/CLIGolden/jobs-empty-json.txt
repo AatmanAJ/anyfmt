@@ -1,0 +1,11 @@
+$ halo jobs --json
+exit: 0
+--- stdout
+{
+  "jobs" : [
+
+  ],
+  "limit" : 10,
+  "source" : "<tmp>/support/recents.json"
+}
+--- stderr

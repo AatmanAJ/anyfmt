@@ -1,0 +1,212 @@
+$ halo presets list --format jpg --json
+exit: 0
+--- stdout
+{
+  "presets" : [
+    {
+      "builtIn" : true,
+      "format" : "jpg",
+      "hidden" : false,
+      "id" : "builtin.jpg.web",
+      "title" : "Web · 80 %",
+      "values" : {
+        "quality" : 80
+      }
+    },
+    {
+      "builtIn" : true,
+      "format" : "jpg",
+      "hidden" : false,
+      "id" : "builtin.jpg.best",
+      "title" : "Best · 95 %",
+      "values" : {
+        "quality" : 95
+      }
+    }
+  ]
+}
+--- stderr
+
+$ halo presets add --format jpg --title Tiny --opt quality=40 --json
+exit: 0
+--- stdout
+{
+  "builtIn" : false,
+  "format" : "jpg",
+  "hidden" : false,
+  "id" : "<uuid>",
+  "title" : "Tiny",
+  "values" : {
+    "quality" : 40
+  }
+}
+--- stderr
+
+$ halo presets show <uuid> --json
+exit: 0
+--- stdout
+{
+  "builtIn" : false,
+  "format" : "jpg",
+  "hidden" : false,
+  "id" : "<uuid>",
+  "title" : "Tiny",
+  "values" : {
+    "quality" : 40
+  }
+}
+--- stderr
+
+$ halo presets list --format jpg
+exit: 0
+--- stdout
+jpg	<uuid>	Tiny	quality=40
+jpg	builtin.jpg.web	Web · 80 % [built-in]	quality=80
+jpg	builtin.jpg.best	Best · 95 % [built-in]	quality=95
+--- stderr
+
+$ halo presets add --format jpg --title Bad --opt fps=10
+exit: 2
+--- stdout
+--- stderr
+error: unknown option “fps” for JPG. Valid: quality, background, maxDimension, dpi
+
+$ halo convert <tmp>/photo.png --to jpg --preset tiny --dry-run --json
+exit: 0
+--- stdout
+{
+  "dryRun" : true,
+  "errors" : [
+
+  ],
+  "exitCode" : 0,
+  "jobs" : [
+    {
+      "from" : "png",
+      "inputs" : [
+        "<tmp>/photo.png"
+      ],
+      "output" : "<tmp>/photo.jpg",
+      "outputIsFolder" : false,
+      "route" : {
+        "from" : "png",
+        "hops" : [
+          {
+            "engine" : "imageio",
+            "from" : "png",
+            "to" : "jpg"
+          }
+        ],
+        "shownByDefault" : true,
+        "to" : "jpg"
+      },
+      "to" : "jpg"
+    }
+  ],
+  "options" : {
+    "quality" : 40
+  },
+  "skipped" : [
+
+  ],
+  "to" : "jpg"
+}
+--- stderr
+
+$ halo convert <tmp>/photo.png --to jpg --preset Tiny --opt quality=90 --dry-run --json
+exit: 0
+--- stdout
+{
+  "dryRun" : true,
+  "errors" : [
+
+  ],
+  "exitCode" : 0,
+  "jobs" : [
+    {
+      "from" : "png",
+      "inputs" : [
+        "<tmp>/photo.png"
+      ],
+      "output" : "<tmp>/photo.jpg",
+      "outputIsFolder" : false,
+      "route" : {
+        "from" : "png",
+        "hops" : [
+          {
+            "engine" : "imageio",
+            "from" : "png",
+            "to" : "jpg"
+          }
+        ],
+        "shownByDefault" : true,
+        "to" : "jpg"
+      },
+      "to" : "jpg"
+    }
+  ],
+  "options" : {
+    "quality" : 90
+  },
+  "skipped" : [
+
+  ],
+  "to" : "jpg"
+}
+--- stderr
+
+$ halo presets rm <uuid> --json
+exit: 0
+--- stdout
+{
+  "hidden" : false,
+  "id" : "<uuid>",
+  "removed" : true
+}
+--- stderr
+
+$ halo presets rm builtin.jpg.web --json
+exit: 0
+--- stdout
+{
+  "hidden" : true,
+  "id" : "builtin.jpg.web",
+  "removed" : false
+}
+--- stderr
+
+$ halo presets list --format jpg --all --json
+exit: 0
+--- stdout
+{
+  "presets" : [
+    {
+      "builtIn" : true,
+      "format" : "jpg",
+      "hidden" : false,
+      "id" : "builtin.jpg.best",
+      "title" : "Best · 95 %",
+      "values" : {
+        "quality" : 95
+      }
+    },
+    {
+      "builtIn" : true,
+      "format" : "jpg",
+      "hidden" : true,
+      "id" : "builtin.jpg.web",
+      "title" : "Web · 80 %",
+      "values" : {
+        "quality" : 80
+      }
+    }
+  ]
+}
+--- stderr
+
+$ halo presets show missing
+exit: 2
+--- stdout
+--- stderr
+error: no preset “missing”
+

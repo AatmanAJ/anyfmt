@@ -1,0 +1,5 @@
+$ halo tool nope.nope /tmp/x.png
+exit: 2
+--- stdout
+--- stderr
+error: unknown tool “nope.nope”. Try `halo tools`.

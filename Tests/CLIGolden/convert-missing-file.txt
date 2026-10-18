@@ -1,5 +1,6 @@
 $ halo convert /nonexistent/halo.png --to jpg
-exit: 66
+exit: 4
 --- stdout
 --- stderr
-error: no such file: /nonexistent/halo.png
+✗ halo.png: no such file or not readable: /nonexistent/halo.png
+0 succeeded, 1 failed

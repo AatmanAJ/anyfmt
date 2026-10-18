@@ -1,0 +1,7 @@
+$ halo convert <tmp>/tone.wav --to mp3 --json
+exit: 5
+--- stdout
+{"event":"start","jobs":1}
+{"code":"engine_failed","event":"error","file":"<tmp>/tone.wav","message":"The conversion stopped unexpectedly. The original file is untouched. (ffmpeg exited 1 simulated ffmpeg failure)"}
+{"event":"done","exitCode":5,"failed":1,"skipped":0,"succeeded":0}
+--- stderr

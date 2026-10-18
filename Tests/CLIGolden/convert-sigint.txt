@@ -1,0 +1,6 @@
+$ halo convert <tmp>/photo.png --to tiff --json   (SIGINT after start)
+exit: 7
+--- stdout
+{"event":"start","jobs":1}
+{"code":"cancelled","event":"error","file":"<tmp>/photo.png","message":"cancelled"}
+{"event":"done","exitCode":7,"failed":1,"skipped":0,"succeeded":0}

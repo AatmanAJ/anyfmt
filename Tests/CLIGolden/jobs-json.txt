@@ -1,0 +1,18 @@
+$ halo jobs --json
+exit: 0
+--- stdout
+{
+  "jobs" : [
+    {
+      "date" : "<date>",
+      "id" : "<uuid>",
+      "outputs" : [
+        "<tmp>/photo.png"
+      ],
+      "title" : "photo.png → PNG"
+    }
+  ],
+  "limit" : 10,
+  "source" : "<tmp>/support/recents.json"
+}
+--- stderr

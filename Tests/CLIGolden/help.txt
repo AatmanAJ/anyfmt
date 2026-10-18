@@ -3,14 +3,24 @@ exit: 0
 --- stdout
 usage: halo <command> [options]
 
-commands:
-  convert <file>... --to <format> [--opt key=value]... [--out <dir>] [--metadata keep|private|strip]
-  tool <tool-id> <file>... [--opt key=value]... [--out <dir>]
-  formats [--from <format>] [--json]     list conversions (from the live capability table)
-  tools [--json]                         list tools and their options
-  route <from> <to>                      show the planned route
-  version
+convert <file>... --to <format> [--opt key=value]... [--preset <id|title>]
+        [--out-dir <dir>] [--overwrite rename|never] [--metadata keep|private|strip] [--dry-run]
+targets <file>...              formats these files can become (with routes)
+formats [--from <format>]      every conversion in the live capability table
+options <format>               options for converting to <format>
+tool <tool-id> <file>... [--opt key=value]... [--out-dir <dir>] [--metadata …]
+tools                          tools and their options
+presets [list [--format <f>] | show <id> | add --format <f> --title <t> --opt k=v... | rm <id>]
+jobs                           recent conversions made with the app
+doctor                         engines, packs, paths, signature, permissions
+schema                         everything above in one document (schemaVersion 1)
+route <from> <to>              the planned route between two formats
+mcp                            Model Context Protocol server on stdin/stdout
+version
+help
 
-Outputs are written beside each original (or into --out) and never overwrite
-anything: name.png, then name 2.png, name 3.png …
+Every command takes --json (pretty JSON on stdout; convert and tool stream NDJSON).
+Human messages go to stderr. Outputs never overwrite anything: name.png, then
+name 2.png … Exit codes: 0 ok, 2 usage, 3 unsupported route, 4 input missing,
+5 engine failed, 6 partial batch, 7 cancelled, 8 cloud unavailable.
 --- stderr

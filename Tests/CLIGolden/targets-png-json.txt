@@ -1,0 +1,584 @@
+$ halo targets <tmp>/photo.png --json
+exit: 0
+--- stdout
+{
+  "inputs" : [
+    {
+      "file" : "<tmp>/photo.png",
+      "format" : "png"
+    }
+  ],
+  "targets" : [
+    {
+      "format" : "jpg",
+      "kind" : "image",
+      "label" : "JPG",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "jpg"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "jpg"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "heic",
+      "kind" : "image",
+      "label" : "HEIC",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "heic"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "heic"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "webp",
+      "kind" : "image",
+      "label" : "WebP",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "ffmpeg-image",
+              "from" : "png",
+              "to" : "webp"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "webp"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "avif",
+      "kind" : "image",
+      "label" : "AVIF",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "avif"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "avif"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "tiff",
+      "kind" : "image",
+      "label" : "TIFF",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "tiff"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "tiff"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "gif",
+      "kind" : "image",
+      "label" : "GIF",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "ffmpeg-image",
+              "from" : "png",
+              "to" : "gif"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "gif"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "bmp",
+      "kind" : "image",
+      "label" : "BMP",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "bmp"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "bmp"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "heif",
+      "kind" : "image",
+      "label" : "HEIF",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "heif"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "heif"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "jp2",
+      "kind" : "image",
+      "label" : "JP2",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "jp2"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "jp2"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "psd",
+      "kind" : "image",
+      "label" : "PSD",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "psd"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "psd"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "ico",
+      "kind" : "image",
+      "label" : "ICO",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "ico"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "ico"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "icns",
+      "kind" : "image",
+      "label" : "ICNS",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "icns"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "icns"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "tga",
+      "kind" : "image",
+      "label" : "TGA",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "tga"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "tga"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "exr",
+      "kind" : "image",
+      "label" : "EXR",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "exr"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "exr"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "pdf",
+      "kind" : "pdf",
+      "label" : "PDF",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            }
+          ],
+          "shownByDefault" : true,
+          "to" : "pdf"
+        }
+      ],
+      "shownByDefault" : true
+    },
+    {
+      "format" : "docx",
+      "kind" : "document",
+      "label" : "DOCX",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "ooxml",
+              "from" : "pdf",
+              "to" : "docx"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "docx"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "md",
+      "kind" : "document",
+      "label" : "MD",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "markdown",
+              "from" : "pdf",
+              "to" : "md"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "md"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "txt",
+      "kind" : "document",
+      "label" : "TXT",
+      "multiHop" : false,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "txt"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "txt"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "html",
+      "kind" : "document",
+      "label" : "HTML",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "markdown",
+              "from" : "pdf",
+              "to" : "html"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "html"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "rtf",
+      "kind" : "document",
+      "label" : "RTF",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "attributedtext",
+              "from" : "pdf",
+              "to" : "rtf"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "rtf"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "rtfd",
+      "kind" : "document",
+      "label" : "RTFD",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "attributedtext",
+              "from" : "pdf",
+              "to" : "rtfd"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "rtfd"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "odt",
+      "kind" : "document",
+      "label" : "ODT",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "ooxml",
+              "from" : "pdf",
+              "to" : "odt"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "odt"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "pptx",
+      "kind" : "slides",
+      "label" : "PPTX",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "ooxml",
+              "from" : "pdf",
+              "to" : "pptx"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "pptx"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "xlsx",
+      "kind" : "spreadsheet",
+      "label" : "XLSX",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "ooxml",
+              "from" : "pdf",
+              "to" : "xlsx"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "xlsx"
+        }
+      ],
+      "shownByDefault" : false
+    },
+    {
+      "format" : "epub",
+      "kind" : "ebook",
+      "label" : "EPUB",
+      "multiHop" : true,
+      "routes" : [
+        {
+          "from" : "png",
+          "hops" : [
+            {
+              "engine" : "imageio",
+              "from" : "png",
+              "to" : "pdf"
+            },
+            {
+              "engine" : "epub",
+              "from" : "pdf",
+              "to" : "epub"
+            }
+          ],
+          "shownByDefault" : false,
+          "to" : "epub"
+        }
+      ],
+      "shownByDefault" : false
+    }
+  ]
+}
+--- stderr

@@ -1,0 +1,12 @@
+$ halo convert <tmp>/photo.png --to jpg --opt quality=loud --json
+exit: 2
+--- stdout
+{
+  "error" : {
+    "code" : "usage",
+    "exitCode" : 2,
+    "message" : "bad value “loud” for option quality"
+  }
+}
+--- stderr
+error: bad value “loud” for option quality

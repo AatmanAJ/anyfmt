@@ -1,0 +1,10 @@
+$ halo version --json
+exit: 0
+--- stdout
+{
+  "licence" : "AGPL-3.0-only",
+  "name" : "halo",
+  "schemaVersion" : 1,
+  "version" : "<version>"
+}
+--- stderr
