@@ -1,6 +1,6 @@
 import Foundation
 
-// Owned by lane E (Subtitles). Placeholder until the lane lands.
+/// Lane E: subtitle engines.
 public enum SubtitleEngines {
-    public static let all: [any ConversionEngine] = []
+    public static let all: [any ConversionEngine] = [SubtitleEngine()]
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-// Owned by lane E (Audio + Video). Placeholder until the lane lands.
+/// Lane E: audio and video engines.
 public enum AVEngines {
-    public static let all: [any ConversionEngine] = []
+    public static let all: [any ConversionEngine] = [FFmpegAVEngine(), AVFoundationEngine()]
 }
