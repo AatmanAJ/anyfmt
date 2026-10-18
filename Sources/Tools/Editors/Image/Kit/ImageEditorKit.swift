@@ -25,16 +25,6 @@ enum ImageEditorKit {
         return Color(.sRGB, red: c.r, green: c.g, blue: c.b, opacity: c.a)
     }
 
-    static func hex(_ color: Color) -> String {
-        let ns = NSColor(color).usingColorSpace(.sRGB) ?? .black
-        return HexColor.string(r: Double(ns.redComponent), g: Double(ns.greenComponent), b: Double(ns.blueComponent), a: Double(ns.alphaComponent))
-    }
-
-    /// Binding a SwiftUI `Color` to a "#RRGGBB" string.
-    static func colorBinding(_ hex: Binding<String>) -> Binding<Color> {
-        Binding(get: { color(hex: hex.wrappedValue) }, set: { hex.wrappedValue = Self.hex($0) })
-    }
-
     // MARK: Geometry
 
     /// Largest rect of `size`'s aspect inside `bounds`, centred.
@@ -73,8 +63,6 @@ enum ImageEditorKit {
     static func preview(_ url: URL, edge: Int = previewEdge) -> CGImage? {
         ImageSupport.thumbnail(url, maxPixelSize: edge)
     }
-
-    static func fileIcon(_ url: URL) -> NSImage { NSWorkspace.shared.icon(forFile: url.path) }
 }
 
 // MARK: - Views

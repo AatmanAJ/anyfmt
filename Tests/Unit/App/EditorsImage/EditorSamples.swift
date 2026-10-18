@@ -5,7 +5,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
 @testable import HaloApp
-import HaloCore
+@testable import HaloCore
 
 /// Sample media for editor tests and screenshots, drawn from scratch.
 @MainActor
@@ -185,10 +185,23 @@ enum EditorSnapshot {
         return rep
     }
 
+    /// Writing (and palette-compacting) the PNGs takes ~1 min in Debug, so it is
+    /// opt-in: `TEST_RUNNER_HALO_SCREENSHOTS=1 xcodebuild test …`. Without it the
+    /// views are still rendered and checked, nothing is written.
+    static var writesFiles: Bool { ProcessInfo.processInfo.environment["HALO_SCREENSHOTS"] == "1" }
+
+    /// Renders `view`; returns the PNG written to docs/screens, or nil when writing is off.
     @discardableResult
-    static func write<V: View>(_ view: V, size: NSSize, name: String, dark: Bool = false) throws -> URL {
+    static func write<V: View>(_ view: V, size: NSSize, name: String, dark: Bool = false) throws -> URL? {
         let rep = try XCTUnwrap(render(view, size: size, dark: dark))
-        let data = try XCTUnwrap(rep.representation(using: .png, properties: [:]))
+        XCTAssertGreaterThan(rep.pixelsWide, Int(size.width) - 1)
+        guard writesFiles else { return nil }
+        var data = try XCTUnwrap(rep.representation(using: .png, properties: [:]))
+        // Dogfood the compress tool's palette PNG writer to keep the repo light.
+        if let cg = rep.cgImage, let px = ImageSupport.rgba8(cg, colorSpace: EditorSamples.srgb) {
+            let q = PaletteQuantizer(maxColors: 256).quantize(pixels: px.pixels, width: px.width, height: px.height)
+            if let small = PalettePNGWriter.write(q, colorSpace: EditorSamples.srgb, dpi: 144, metadataChunks: []), small.count < data.count { data = small }
+        }
         try FileManager.default.createDirectory(at: screensDirectory, withIntermediateDirectories: true)
         let url = screensDirectory.appendingPathComponent("\(name)\(dark ? "-dark" : "").png")
         try data.write(to: url)

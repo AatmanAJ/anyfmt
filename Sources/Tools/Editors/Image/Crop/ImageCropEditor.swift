@@ -322,10 +322,9 @@ private struct AspectGlyph: View {
 struct ImageCropSidebar: View {
     @ObservedObject var model: ImageCropModel
 
-    private let aspects: [(id: String, label: String, glyph: String)] = [
-        ("free", String(localized: "Free"), "crop"), ("1:1", String(localized: "Square"), "square"),
-        ("4:3", "4:3", "rectangle"), ("3:2", "3:2", "rectangle"), ("16:9", "16:9", "rectangle.ratio.16.to.9"),
-        ("9:16", "9:16", "rectangle.ratio.9.to.16"),
+    private let aspects: [(id: String, label: String)] = [
+        ("free", String(localized: "Free")), ("1:1", String(localized: "Square")), ("4:3", "4:3"),
+        ("3:2", "3:2"), ("16:9", "16:9"), ("9:16", "9:16"),
     ]
 
     var body: some View {

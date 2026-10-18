@@ -263,6 +263,14 @@ final class DrawingToolTests: XCTestCase {
         XCTAssertNotNil(data.range(of: Data("DCTDecode".utf8)), "JPEG data embedded as-is")
     }
 
+    func testHEICPagesAreEmbeddedAsJPEG() async throws {
+        let heic = try G1.write(G1.photo(width: 800, height: 600), to: dir.appendingPathComponent("p.heic"), type: .heic, quality: 0.8)
+        let out = try await G1.run(ToolIDs.imagesToPDF, inputs: [heic], in: dir)
+        let data = try Data(contentsOf: out[0])
+        XCTAssertNotNil(data.range(of: Data("DCTDecode".utf8)), "HEIC re-encoded as JPEG, not raw pixels")
+        XCTAssertLessThan(data.count, 800 * 600, "far smaller than uncompressed pixels")
+    }
+
     func testImagesToPDFPaperSizes() async throws {
         let wide = try G1.write(G1.photo(width: 3000, height: 2000), to: dir.appendingPathComponent("w.jpg"), type: .jpeg)
         let out = try await G1.run(ToolIDs.imagesToPDF, inputs: [wide], options: OptionValues([OptionKey.pageSize: .string("a4")]), in: dir)

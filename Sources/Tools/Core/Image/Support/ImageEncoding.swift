@@ -11,6 +11,8 @@ struct ImageEncoder: Sendable {
     let ffmpeg: FFmpeg
     /// Private scratch folder inside the request's output directory (ffmpeg round trips).
     let scratch: URL
+    /// Use the ffmpeg AVIF path even where ImageIO can encode AVIF (tests the macOS < 26 route).
+    var forceFFmpegAVIF = false
 
     init(context: EngineContext, scratch: URL) {
         self.ffmpeg = FFmpeg(locator: context.locator)
@@ -24,7 +26,7 @@ struct ImageEncoder: Sendable {
         switch format {
         case Formats.webp:
             return try await encodeWithFFmpeg(image, format: format, quality: quality ?? 0.85)
-        case Formats.avif where !ImageFormats.nativeAVIF:
+        case Formats.avif where !ImageFormats.nativeAVIF || forceFFmpegAVIF:
             return try await encodeWithFFmpeg(image, format: format, quality: quality ?? 0.8)
         default:
             guard let type = ImageFormats.destinationType(for: format) else {

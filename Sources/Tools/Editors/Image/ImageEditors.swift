@@ -37,6 +37,18 @@ enum ImageEditors {
         return true
     }
 
+    /// Shows a finished tool's result when it has something to show beyond
+    /// the file itself. Today: Read QR / barcode opens the code list (and
+    /// copies the codes). Returns false for every other tool.
+    /// Wiring: the job UI should call this after a tool job succeeds (see
+    /// docs/contract-changes/G1.md for the proposed `EditorFactory` forwarder).
+    @discardableResult
+    static func presentResult(_ tool: ToolSpec, outputs: [URL]) -> Bool {
+        guard tool.id == ToolIDs.readCodes, let txt = outputs.first(where: { $0.pathExtension.lowercased() == "txt" }) else { return false }
+        CodeResultPresenter.present(fileAt: txt)
+        return true
+    }
+
     /// Builds the editor for `tool`, or nil when it isn't one of ours or the inputs don't fit.
     static func make(_ tool: ToolSpec, inputs: [URL]) -> Built? {
         guard tools.contains(tool.id), !inputs.isEmpty else { return nil }

@@ -100,6 +100,7 @@ final class ImageEditorsTests: XCTestCase {
             m.adjustments.saturation = 1 + Double(i) * 0.1
             worst = max(worst, m.lastRenderSeconds)
         }
+        print("G1 adjust preview worst re-render: \(Int((worst * 1000).rounded())) ms")
         XCTAssertLessThan(worst, 0.05, "live preview re-render must stay under 50 ms (worst \(Int(worst * 1000)) ms)")
         XCTAssertTrue(m.canSave)
         XCTAssertEqual(m.options.double("exposure", default: 0), 0.5)
@@ -246,6 +247,17 @@ final class ImageEditorsTests: XCTestCase {
         _ = ResizeOptionsView(options: rb, sourceSize: CGSize(width: 4032, height: 3024)).body
         rb.wrappedValue["mode"] = .string("preset")
         XCTAssertEqual(ResizePlan.targetSize(for: CGSize(width: 4032, height: 3024), options: resize), CGSize(width: 1920, height: 1440))
+    }
+
+    func testPresentResultOnlyForReadCodes() throws {
+        let txt = dir.appendingPathComponent("menu-codes.txt")
+        try CodeReader.text(for: [CodeReadResult(payload: "hello", symbology: "QR")]).write(to: txt, atomically: true, encoding: .utf8)
+        CodeResultPresenter.pasteboard = NSPasteboard(name: NSPasteboard.Name("halo-test-\(UUID().uuidString)"))
+        defer { CodeResultPresenter.pasteboard = .general }
+        XCTAssertFalse(ImageEditors.presentResult(EditorSamples.spec(ToolIDs.compressImage), outputs: [photo]))
+        XCTAssertTrue(ImageEditors.presentResult(EditorSamples.spec(ToolIDs.readCodes), outputs: [txt]))
+        XCTAssertEqual(CodeResultPresenter.pasteboard.string(forType: .string), "hello", "results are copied")
+        for w in NSApp.windows where w.title == "1 code found" { w.close() }
     }
 
     func testCodeResultPresenter() {

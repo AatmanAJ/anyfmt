@@ -114,6 +114,22 @@ final class ContainerMetadataTests: XCTestCase {
         XCTAssertNil(G1.properties(clean[0])[kCGImagePropertyGPSDictionary as String])
     }
 
+    func testFFmpegAVIFFallbackEncodes() async throws {
+        try XCTSkipUnless(G1.ffmpeg.isAvailable)
+        var encoder = ImageEncoder(context: G1.context, scratch: dir.appendingPathComponent(".scratch"))
+        encoder.forceFFmpegAVIF = true
+        let hi = try await encoder.encode(G1.photo(width: 160, height: 120), as: Formats.avif, quality: 0.9, properties: [:])
+        let lo = try await encoder.encode(G1.photo(width: 160, height: 120), as: Formats.avif, quality: 0.2, properties: [:])
+        XCTAssertLessThan(lo.count, hi.count, "quality maps to CRF")
+        let url = dir.appendingPathComponent("ff.avif")
+        try hi.write(to: url)
+        let img = try G1.decode(url)
+        XCTAssertEqual(img.width, 160)
+        XCTAssertEqual(img.height, 120)
+        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: dir.appendingPathComponent(".scratch").path)) ?? []
+        XCTAssertEqual(leftovers, [], "temporary PNG and AVIF are cleaned up")
+    }
+
     func testGreyJPEGWithOrientationDecodesToRGB() throws {
         let ctx = try XCTUnwrap(CGContext(data: nil, width: 40, height: 20, bitsPerComponent: 8, bytesPerRow: 0,
                                           space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue))

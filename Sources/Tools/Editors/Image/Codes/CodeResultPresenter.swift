@@ -42,8 +42,11 @@ public enum CodeResultPresenter {
         present(results: CodeReader.parse(fileAt: url), source: url.lastPathComponent)
     }
 
+    /// The general pasteboard; tests swap in a private one.
+    static var pasteboard: NSPasteboard = .general
+
     static func copy(_ text: String) {
-        let pb = NSPasteboard.general
+        let pb = pasteboard
         pb.clearContents()
         pb.setString(text, forType: .string)
     }

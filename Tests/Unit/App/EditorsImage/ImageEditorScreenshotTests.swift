@@ -4,8 +4,9 @@ import XCTest
 @testable import HaloApp
 import HaloCore
 
-/// Renders every lane G1 editor offscreen into docs/screens/editor-<tool>.png
-/// (light and dark) with sample content, so regressions are visible in review.
+/// Renders every lane G1 editor offscreen with sample content (light and dark).
+/// With HALO_SCREENSHOTS=1 the images go to docs/screens/editor-<tool>.png so
+/// regressions are visible in review; otherwise this is a rendering smoke test.
 @MainActor
 final class ImageEditorScreenshotTests: XCTestCase {
     private var dir: URL!
@@ -27,8 +28,9 @@ final class ImageEditorScreenshotTests: XCTestCase {
         let built = try XCTUnwrap(ImageEditors.make(EditorSamples.spec(id), inputs: inputs))
         await prepare(built.model)
         for dark in [false, true] {
-            let url = try EditorSnapshot.write(built.makeView({ _ in }, {}), size: built.size, name: "editor-\(name)", dark: dark)
-            XCTAssertGreaterThan((try? Data(contentsOf: url))?.count ?? 0, 10_000)
+            if let url = try EditorSnapshot.write(built.makeView({ _ in }, {}), size: built.size, name: "editor-\(name)", dark: dark) {
+                XCTAssertGreaterThan((try? Data(contentsOf: url))?.count ?? 0, 10_000)
+            }
         }
     }
 

@@ -270,7 +270,7 @@ enum PalettePNGWriter {
             raw.append(0) // filter: none (best for palette data)
             raw.append(contentsOf: row)
         }
-        guard let idat = PNGChunks.deflate(raw) else { return nil }
+        guard let idat = PNGChunks.deflate(raw, level: 6) else { return nil }
 
         var chunks: [PNGChunks.Chunk] = []
         var ihdr = Data()

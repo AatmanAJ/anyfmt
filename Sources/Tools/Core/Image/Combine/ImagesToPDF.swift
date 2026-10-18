@@ -93,8 +93,17 @@ struct ImagesToPDFRunner: ToolRunner {
         for (i, input) in inputs.enumerated() {
             try Task.checkCancellation()
             guard let src = CGImageSourceCreateWithURL(input as CFURL, nil), CGImageSourceGetCount(src) > 0,
-                  let raw = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
+                  var raw = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
                 throw ConversionError.unreadable(input, detail: "ImageIO could not open")
+            }
+            // PDF has no HEIC/AVIF/WebP filter, so Quartz would embed them as
+            // (huge) lossless pixels. Re-encode those as JPEG, which PDF carries natively.
+            if let type = CGImageSourceGetType(src) as String?,
+               ["public.heic", "public.heif", "public.avif", "org.webmproject.webp", "public.avci"].contains(type),
+               !ImageSupport.hasAlpha(raw),
+               let jpeg = try? ImageEncoder.encodeNative(raw, type: "public.jpeg", quality: 0.9, properties: [:], format: Formats.jpg),
+               let jsrc = CGImageSourceCreateWithData(jpeg as CFData, nil), let j = CGImageSourceCreateImageAtIndex(jsrc, 0, nil) {
+                raw = j
             }
             let props = (CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [String: Any]) ?? [:]
             let o = ImageSupport.orientation(of: props)
