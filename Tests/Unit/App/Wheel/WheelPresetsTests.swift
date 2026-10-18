@@ -106,6 +106,61 @@ final class WheelPresetsTests: XCTestCase {
         XCTAssertEqual(model.estimate?.frames, 48)
     }
 
+    /// Changing a choice updates the numbers at once (provisional), then the real estimate replaces them.
+    func testChoicesUpdateNumbersInstantlyThenRefine() async throws {
+        let target = try gifTarget()
+        let model = OptionsPanelModel(target: target, values: OptionValues([OptionKey.fps: .string("10"), OptionKey.gifWidth: .string("480")]),
+                                      input: mov, presetStore: store)
+        model.overrideEstimate(.init(bytes: 1_000_000, duration: 4.0, frames: 40, inputBytes: 5_000_000, pixelWidth: 480))
+        model.estimator = { (_: URL, _: FormatID, _: OptionValues) async -> OptionsPanelController.Estimate? in
+            OptionsPanelController.Estimate(bytes: 2_222_222, duration: 4.0, frames: 80, inputBytes: 5_000_000, isExact: false, pixelWidth: 480)
+        }
+        model.values[OptionKey.fps] = OptionValue.string("20")
+        XCTAssertEqual(model.estimate?.frames, 80, "frames = duration × fps, immediately")
+        XCTAssertEqual(model.estimate?.bytes, 2_000_000, "bytes scale with fps before the encode finishes")
+        XCTAssertEqual(model.estimate?.isProvisional, true)
+        XCTAssertTrue(model.refining)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        XCTAssertEqual(model.estimate?.bytes, 2_222_222, "the measured value replaces the provisional one")
+        XCTAssertFalse(model.refining)
+    }
+
+    func testProvisionalScalesWithWidthAndKeep() throws {
+        let model = OptionsPanelModel(target: try gifTarget(), values: OptionValues([OptionKey.fps: .string("10"), OptionKey.gifWidth: .string("480")]),
+                                      input: mov, presetStore: store)
+        model.overrideEstimate(.init(bytes: 1_000_000, duration: 2.0, frames: 20, pixelWidth: 480))
+        let half = model.provisional(for: OptionValues([OptionKey.fps: .string("10"), OptionKey.gifWidth: .string("240")]))
+        XCTAssertEqual(half?.bytes, 250_000, "a quarter of the pixels")
+        XCTAssertEqual(half?.pixelWidth, 240)
+        let keep = model.provisional(for: OptionValues([OptionKey.fps: .string("10"), OptionKey.gifWidth: .string("0")]))
+        XCTAssertNil(keep?.bytes, "source width unknown: Keep isn't guessed")
+        XCTAssertEqual(keep?.frames, 20, "frames are still exact")
+        let wider = model.provisional(for: OptionValues([OptionKey.fps: .string("10"), OptionKey.gifWidth: .string("960")]))
+        XCTAssertEqual(wider?.bytes, 4_000_000, "wider than measured scales up (the 480 output isn't the source)")
+    }
+
+    func testChipHintsShowWhatEachChoiceWouldCost() throws {
+        let model = OptionsPanelModel(target: try gifTarget(), values: OptionValues([OptionKey.fps: .string("10")]),
+                                      input: mov, presetStore: store)
+        let fps = try XCTUnwrap(model.schema.spec(OptionKey.fps))
+        guard case .choice(let choices) = fps.kind, let thirty = choices.first(where: { $0.id == "30" }) else { return XCTFail("fps choices") }
+        XCTAssertNil(model.hint(for: fps, choice: thirty), "no hint before anything is measured")
+        model.overrideEstimate(.init(bytes: 1_000_000, duration: 2.0, frames: 20, pixelWidth: 480))
+        XCTAssertEqual(model.hint(for: fps, choice: thirty), "≈ " + ByteCountFormatter.string(fromByteCount: 3_000_000, countStyle: .file))
+        let loop = try XCTUnwrap(model.schema.spec(OptionKey.gifLoop))
+        guard case .choice(let loops) = loop.kind else { return XCTFail("loop choices") }
+        XCTAssertNil(model.hint(for: loop, choice: loops[0]), "loop doesn't change the size: no hint")
+    }
+
+    func testNoProvisionalGuessesForOtherTargets() throws {
+        let router = Router(table: CapabilityTable([Capability("mov", "mp4", "test", schema: StandardSchemas.video)]))
+        let mp4 = try XCTUnwrap(router.commonTargets(for: ["mov"]).first { $0.format == "mp4" })
+        let model = OptionsPanelModel(target: mp4, values: OptionValues(), input: mov, presetStore: store)
+        model.overrideEstimate(.init(bytes: 1_000_000, duration: 2.0))
+        XCTAssertNil(model.provisional(for: OptionValues([OptionKey.fps: .string("60")])),
+                     "video sizes don't scale simply with fps; wait for the measurement")
+    }
+
     func testPanelStaysOnTheDropScreen() {
         let size = CGSize(width: 520, height: 600)
         let origin = OptionsPanelController.origin(for: size, near: CGPoint(x: -5000, y: -5000), screens: [])

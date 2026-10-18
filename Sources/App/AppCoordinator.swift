@@ -48,7 +48,8 @@ final class AppCoordinator {
         optionsPanel.estimator = { url, format, values in
             guard let e = try? await Estimator.estimate(input: url, target: format, options: values) else { return nil }
             return OptionsPanelController.Estimate(bytes: e.bytes, duration: e.duration, frames: e.frames,
-                                                   inputBytes: e.inputBytes, isExact: e.isExact)
+                                                   inputBytes: e.inputBytes, isExact: e.isExact,
+                                                   pixelWidth: e.pixelSize.map { Double($0.width) })
         }
         optionsPanel.onRememberDefault = { [weak self] format, values in
             self?.settings.formatDefaults[format] = values
