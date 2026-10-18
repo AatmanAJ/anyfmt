@@ -32,7 +32,8 @@ generate:
 	@xcodegen generate --quiet
 
 build: generate
-	$(XCB) -scheme Halo -configuration $(CONFIG) build | xcbeautify 2>/dev/null || $(XCB) -scheme Halo -configuration $(CONFIG) build -quiet
+	$(XCB) -scheme Halo -configuration $(CONFIG) build -quiet
+	@python3 scripts/sync-strings.py $(DERIVED)
 
 ## Unit tests: packages + core + app-hosted, plus policy checks.
 test: generate test-packages test-unit check gallery
