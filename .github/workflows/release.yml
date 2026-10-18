@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      - name: Tools
+        run: brew install xcodegen meson ninja nasm pkg-config autoconf automake libtool
+      - name: Engines from pinned sources
+        run: make engines
+
+      - name: Import Developer ID certificate
+        env:
+          CERT_P12_BASE64: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+        run: |
+          KC=$RUNNER_TEMP/build.keychain-db
+          security create-keychain -p "" "$KC"
+          security set-keychain-settings "$KC"
+          security unlock-keychain -p "" "$KC"
+          echo "$CERT_P12_BASE64" | base64 --decode > $RUNNER_TEMP/cert.p12
+          security import $RUNNER_TEMP/cert.p12 -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KC"
+          security list-keychains -d user -s "$KC" login.keychain
+
+      - name: Notary profile
+        env:
+          AC_API_KEY_ID: ${{ secrets.AC_API_KEY_ID }}
+          AC_API_ISSUER: ${{ secrets.AC_API_ISSUER }}
+          AC_API_KEY_P8: ${{ secrets.AC_API_KEY_P8 }}
+        run: |
+          echo "$AC_API_KEY_P8" > $RUNNER_TEMP/key.p8
+          xcrun notarytool store-credentials halo-notary --key $RUNNER_TEMP/key.p8 --key-id "$AC_API_KEY_ID" --issuer "$AC_API_ISSUER"
+
+      - name: Signed + notarized DMG
+        env:
+          DEVELOPER_ID: ${{ secrets.DEVELOPER_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          NOTARY_PROFILE: halo-notary
+          DMG_LAYOUT: "0"
+        run: make dmg
+
+      - name: Engine sources archive (GPL source offer)
+        run: tar -czf dist/halo-${GITHUB_REF_NAME#v}-engine-sources.tar.gz -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
+
+      - name: Appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: packaging/sparkle/make-appcast.sh dist "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.dmg
+            dist/*-engine-sources.tar.gz
+            dist/appcast.xml
+          body: |
+            Source for this build: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}
+            Bundled engine sources (GPL/LGPL source offer): attached `*-engine-sources.tar.gz`.

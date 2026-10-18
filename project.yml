@@ -96,7 +96,7 @@ targets:
         SUAutomaticallyUpdate: false
         SUEnableSystemProfiling: false
         SUFeedURL: "https://updates.example.invalid/appcast.xml"
-        SUPublicEDKey: "REPLACE_WITH_SPARKLE_PUBLIC_ED_KEY"
+        SUPublicEDKey: "9bpyosf5ny/ai9Ww4gS0HQSGqy27V5sEaewoMiqr6pI="
     settings:
       base:
         PRODUCT_NAME: $(BRAND_NAME)

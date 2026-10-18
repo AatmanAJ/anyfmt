@@ -1,0 +1,35 @@
+name: Nightly matrix
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  matrix:
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      - name: Tools
+        run: brew install xcodegen meson ninja nasm pkg-config autoconf automake libtool
+      - name: Cache engines
+        id: engines
+        uses: actions/cache@v4
+        with:
+          path: |
+            Engines/dist
+            Engines/build/src
+          key: engines-${{ runner.os }}-${{ hashFiles('Engines/versions.env', 'Engines/build-*.sh', 'Engines/lib.sh') }}
+      - if: steps.engines.outputs.cache-hit != 'true'
+        run: make engines
+      - name: Matrix (every route on its fixture)
+        run: make matrix
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-report
+          path: docs/MATRIX.md
