@@ -13,6 +13,9 @@ struct CloudEntitlements: Entitlements, Equatable, Codable {
     let features: Set<CloudFeature>
     let quotas: CloudQuotas
     let customDomains: [String]
+    /// The active offline licence folded in by `merging(_:now:)` (Licence/LicenceEntitlements.swift).
+    /// Only ever raises `plan` and reports seats; never grants a feature.
+    var licence: LicenceEntitlements? = nil
 
     func can(_ feature: CloudFeature) -> Bool {
         isSignedIn && features.contains(feature)
