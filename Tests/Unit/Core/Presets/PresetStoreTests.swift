@@ -224,6 +224,19 @@ final class PresetStoreTests: XCTestCase {
         XCTAssertEqual(user.first?.values.values, [OptionKey.quality: .int(100)])
         XCTAssertEqual(s.hiddenBuiltIns(for: Formats.gif).map(\.id), ["builtin.gif.small"])
     }
+
+    /// The app and the CLI share presets.json: one process's edit must show up in the other.
+    func testAnotherProcessesEditIsPickedUp() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("halo-presets-shared-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let app = PresetStore(fileURL: url)
+        let cli = PresetStore(fileURL: url)
+        XCTAssertTrue(app.allUserPresets().isEmpty)
+        cli.add("From the CLI", format: "gif", values: OptionValues([OptionKey.fps: .int(15)]))
+        XCTAssertEqual(app.allUserPresets().map(\.title), ["From the CLI"], "seen without relaunching")
+        app.add("From the app", format: "gif", values: OptionValues())
+        XCTAssertEqual(Set(cli.allUserPresets().map(\.title)), ["From the CLI", "From the app"], "neither overwrote the other")
+    }
 }
 
 private final class Counter: @unchecked Sendable {
@@ -231,4 +244,5 @@ private final class Counter: @unchecked Sendable {
     private var n = 0
     var value: Int { lock.withLock { n } }
     func bump() { lock.withLock { n += 1 } }
+
 }

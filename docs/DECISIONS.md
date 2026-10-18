@@ -378,3 +378,25 @@ Account and in the menu bar ("Pro Licence & Account…").
   pay-per-use API (`docs/API.md`). There's no commercial-use fee for local features.
   Under AGPL, anyone can build and use the app from source, so such a fee would
   only tax honest users.
+
+### D-041 The CLI is the agent interface; MCP is in-house over stdio
+- **One registry.** `halo` links HaloCore, so formats, routes, option schemas
+  (`OptionsSchema.forTarget`), presets (the same `presets.json`, re-read whenever
+  either process changes it) and estimates are the app's own. `halo schema --json`
+  (`schemaVersion: 1`) dumps all of it, so an agent can plan without guessing.
+- **Contract.** `--json` on every command. Convert and tool print NDJSON events on
+  stdout (start / progress / output / skip / error / done), with human text on
+  stderr. Nothing ever prompts. Exit codes: 0 ok, 2 usage, 3 unsupported route,
+  4 input, 5 engine, 6 partial batch, 7 cancelled, 8 cloud. The old sysexits
+  codes were too coarse for agents to branch on; the mapping is in `docs/CLI.md`.
+  Golden tests pin every JSON shape.
+- **MCP.** A small hand-written JSON-RPC server over stdio, with no new
+  dependencies. The official Swift SDK is MIT/Apache-2.0, but it pulls in SwiftNIO
+  and a docc plugin pinned to a branch, and it targets an older spec. The server
+  speaks 2025-11-25 (also 2025-06-18 and 2025-03-26) through `initialize`, and
+  2026-07-28 statelessly (per-request version, `server/discover`). The official MCP
+  Inspector passed `tools/list` and `tools/call`. There's no network and no port:
+  local automation goes through the CLI and MCP only, never an HTTP server.
+- **PATH symlinks.** Through the cask's or Settings' symlink, argv[0] is plain
+  "halo", so the CLI couldn't find its bundled engines and every audio, video and
+  SVG route vanished. It now resolves its own Helpers folder.

@@ -107,7 +107,7 @@ halo presets add --format mp4 --title "Slack · 720p" --opt videoQuality=small -
 halo convert talk.mov --to mp4 --preset "Slack · 720p" --json
 ```
 
-The app picks up presets made here when it relaunches.
+The app picks up presets made here on its next wheel (they share one file).
 
 ## MCP
 

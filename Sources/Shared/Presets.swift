@@ -37,6 +37,10 @@ public final class PresetStore: @unchecked Sendable {
     public let fileURL: URL
     private let lock = NSLock()
     private var state: State?
+    /// Modification date + size of the file `state` came from. The app and the
+    /// `halo` CLI share the file, so a change made by the other process is picked
+    /// up on the next read instead of being overwritten.
+    private var loadedStamp: FileStamp?
     private var changeHandler: (@Sendable () -> Void)?
 
     public init(fileURL: URL) {
@@ -285,8 +289,18 @@ public final class PresetStore: @unchecked Sendable {
         handler?()
     }
 
+    private struct FileStamp: Equatable {
+        let modified: Date?
+        let size: Int?
+    }
+
+    private func currentStamp() -> FileStamp? {
+        guard let a = try? FileManager.default.attributesOfItem(atPath: fileURL.path) else { return nil }
+        return FileStamp(modified: a[.modificationDate] as? Date, size: (a[.size] as? NSNumber)?.intValue)
+    }
+
     private func loadLocked() -> State {
-        if let state { return state }
+        if let state, currentStamp() == loadedStamp { return state }
         var loaded = State()
         if let data = try? Data(contentsOf: fileURL) {
             do {
@@ -298,6 +312,7 @@ public final class PresetStore: @unchecked Sendable {
             }
         }
         state = loaded
+        loadedStamp = currentStamp()
         return loaded
     }
 
@@ -305,6 +320,7 @@ public final class PresetStore: @unchecked Sendable {
         do {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try Self.encoder.encode(s).write(to: fileURL, options: .atomic)
+            loadedStamp = currentStamp()
         } catch {
             Log.settings.error("presets: could not save \(self.fileURL.path, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }

@@ -26,9 +26,13 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 | Always a new copy, never overwrite | ✅ | `renamex_np(RENAME_EXCL)`, Finder-style `name 2.ext` |
 | Everything local, no uploads | ✅ | `make netcheck`: 0 sockets. ffmpeg built `--disable-network` |
 | Apple silicon, macOS 13+ | 🟡 | arm64, macOS 13 target; verified on macOS 27 only (B-007) |
-| ➕ Options per target | ✅ | Hover popover from the schema mid-drag (right-click in keyboard mode): quality, size, DPI, codec, cloud |
+| ➕ Options per target | ✅ | Configure after the drop: tune lip or ⌥-drop opens a pinned panel from the schema, with live size/duration/frame estimates (D-038) |
+| ➕ Sticky aim + lock | ✅ | Selection holds against drift (30 %/10° + 60 ms); ⌥ tap locks the segment mid-drag, no permission needed |
+| ➕ Presets | ✅ | Built-in + saved presets per format as chips on the wheel, "Last used", editable in Settings › Formats, shared with the CLI, synced (Pro) |
 | ➕ More than 8 targets | ✅ | Second ring 9–20, paging above |
-| ➕ Command-line tool | ✅ | `halo convert/tool/formats/route` over the same table |
+| ➕ Command-line tool | ✅ | Agent-ready `halo` CLI: `--json` everywhere, NDJSON progress, dry runs, stable exit codes, `halo schema` (docs/CLI.md) |
+| ➕ MCP server | ✅ | `halo mcp` over stdio, no network, no port: convert, targets, options, estimate, presets, tools (agents/SKILL.md) |
+| ➕ Public API (Pro) | 🟡 | Contract, mock and TypeScript SDK done (docs/API.md); the server isn't built (B-006) |
 
 ## Scale
 

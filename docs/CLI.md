@@ -179,9 +179,9 @@ Presets live in the same `presets.json` the app uses
 - `rm <id|title>` deletes a user preset. A built-in is hidden instead, as in
   the app.
 
-The running app caches presets in memory. It sees a change you make here
-after it relaunches (or after the next sync), and until then an edit made in
-the app can write over it.
+The app and the CLI share `presets.json`. Each re-reads the file when the other
+has changed it, so an edit made here shows up on the app's next wheel without
+a relaunch, and neither overwrites the other.
 
 ### jobs
 
