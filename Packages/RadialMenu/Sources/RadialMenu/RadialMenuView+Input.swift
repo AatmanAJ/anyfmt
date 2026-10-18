@@ -86,8 +86,12 @@ extension RadialMenuView {
     }
 
     public override func mouseUp(with event: NSEvent) {
-        guard !isShowingDropZone else { return }
         let point = convert(event.locationInWindow, from: nil)
+        if isShowingDropZone {
+            // A click in the empty ring's hub dismisses it.
+            if hypot(point.x - wheelCenter.x, point.y - wheelCenter.y) < configuration.hubRadius { cancel() }
+            return
+        }
         switch radialLayout.hitTest(relative(point), current: highlightedSlot) {
         case .slot(let s):
             setHighlightedSlot(s, animated: true)

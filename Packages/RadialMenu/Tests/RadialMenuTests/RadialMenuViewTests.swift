@@ -219,9 +219,14 @@ final class RadialMenuViewTests: XCTestCase {
     }
 
     func testDropZoneShowsWhenEmpty() {
-        let (view, _) = makeView(0)
+        let (view, recorder) = makeView(0)
         view.dropZone = RadialDropZone(title: "Drop files")
         XCTAssertTrue(view.isShowingDropZone)
+        let c = view.wheelCenter
+        guard let click = NSEvent.mouseEvent(with: .leftMouseUp, location: c, modifierFlags: [], timestamp: 0, windowNumber: 0,
+                                             context: nil, eventNumber: 0, clickCount: 1, pressure: 0) else { return XCTFail("event") }
+        view.mouseUp(with: click)
+        XCTAssertEqual(recorder.cancels, 1, "click in the hub dismisses the empty ring")
         view.setItems(items(3), animated: true)
         XCTAssertFalse(view.isShowingDropZone)
     }
