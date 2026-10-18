@@ -17,10 +17,16 @@ enum CloudStyle {
             let match = appearance.bestMatch(from: [.aqua, .darkAqua, .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua])
             let dark = match == .darkAqua || match == .accessibilityHighContrastDarkAqua
             let increased = match == .accessibilityHighContrastAqua || match == .accessibilityHighContrastDarkAqua
+                || increasedContrastPreview.current
             let chosen = increased ? (highContrast ?? pair) : pair
             return rgb(dark ? chosen.dark : chosen.light)
         }
     }
+
+    /// Renders the increased-contrast variants regardless of the system setting.
+    /// Only the offscreen screenshot tests set this: AppKit can't force the
+    /// accessibility appearances on a view (they resolve to plain Aqua).
+    static let increasedContrastPreview = CloudLocked(false)
 
     static func rgb(_ hex: Int) -> NSColor {
         NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
@@ -50,21 +56,17 @@ struct CloudPlanBadge: View {
             .padding(.vertical, DesignTokens.Space.xxs + 1)
             .foregroundStyle(foreground)
             .background(Capsule().fill(fill))
-            .overlay(Capsule().strokeBorder(stroke, lineWidth: 1))
+            .fixedSize()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("Plan: \(plan.displayName)"))
     }
 
     private var fill: Color {
         switch plan {
-        case .free: .clear
+        case .free: CloudStyle.mist.opacity(0.16)
         case .pro: CloudStyle.proGold
         case .team: CloudStyle.iris
         }
-    }
-
-    private var stroke: Color {
-        plan == .free ? CloudStyle.mist.opacity(0.6) : .clear
     }
 
     private var foreground: Color {
@@ -90,6 +92,7 @@ struct CloudProChip: View {
         .padding(.vertical, DesignTokens.Space.xxs)
         .foregroundStyle(CloudStyle.onGold)
         .background(Capsule().fill(CloudStyle.proGold))
+        .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Pro, uses \(Brand.name) Cloud"))
     }

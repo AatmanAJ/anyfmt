@@ -132,11 +132,25 @@ enum CloudCopy {
         case .inbox:
             String(localized: "Send files from your phone or browser and they appear in a folder on this Mac.")
         case .transcription:
-            String(localized: "Turn speech in audio or video into SRT or VTT subtitles, using GPUs on our servers.")
+            String(localized: "Turn speech in audio or video into SRT or VTT subtitles, using GPUs on the server.")
         case .upscale:
-            String(localized: "Enlarge images with a machine-learning model that runs on our servers.")
+            String(localized: "Enlarge images with a machine-learning model that runs on the server.")
         case .backgroundRemovalHQ:
-            String(localized: "Cut out subjects with a larger model than your Mac runs. The local Remove background tool stays free.")
+            String(localized: "Cut out subjects with a larger model than your Mac can run. The local Remove background tool stays free.")
+        }
+    }
+
+    /// The honest "what leaves your Mac" line for the explainer.
+    static func uploadFact(for feature: CloudFeature, server: String) -> String {
+        switch feature {
+        case .shareLink, .shareLinkCustomDomain:
+            String(localized: "Uploads to \(server) so anyone with the link can download it.")
+        case .sync:
+            String(localized: "Your favourites, presets and settings are stored on \(server).")
+        case .inbox:
+            String(localized: "Files you send wait on \(server) until this Mac saves them.")
+        case .cloudJobs, .transcription, .upscale, .backgroundRemovalHQ:
+            String(localized: "Uploads to \(server). Results come back to your Mac.")
         }
     }
 

@@ -38,6 +38,7 @@ struct ProExplainerView: View {
                 HStack(spacing: Space.s) {
                     Text(CloudCopy.title(for: feature))
                         .font(.system(size: TypeRamp.headline, weight: .semibold))
+                        .multilineTextAlignment(.center)
                     CloudProChip()
                 }
                 .accessibilityElement(children: .combine)
@@ -49,7 +50,7 @@ struct ProExplainerView: View {
             }
 
             VStack(alignment: .leading, spacing: Space.s) {
-                fact("icloud.and.arrow.up", String(localized: "Uploads to \(serverName). Results come back to your Mac."))
+                fact("icloud.and.arrow.up", CloudCopy.uploadFact(for: feature, server: serverName))
                 fact("laptopcomputer", String(localized: "Every conversion, tool and action on your Mac stays free, with no account."))
                 if reason == .notInPlan {
                     fact("person.crop.circle.badge.checkmark", String(localized: "Your current plan doesn’t include this."))
