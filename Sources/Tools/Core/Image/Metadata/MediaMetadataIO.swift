@@ -44,7 +44,7 @@ enum MediaMetadataIO {
         if let a = probe.audio {
             var s = a.codec_name?.uppercased() ?? ""
             if let sr = a.sample_rate.flatMap(Double.init) { s += String(format: " · %.1f kHz", sr / 1000) }
-            if let ch = a.channels { s += ch == 1 ? " · mono" : ch == 2 ? " · stereo" : " · \(ch) ch" }
+            if let ch = a.channels { s += " · " + (ch == 1 ? L("mono") : ch == 2 ? L("stereo") : L("\(ch) channels")) }
             info("media.audio", L("Audio"), L("Media"), s)
         }
         if let br = probe.format?.bit_rate.flatMap(Double.init) { info("media.bitrate", L("Bit rate"), L("Media"), "\(Int(br / 1000)) kbps") }

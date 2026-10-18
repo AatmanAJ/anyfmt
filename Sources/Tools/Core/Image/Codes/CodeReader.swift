@@ -61,11 +61,11 @@ public enum CodeReader {
     }
 
     private static let labels: [String: String] = [
-        "QR": "QR code", "MicroQR": "Micro QR code", "Aztec": "Aztec code", "DataMatrix": "Data Matrix",
+        "QR": L("QR code"), "MicroQR": L("Micro QR code"), "Aztec": L("Aztec code"), "DataMatrix": "Data Matrix",
         "PDF417": "PDF417", "MicroPDF417": "MicroPDF417", "EAN13": "EAN-13", "EAN8": "EAN-8", "UPCE": "UPC-E",
         "Code39": "Code 39", "Code39Checksum": "Code 39", "Code39FullASCII": "Code 39", "Code39FullASCIIChecksum": "Code 39",
-        "Code93": "Code 93", "Code93i": "Code 93", "Code128": "Code 128", "I2of5": "Interleaved 2 of 5",
-        "I2of5Checksum": "Interleaved 2 of 5", "ITF14": "ITF-14", "Codabar": "Codabar", "GS1DataBar": "GS1 DataBar",
+        "Code93": "Code 93", "Code93i": "Code 93", "Code128": "Code 128", "I2of5": L("Interleaved 2 of 5"),
+        "I2of5Checksum": L("Interleaved 2 of 5"), "ITF14": "ITF-14", "Codabar": "Codabar", "GS1DataBar": "GS1 DataBar",
         "GS1DataBarExpanded": "GS1 DataBar Expanded", "GS1DataBarLimited": "GS1 DataBar Limited", "MSIPlessey": "MSI Plessey",
     ]
 
