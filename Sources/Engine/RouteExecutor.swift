@@ -16,6 +16,10 @@ public struct RouteExecutor: Sendable {
                         metadata: MetadataPolicy, workDirectory: URL, context: EngineContext) async throws -> [URL] {
         guard !route.hops.isEmpty else { throw ConversionError.noRoute(from: route.from, to: route.to) }
         var current = inputs
+        // The previous intermediate step's folder. It's deleted as soon as the
+        // next hop has consumed it, so a 3-hop route over a large video never
+        // holds more than two generations on disk.
+        var previousStepDir: URL?
         let n = Double(route.hops.count)
         for (i, hop) in route.hops.enumerated() {
             try Task.checkCancellation()
@@ -44,9 +48,21 @@ public struct RouteExecutor: Sendable {
             for f in out.files where !FileManager.default.fileExists(atPath: f.path) {
                 throw ConversionError.outputMissing("\(hop): \(f.lastPathComponent)")
             }
+            // Never delete a folder an engine handed straight back as its output.
+            if let prev = previousStepDir, !out.files.contains(where: { Self.isInside($0, prev) }) {
+                try? FileManager.default.removeItem(at: prev)
+            }
+            previousStepDir = isLast ? nil : stepDir
             current = out.files
         }
         context.progress(1)
         return current
+    }
+
+    /// True if `url` is `dir` itself or lies inside it.
+    static func isInside(_ url: URL, _ dir: URL) -> Bool {
+        let d = dir.standardizedFileURL.path
+        let p = url.standardizedFileURL.path
+        return p == d || p.hasPrefix(d.hasSuffix("/") ? d : d + "/")
     }
 }
