@@ -124,6 +124,31 @@ Until then the app keeps its current look. Every phase that doesn't depend on th
 visuals carries on: wheel behaviour, presets, the options panel's logic, activation,
 onboarding tests, CLI + MCP, and the API.
 
+## B-015 Some drags end within a second before a wheel can open (needs a hands-on session)
+
+**What happens.** Logged on the dev Mac (2026-10-18, Release build, verbose
+logging). Drags from Photos and Mail (promised files), and some later drags that
+carried a file URL, end 0.4–1 s after they start, with no Shift press seen.
+DragSense reads the left button as up, from both the session state and the
+hardware (HID) state, while the drag is presumably still held. Its log shows:
+`button reads up but the drag is still moving; holding` → `drag N ended without a wheel`.
+Drags from Finder earlier the same day opened the wheel normally, about 40 times
+in total across the sessions.
+
+**Already done.**
+- e26ae0a reads the hardware button state as well.
+- During a file drag, drag movement in the last 150 ms counts as held (unit-tested).
+- Your report of a successful drag from Photos after that fix doesn't match the
+  log: the run's only Photos drag (22:57) ended without a wheel. So this is
+  **not confirmed fixed.**
+
+**What I need.** One short session. Drag from Photos, holding still for a second
+before pressing ⇧, then the same with a Finder file. Tell me whether the pointer
+was moving and whether you were on a trackpad (Force Touch click-and-hold) or a
+mouse. If the hardware reading really says "up" while the button is held, the
+next step is tracking the drag session itself (leftMouseUp event monitors) rather
+than the button state.
+
 ## B-002 Developer ID signing + notarization
 
 **Why blocked.** No signing identity on this machine (`security find-identity -v -p codesigning`
