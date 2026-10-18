@@ -1,6 +1,6 @@
 import Foundation
 
-// Owned by lane F (Archives). Placeholder until the lane lands.
+// Lane F (archives). Rows live in ArchiveRoutes.swift.
 public enum ArchiveEngines {
-    public static let all: [any ConversionEngine] = []
+    public static let all: [any ConversionEngine] = [ArchiveEngine()]
 }

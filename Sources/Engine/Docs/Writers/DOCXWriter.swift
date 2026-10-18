@@ -104,6 +104,9 @@ final class DocxBuilder {
         var paragraphStyle: String?
         var listLevel = -1
         var cellHeader = false
+        /// Heading runs also carry direct bold + size (half-points): AppKit's DOCX
+        /// importer (TextEdit, textutil) ignores styles.xml entirely.
+        var headingHalfPoints: Int?
     }
 
     let pageSize: PageSize
@@ -197,6 +200,8 @@ final class DocxBuilder {
     <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="720"/><w:characterSpacingControl w:val="doNotCompress"/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>
     """
 
+    static let headingSizes = [40, 32, 28, 24, 22, 22]
+
     static let stylesXML: String = {
         let font = "<w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:eastAsia=\"Calibri\" w:cs=\"Calibri\"/>"
         let mono = "<w:rFonts w:ascii=\"Courier New\" w:hAnsi=\"Courier New\" w:eastAsia=\"Courier New\" w:cs=\"Courier New\"/>"
@@ -208,7 +213,7 @@ final class DocxBuilder {
         <w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:b/><w:sz w:val="52"/><w:szCs w:val="52"/></w:rPr></w:style>
 
         """
-        let sizes = [40, 32, 28, 24, 22, 22]
+        let sizes = headingSizes
         let before = [360, 320, 280, 240, 240, 200]
         for l in 1...6 {
             let italic = l >= 5 ? "<w:i/><w:iCs/>" : ""
@@ -241,7 +246,11 @@ final class DocxBuilder {
         switch b {
         case .heading(let level, let inl):
             if ctx.paragraphStyle == "Quote" { return paragraph(inl, style: "Quote", ctx: ctx) }
-            return paragraph(inl, style: "Heading\(min(max(level, 1), 6))", ctx: ctx)
+            let l = min(max(level, 1), 6)
+            var c = ctx
+            c.bold = true
+            c.headingHalfPoints = Self.headingSizes[l - 1]
+            return paragraph(inl, style: "Heading\(l)", ctx: c)
         case .paragraph(let inl):
             return paragraph(inl, style: ctx.paragraphStyle, ctx: ctx)
         case .list(let l):
@@ -401,6 +410,7 @@ final class DocxBuilder {
         if c.bold { s += "<w:b/><w:bCs/>" }
         if c.italic { s += "<w:i/><w:iCs/>" }
         if c.strike { s += "<w:strike/>" }
+        if let hp = c.headingHalfPoints { s += "<w:sz w:val=\"\(hp)\"/><w:szCs w:val=\"\(hp)\"/>" }
         if c.underline && !c.link { s += "<w:u w:val=\"single\"/>" }
         return s
     }

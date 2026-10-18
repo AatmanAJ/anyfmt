@@ -148,7 +148,8 @@ enum FlowAssembler {
         }
         func paragraphBlock(_ p: ParaItem) -> DocBlock? {
             let inl = p.inlines.trimmed
-            if let h = p.heading { return inl.isEmpty ? nil : .heading(level: h, inl) }
+            // Headings are bold by definition; drop redundant bold runs.
+            if let h = p.heading { return inl.isEmpty ? nil : .heading(level: h, unwrapBold(inl)) }
             if inl.isEmpty { return nil }
             if inl.count == 1, case .image(let im) = inl[0] { return .image(im) }
             return .paragraph(inl)

@@ -20,6 +20,8 @@ public struct HTMLWriter {
     public var extraCSS: String = ""
     /// For `.xhtml`: stylesheet href to link instead of inline CSS.
     public var stylesheetHref: String?
+    /// When set, top-level headings get `id="<prefix><block index>"` (EPUB navigation targets).
+    public var headingIDPrefix: String?
 
     public init(flavor: Flavor = .web, imageMode: ImageMode = .dataURI) {
         self.flavor = flavor
@@ -31,7 +33,7 @@ public struct HTMLWriter {
     public func document(_ doc: DocModel, blocks: [DocBlock]? = nil, title: String? = nil) -> String {
         let t = esc(title ?? doc.displayTitle ?? "")
         let lang = esc(doc.metadata.language ?? "en")
-        let content = body(blocks ?? doc.blocks)
+        let content = topLevel(blocks ?? doc.blocks)
         let author = doc.metadata.author.map { "<meta name=\"author\" content=\"\(esc($0))\"\(selfClose)>\n" } ?? ""
         switch flavor {
         case .xhtml:
@@ -150,6 +152,18 @@ public struct HTMLWriter {
 
     public func body(_ blocks: [DocBlock]) -> String {
         blocks.map(block).filter { !$0.isEmpty }.joined(separator: "\n")
+    }
+
+    /// Body for a document's top level: like `body`, plus heading ids when requested.
+    func topLevel(_ blocks: [DocBlock]) -> String {
+        guard let prefix = headingIDPrefix else { return body(blocks) }
+        return blocks.enumerated().map { i, b -> String in
+            if case .heading(let level, let inl) = b {
+                let l = min(max(level, 1), 6)
+                return "<h\(l) id=\"\(esc(prefix))\(i)\">\(inlines(inl))</h\(l)>"
+            }
+            return block(b)
+        }.filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
     func block(_ b: DocBlock) -> String {
