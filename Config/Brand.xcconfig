@@ -1,0 +1,8 @@
+// The product name lives here and in Sources/Shared/Brand.swift. Nowhere else.
+// Renaming the app = change BRAND_NAME here and `name` in Brand.swift.
+BRAND_NAME = Halo
+
+// Everything below is derived. Do not hard-code the name elsewhere.
+BRAND_SLUG = $(BRAND_NAME:lower)
+BRAND_BUNDLE_ID = dev.aiwithaj.$(BRAND_SLUG)
+BRAND_URL_SCHEME = $(BRAND_SLUG)

@@ -1,0 +1,35 @@
+# Xcode / build
+*.xcodeproj
+*.xcworkspace
+!Packages/**/*.xcworkspace
+build/
+DerivedData/
+.build/
+.swiftpm/
+*.xcresult
+xcuserdata/
+
+# Engines (built from pinned sources by make engines)
+Engines/build/
+Engines/dist/
+
+# Reference material for interaction study only. Third-party media must
+# never be committed (see BUILD.md legal lines).
+research/videos/
+research/frames/
+research/press/
+research/prior-art-src/
+
+# Test output
+Tests/Fixtures/generated/
+Tests/Matrix/out/
+Tests/Mock/node_modules/
+
+# Release artifacts
+dist/
+*.dmg
+packaging/sparkle/private*
+
+# macOS
+.DS_Store
+Config/App-Info.plist
