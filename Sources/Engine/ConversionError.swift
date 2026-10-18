@@ -34,6 +34,14 @@ public enum ConversionError: Error, LocalizedError, Sendable {
         }
     }
 
+    /// `technicalDetails` without the engine's command line (the `$ …` line), for
+    /// one-line messages. "Copy details" keeps the full version.
+    public var briefDetails: String {
+        technicalDetails.split(separator: "\n", omittingEmptySubsequences: false)
+            .filter { !$0.hasPrefix("$ ") }
+            .joined(separator: "\n")
+    }
+
     public var technicalDetails: String {
         switch self {
         case .unsupported(let f, let t): "unsupported \(f)→\(t)"

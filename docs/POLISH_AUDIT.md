@@ -1,5 +1,83 @@
 # Polish audit
 
+## v2 (phase 2 redesign, 2026-10-18)
+
+The question again, after the redesign: **where is each surface still worse than
+a top-tier Mac app, and what did we do about it?** Per-area notes, with
+before/after tables, are in `docs/redesign/`, and the side-by-side page is
+`docs/REDESIGN.md`.
+
+Legend as below: ✅ equal or better · 🔧 fixed in this pass · ⚖️ accepted, with
+the reason · 👁 needs hands on real hardware (BLOCKERS B-001)
+
+### System-wide
+
+| Item | Status |
+|---|---|
+| One token system (primitives → semantic → component). No literal colours, font sizes or radii in UI code: `scripts/check-tokens.sh` runs in `make test` (148 hits at baseline, 0 now) | 🔧 |
+| Palette: cobalt / orange / flame on near-black. No purple, no green, no gold. Errors always carry an icon and a label | 🔧 |
+| Type: Inter Display for format names, headlines and numerals (OFL, D-039); SF Pro everywhere else | 🔧 |
+| Two radii (tile, pill) plus the wheel's segment corner. One elevation shadow. No glow, no glass on the wheel | 🔧 |
+| Motion: named curves (`DesignTokens.Curve`: snap, glide, settle, exit) through `HaloMotion`. Reduce Motion becomes a ≤ 120 ms crossfade on every surface | 🔧 |
+| Increased Contrast / Reduce Transparency: bands become flat fills and outlines appear, on the wheel, cards, onboarding and cloud screens | 🔧 |
+| Contrast: every semantic text pair is AA. White on orange (2.2:1, as in the reference) is never used; orange takes black text | 🔧 |
+| App icon, menu bar glyph and DMG background in the new palette, with small icon sizes redrawn rather than scaled | 🔧 |
+| Strokes on rounded shapes notch in offscreen renders on this macOS, so borders that matter are drawn as fills (`haloBorder`, `PillBorder`). Live rendering is unaffected | ⚖️ |
+| Focus rings on custom pills use SwiftUI's ring in the system accent. Visible, but not cobalt; matching the user's accent is also what Mac apps do | ⚖️ |
+| Settings screenshots render light and dark only; cloud screens also render Increased Contrast | ⚖️ |
+
+### Wheel and options
+
+| Item | Status |
+|---|---|
+| Aiming vs configuring on one pointer: sticky selection (30 % / 10° + 60 ms), ⌥-tap lock, the tune lip and ⌥-drop open a pinned panel after the drop (D-038) | 🔧 |
+| The new look: black disc, charcoal wedges, display-type names, heat-band hover with black text, cobalt lock/lip/chips (D-042) | 🔧 |
+| Presets: chips on the wheel, Last used, Settings editing, shared with the CLI, synced | 🔧 |
+| The options panel shows live size, duration and frame estimates (Estimator: GIF −8…0 %, video +2…5 %, images exact ≤ 4 MP) | 🔧 |
+| How the hysteresis numbers, lock, lip and chips feel mid-drag | 👁 |
+| Haptics mid-drag: macOS drops haptics from an inactive app | ⚖️ |
+
+### Onboarding and About
+
+| Item | Status |
+|---|---|
+| Editorial pages, one band each, display headlines, pills; the demo wheel matches the real one | 🔧 |
+| Permission rows used tinted circles; they now share the Settings glyph tile | 🔧 |
+| The demo draws its own wheel (`DemoWheelRing`) instead of hosting `RadialMenuView`. It matches visually; wiring the real view would remove the duplication | ⚖️ |
+| Long translations shrink the headline (scale factor 0.5) rather than re-breaking; translators set the line breaks | ⚖️ |
+| Full-flow UI test needs Automation Mode (B-003); the logic is covered offscreen | ⚖️ |
+
+### Progress, toasts, menu bar, Float, Move
+
+| Item | Status |
+|---|---|
+| Cards: big numeral, cobalt band bar, human errors, Copy details with engines, the **quoted command line**, stderr tail and `~` redaction | 🔧 |
+| Card hover tests read the real pointer (flaky); a `tracksPointer` switch makes them deterministic | 🔧 |
+| The board's "1080p ·" spec in the running detail needs the job to expose an options summary; it shows the ETA for now | ⚖️ |
+| The numeral doesn't tick (`numericText` needs macOS 14) | ⚖️ |
+| Five stacked 420 pt cards on a 13″ display | 👁 |
+
+### Settings and cloud
+
+| Item | Status |
+|---|---|
+| Native Settings window on the token surfaces; display type in three deliberate places; pills for primary actions; empty, loading and error states per pane | 🔧 |
+| Key caps are pill-shaped at 22 pt (the tile radius is more than half their height); a squarer cap would need a third radius | ⚖️ |
+| The share-link sheet still uses a grouped Form inside the editorial panel | ⚖️ |
+
+### Editors
+
+| Item | Status |
+|---|---|
+| Shell, display-type headers, tiles, chips, cobalt handles with a dark and light double rim that reads on any image; unreadable, loading and failure states everywhere | 🔧 |
+| Text fields and two sliders are system-styled (cobalt tint) | ⚖️ |
+| The reorder springs in Organize PDF and Join still run when motion is allowed (they honour Reduce Motion) | ⚖️ |
+| How the handles and labelled trim handles feel in use | 👁 |
+
+---
+
+## v1 (phase 1)
+
 Every screen and interaction, checked against the reference measurements in
 `research/INTERACTION_NOTES.md` and against our own screenshots in
 `docs/screens/` (rendered by `make gallery`). The question for each row: **is

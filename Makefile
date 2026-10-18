@@ -59,6 +59,7 @@ sdk-test:
 check:
 	./scripts/check-entitlements.sh
 	./scripts/check-duplicate-files.sh
+	./scripts/check-tokens.sh
 
 ## UI tests need macOS Automation Mode enabled (see BLOCKERS.md).
 uitest: generate

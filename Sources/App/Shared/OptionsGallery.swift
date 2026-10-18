@@ -22,7 +22,7 @@ struct OptionsGallery: View {
         OptionSpec(OptionKey.pages, L("Pages"), .pageRange, default: .string("1-3, 5"), help: L("Leave empty for all pages, or e.g. 1-3,5")),
         OptionSpec("range", L("Range"), .timeRange, default: .string("9-2")),
         OptionSpec("title", L("Title"), .text, default: .string("Holiday")),
-        OptionSpec(OptionKey.background, L("Background"), .color, default: .string("#6E56F8")),
+        OptionSpec(OptionKey.background, L("Background"), .color, default: .string("#FF9500")), // token-ok: sample user value (a colour the user picked)
         OptionSpec("rect", L("Crop"), .rect, default: .string("0.1,0.1,0.8,0.75")),
     ])
 

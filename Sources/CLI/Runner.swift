@@ -315,7 +315,7 @@ enum Runner {
     static func describe(_ error: Error) -> String {
         if error is CancellationError { return "cancelled" }
         if let e = error as? ConversionError {
-            let detail = e.technicalDetails.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
+            let detail = e.briefDetails.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
             let message = e.localizedDescription
             return detail.isEmpty || detail == message ? message : "\(message) (\(detail.prefix(400)))"
         }

@@ -7,6 +7,7 @@
     "%@ changed here and on %@. Kept the version from %@." : {},
     "%@ changed here and on %@. Kept this Mac’s version." : {},
     "%@ Cloud is optional" : {},
+    "%@ couldn’t be read. It may be damaged, or in a format this editor can’t show. Your file hasn’t been changed." : {},
     "%@ floats on a shelf until you drag it out" : {},
     "%@ installed. New conversions are available." : {},
     "%@ is copied: paste it into any folder" : {},
@@ -31,6 +32,7 @@
     "%@ to %@" : {},
     "%@ together — not a tap" : {},
     "%@ wheel" : {},
+    "%@ Your file hasn’t been changed." : {},
     "%@ · %@ on disk" : {},
     "%@ · from %@" : {},
     "%@ – %@" : {},
@@ -60,6 +62,7 @@
     "%lld channels" : {},
     "%lld clips" : {},
     "%lld clips · %@ total" : {},
+    "%lld codes" : {},
     "%lld codes found" : {},
     "%lld didn’t finish" : {},
     "%lld downloads" : {},
@@ -115,6 +118,7 @@
     "+%lld more" : {},
     "1 audio file" : {},
     "1 change" : {},
+    "1 code" : {},
     "1 code found" : {},
     "1 day" : {},
     "1 download" : {},
@@ -171,6 +175,7 @@
     "Add to Favourites" : {},
     "Add to selection" : {},
     "Adds each engine step to the system log. Turn it on before reproducing a problem." : {},
+    "Adjust" : {},
     "Adjusted image" : {},
     "Advanced" : {
       "comment" : "Settings pane"
@@ -192,6 +197,7 @@
     "Also uses macOS’s own %@. Sources for every bundled engine are linked from each release." : {},
     "And macOS’s %@." : {},
     "Angle" : {},
+    "Annotate" : {},
     "Annotation canvas" : {},
     "Annotation text" : {},
     "another Mac" : {},
@@ -224,6 +230,7 @@
     "Before / After" : {},
     "Beside the original" : {},
     "Black" : {},
+    "Bleep" : {},
     "Bleep %lld" : {},
     "Bleep at playhead" : {},
     "Bleep Here" : {},
@@ -242,7 +249,11 @@
     "Cancelled" : {},
     "Cancelled. Nothing happened to the file." : {},
     "Cancelling…" : {},
+    "Can’t open %@. It may be locked or damaged. Leave it out to save the rest." : {},
     "Can’t open (locked or damaged)" : {},
+    "Can’t open this file" : {},
+    "Can’t open this image" : {},
+    "Can’t read the metadata" : {},
     "Capture the frame on screen (F)" : {},
     "Changed" : {},
     "Changes" : {},
@@ -279,6 +290,7 @@
     "Cloud features are optional" : {},
     "Cloud is optional" : {},
     "Code from the sign-in page" : {},
+    "Collage" : {},
     "Collapse" : {},
     "Colour" : {},
     "Column" : {},
@@ -583,6 +595,7 @@
     "items" : {
       "comment" : "Follows the item count on the Float shelf: “5 items”"
     },
+    "Join" : {},
     "Join order" : {},
     "JPG" : {},
     "KB" : {},
@@ -727,6 +740,7 @@
     "No options for this format." : {
       "comment" : "Options popover with nothing to set"
     },
+    "No pages to show" : {},
     "No permissions\nneeded." : {
       "comment" : "Onboarding permissions headline; keep each line short"
     },
@@ -738,6 +752,7 @@
       "comment" : "Hub text when no editing tool applies"
     },
     "No writable folder on your PATH. Run this in Terminal:" : {},
+    "None of these PDFs could be opened. They may be locked with a password or damaged. Your files haven’t been changed." : {},
     "None yet. Drag across the waveform, or press M at the playhead." : {},
     "None yet. Folders you move things to appear in the Move menu." : {},
     "Not granted" : {},
@@ -745,6 +760,7 @@
     "Not synced yet" : {},
     "Nothing converted yet" : {},
     "Nothing local ever needs a key. Skipping changes nothing." : {},
+    "Nothing readable in this picture. A closer, sharper shot of the code usually works." : {},
     "Nothing to convert" : {},
     "Nothing to set: converting to %@ has no options." : {},
     "Nothing yet" : {},
@@ -834,6 +850,7 @@
     "Pile with 1 item" : {},
     "Pixel-perfect Word, PowerPoint and Excel to PDF, using LibreOffice." : {},
     "Pixelate" : {},
+    "Pixels wide. The height follows the layout." : {},
     "Plan" : {},
     "Plan: %@" : {},
     "Play" : {},
@@ -891,6 +908,7 @@
     "Pro. Uploads the file to the cloud." : {
       "comment" : "VoiceOver hint for cloud segments"
     },
+    "Problem" : {},
     "Problem: %@" : {
       "comment" : "VoiceOver prefix for an invalid option value"
     },
@@ -921,6 +939,7 @@
     "Recipes" : {},
     "Recording. Press the new shortcut, or Escape to cancel." : {},
     "Red" : {},
+    "Redact" : {},
     "Redaction canvas" : {},
     "Redo" : {},
     "Refresh" : {},
@@ -1066,6 +1085,8 @@
     "Show in Finder when done" : {},
     "Show on the wheel" : {},
     "Show Welcome…" : {},
+    "Showing the original" : {},
+    "Showing your changes" : {},
     "Shows the next page of options" : {
       "comment" : "VoiceOver hint of the More segment"
     },
@@ -1193,6 +1214,7 @@
     "These ship inside %@, so it works with nothing else installed. Your files never leave your Mac." : {},
     "This action isn’t available." : {},
     "This downloads %@ from %@ · %@" : {},
+    "This file" : {},
     "This format is lossless, so the trim is sample-exact with no quality loss." : {},
     "This licence expired on %@." : {},
     "This licence key doesn’t check out. Copy it again from your receipt, the whole thing." : {},
@@ -1208,12 +1230,14 @@
     "Time %@ of %@" : {},
     "Title" : {},
     "To" : {},
+    "To PDF" : {},
     "To remove everything, including camera details, use Strip metadata." : {},
     "Tone" : {},
     "Took %@" : {},
     "Tool" : {},
     "Tools" : {},
     "Transcription" : {},
+    "Trim" : {},
     "Troubleshooting" : {},
     "Try a file extension such as heic or mp4." : {},
     "Try Another" : {},
