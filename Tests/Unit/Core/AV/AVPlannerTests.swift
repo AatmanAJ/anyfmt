@@ -309,6 +309,31 @@ final class AVPlannerTests: XCTestCase {
         XCTAssertTrue(args(keep, pass: 0).contains("scale=720:-1"), "keep = display width")
     }
 
+    func testGIFOptionsChangeTheArguments() throws {
+        let f = facts(video("h264", 640, 480, fps: 30))
+        let base = try plan(f, Formats.mp4, Formats.gif)
+        XCTAssertTrue(args(base, pass: 0).contains("palettegen=stats_mode=diff:max_colors=256"))
+        XCTAssertTrue(args(base, pass: 1).contains("paletteuse=dither=sierra2_4a:"))
+        XCTAssertTrue(args(base, pass: 1).contains("-loop 0 -f gif"), "forever by default")
+
+        let once = try plan(f, Formats.mp4, Formats.gif, [OptionKey.gifLoop: .string("once")])
+        XCTAssertTrue(args(once, pass: 1).contains("-loop -1 -f gif"), "-1 = play once in ffmpeg's GIF muxer")
+        XCTAssertEqual(args(once, pass: 0).replacingOccurrences(of: #"\.palette-[^ ]+"#, with: "", options: .regularExpression),
+                       args(base, pass: 0).replacingOccurrences(of: #"\.palette-[^ ]+"#, with: "", options: .regularExpression),
+                       "loop only touches the muxer")
+
+        for n in ["128", "64", "32"] {
+            let p = try plan(f, Formats.mp4, Formats.gif, [OptionKey.gifColors: .string(n)])
+            XCTAssertTrue(args(p, pass: 0).contains("palettegen=stats_mode=diff:max_colors=\(n)"), n)
+        }
+        let flat = try plan(f, Formats.mp4, Formats.gif, [OptionKey.gifDither: .bool(false)])
+        XCTAssertTrue(args(flat, pass: 1).contains("paletteuse=dither=none:diff_mode=rectangle"))
+        XCTAssertFalse(args(flat, pass: 1).contains("sierra2_4a"))
+
+        let silly = try plan(f, Formats.mp4, Formats.gif, [OptionKey.gifColors: .string("1")])
+        XCTAssertTrue(args(silly, pass: 0).contains("max_colors=4"), "clamped to palettegen's minimum")
+    }
+
     func testGIFInputToVideoEncodes() throws {
         let gif = facts(video("gif", 99, 75, fps: 10, pix: "bgra"))
         let mp4 = try plan(gif, Formats.gif, Formats.mp4)
