@@ -189,6 +189,13 @@ Not shipped (small, client APIs exist where noted):
   `revoke`, `CloudAPIClient.linkStats` exist).
 - A devices list UI (`CloudAPIClient.devices()` exists).
 - SSE progress (contract + mock have it; client polls by design, D-I6).
+- The PKCE verifier lives in memory only, so a magic link opened after the
+  app was quit and relaunched is refused with "start again" (one extra click,
+  never a silent failure). Persisting the pending sign-in in the Keychain would
+  remove that; not worth the extra secret at rest for now.
+- The SHA-256 pass before an upload reads the whole file synchronously on the
+  uploading task (not measured on multi-GB files yet); move it to a dedicated
+  thread if very large uploads become common.
 - Options for the Pro tools need a shared-schema change; see Contract changes.
 
 ## Contract change requests

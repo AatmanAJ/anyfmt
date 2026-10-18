@@ -50,8 +50,9 @@ enum CloudPanels {
                 if let panelRef { dismiss(panelRef) }
                 if reason == .signedOut {
                     session.signIn()
-                } else if let url = URL(string: "/account/plan", relativeTo: session.serverURL) {
-                    NSWorkspace.shared.open(url.absoluteURL)
+                } else {
+                    // Keeps a self-host's path prefix (https://example.com/halo/account/plan).
+                    NSWorkspace.shared.open(session.serverURL.appendingPathComponent("account/plan"))
                 }
             },
             onNotNow: { if let panelRef { dismiss(panelRef) } })
