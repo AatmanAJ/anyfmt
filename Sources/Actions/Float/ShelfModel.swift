@@ -55,6 +55,9 @@ public struct ShelfChange: Equatable, Sendable {
     /// Already on the shelf: brought back to the top of the pile.
     public var raised: [ShelfItem] = []
     public var removed: [ShelfItem] = []
+    /// Removed because they were dragged out (the view fades them instead of
+    /// dropping them off the pile: they already left with the drag).
+    public var leftByDrag = false
     /// Followed a rename/move.
     public var relocated: [ShelfItem] = []
 

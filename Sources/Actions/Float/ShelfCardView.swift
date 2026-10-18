@@ -97,8 +97,22 @@ final class ShelfCardView: ActionCardView {
         if newItems.isEmpty { newMode = .empty }
         else if mode == .empty { newMode = .collapsed }
         else if mode == .expanded && newItems.count < 2 { newMode = .collapsed }
-        stackView.apply(items: newItems, change: wasEmpty ? nil : change, animated: animated && !wasEmpty)
+        stackView.apply(items: newItems, change: change, animated: animated)
         gridView.apply(items: newItems, change: change, animated: animated && mode == .expanded)
+        if newItems.isEmpty && !wasEmpty && animated {
+            // Emptied while showing: the shelf is about to dismiss itself, so
+            // keep the current look while the last items fall out and it fades.
+            // (Settle into the empty state later in case it stays up.)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
+                MainActor.assumeIsolated {
+                    guard let self, self.items.isEmpty else { return }
+                    self.updateLabels()
+                    self.setMode(.empty, animated: false)
+                }
+            }
+            updateAccessibilityLabel()
+            return
+        }
         updateLabels()
         if newMode != mode {
             setMode(newMode, animated: animated)
@@ -111,7 +125,6 @@ final class ShelfCardView: ActionCardView {
 
     func setMode(_ newMode: Mode, animated: Bool) {
         guard newMode != mode else { return }
-        let old = mode
         mode = newMode
         if newMode == .expanded {
             gridView.apply(items: items, change: nil, animated: animated)
@@ -127,7 +140,7 @@ final class ShelfCardView: ActionCardView {
         }
         let duration = animated ? (ActionStyle.reduceMotion ? DesignTokens.Motion.crossfade : 0.16) : 0
         for v in show { v.isHidden = false }
-        if duration > 0 && old != .empty {
+        if duration > 0 {
             NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = duration
                 for v in show { v.animator().alphaValue = 1 }
@@ -150,6 +163,21 @@ final class ShelfCardView: ActionCardView {
         guard items.count >= 2 else { return }
         expandedByHover = false
         setMode(.expanded, animated: true)
+        // A click focuses the shelf (as clicking any window would) so Esc
+        // collapses it. The panel is non-activating: the app stays in the background.
+        window?.makeKey()
+        window?.makeFirstResponder(self)
+    }
+
+    override var acceptsFirstResponder: Bool { true }
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 53, mode == .expanded { // Escape
+            expandedByHover = false
+            setMode(.collapsed, animated: true)
+        } else {
+            super.keyDown(with: event)
+        }
     }
 
     @objc private func collapseTapped() {

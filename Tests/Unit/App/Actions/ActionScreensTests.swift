@@ -24,6 +24,40 @@ final class ActionScreensTests: XCTestCase {
         }
     }
 
+    func testShelfPlacementStaysOnScreen() throws {
+        let screen = try XCTUnwrap(NSScreen.main)
+        let vf = screen.visibleFrame
+        let size = ShelfCardView.collapsedSize
+        // Centred on the drop point when there's room.
+        let mid = CGPoint(x: vf.midX, y: vf.midY)
+        let centred = ShelfWindowPresenter.initialCardFrame(size: size, near: mid, savedOrigin: nil)
+        XCTAssertEqual(centred.midX, mid.x, accuracy: 0.5)
+        XCTAssertEqual(centred.midY, mid.y, accuracy: 0.5)
+        // Pushed inward at a corner.
+        let corner = ShelfWindowPresenter.initialCardFrame(size: size, near: CGPoint(x: vf.maxX - 2, y: vf.maxY - 2), savedOrigin: nil)
+        XCTAssertTrue(vf.contains(corner), "\(corner) inside \(vf)")
+        // A saved position off every screen falls back to the default spot.
+        let lost = ShelfWindowPresenter.initialCardFrame(size: size, near: nil, savedOrigin: CGPoint(x: -99_999, y: -99_999))
+        XCTAssertTrue(NSScreen.screens.contains { $0.visibleFrame.contains(lost) })
+        // A saved position on screen is honoured.
+        let saved = CGPoint(x: vf.minX + 40, y: vf.minY + 60)
+        XCTAssertEqual(ShelfWindowPresenter.initialCardFrame(size: size, near: nil, savedOrigin: saved).origin, saved)
+    }
+
+    func testClampKeepsTheInset() {
+        let vf = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        let r = ShelfWindowPresenter.clamp(CGRect(x: 990, y: -50, width: 100, height: 100), to: vf, inset: 8)
+        XCTAssertEqual(r, CGRect(x: 892, y: 8, width: 100, height: 100))
+    }
+
+    func testMoveDestinationLocations() {
+        let home = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+        XCTAssertEqual(MoveDestination.location(of: home.appendingPathComponent("Desktop")), "Home")
+        XCTAssertEqual(MoveDestination.location(of: home.appendingPathComponent("Code/halo")), "~/Code")
+        XCTAssertEqual(MoveDestination.location(of: URL(fileURLWithPath: "/Volumes/Backup/Photos")), "Backup")
+        XCTAssertEqual(MoveDestination.location(of: URL(fileURLWithPath: "/opt/stuff")), "/opt")
+    }
+
     func testCardSizes() {
         XCTAssertEqual(ShelfCardView.size(mode: .collapsed, count: 5), ShelfCardView.collapsedSize)
         let grid = ShelfCardView.size(mode: .expanded, count: 5)

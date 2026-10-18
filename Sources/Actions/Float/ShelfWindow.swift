@@ -143,24 +143,34 @@ final class ShelfWindowPresenter: ShelfPresenting {
         return r
     }
 
+    /// The card always fills the window less the shadow margin. Animated
+    /// resizes rely on autoresizing (the card already has the right margins);
+    /// instant ones set the window first, then pin the card.
     private func setCardFrame(_ cardFrame: CGRect, animated: Bool) {
         let windowFrame = cardFrame.insetBy(dx: -margin, dy: -margin)
-        card.frame = NSRect(x: margin, y: margin, width: cardFrame.width, height: cardFrame.height)
         card.autoresizingMask = [.width, .height]
-        if animated {
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = ActionStyle.reduceMotion ? 0 : 0.22
+        pinCard()
+        if animated && !ActionStyle.reduceMotion {
+            NSAnimationContext.runAnimationGroup({ ctx in
+                ctx.duration = 0.22
                 ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1)
                 panel.animator().setFrame(windowFrame, display: true)
-            }
+            }, completionHandler: { [weak self] in
+                MainActor.assumeIsolated { self?.pinCard() }
+            })
         } else {
             panel.setFrame(windowFrame, display: true)
+            pinCard()
         }
+    }
+
+    private func pinCard() {
+        let bounds = panel.contentView?.bounds ?? .zero
+        card.frame = bounds.insetBy(dx: margin, dy: margin)
     }
 
     /// Expanding keeps the top edge and centre where they are (then stays on screen).
     private func resize(for mode: ShelfCardView.Mode) {
-        guard panel.isVisible || hiding == false else { return }
         let current = panel.frame.insetBy(dx: margin, dy: margin)
         let size = ShelfCardView.size(mode: mode, count: card.items.count)
         guard size != current.size else { return }

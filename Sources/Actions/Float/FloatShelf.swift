@@ -1,7 +1,7 @@
 import AppKit
 import HaloCore
 
-/// The Float shelf (Dropover-style): a floating pile of files you parked to
+/// The Float shelf: a floating pile of files you parked to
 /// drag somewhere later.
 ///
 /// - `add(urls:near:)` parks files (the Float action, drops onto the shelf).
@@ -122,7 +122,9 @@ public final class FloatShelf: ObservableObject {
             for url in urls(for: ids).prefix(20) { NSWorkspace.shared.open(url) }
         case .dragEnded(let ids, let operation, let keep):
             if Self.shouldRemoveAfterDrag(operation: operation, keepOnShelf: keep) {
-                commit(model.remove(ids: ids))
+                var change = model.remove(ids: ids)
+                change.leftByDrag = true
+                commit(change)
             }
             refresh()
         case .moved:

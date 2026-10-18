@@ -102,7 +102,7 @@ final class ShelfStackView: NSView, NSDraggingSource {
         // Leaving the visible pile.
         for (id, l) in layers where !visibleIDs.contains(id) {
             layers[id] = nil
-            if motion && removedIDs.contains(id) {
+            if motion && removedIDs.contains(id) && change?.leftByDrag != true {
                 fallOut(l)
             } else if animated && oldVisible.contains(id) {
                 fadeOut(l)
