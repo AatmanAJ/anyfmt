@@ -78,6 +78,27 @@ make build && open build/DerivedData/Build/Products/Debug/Halo.app
 The in-app latency probe (`DragSense.diagnostics.latencySummary()`) gives the
 real key tap → wheel visible p95 for docs/PERF.md (the estimate there is ≈ 30 ms).
 
+## B-014 Approve the redesign direction (phase 2 checkpoint)
+
+**Why blocked.** The approved phase 2 plan puts one deliberate stop before the
+app-wide redesign: you approve the visual direction first.
+
+**What's ready.** `docs/screens/after/direction/`:
+- the wheel, locked with preset chips, and over the tune lip;
+- the options panel, dark and light;
+- the progress cards;
+- onboarding page 1;
+- the palette, with every token's hex and contrast.
+
+They're rendered from the real tokens (`DesignTokens.Primitive/Semantic/Band/Shape/Typeface`)
+and the bundled Inter Display (D-039). Re-render with
+`build/DerivedData/Build/Products/Debug/Halo.app/Contents/MacOS/Halo --render-direction docs/screens/after/direction`.
+
+**What I need.** "Approved", or what to change: colours, type, density, the bands.
+Until then the app keeps its current look. Every phase that doesn't depend on the
+visuals carries on: wheel behaviour, presets, the options panel's logic, activation,
+onboarding tests, CLI + MCP, and the API.
+
 ## B-002 Developer ID signing + notarization
 
 **Why blocked.** No signing identity on this machine (`security find-identity -v -p codesigning`

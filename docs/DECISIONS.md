@@ -342,3 +342,20 @@ neighbouring segment. Aiming now happens during the drag and configuring after i
   400 ms dwell. Dropping on one runs with that preset. The hit area grows to cover the
   band out to the chips while they show, and a corridor keeps the segment selected on
   the way there, so the drag can't fall through to the window below.
+
+### D-039 Display face: Inter Display (bundled, OFL 1.1); body stays SF Pro
+The redesign needs a heavy, tightly tracked grotesk for format names, numerals and
+headlines. The reference's face looks like a commercial Helvetica-Now-style
+display cut, which can't ship in an AGPL app. **Inter Display** (Inter v4.1, release
+2024-11-16, by Rasmus Andersson) is licensed under the **SIL Open Font License 1.1**.
+That was verified from the release's own `LICENSE.txt`, not assumed. OFL allows
+bundling and redistribution with any software, including GPL/AGPL, provided the
+fonts aren't sold on their own and the licence travels with them. Only the two
+weights in use ship (`InterDisplay-Black.ttf`, `InterDisplay-ExtraBold.ttf`, about
+0.4 MB each, from release zip SHA-256 `9883fdd4…b11e`). They're registered for the
+process only (`CTFontManagerRegisterFontsForURL(.process)`), and the licence is in
+`LICENSES/inter-4.1/`. Body and labels stay on the system font (SF Pro) for Dynamic
+Type, localisation and zero extra size. The sampled indigo top band of the
+reference's blue gradient (`#3E28D1`) is kept in the tokens for the record but
+unused, because it reads as the purple the brief bans; `band.cobalt` starts from
+deep cobalt instead.
