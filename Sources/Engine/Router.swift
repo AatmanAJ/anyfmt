@@ -88,7 +88,13 @@ public struct Router: Sendable {
     /// Router (with its warm route memo) is returned. Installing a pack or a
     /// binary appearing changes the rows, which builds a fresh Router.
     public static func live(registry: EngineRegistry = .default) -> Router {
-        cached(for: CapabilityTable.default.available(in: registry))
+        cached(for: LiveAvailability.shared.table(registry: registry))
+    }
+
+    /// Re-evaluate engine availability now (a pack was installed or removed, an
+    /// opt-in changed). Otherwise availability is re-checked at most every 2 s.
+    public static func invalidateLive() {
+        LiveAvailability.shared.invalidate()
     }
 
     /// The memoised Router for `table`, rebuilt only when the rows change.
@@ -226,4 +232,25 @@ final class LiveRouterCache: @unchecked Sendable {
             return fresh
         }
     }
+}
+
+/// Availability of the default table, re-evaluated at most every `ttl` seconds.
+/// Checking ~650 rows (some stat bundled binaries) on every wheel show and every
+/// `live()` call added up; within a drag nothing about the Mac changes.
+final class LiveAvailability: @unchecked Sendable {
+    static let shared = LiveAvailability()
+    private let lock = NSLock()
+    private let ttl: TimeInterval = 2
+    private var snapshot: (ids: Set<EngineID>, at: TimeInterval, table: CapabilityTable)?
+
+    func table(registry: EngineRegistry) -> CapabilityTable {
+        let now = ProcessInfo.processInfo.systemUptime
+        let ids = registry.ids
+        if let s = lock.withLock({ snapshot }), s.ids == ids, now - s.at < ttl { return s.table }
+        let fresh = CapabilityTable.default.available(in: registry)
+        lock.withLock { snapshot = (ids, now, fresh) }
+        return fresh
+    }
+
+    func invalidate() { lock.withLock { snapshot = nil } }
 }

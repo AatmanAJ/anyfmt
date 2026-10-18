@@ -63,6 +63,7 @@ enum PackCatalog {
         Task { @MainActor in
             do {
                 _ = try await PackInstaller(spec: e.spec).install(from: file)
+                Router.invalidateLive()
                 ToastHUD.show(String(localized: "\(e.spec.name) installed. New conversions are available."))
             } catch {
                 ToastHUD.show(error.localizedDescription, isError: true)
@@ -73,6 +74,7 @@ enum PackCatalog {
     private static func remove(_ e: Entry) {
         do {
             try PackInstaller(spec: e.spec).uninstall()
+            Router.invalidateLive()
             ToastHUD.show(String(localized: "\(e.spec.name) removed."))
         } catch {
             ToastHUD.show(error.localizedDescription, isError: true)
