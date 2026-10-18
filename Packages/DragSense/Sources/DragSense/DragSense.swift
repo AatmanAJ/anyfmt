@@ -252,6 +252,9 @@ public final class DragSense: ObservableObject {
     private var taps = TapDetector()
     /// Set by `feedTaps` when the lock key was tapped in the latest sample.
     private var lockTapped = false
+    /// Last global drag-movement event (see `buttonHeld`).
+    private var lastDragMovementAt: TimeInterval?
+    private var reportedMovementHold = false
     private var rate: Rate = .stopped
     private var readGeneration = 0
     private var outbox: [Output] = []
@@ -301,6 +304,7 @@ public final class DragSense: ObservableObject {
         case .mouseDown:
             tick(.wake(reason))
         case .mouseDragged:
+            lastDragMovementAt = scheduler.now
             // Only useful if the mouse-down was missed; the active timer covers the rest.
             if case .idle = phase { tick(.wake(reason)) }
         case .modifiersChanged:
@@ -311,7 +315,7 @@ public final class DragSense: ObservableObject {
     private func tick(_ reason: TickReason) {
         guard isRunning else { return }
         let now = scheduler.now
-        let down = input.pressedMouseButtons & 1 != 0
+        let down = buttonHeld(now: now)
         let location = input.mouseLocation
 
         switch phase {
@@ -391,6 +395,29 @@ public final class DragSense: ObservableObject {
         }
         flush()
     }
+
+    /// The left button, with one safety net: during a file drag, drag movement
+    /// in the last `dragMovementGrace` seconds counts as held even if the button
+    /// reads up (a source app can make the reading lie mid-drag).
+    private func buttonHeld(now: TimeInterval) -> Bool {
+        if input.pressedMouseButtons & 1 != 0 { return true }
+        switch phase {
+        case .dragging, .wheelOpen:
+            if let moved = lastDragMovementAt, now - moved <= Self.dragMovementGrace {
+                if !reportedMovementHold {
+                    reportedMovementHold = true
+                    diagnostics.verbose("button reads up but the drag is still moving; holding")
+                }
+                return true
+            }
+        default:
+            break
+        }
+        reportedMovementHold = false
+        return false
+    }
+
+    static let dragMovementGrace: TimeInterval = 0.15
 
     private func refreshBaseline() {
         if let count = input.dragPasteboardChangeCount { baseline = count }

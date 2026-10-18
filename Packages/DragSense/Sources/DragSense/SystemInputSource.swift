@@ -39,6 +39,7 @@ public final class SystemInputSource: InputSource {
     private let readQueue = DispatchQueue(label: "DragSense.pasteboard-read", qos: .userInteractive)
     private var readsInFlight = 0
     private var readStartedAt: TimeInterval?
+    private var reportedHIDHold = false
     private var reportedStall = false
     static let stalledReadInterval: TimeInterval = 5
 
@@ -52,7 +53,21 @@ public final class SystemInputSource: InputSource {
         DispatchQueue.main.async { bag.removeAll() }
     }
 
-    public var pressedMouseButtons: Int { NSEvent.pressedMouseButtons }
+    /// The session's button state, or'ed with the physical (HID) left button.
+    /// Some drag sources (seen with Photos and Mail) make the session state
+    /// read "up" while the button is still held; the HID state doesn't move.
+    /// Neither read needs a permission.
+    public var pressedMouseButtons: Int {
+        let session = NSEvent.pressedMouseButtons
+        let hidLeft = CGEventSource.buttonState(.hidSystemState, button: .left)
+        if hidLeft && session & 1 == 0 && !reportedHIDHold {
+            reportedHIDHold = true
+            DragSenseLog.input.info("left button reads up in the session but down in hardware; treating it as held")
+        } else if !hidLeft {
+            reportedHIDHold = false
+        }
+        return session | (hidLeft ? 1 : 0)
+    }
     public var mouseLocation: CGPoint { NSEvent.mouseLocation }
     public var modifierFlags: NSEvent.ModifierFlags { NSEvent.modifierFlags }
 
