@@ -108,11 +108,11 @@ struct MediaRun: Sendable {
 }
 
 extension ConversionError {
-    static func noAudio(_ url: URL) -> ConversionError {
+    public static func noAudio(_ url: URL) -> ConversionError {
         .other(L("“\(url.lastPathComponent)” has no audio track."), detail: "no audio stream")
     }
 
-    static func noVideo(_ url: URL) -> ConversionError {
+    public static func noVideo(_ url: URL) -> ConversionError {
         .other(L("“\(url.lastPathComponent)” has no video track."), detail: "no video stream")
     }
 }

@@ -80,7 +80,8 @@ public struct PixelCrop: Sendable, Equatable {
 
     /// Even-sized, even-positioned crop inside a `frameWidth × frameHeight` frame.
     public static func make(_ r: CGRectValue, frameWidth fw: Int, frameHeight fh: Int) -> PixelCrop {
-        func even(_ v: Double) -> Int { Int((v / 2).rounded(.down)) * 2 }
+        // Nearest even pixel: exact rects from the editor survive float round-trips.
+        func even(_ v: Double) -> Int { Int((v / 2).rounded()) * 2 }
         var w = max(2, even(r.width * Double(fw)))
         var h = max(2, even(r.height * Double(fh)))
         w = min(w, fw - fw % 2)

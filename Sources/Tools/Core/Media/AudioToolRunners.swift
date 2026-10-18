@@ -20,7 +20,7 @@ public struct TrimAudioRunner: ToolRunner {
     public let id = ToolIDs.trimAudio
     public init() {}
 
-    static func canCopy(codec: String, container: MediaContainer) -> Bool {
+    public static func canCopy(codec: String, container: MediaContainer) -> Bool {
         (codec == "mp3" && container == .mp3) || (codec == "aac" && [.m4a, .mp4, .mov, .caf].contains(container))
     }
 
