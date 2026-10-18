@@ -225,7 +225,8 @@ Each lane recorded its decisions in its notes file; they're part of this log by 
 [A DragSense](lanes/A-dragsense.md) (A-1…A-13) · [B Wheel](lanes/B-wheel.md) (D-B01…D-B12) ·
 [C Jobs](lanes/C-jobs.md) (D-C1…D-C14) · [D Image + PDF](lanes/D-image.md) (D-D1…D-D15) ·
 [E Audio/Video/Subtitles](lanes/E-av.md) · [H Actions](lanes/H-actions.md) (H-1…H-9) ·
-[I Cloud](lanes/I-cloud.md) (D-I1…D-I12), plus F, G1, G2 and the UI lane as they land.
+[I Cloud](lanes/I-cloud.md) (D-I1…D-I12) · [F Docs/Sheets/Archives](lanes/F-docs.md) (D-F01…D-F18) ·
+[G1 Image tools](lanes/G1-image-tools.md) · [G2 Media tools](lanes/G2-media-tools.md) · [P UI](lanes/P-ui.md) (D-P1…D-P7).
 The ones that changed a shared contract are applied in the code and listed in `docs/contract-changes/`.
 
 ### D-031 Hardened runtime only on Developer ID builds
@@ -236,3 +237,26 @@ Developer ID build (`make dmg` with `DEVELOPER_ID`, the release workflow) sets
 `HALO_HARDENED_RUNTIME=YES` and signs every nested binary with `--options runtime`, as
 notarization requires. Local ad-hoc builds leave it off. Nothing is weakened for
 distributed builds. No `disable-library-validation` entitlement is used.
+
+### D-032 Cross-family multi-hop routes are opt-in on the wheel
+With every lane merged, a photo could reach DOCX, EPUB or XLSX via PDF + OCR, and a
+spreadsheet could reach RTF via HTML. These routes work, but they clutter the wheel and
+surprise people. `Route.isShownByDefault` (one rule, used by the wheel and the matrix
+count) hides routes that pass through a `.hiddenByDefault` row or hop between families
+(images, text documents, spreadsheets, slides, audio, video, archives) in more than one
+step. Direct rows and anything ending in PDF stay visible. All 793 routes still ship:
+the CLI, the matrix, and Settings › Formats can switch any target on. 516 are on the
+wheel out of the box.
+
+### D-033 Optional packs: Halo never downloads them
+F built a checksum-verified installer that installs from a local file only. Settings ›
+Engines opens the official download page in the browser, then the user picks the
+downloaded file, which is verified against its pinned SHA-256 before installing. The
+app makes no network request for packs. The LibreOffice pin is still empty, so that
+install is refused until BLOCKERS B-011 is done.
+
+### D-034 String Catalogs are synced by script
+`xcodebuild` emits `.stringsdata` but only the Xcode IDE writes them into `.xcstrings`.
+`scripts/sync-strings.py` runs after every `make build`. It keeps comments and
+translations and marks removed keys stale, so all 1,388 user-facing strings are in the
+two catalogs (HaloCore, app).

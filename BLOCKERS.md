@@ -159,3 +159,39 @@ decodes real DNG/CR3/NEF/ARW files.
 gh repo create aiwithaj/homebrew-tap --public
 shasum -a 256 dist/Halo-0.1.0.dmg   # into packaging/homebrew/halo.rb, then copy it to Casks/halo.rb in the tap
 ```
+
+## B-011 Office pack checksum (LibreOffice)
+
+**Why blocked.** The installer only accepts a pinned, verified file (D-033), and
+LibreOffice's SHA-256 can't be pinned without downloading the release. The pandoc pack
+is already pinned.
+
+```bash
+curl -LO https://download.documentfoundation.org/libreoffice/stable/26.8.1/mac/aarch64/LibreOffice_26.8.1_MacOS_aarch64.dmg
+curl -LO https://download.documentfoundation.org/libreoffice/stable/26.8.1/mac/aarch64/LibreOffice_26.8.1_MacOS_aarch64.dmg.asc
+gpg --verify LibreOffice_26.8.1_MacOS_aarch64.dmg.asc   # The Document Foundation's release key
+shasum -a 256 LibreOffice_26.8.1_MacOS_aarch64.dmg      # → OfficePack.spec.sha256 in Sources/Engine/Docs/Packs/Packs.swift
+```
+
+This unlocks the faithful PPT, KEY and ODP routes and the higher-fidelity Office
+routes (`.needsPack` rows, already implemented).
+
+## B-012 Open our Office/EPUB output in the real apps
+
+**Why blocked.** Word, Pages, PowerPoint, Excel, Keynote, Numbers, LibreOffice and
+Books aren't installed here. Apple's own Office Quick Look generator and AppKit already
+read every DOCX, XLSX and PPTX we write, and the EPUB passes structural checks.
+`epubcheck` needs Java and the network.
+
+Run `make fixtures matrix`, then open `Tests/Matrix/out/*-to-{docx,odt,xlsx,pptx,epub}/*`
+in each app and note any "repair" prompt.
+
+## B-013 iWork opt-in end to end
+
+**Why blocked.** It needs Pages, Keynote and Numbers installed, plus a one-time
+Automation consent prompt. It was never run in tests, because the prompt would block.
+
+```bash
+defaults write dev.aiwithaj.halo optIn.iWorkAppleEvents -bool YES
+halo convert report.pages --to pdf && halo convert notes.docx --to pages
+```
