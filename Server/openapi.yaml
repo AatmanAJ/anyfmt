@@ -35,6 +35,17 @@ info:
       machine-readable string; `error.message` is a human sentence the app
       may show as-is.
 
+    ## Two kinds of credentials
+    - `bearerAuth`: the Mac app's OAuth access token (sign-in). Used by
+      every app endpoint, and to manage API keys.
+    - `apiKeyAuth`: `Authorization: Bearer halo_sk_…`, for the public
+      pay-per-use conversion API (`/v1/files`, `/v1/conversions`,
+      `/v1/formats`, `/v1/schema`, `/v1/webhooks`, `/v1/usage`). Servers
+      tell them apart by the `halo_sk_` prefix. API keys never work on
+      the app endpoints except the resumable `/v1/uploads` operations,
+      and app tokens never work on the public API except `/v1/usage`.
+      The public API is documented with curl examples in docs/API.md.
+
     ## Privacy rules the server must keep
     - No analytics, no third-party trackers on any page the API serves
       (including share-link landing pages).
@@ -57,16 +68,35 @@ servers:
 
 tags:
   - name: meta
+    description: Health and identity.
   - name: auth
     description: Browser sign-in (magic link or anything the server's web page offers) with OAuth 2.0 authorization code + PKCE back to the app's URL scheme.
   - name: account
+    description: The signed-in user, plan and quotas.
   - name: uploads
-    description: Resumable, chunked uploads used by share links, cloud jobs and the inbox.
+    description: Resumable, chunked uploads used by share links, cloud jobs, the inbox and (for files over 100 MB) the public API.
   - name: links
+    description: Share links for uploaded files.
   - name: jobs
+    description: Cloud jobs started by the Mac app (conversions and AI tools).
   - name: files
+    description: File storage and downloads (job results, inbox items, public API inputs and outputs).
   - name: sync
+    description: Opaque, versioned JSON documents synced between the user's Macs.
   - name: inbox
+    description: Files sent from a phone or browser that land on the Mac.
+  - name: api-keys
+    description: Secret keys for the public pay-per-use conversion API. Managed with the app/dashboard sign-in, never with an API key.
+  - name: conversions
+    description: Public pay-per-use conversion API (API-key auth).
+  - name: formats
+    description: Formats, routes and option schemas, the same registry the app and CLI use.
+  - name: webhooks
+    description: Signed event deliveries for conversions.
+  - name: usage
+    description: Metered usage for the current or a past billing period.
+  - name: licences
+    description: Optional Pro licence activation for the Mac app.
 
 security:
   - bearerAuth: []
@@ -90,6 +120,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Health" }
+        "429": { $ref: "#/components/responses/RateLimited" }
         "503": { $ref: "#/components/responses/Unavailable" }
 
   /v1/auth/authorize:
@@ -202,6 +233,7 @@ paths:
                 client_id: { type: string }
       responses:
         "200": { description: Revoked (or already invalid). }
+        "429": { $ref: "#/components/responses/RateLimited" }
 
   /v1/devices:
     get:
@@ -267,6 +299,9 @@ paths:
     post:
       tags: [uploads]
       operationId: createUpload
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Start a resumable upload
       description: |
         Declares the file up front (size + SHA-256). The server answers with
@@ -302,6 +337,9 @@ paths:
     head:
       tags: [uploads]
       operationId: headUpload
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Cheap resume probe
       description: Returns the committed offset in `Upload-Offset`. Clients call this after any interrupted chunk, then continue from that byte.
       responses:
@@ -316,6 +354,9 @@ paths:
     get:
       tags: [uploads]
       operationId: getUpload
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Upload status (same information as HEAD, as JSON)
       responses:
         "200":
@@ -330,6 +371,9 @@ paths:
     put:
       tags: [uploads]
       operationId: putUploadChunk
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Append one chunk
       description: |
         The body is raw bytes. `Content-Range` must start exactly at the
@@ -381,6 +425,9 @@ paths:
     delete:
       tags: [uploads]
       operationId: abortUpload
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Abort an upload and delete its bytes
       responses:
         "204": { description: Deleted. }
@@ -391,6 +438,9 @@ paths:
     post:
       tags: [uploads]
       operationId: completeUpload
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
       summary: Finalise an upload and verify its SHA-256
       parameters:
         - { name: uploadId, in: path, required: true, schema: { type: string } }
@@ -491,6 +541,7 @@ paths:
     get:
       tags: [links]
       operationId: getLink
+      summary: One share link
       responses:
         "200":
           description: Link.
@@ -682,6 +733,7 @@ paths:
     get:
       tags: [sync]
       operationId: getSyncDocument
+      summary: Read one sync document (conditional with If-None-Match)
       responses:
         "200":
           description: Document.
@@ -749,6 +801,7 @@ paths:
     delete:
       tags: [sync]
       operationId: deleteSyncDocument
+      summary: Delete a sync document (If-Match required)
       parameters:
         - name: If-Match
           in: header
@@ -859,6 +912,615 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  # ------------------------------------------------------------------
+  # Public pay-per-use conversion API (API keys). docs/API.md has the
+  # narrative version with curl examples.
+  # ------------------------------------------------------------------
+
+  /v1/api-keys:
+    get:
+      tags: [api-keys]
+      operationId: listApiKeys
+      summary: The account's API keys (never the secrets)
+      responses:
+        "200":
+          description: Keys, newest first, including revoked ones from the last 30 days.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ApiKey" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+    post:
+      tags: [api-keys]
+      operationId: createApiKey
+      summary: Create an API key; the secret is returned once
+      description: |
+        Requires the app/dashboard sign-in (`bearerAuth`). An API key can
+        never create, list or revoke API keys, so a leaked key cannot mint
+        more. The `secret` appears only in this response; the server stores
+        a hash and shows `prefix` afterwards.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApiKeyCreate" }
+      responses:
+        "201":
+          description: Key created. Store `secret` now; it is never shown again.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiKeyCreated" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/api-keys/{apiKeyId}:
+    delete:
+      tags: [api-keys]
+      operationId: revokeApiKey
+      summary: Revoke an API key immediately
+      description: Requests with the key fail with `401 invalid_api_key` from now on. Conversions it started keep running.
+      parameters:
+        - { name: apiKeyId, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Revoked (idempotent). }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/files:
+    post:
+      tags: [files]
+      operationId: uploadFile
+      summary: Direct upload of a small file (at most 100 MB) for the public API
+      description: |
+        The body is the raw file. For anything over 100 MB use the
+        resumable `/v1/uploads` operations (they accept API keys too); the
+        completed `Upload` then carries a `fileId` usable as a conversion
+        input. Files expire after `expiresAt` (24 h by default) and are
+        deleted with their conversion outputs.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: filename
+          in: query
+          required: true
+          description: Display name; its extension is used to detect the input format unless the conversion names `input.format`.
+          schema: { type: string, minLength: 1, maxLength: 255 }
+        - name: Content-Type
+          in: header
+          required: false
+          schema: { type: string, default: application/octet-stream }
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: { type: string, contentMediaType: application/octet-stream }
+      responses:
+        "201":
+          description: Stored.
+          headers:
+            Location: { schema: { type: string }, description: "/v1/files/{id}/content" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StoredFile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /v1/files/{fileId}/content:
+    get:
+      tags: [files]
+      operationId: downloadFileContent
+      summary: Download a file's bytes (supports Range)
+      description: |
+        Works for files uploaded with `POST /v1/files` and for conversion
+        outputs (`Conversion.output.fileId`). Single byte ranges only
+        (`Range: bytes=0-1023`, `bytes=1024-`, `bytes=-512`); a server may
+        ignore `Range` and answer `200` with the whole file. An
+        unsatisfiable range is `416 range_not_satisfiable`.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - { name: fileId, in: path, required: true, schema: { type: string } }
+        - name: Range
+          in: header
+          required: false
+          schema: { type: string, examples: ["bytes=0-1048575"] }
+      responses:
+        "200":
+          description: Whole file.
+          headers:
+            Accept-Ranges: { schema: { type: string, const: bytes } }
+            Content-Length: { schema: { type: integer, format: int64 } }
+            Content-Disposition: { schema: { type: string }, description: "`attachment; filename=\"…\"`" }
+            Digest: { schema: { type: string }, description: "`sha-256=<base64>`" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/octet-stream:
+              schema: { type: string, contentMediaType: application/octet-stream }
+        "206":
+          description: The requested range.
+          headers:
+            Accept-Ranges: { schema: { type: string, const: bytes } }
+            Content-Range: { schema: { type: string, examples: ["bytes 0-1023/52428800"] } }
+            Content-Length: { schema: { type: integer, format: int64 } }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/octet-stream:
+              schema: { type: string, contentMediaType: application/octet-stream }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "416":
+          description: "`range_not_satisfiable`; `Content-Range: bytes */{size}`."
+          headers:
+            Content-Range: { schema: { type: string, examples: ["bytes */1024"] } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/conversions:
+    get:
+      tags: [conversions]
+      operationId: listConversions
+      summary: The account's conversions, newest first (cursor pagination)
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - { $ref: "#/components/parameters/Cursor" }
+        - { $ref: "#/components/parameters/Limit" }
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ConversionStatus" }
+      responses:
+        "200":
+          description: One page. `nextCursor` is `null` on the last page.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConversionPage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+    post:
+      tags: [conversions]
+      operationId: createConversion
+      summary: Start a conversion
+      description: |
+        `options` keys are Halo option keys from the target's option
+        schema (`GET /v1/schema`, `optionSchemas[].id` named by the
+        route's `optionsSchema`). Unknown keys, wrong types and values out
+        of range are `422 validation_failed` with `error.details.fields`.
+        Missing keys use the schema default.
+
+        **Idempotency.** Send `Idempotency-Key` (any unique string up to
+        255 characters, a UUID is ideal). Repeating the request with the
+        same key and the same body within 24 h returns the original
+        conversion with `200` and `Idempotent-Replayed: true` instead of
+        starting a second one, so retries after a timeout are safe. The
+        same key with a different body is `409 idempotency_conflict`.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string, minLength: 1, maxLength: 255 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConversionCreate" }
+      responses:
+        "200":
+          description: Replay of an earlier request with the same `Idempotency-Key`.
+          headers:
+            Idempotent-Replayed: { schema: { type: string, const: "true" } }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversion" }
+        "202":
+          description: Accepted (queued).
+          headers:
+            Location: { schema: { type: string }, description: "/v1/conversions/{id}" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversion" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402": { $ref: "#/components/responses/QuotaExceeded" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422":
+          description: "`validation_failed` (bad body or options), `unsupported_route` (no route from the input format to `target`) or `input_unavailable` (the URL couldn't be fetched)."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/conversions/{conversionId}:
+    parameters:
+      - { name: conversionId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [conversions]
+      operationId: getConversion
+      summary: Conversion status, progress, output and usage
+      description: Poll no faster than `pollAfterMs`, or register a webhook and skip polling.
+      security:
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: Conversion.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversion" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+    delete:
+      tags: [conversions]
+      operationId: cancelConversion
+      summary: Cancel a queued or running conversion
+      description: |
+        Idempotent: cancelling a cancelled conversion returns it again.
+        A conversion that already succeeded or failed can't be cancelled
+        (`409 already_finished`, body carries the error envelope). Cancelled
+        conversions aren't billed past the moment of cancellation.
+      security:
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: The conversion, now `cancelled`.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversion" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/formats:
+    get:
+      tags: [formats]
+      operationId: listFormats
+      summary: Every input format and the targets it converts to, with hop counts
+      security:
+        - apiKeyAuth: []
+        - {}
+      parameters:
+        - name: input
+          in: query
+          required: false
+          description: Only this input format.
+          schema: { type: string, examples: [heic] }
+      responses:
+        "200":
+          description: Formats.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FormatList" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/schema:
+    get:
+      tags: [formats]
+      operationId: getSchema
+      summary: The whole registry (formats, routes, option schemas, tools, presets) in the shape `halo schema --json` prints
+      security:
+        - apiKeyAuth: []
+        - {}
+      responses:
+        "200":
+          description: Registry.
+          headers:
+            ETag: { schema: { type: string }, description: Changes whenever any part of the registry changes. }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HaloSchema" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/webhooks:
+    get:
+      tags: [webhooks]
+      operationId: listWebhooks
+      summary: Registered webhook endpoints (secrets are never listed)
+      security:
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: Endpoints.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/WebhookEndpoint" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+    post:
+      tags: [webhooks]
+      operationId: createWebhook
+      summary: Register a webhook endpoint; its signing secret is returned once
+      description: |
+        Deliveries are `POST`s with a JSON `WebhookEvent` body and a
+        `Halo-Signature` header (see the `conversionSucceeded` webhook and
+        docs/API.md). URLs must be `https` (the mock also accepts
+        `http://127.0.0.1` / `localhost`). A server must refuse URLs that
+        resolve to private, loopback or link-local addresses.
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookCreate" }
+      responses:
+        "201":
+          description: Registered. Store `secret` now; it is never shown again.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebhookEndpointCreated" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/webhooks/{webhookId}:
+    delete:
+      tags: [webhooks]
+      operationId: deleteWebhook
+      summary: Remove a webhook endpoint (pending retries are dropped)
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - { name: webhookId, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/usage:
+    get:
+      tags: [usage]
+      operationId: getUsage
+      summary: Metered usage for a billing period
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "`YYYY-MM` (UTC calendar month). Defaults to the current month."
+          schema: { type: string, pattern: "^[0-9]{4}-(0[1-9]|1[0-2])$", examples: ["2026-10"] }
+      responses:
+        "200":
+          description: Usage.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Usage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/licences/activate:
+    post:
+      tags: [licences]
+      operationId: activateLicence
+      summary: Activate a Pro licence key on a device (optional, for the Mac app)
+      description: |
+        The licence key is the credential, so no sign-in is needed. Calling
+        it again for a device that is already active is a no-op that
+        returns the same licence. When every seat is taken the answer is
+        `409 licence_device_limit` with `error.details.devices`, so the app
+        can offer to deactivate one.
+      security:
+        - {}
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LicenceActivate" }
+      responses:
+        "200":
+          description: Active on this device.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LicenceState" }
+        "404":
+          description: "`licence_invalid`: no such key."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: "`licence_device_limit` or `licence_revoked`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/licences/{licenceId}/deactivate:
+    post:
+      tags: [licences]
+      operationId: deactivateLicence
+      summary: Free a device's seat
+      description: Idempotent. The `key` must match the licence, so knowing a licence id alone can't deactivate anyone.
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - { name: licenceId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LicenceActivate" }
+      responses:
+        "200":
+          description: Seat freed (or was already free).
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LicenceState" }
+        "404":
+          description: "`licence_invalid`: unknown licence or the key doesn't match."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+webhooks:
+  conversionSucceeded:
+    post:
+      tags: [webhooks]
+      operationId: onConversionSucceeded
+      summary: "`conversion.succeeded`, sent to subscribed endpoints"
+      description: |
+        Verify `Halo-Signature` before trusting the body:
+        `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>`.
+        Reject when `|now - t| > 300` (5 minutes). There may be more than
+        one `v1=` during a secret rotation; accept if any matches. Answer
+        any `2xx` within 10 s. Anything else (or a timeout) is retried with
+        exponential backoff (about 1 min, 5 min, 30 min, 2 h, 6 h, 12 h,
+        24 h: 8 attempts over roughly 2 days); `Halo-Delivery-Attempt`
+        counts from 1. Deliveries can repeat and arrive out of order:
+        dedupe on `WebhookEvent.id` and trust `data.conversion.status`.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/HaloSignature"
+        - $ref: "#/components/parameters/HaloWebhookId"
+        - $ref: "#/components/parameters/HaloDeliveryAttempt"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookEvent" }
+      responses:
+        "200": { description: Any 2xx acknowledges the delivery. }
+        "400": { description: Any non-2xx (or no answer within 10 s) schedules a retry. }
+  conversionFailed:
+    post:
+      tags: [webhooks]
+      operationId: onConversionFailed
+      summary: "`conversion.failed`, sent to subscribed endpoints"
+      description: Same delivery, signature and retry rules as `conversion.succeeded`. `data.conversion.error` says why.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/HaloSignature"
+        - $ref: "#/components/parameters/HaloWebhookId"
+        - $ref: "#/components/parameters/HaloDeliveryAttempt"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookEvent" }
+      responses:
+        "200": { description: Any 2xx acknowledges the delivery. }
+        "400": { description: Any non-2xx (or no answer within 10 s) schedules a retry. }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -870,7 +1532,16 @@ components:
         typically 3600 s). On `401` the client refreshes once with its
         refresh token and retries the request once; if the refresh fails
         with `invalid_grant` the client signs out locally.
-
+    apiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: "halo_sk_…"
+      description: |
+        Public API key from `POST /v1/api-keys`, sent as
+        `Authorization: Bearer halo_sk_…`. Keys carry scopes (`read`,
+        `convert`); a missing scope is `403 insufficient_scope`. A
+        revoked, expired or unknown key is `401 invalid_api_key`. Keys
+        are never refreshed: there is no token exchange.
 
   headers:
     X-Request-Id:
@@ -896,6 +1567,24 @@ components:
       schema: { type: string }
 
   parameters:
+    HaloSignature:
+      name: Halo-Signature
+      in: header
+      required: true
+      description: '`t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>` (more than one `v1` during a secret rotation).'
+      schema: { type: string, examples: ["t=1792310400,v1=5f2b…"] }
+    HaloWebhookId:
+      name: Halo-Webhook-Id
+      in: header
+      required: true
+      description: The endpoint id this delivery is for.
+      schema: { type: string }
+    HaloDeliveryAttempt:
+      name: Halo-Delivery-Attempt
+      in: header
+      required: true
+      description: 1 for the first delivery, then 2, 3, … on retries.
+      schema: { type: integer, minimum: 1 }
     Cursor:
       name: cursor
       in: query
@@ -958,6 +1647,29 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: "`insufficient_scope` (API key lacks the scope; `error.details.scope`) or `forbidden`."
+      headers:
+        RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+        RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+        RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: "`idempotency_conflict` (same `Idempotency-Key`, different body) or `already_finished` (cancel after success/failure)."
+      headers:
+        RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+        RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+        RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InternalError:
+      description: "`internal`. Safe to retry with the same `Idempotency-Key`."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
     Unavailable:
       description: "`maintenance` / `server_busy`."
       headers:
@@ -993,11 +1705,22 @@ components:
                 - version_conflict
                 - precondition_required
                 - unsupported_operation
+                - unsupported_route
+                - invalid_api_key
+                - insufficient_scope
+                - idempotency_conflict
+                - already_finished
+                - input_unavailable
+                - conversion_failed
+                - range_not_satisfiable
+                - licence_invalid
+                - licence_revoked
+                - licence_device_limit
                 - rate_limited
                 - server_busy
                 - maintenance
                 - internal
-            message: { type: string, description: Human sentence, safe to show. }
+            message: { type: string, description: "Human sentence, safe to show." }
             requestId: { type: string }
             details: { type: object, additionalProperties: true }
       examples:
@@ -1155,6 +1878,7 @@ components:
         maxChunkSize: { type: integer, format: int64, description: Largest PUT body accepted (≥ 1 MiB). }
         sha256: { $ref: "#/components/schemas/Sha256" }
         expiresAt: { type: string, format: date-time }
+        fileId: { type: [string, "null"], description: "Set once `status` is `complete`: the id to use as a public API conversion input (`ConversionInput.fileId`)." }
 
     ShareLinkCreate:
       type: object
@@ -1335,3 +2059,433 @@ components:
         createdAt: { type: string, format: date-time }
         expiresAt: { type: [string, "null"], format: date-time }
         downloadUrl: { type: string, format: uri }
+
+    # ---------------------------------------------------------- public API
+
+    ApiKeyScope:
+      type: string
+      enum: [convert, read]
+      description: |
+        `read`: every `GET` of the public API (conversions, files, formats,
+        schema, webhooks, usage). `convert`: everything that creates or
+        changes something (uploads, conversions, cancel, webhooks). A key
+        usually has both.
+
+    ApiKeyCreate:
+      type: object
+      required: [name, scopes]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100, examples: ["CI pipeline"] }
+        scopes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/ApiKeyScope" }
+        expiresAt: { type: [string, "null"], format: date-time, description: "`null` = never." }
+
+    ApiKey:
+      type: object
+      required: [id, name, scopes, prefix, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        scopes:
+          type: array
+          items: { $ref: "#/components/schemas/ApiKeyScope" }
+        prefix: { type: string, description: "First 12 characters of the secret, for recognising it (`halo_sk_AbCd`).", examples: [halo_sk_AbCd] }
+        createdAt: { type: string, format: date-time }
+        lastUsedAt: { type: [string, "null"], format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+        revokedAt: { type: [string, "null"], format: date-time }
+
+    ApiKeyCreated:
+      type: object
+      required: [apiKey, secret]
+      properties:
+        apiKey: { $ref: "#/components/schemas/ApiKey" }
+        secret:
+          type: string
+          pattern: "^halo_sk_[A-Za-z0-9_-]{32,}$"
+          description: "The full key. Shown once; send it as `Authorization: Bearer <secret>`."
+
+    StoredFile:
+      type: object
+      required: [id, name, size, sha256, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        size: { type: integer, format: int64 }
+        sha256: { $ref: "#/components/schemas/Sha256" }
+        contentType: { type: string }
+        format: { type: [string, "null"], description: "Detected Halo format id, e.g. `png`, or `null` when unknown." }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+
+    ConversionStatus:
+      type: string
+      enum: [queued, running, succeeded, failed, cancelled]
+
+    ConversionInput:
+      description: Exactly one of `fileId` or `url`. `format` overrides detection from the file name or URL path.
+      oneOf:
+        - type: object
+          required: [fileId]
+          additionalProperties: false
+          properties:
+            fileId: { type: string, description: "From `POST /v1/files` or a completed `Upload.fileId`." }
+            format: { type: string }
+        - type: object
+          required: [url]
+          additionalProperties: false
+          properties:
+            url: { type: string, format: uri, description: "Public `https` URL the server fetches (at most 100 MB, 30 s)." }
+            format: { type: string }
+
+    OptionValue:
+      type: [string, number, boolean]
+      description: A Halo `OptionValue`. `choice` options take the choice id as a string.
+
+    ConversionCreate:
+      type: object
+      required: [input, target]
+      properties:
+        input: { $ref: "#/components/schemas/ConversionInput" }
+        target: { type: string, description: "Halo format id of the output (`GET /v1/formats`).", examples: [webp] }
+        options:
+          type: object
+          description: Keys are Halo option keys of the route's option schema; validated by schema id.
+          additionalProperties: { $ref: "#/components/schemas/OptionValue" }
+          examples: [{ quality: 80, maxDimension: 2048 }]
+        webhook:
+          type: [string, "null"]
+          format: uri
+          description: |
+            Also notify this URL about this conversion. It must be the URL of
+            a registered webhook endpoint (that endpoint's secret signs the
+            delivery), otherwise `422 validation_failed`. One delivery per
+            event and URL even if the endpoint is also subscribed.
+        metadata:
+          type: object
+          description: Up to 20 string keys (≤ 40 chars) with string values (≤ 500 chars), echoed back and in webhooks.
+          maxProperties: 20
+          additionalProperties: { type: string, maxLength: 500 }
+
+    ConversionError:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, examples: [conversion_failed, input_unavailable] }
+        message: { type: string }
+
+    ConversionUsage:
+      type: object
+      required: [inputBytes, outputBytes, mediaMinutes]
+      description: What this conversion is billed for. Final once the conversion is terminal.
+      properties:
+        inputBytes: { type: integer, format: int64 }
+        outputBytes: { type: integer, format: int64 }
+        mediaMinutes: { type: number, description: "Audio/video duration processed, rounded up to 0.01; 0 for other kinds." }
+        billable: { type: boolean, description: "`false` for failed conversions and for conversions cancelled while queued." }
+
+    Conversion:
+      type: object
+      required: [id, status, progress, input, target, options, createdAt, usage]
+      properties:
+        id: { type: string }
+        status: { $ref: "#/components/schemas/ConversionStatus" }
+        progress: { type: number, minimum: 0, maximum: 1 }
+        input:
+          type: object
+          required: [format]
+          properties:
+            fileId: { type: [string, "null"] }
+            url: { type: [string, "null"] }
+            format: { type: string }
+            name: { type: [string, "null"] }
+            size: { type: [integer, "null"], format: int64 }
+        target: { type: string }
+        options:
+          type: object
+          description: Options after defaults were applied.
+          additionalProperties: { $ref: "#/components/schemas/OptionValue" }
+        optionsSchema: { type: string, description: "Schema id the options were validated against.", examples: [image.webp] }
+        hops: { type: integer, minimum: 1, description: "Engine steps in the route (`via` formats + 1)." }
+        output:
+          description: Present when `status` is `succeeded`.
+          oneOf:
+            - $ref: "#/components/schemas/StoredFile"
+            - type: "null"
+        error:
+          description: Present when `status` is `failed`.
+          oneOf:
+            - $ref: "#/components/schemas/ConversionError"
+            - type: "null"
+        usage: { $ref: "#/components/schemas/ConversionUsage" }
+        webhook: { type: [string, "null"], format: uri }
+        metadata:
+          type: object
+          additionalProperties: { type: string }
+        pollAfterMs: { type: integer, default: 1000 }
+        createdAt: { type: string, format: date-time }
+        startedAt: { type: [string, "null"], format: date-time }
+        finishedAt: { type: [string, "null"], format: date-time }
+
+    ConversionPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Conversion" }
+        nextCursor: { type: [string, "null"] }
+
+    FormatKind:
+      type: string
+      enum: [image, video, audio, document, subtitle, archive, data]
+
+    FormatTarget:
+      type: object
+      required: [id, hops, optionsSchema]
+      properties:
+        id: { type: string, description: Target format id. }
+        hops: { type: integer, minimum: 1, description: "1 = one engine step; 2+ = goes through `via`." }
+        via:
+          type: array
+          description: Intermediate formats, in order.
+          items: { type: string }
+        optionsSchema: { type: string, description: "`OptionSchema.id` for this route's options (`none` = no options)." }
+        cloudOnly: { type: boolean, default: false, description: Only the cloud can run it (the app can't locally). }
+
+    FormatInfo:
+      type: object
+      required: [id, kind, label, extensions, targets]
+      properties:
+        id: { type: string, examples: [heic] }
+        kind: { $ref: "#/components/schemas/FormatKind" }
+        label: { type: string, examples: [HEIC image] }
+        extensions:
+          type: array
+          items: { type: string }
+        mimeTypes:
+          type: array
+          items: { type: string }
+        targets:
+          type: array
+          items: { $ref: "#/components/schemas/FormatTarget" }
+
+    FormatList:
+      type: object
+      required: [schemaVersion, items]
+      properties:
+        schemaVersion: { type: integer, minimum: 1 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FormatInfo" }
+
+    OptionKindName:
+      type: string
+      enum: [slider, integer, decimal, toggle, choice, fileSize, pageRange, timeRange, color, rect, text]
+      description: Mirrors `OptionKind` in Sources/Shared/Options.swift.
+
+    OptionSpec:
+      type: object
+      required: [id, label, kind, default]
+      properties:
+        id: { type: string, description: "Halo option key (`OptionKey`), e.g. `quality`." }
+        label: { type: string }
+        kind: { $ref: "#/components/schemas/OptionKindName" }
+        default: { $ref: "#/components/schemas/OptionValue" }
+        min: { type: number, description: "`slider`, `integer`, `decimal`." }
+        max: { type: number }
+        step: { type: number, description: "`slider`, `decimal`." }
+        unit: { type: [string, "null"] }
+        choices:
+          type: array
+          description: "`choice` only."
+          items:
+            type: object
+            required: [id, label]
+            properties:
+              id: { type: string }
+              label: { type: string }
+        help: { type: [string, "null"] }
+        visibleWhen:
+          type: object
+          description: Only meaningful when these other options have these values.
+          additionalProperties: { $ref: "#/components/schemas/OptionValue" }
+
+    OptionSchema:
+      type: object
+      required: [id, options]
+      properties:
+        id: { type: string, examples: [image.webp] }
+        options:
+          type: array
+          items: { $ref: "#/components/schemas/OptionSpec" }
+
+    SchemaTool:
+      type: object
+      required: [id, label, inputs, optionsSchema]
+      properties:
+        id: { type: string, examples: [cloud.transcribe] }
+        label: { type: string }
+        inputs:
+          type: array
+          description: Input format ids.
+          items: { type: string }
+        optionsSchema: { type: string }
+        cloud: { type: boolean, default: false }
+
+    SchemaPreset:
+      type: object
+      required: [id, label, target, options]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        target: { type: string }
+        options:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/OptionValue" }
+
+    HaloSchema:
+      type: object
+      required: [schemaVersion, formats, optionSchemas]
+      description: |
+        The registry document. `halo schema --json` (CLI, phase G) prints
+        exactly this shape; servers serve their own copy, which may be a
+        subset of what the app can do locally. `schemaVersion` increments
+        on any breaking change to this shape; additions don't bump it.
+      properties:
+        schemaVersion: { type: integer, minimum: 1, examples: [1] }
+        generator: { type: string, description: "Who produced it, e.g. `halo 1.0.0` or `halo-cloud 2026.10`." }
+        formats:
+          type: array
+          items: { $ref: "#/components/schemas/FormatInfo" }
+        optionSchemas:
+          type: array
+          items: { $ref: "#/components/schemas/OptionSchema" }
+        tools:
+          type: array
+          items: { $ref: "#/components/schemas/SchemaTool" }
+        presets:
+          type: array
+          items: { $ref: "#/components/schemas/SchemaPreset" }
+
+    WebhookEventType:
+      type: string
+      enum: [conversion.succeeded, conversion.failed]
+
+    WebhookCreate:
+      type: object
+      required: [url, events]
+      properties:
+        url: { type: string, format: uri }
+        events:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/WebhookEventType" }
+        description: { type: string, maxLength: 200 }
+
+    WebhookEndpoint:
+      type: object
+      required: [id, url, events, createdAt]
+      properties:
+        id: { type: string }
+        url: { type: string, format: uri }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/WebhookEventType" }
+        description: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+
+    WebhookEndpointCreated:
+      allOf:
+        - $ref: "#/components/schemas/WebhookEndpoint"
+        - type: object
+          required: [secret]
+          properties:
+            secret: { type: string, pattern: "^whsec_[A-Za-z0-9_-]{32,}$", description: "HMAC key for `Halo-Signature`. Shown once." }
+
+    WebhookEvent:
+      type: object
+      required: [id, type, createdAt, data]
+      properties:
+        id: { type: string, description: Stable across retries; dedupe on it. }
+        type: { $ref: "#/components/schemas/WebhookEventType" }
+        createdAt: { type: string, format: date-time }
+        data:
+          type: object
+          required: [conversion]
+          properties:
+            conversion: { $ref: "#/components/schemas/Conversion" }
+
+    Usage:
+      type: object
+      required: [period, conversions, mediaMinutes, bytes]
+      properties:
+        period:
+          type: object
+          required: [id, start, end]
+          properties:
+            id: { type: string, examples: ["2026-10"] }
+            start: { type: string, format: date-time }
+            end: { type: string, format: date-time, description: Exclusive. }
+        conversions:
+          type: object
+          required: [total, succeeded, failed, cancelled, billable]
+          properties:
+            total: { type: integer }
+            succeeded: { type: integer }
+            failed: { type: integer }
+            cancelled: { type: integer }
+            billable: { type: integer }
+        mediaMinutes: { type: number }
+        bytes:
+          type: object
+          required: [input, output]
+          properties:
+            input: { type: integer, format: int64 }
+            output: { type: integer, format: int64 }
+        limits:
+          type: object
+          description: Account limits; `null` = none.
+          properties:
+            conversionsPerMonth: { type: [integer, "null"] }
+            mediaMinutesPerMonth: { type: [number, "null"] }
+            maxFileBytes: { type: integer, format: int64 }
+
+    LicenceActivate:
+      type: object
+      required: [key, deviceId]
+      properties:
+        key: { type: string, minLength: 8, maxLength: 64, examples: [HALO-MOCK-PRO0-0001] }
+        deviceId: { type: string, minLength: 8, maxLength: 128, description: "Stable, random per-install id the app generates (not a hardware serial)." }
+        deviceName: { type: string, maxLength: 100 }
+
+    Licence:
+      type: object
+      required: [id, plan, status, maxDevices]
+      properties:
+        id: { type: string }
+        plan: { $ref: "#/components/schemas/Plan" }
+        status: { type: string, enum: [active, revoked, expired] }
+        maxDevices: { type: integer, minimum: 1 }
+        expiresAt: { type: [string, "null"], format: date-time, description: "`null` = perpetual." }
+
+    LicenceDevice:
+      type: object
+      required: [deviceId, activatedAt]
+      properties:
+        deviceId: { type: string }
+        name: { type: [string, "null"] }
+        activatedAt: { type: string, format: date-time }
+
+    LicenceState:
+      type: object
+      required: [licence, devices]
+      properties:
+        licence: { $ref: "#/components/schemas/Licence" }
+        devices:
+          type: array
+          items: { $ref: "#/components/schemas/LicenceDevice" }
