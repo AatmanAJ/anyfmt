@@ -101,15 +101,16 @@ final class ShelfWindowPresenter: ShelfPresenting {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 1
         fade.toValue = 0
-        fade.duration = 0.16
+        fade.duration = ActionStyle.reduceMotion ? DesignTokens.Curve.reducedCrossfade : DesignTokens.Curve.exit.duration + 0.05
+        fade.timingFunction = ActionStyle.curve(DesignTokens.Curve.exit)
         fade.fillMode = .forwards
         fade.isRemovedOnCompletion = false
         layer.add(fade, forKey: "hideFade")
         if !ActionStyle.reduceMotion {
             let shrink = CABasicAnimation(keyPath: "transform")
             shrink.toValue = NSValue(caTransform3D: Self.scale(0.86, about: CGPoint(x: card.bounds.midX, y: card.bounds.midY)))
-            shrink.duration = 0.18
-            shrink.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            shrink.duration = DesignTokens.Curve.exit.duration + 0.07
+            shrink.timingFunction = ActionStyle.curve(DesignTokens.Curve.exit)
             shrink.fillMode = .forwards
             shrink.isRemovedOnCompletion = false
             layer.add(shrink, forKey: "hideShrink")
@@ -154,8 +155,8 @@ final class ShelfWindowPresenter: ShelfPresenting {
         pinCard()
         if animated && !ActionStyle.reduceMotion {
             NSAnimationContext.runAnimationGroup({ ctx in
-                ctx.duration = 0.22
-                ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1)
+                ctx.duration = DesignTokens.Curve.glide.duration
+                ctx.timingFunction = ActionStyle.curve(DesignTokens.Curve.glide)
                 panel.animator().setFrame(windowFrame, display: true)
             }, completionHandler: { [weak self] in
                 MainActor.assumeIsolated { self?.pinCard() }
@@ -211,7 +212,7 @@ final class ShelfWindowPresenter: ShelfPresenting {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 0
         fade.toValue = 1
-        fade.duration = ActionStyle.reduceMotion ? 0.15 : 0.1
+        fade.duration = ActionStyle.reduceMotion ? DesignTokens.Curve.reducedCrossfade : DesignTokens.Curve.snap.duration
         layer.add(fade, forKey: "popFade")
         guard !ActionStyle.reduceMotion else { return }
         let b = card.bounds

@@ -106,7 +106,7 @@ final class ProgressPresenterTests: XCTestCase {
         XCTAssertTrue(panel.collectionBehavior.contains(.fullScreenAuxiliary))
         let card = cardRect(panel)
         XCTAssertEqual(card.width, ProgressTheme.Metrics.cardWidth, accuracy: 0.5)
-        XCTAssertEqual(card.height, 70, accuracy: 6, "≈ reference proportions")
+        XCTAssertEqual(card.height, 82, accuracy: 8, "≈ the approved board (5-progress-cards-dark)")
         XCTAssertEqual(card.midX, 700, accuracy: 1)
         XCTAssertEqual(card.maxY, 500 - ProgressTheme.Metrics.anchorGap, accuracy: 1)
     }

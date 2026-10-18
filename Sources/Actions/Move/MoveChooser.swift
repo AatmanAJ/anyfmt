@@ -153,13 +153,13 @@ final class MoveChooserPanel: NSPanel {
 /// The chooser card's content.
 @MainActor
 final class MoveChooserView: ActionCardView {
-    static let width: CGFloat = 300
-    static let rowHeight: CGFloat = 38
-    static let headerHeight: CGFloat = 34
-    static let padding: CGFloat = 6
+    static let width = DesignTokens.Component.MoveChooser.width
+    static let rowHeight = DesignTokens.Component.MoveChooser.rowHeight
+    static let headerHeight = DesignTokens.Component.MoveChooser.headerHeight
+    static let padding = DesignTokens.Component.MoveChooser.padding
 
     var onChoice: ((MoveChoice) -> Void)?
-    private let header = PassiveLabel(size: DesignTokens.TypeRamp.caption, weight: .semibold, color: .secondaryLabelColor)
+    private let header = PassiveLabel(size: DesignTokens.Component.MoveChooser.headerSize, weight: .bold, color: ActionStyle.mist)
     private var rows: [MoveChooserRow] = []
     private let separator = CALayer()
     private(set) var selectedIndex = 0 { didSet { updateSelection() } }
@@ -179,7 +179,7 @@ final class MoveChooserView: ActionCardView {
     init(items: [URL], destinations: [MoveDestination]) {
         let shown = Array(destinations.prefix(ActionPreferences.maxRecentFolders))
         self.folders = shown.map(\.url)
-        super.init(cornerRadius: DesignTokens.Radius.large, material: .menu)
+        super.init(cornerRadius: DesignTokens.Shape.tile)
         header.stringValue = Self.title(for: items)
         contentView.addSubview(header)
         for (i, destination) in shown.enumerated() {
@@ -221,15 +221,15 @@ final class MoveChooserView: ActionCardView {
         super.layout()
         let b = bounds
         let p = Self.padding
-        header.frame = NSRect(x: 14, y: b.height - 25, width: b.width - 28, height: 14)
+        header.frame = NSRect(x: 18, y: b.height - 25, width: b.width - 36, height: 14)
         var y = b.height - Self.headerHeight
         for (i, row) in rows.enumerated() {
             if i == folders.count {
                 y -= 9 // separator before "Choose Folder…"
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
-                separator.frame = CGRect(x: 14, y: y + 4, width: b.width - 28, height: 1)
-                separator.backgroundColor = ActionStyle.cg(NSColor.separatorColor, in: effectiveAppearance)
+                separator.frame = CGRect(x: 18, y: y + 4, width: b.width - 36, height: 1)
+                separator.backgroundColor = ActionStyle.cg(ActionStyle.color(DesignTokens.Semantic.hairline), in: effectiveAppearance)
                 CATransaction.commit()
             }
             y -= Self.rowHeight
@@ -276,14 +276,17 @@ final class MoveChooserView: ActionCardView {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 0
         fade.toValue = 1
-        fade.duration = DesignTokens.Motion.crossfade
+        fade.duration = ActionStyle.duration(DesignTokens.Curve.glide)
+        fade.timingFunction = ActionStyle.curve(DesignTokens.Curve.glide)
         layer.add(fade, forKey: "in")
         guard !ActionStyle.reduceMotion else { return }
-        // Grows from its top-left corner, where the pointer is.
-        let spring = ActionStyle.spring("transform", response: 0.3, damping: 0.82)
-        spring.fromValue = NSValue(caTransform3D: ShelfWindowPresenter.scale(0.92, about: CGPoint(x: 18, y: bounds.height - 12)))
-        spring.toValue = NSValue(caTransform3D: CATransform3DIdentity)
-        layer.add(spring, forKey: "grow")
+        // Glides out of its top-left corner, where the pointer is.
+        let grow = CABasicAnimation(keyPath: "transform")
+        grow.fromValue = NSValue(caTransform3D: ShelfWindowPresenter.scale(0.94, about: CGPoint(x: 18, y: bounds.height - 12)))
+        grow.toValue = NSValue(caTransform3D: CATransform3DIdentity)
+        grow.duration = DesignTokens.Curve.glide.duration
+        grow.timingFunction = ActionStyle.curve(DesignTokens.Curve.glide)
+        layer.add(grow, forKey: "grow")
     }
 
     func animateOut(completion: @escaping @MainActor () -> Void) {
@@ -293,7 +296,8 @@ final class MoveChooserView: ActionCardView {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 1
         fade.toValue = 0
-        fade.duration = DesignTokens.Motion.close
+        fade.duration = ActionStyle.duration(DesignTokens.Curve.exit)
+        fade.timingFunction = ActionStyle.curve(DesignTokens.Curve.exit)
         fade.fillMode = .forwards
         fade.isRemovedOnCompletion = false
         layer.add(fade, forKey: "out")
@@ -346,16 +350,16 @@ final class MoveChooserRow: NSView {
 
     private let highlight = CALayer()
     private let icon = NSImageView()
-    private let name = PassiveLabel(size: DesignTokens.TypeRamp.body, weight: .medium)
-    private let detail = PassiveLabel(size: DesignTokens.TypeRamp.caption, color: .secondaryLabelColor)
-    private let key = PassiveLabel(size: DesignTokens.TypeRamp.caption, weight: .medium, color: .tertiaryLabelColor)
+    private let name = PassiveLabel(size: DesignTokens.Component.MoveChooser.nameSize, weight: .bold)
+    private let detail = PassiveLabel(size: DesignTokens.Component.MoveChooser.detailSize, weight: .medium, color: ActionStyle.mist)
+    private let key = PassiveLabel(size: DesignTokens.Component.MoveChooser.detailSize, weight: .bold, color: ActionStyle.mist)
     private var tracking: NSTrackingArea?
 
     init(destination: MoveDestination, index: Int) {
         super.init(frame: .zero)
         setUp()
         let image = destination.icon
-        image.size = NSSize(width: 22, height: 22)
+        image.size = NSSize(width: DesignTokens.Component.MoveChooser.iconSize, height: DesignTokens.Component.MoveChooser.iconSize)
         icon.image = image
         name.stringValue = destination.name
         detail.stringValue = destination.detail
@@ -369,7 +373,7 @@ final class MoveChooserRow: NSView {
         setUp()
         let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         icon.image = NSImage(systemSymbolName: "folder.badge.plus", accessibilityDescription: nil)?.withSymbolConfiguration(config)
-        icon.contentTintColor = ActionStyle.iris
+        icon.contentTintColor = ActionStyle.accentText
         name.stringValue = String(localized: "Choose Folder…")
         key.stringValue = "⌘O"
         setAccessibilityLabel(name.stringValue)
@@ -380,7 +384,7 @@ final class MoveChooserRow: NSView {
 
     private func setUp() {
         wantsLayer = true
-        highlight.cornerRadius = DesignTokens.Radius.small + 1
+        // The selected row is a cobalt pill (the direction's two radii: tile and pill).
         highlight.cornerCurve = .continuous
         highlight.actions = ["frame": NSNull(), "position": NSNull(), "bounds": NSNull()]
         highlight.opacity = 0
@@ -400,10 +404,12 @@ final class MoveChooserRow: NSView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         highlight.frame = b
+        highlight.cornerRadius = b.height / 2
         highlight.backgroundColor = ActionStyle.selection.cgColor
         CATransaction.commit()
-        icon.frame = NSRect(x: 9, y: (b.height - 22) / 2, width: 22, height: 22)
-        let textX: CGFloat = 40
+        let side = DesignTokens.Component.MoveChooser.iconSize
+        icon.frame = NSRect(x: 12, y: (b.height - side) / 2, width: side, height: side)
+        let textX: CGFloat = 44
         let keyWidth: CGFloat = 30
         let textWidth = b.width - textX - keyWidth - 10
         if detail.stringValue.isEmpty {
@@ -412,16 +418,17 @@ final class MoveChooserRow: NSView {
             name.frame = NSRect(x: textX, y: b.height / 2 - 1, width: textWidth, height: 17)
             detail.frame = NSRect(x: textX, y: b.height / 2 - 15, width: textWidth, height: 14)
         }
-        key.frame = NSRect(x: b.width - keyWidth - 10, y: (b.height - 14) / 2, width: keyWidth, height: 14)
+        key.frame = NSRect(x: b.width - keyWidth - 14, y: (b.height - 14) / 2, width: keyWidth, height: 14)
     }
 
     private func updateColors() {
         highlight.opacity = isSelected ? 1 : 0
-        name.textColor = isSelected ? .white : .labelColor
-        detail.textColor = isSelected ? NSColor(white: 1, alpha: 0.78) : .secondaryLabelColor
-        key.textColor = isSelected ? NSColor(white: 1, alpha: 0.7) : .tertiaryLabelColor
+        // White on cobalt is 5.0:1; the dimmer whites failed AA at caption size, so all text goes white.
+        name.textColor = isSelected ? ActionStyle.onSelection : ActionStyle.ink
+        detail.textColor = isSelected ? ActionStyle.onSelection : ActionStyle.mist
+        key.textColor = isSelected ? ActionStyle.onSelection : ActionStyle.mist
         if name.stringValue == String(localized: "Choose Folder…") {
-            icon.contentTintColor = isSelected ? .white : ActionStyle.iris
+            icon.contentTintColor = isSelected ? ActionStyle.onSelection : ActionStyle.accentText
         }
         setAccessibilitySelected(isSelected)
     }

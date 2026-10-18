@@ -20,8 +20,9 @@ enum ShelfCommand {
     case hovered
 }
 
-/// The collapsed shelf: the newest items as a small physical pile with a
-/// count badge. Dragging the pile drags every item; a click expands the grid.
+/// The collapsed shelf: the newest items as a small physical pile (the count
+/// is set large in the display face under it, so the pile carries no badge).
+/// Dragging the pile drags every item; a click expands the grid.
 @MainActor
 final class ShelfStackView: NSView, NSDraggingSource {
     static let printSide: CGFloat = 94
@@ -34,7 +35,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
 
     private(set) var items: [ShelfItem] = []
     private var layers: [UUID: ShelfPrintLayer] = [:]
-    private let badge = ShelfBadgeLayer()
     private var mouseDown: NSEvent?
     private var draggingIDs: Set<UUID> = []
     private var elements: [UUID: ShelfItemAccessibilityElement] = [:]
@@ -43,9 +43,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
         super.init(frame: frame)
         wantsLayer = true
         layer?.masksToBounds = false
-        badge.zPosition = 100
-        badge.opacity = 0
-        layer?.addSublayer(badge)
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
     }
@@ -77,7 +74,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
         for (depth, item) in stackItems.enumerated() {
             if let l = layers[item.id] { place(l, item: item, depth: depth) }
         }
-        placeBadge()
         CATransaction.commit()
     }
 
@@ -112,7 +108,7 @@ final class ShelfStackView: NSView, NSDraggingSource {
         }
 
         // Arriving or staying. Create and place first, then fix the sublayer
-        // order (bottom of the pile first, falling items and the badge above;
+        // order (bottom of the pile first, falling items above;
         // zPosition alone isn't honoured by every renderer), then animate.
         var fresh = Set<UUID>()
         for (depth, item) in visible.enumerated() {
@@ -124,7 +120,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
                 layer?.insertSublayer(l, at: UInt32(index))
             }
         }
-        if layer?.sublayers?.last !== badge { layer?.addSublayer(badge) }
 
         // Bottom first so the newest lands last, on top.
         var landingIndex = 0
@@ -142,7 +137,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
         }
         CATransaction.commit()
 
-        updateBadge(animated: animated)
         updateAccessibility()
     }
 
@@ -163,7 +157,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
                 a.duration = DesignTokens.Motion.crossfade
                 l.add(a, forKey: "thumb")
             }
-            self.placeBadge()
         }
         l.configure(thumb, side: side, scale: scale, appearance: effectiveAppearance)
         layers[item.id] = l
@@ -180,7 +173,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
             l.configure(thumb, side: Self.printSide, scale: scale, appearance: effectiveAppearance)
             CATransaction.commit()
         }
-        updateBadge(animated: false)
         needsLayout = true
     }
 
@@ -279,40 +271,6 @@ final class ShelfStackView: NSView, NSDraggingSource {
         fade.toValue = l.opacity
         fade.duration = DesignTokens.Motion.crossfade + 0.06
         l.add(fade, forKey: "fadeIn")
-    }
-
-    // MARK: Badge
-
-    private func updateBadge(animated: Bool) {
-        let count = items.count
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        if count >= 2 { badge.configure(count: count, scale: scale, appearance: effectiveAppearance) }
-        placeBadge()
-        CATransaction.commit()
-        let show: Float = count >= 2 ? 1 : 0
-        guard badge.opacity != show || animated else { return }
-        if animated && !ActionStyle.reduceMotion && show == 1 {
-            let pop = ActionStyle.spring("transform.scale", response: 0.3, damping: 0.55)
-            pop.fromValue = badge.opacity == 0 ? 0.4 : 1.25
-            pop.toValue = 1
-            badge.add(pop, forKey: "pop")
-        }
-        if animated {
-            let fade = CABasicAnimation(keyPath: "opacity")
-            fade.fromValue = badge.opacity
-            fade.toValue = show
-            fade.duration = DesignTokens.Motion.crossfade
-            badge.add(fade, forKey: "fade")
-        }
-        badge.opacity = show
-    }
-
-    private func placeBadge() {
-        guard let top = stackItems.first, let l = layers[top.id] else { return }
-        let half = CGSize(width: l.bounds.width / 2, height: l.bounds.height / 2)
-        badge.position = CGPoint(x: min(l.position.x + half.width - 4, bounds.maxX - badge.bounds.width / 2 - 2),
-                                 y: min(l.position.y + half.height - 4, bounds.maxY - badge.bounds.height / 2 - 2))
     }
 
     // MARK: Mouse

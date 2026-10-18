@@ -21,6 +21,8 @@ final class ProgressPresenter {
         /// Off in tests: no springs, no delays.
         var animated = true
         var announcesToVoiceOver = true
+        /// Running progress is spoken only while VoiceOver is on (and sparingly).
+        var voiceOverEnabled: @MainActor () -> Bool = { NSWorkspace.shared.isVoiceOverEnabled }
         var screens: @MainActor () -> [ProgressScreen] = { ProgressScreen.system() }
         var reduceMotion: @MainActor () -> Bool = { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
     }
@@ -34,6 +36,9 @@ final class ProgressPresenter {
         var finishHandled = false
         var dismissing = false
         var autoClose: Task<Void, Never>?
+        /// Last quarter (25/50/75%) VoiceOver heard, and when.
+        var spokenQuarter = 0
+        var spokenAt: Date?
 
         init(model: ProgressCardModel, panel: ProgressPanel, host: ProgressHostingView<ProgressCardRoot>) {
             self.model = model
@@ -167,7 +172,24 @@ final class ProgressPresenter {
             card.finishHandled = false
             card.autoClose?.cancel()
             card.autoClose = nil
+            announceProgress(card)
         }
+    }
+
+    /// Speaks "interview.mov → MP4, 50%" when a running card crosses a quarter,
+    /// at most every `spokenProgressInterval` seconds, only while VoiceOver is on,
+    /// at low priority so it never cuts across what the user is doing.
+    private func announceProgress(_ card: Card) {
+        let s = card.model.state
+        guard configuration.announcesToVoiceOver, s.phase == .running, configuration.voiceOverEnabled() else { return }
+        let quarter = Int((min(1, max(0, s.fraction)) * 4).rounded(.down))
+        guard quarter > card.spokenQuarter, quarter < 4 else { return }
+        if let at = card.spokenAt, Date().timeIntervalSince(at) < ProgressTheme.Timing.spokenProgressInterval { return }
+        card.spokenQuarter = quarter
+        card.spokenAt = Date()
+        NSAccessibility.post(element: NSApplication.shared, notification: .announcementRequested,
+                             userInfo: [.announcement: "\(s.headline), \(ProgressCardState.percent(s.fraction))",
+                                        .priority: NSAccessibilityPriorityLevel.low.rawValue])
     }
 
     // MARK: Cards
@@ -198,7 +220,7 @@ final class ProgressPresenter {
         model.onCopyDetails = { [weak self, weak card] in
             guard let self, let card, let details = card.model.state.details else { return }
             self.pasteboard.clearContents()
-            self.pasteboard.setString(details, forType: .string)
+            self.pasteboard.setString(ProgressDiagnostics.report(details), forType: .string)
             card.model.didCopyDetails = true
             Task { [weak card] in
                 try? await Task.sleep(nanoseconds: UInt64(ProgressTheme.Timing.copiedFeedback * 1_000_000_000))
@@ -227,16 +249,11 @@ final class ProgressPresenter {
         return card
     }
 
+    /// Finder icons only: the board card leads with its numeral, so no Quick
+    /// Look thumbnails are generated for it (the icons stay on the model for
+    /// accessibility tooling and future layouts).
     private func loadIcons(_ card: Card) {
-        let urls = card.model.state.iconURLs
-        card.model.icons = urls.map { ProgressIconImage(image: icons.icon(for: $0), isThumbnail: false) }
-        let scale = NSScreen.main?.backingScaleFactor ?? 2
-        for (i, url) in urls.enumerated() {
-            icons.loadThumbnail(for: url, pointSize: ProgressTheme.Metrics.iconSize, scale: scale) { [weak card] image in
-                guard let card, i < card.model.icons.count else { return }
-                card.model.icons[i] = ProgressIconImage(image: image, isThumbnail: true)
-            }
-        }
+        card.model.icons = card.model.state.iconURLs.map { ProgressIconImage(image: icons.icon(for: $0), isThumbnail: false) }
     }
 
     private func scheduleAutoClose(_ card: Card, after delay: TimeInterval) {
@@ -325,7 +342,7 @@ final class ProgressPresenter {
                 if animate {
                     NSAnimationContext.runAnimationGroup { ctx in
                         ctx.duration = ProgressTheme.Timing.restack
-                        ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1)
+                        ctx.timingFunction = ProgressTheme.Timing.caCurve(DesignTokens.Curve.glide)
                         card.panel.animator().setFrame(frame, display: true)
                     }
                 } else {
@@ -362,7 +379,10 @@ final class ProgressPresenter {
 
     private func announce(_ s: ProgressCardState) {
         guard configuration.announcesToVoiceOver else { return }
-        let text = [s.title, s.message ?? s.caption].joined(separator: ". ")
+        // "Converted to MP4. clip.mp4, 62% smaller" / "Couldn’t convert to MP4. <why>"
+        let text = s.phase == .failed
+            ? [s.title, s.message ?? s.caption].joined(separator: ". ")
+            : [s.title, [s.headline, s.numeralSpoken].filter { !$0.isEmpty }.joined(separator: ", ")].joined(separator: ". ")
         NSAccessibility.post(element: NSApplication.shared, notification: .announcementRequested,
                              userInfo: [.announcement: text, .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }

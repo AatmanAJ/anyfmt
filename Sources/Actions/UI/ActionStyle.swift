@@ -1,67 +1,68 @@
 import AppKit
 import HaloCore
 
-/// Colours, metrics and accessibility state shared by the shelf and the Move
-/// chooser. Everything derives from `DesignTokens`.
+/// Colours, type, metrics and accessibility state shared by the shelf and the
+/// Move chooser. Everything comes from `DesignTokens` (component tokens in
+/// `DesignTokens+Actions.swift`): charcoal tiles, cobalt for selection and
+/// drop targets, flame for errors, the display face for counts.
 @MainActor
 enum ActionStyle {
     // MARK: Colour
 
+    /// A dynamic colour from a token pair, resolved per appearance.
     static func color(_ pair: (light: Int, dark: Int), alpha: CGFloat = 1) -> NSColor {
-        NSColor(name: nil) { appearance in
-            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-            return rgb(isDark ? pair.dark : pair.light, alpha: alpha)
-        }
+        let c = NSColor.halo(pair)
+        return alpha < 1 ? c.withAlphaComponent(alpha) : c
     }
 
-    nonisolated static func rgb(_ hex: Int, alpha: CGFloat = 1) -> NSColor {
-        NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
-                green: CGFloat((hex >> 8) & 0xFF) / 255,
-                blue: CGFloat(hex & 0xFF) / 255,
-                alpha: alpha)
-    }
+    /// One value in both appearances.
+    static func fixed(_ hex: Int) -> NSColor { .halo((light: hex, dark: hex)) }
 
-    static let iris = color(DesignTokens.Palette.iris)
-    static let ink = color(DesignTokens.Palette.ink)
-    static let mist = color(DesignTokens.Palette.mist)
+    /// Cobalt as a fill (behind white text: 5.0:1).
+    static let iris = fixed(DesignTokens.Primitive.cobalt500)
+    /// Cobalt as a glyph or text (AA on black and on white).
+    static let accentText = color(DesignTokens.Semantic.accentPrimaryText)
+    static let ink = color(DesignTokens.Semantic.textPrimary)
+    static let mist = color(DesignTokens.Semantic.textSecondary)
     static let danger = color(DesignTokens.Palette.danger)
-    /// Selected-row fill under white text. The light iris in both appearances:
-    /// the dark-mode iris is too light for white text (≈3.3:1; this is ≈4.9:1).
-    static let selection = rgb(DesignTokens.Palette.iris.light)
+    /// Selected-row fill under white text.
+    static let selection = fixed(DesignTokens.Primitive.cobalt500)
+    static let onSelection = fixed(DesignTokens.Semantic.onAccentPrimary)
 
-    /// Solid card fill used when transparency is reduced (and in offscreen renders,
-    /// where window-server materials can't be captured).
-    static let solidCard = NSColor(name: nil) { appearance in
-        let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-        return isDark ? rgb(0x26252C) : rgb(0xF7F6FA)
-    }
+    /// The card fill: charcoal in dark, the light tile in light. Always solid:
+    /// no materials, so Reduce Transparency changes nothing and renders match.
+    static let solidCard = color(DesignTokens.Semantic.tile)
 
-    /// Hairline inner stroke that defines the card's edge on any wallpaper.
+    /// The tile's edge: a hairline in light (so the tile reads on a white
+    /// desktop), none on dark; full strength under Increased Contrast.
     static func strokeColor(highContrast: Bool) -> NSColor {
-        NSColor(name: nil) { appearance in
-            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-            if highContrast { return isDark ? NSColor(white: 1, alpha: 0.55) : NSColor(white: 0, alpha: 0.5) }
-            return isDark ? NSColor(white: 1, alpha: 0.14) : NSColor(white: 0, alpha: 0.09)
-        }
+        if highContrast { return color(DesignTokens.Semantic.textPrimary, alpha: 0.7) }
+        let hairline = color(DesignTokens.Semantic.hairline)
+        return NSColor(name: nil) { appearance in appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? .clear : hairline }
     }
 
-    /// Tint behind a hovered row or cell.
-    static let hoverFill = NSColor(name: nil) { appearance in
-        let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-        return rgb(isDark ? DesignTokens.Palette.iris.dark : DesignTokens.Palette.iris.light, alpha: isDark ? 0.22 : 0.12)
-    }
+    /// Behind a hovered cell: the raised step above the tile.
+    static let hoverFill = color(DesignTokens.Semantic.raised)
 
-    /// Small round control background (shelf ✕ and ⋯).
-    static let controlFill = NSColor(name: nil) { appearance in
-        let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-        return isDark ? NSColor(white: 1, alpha: 0.16) : NSColor(white: 0, alpha: 0.07)
-    }
+    /// Small round control background (shelf ✕, ⋯, chevron).
+    static let controlFill = color(DesignTokens.Semantic.raised)
+    /// The ✕ badge on a thumbnail: raised, with a hairline so it reads on any picture.
+    static let badgeFill = color(DesignTokens.Semantic.raised)
+    static let badgeEdge = color(DesignTokens.Semantic.hairline)
+
+    /// Thumbnail "prints": a white paper border (slightly off-white in dark so it doesn't glare).
+    static let printPaper = color((light: DesignTokens.Primitive.paper0, dark: DesignTokens.Primitive.paper50))
+    static let printEdge = color((light: DesignTokens.Primitive.paper100, dark: DesignTokens.Primitive.paper50))
 
     /// Resolves a dynamic colour for a CALayer under `appearance`.
     static func cg(_ color: NSColor, in appearance: NSAppearance) -> CGColor {
         var result = color.cgColor
         appearance.performAsCurrentDrawingAppearance { result = color.cgColor }
         return result
+    }
+
+    static func isDark(_ appearance: NSAppearance) -> Bool {
+        appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
     }
 
     // MARK: Accessibility display options
@@ -74,6 +75,27 @@ enum ActionStyle {
 
     static func font(_ size: CGFloat, _ weight: NSFont.Weight = .regular) -> NSFont {
         NSFont.systemFont(ofSize: size, weight: weight)
+    }
+
+    /// The display face (Inter Display Black) for counts.
+    static func display(_ size: CGFloat) -> NSFont { HaloFonts.display(size) }
+
+    /// "5 items": the count in the display face, the noun in the system face.
+    static func countTitle(_ count: Int, noun: String, color: NSColor) -> NSAttributedString {
+        let t = DesignTokens.Component.Shelf.self
+        let digits = "\(count)"
+        let result = NSMutableAttributedString(string: digits, attributes: [
+            .font: display(t.countSize), .foregroundColor: color,
+        ])
+        // Display tracking between the digits only, so the word space stays a full space.
+        if digits.count > 1 {
+            result.addAttribute(.kern, value: t.countSize * DesignTokens.Typeface.displayTracking,
+                                range: NSRange(location: 0, length: (digits as NSString).length - 1))
+        }
+        result.append(NSAttributedString(string: " \(noun)", attributes: [
+            .font: font(t.titleSize, .bold), .foregroundColor: color,
+        ]))
+        return result
     }
 
     // MARK: Motion
@@ -89,76 +111,65 @@ enum ActionStyle {
         return a
     }
 
+    /// A named curve from `DesignTokens.Curve` (snap, glide, settle, exit).
+    static func curve(_ c: (c1: CGPoint, c2: CGPoint, duration: Double)) -> CAMediaTimingFunction {
+        CAMediaTimingFunction(controlPoints: Float(c.c1.x), Float(c.c1.y), Float(c.c2.x), Float(c.c2.y))
+    }
+
+    /// Duration for a move: the curve's own, or the short crossfade under Reduce Motion.
+    static func duration(_ c: (c1: CGPoint, c2: CGPoint, duration: Double)) -> Double {
+        reduceMotion ? DesignTokens.Curve.reducedCrossfade : c.duration
+    }
+
     /// Shadow margin around cards: their windows are this much larger so the
     /// card can cast its own (animatable) layer shadow.
-    static let shadowMargin: CGFloat = 26
+    static let shadowMargin = DesignTokens.Component.ActionCard.shadowMargin
 }
 
-/// Rounded "card" chrome: material (or solid fill), hairline stroke and a
-/// layer shadow. The card's content goes in `contentView`.
+/// The shared card chrome: a solid charcoal tile (one radius, `Shape.tile`),
+/// its edge, one floating shadow, and a 2 pt cobalt outline while something is
+/// dragged over it. The card's content goes in `contentView`.
 @MainActor
 class ActionCardView: NSView {
     let contentView = NSView()
-    /// The card's drop shadow lives on its own layer (AppKit owns the backing
-    /// layer's shadow properties) and is masked to the outside of the card so
-    /// it never darkens a translucent material from underneath.
+    /// The drop shadow lives on its own layer (AppKit owns the backing layer's
+    /// shadow properties).
     private let shadowLayer = CALayer()
-    private let shadowMask = CAShapeLayer()
-    private let effect = NSVisualEffectView()
     private let solid = CALayer()
     private let stroke = CALayer()
-    private let glow = CALayer()
+    private let outline = CALayer()
     let cornerRadius: CGFloat
 
-    /// Forces the solid fill (offscreen renders can't capture materials).
+    /// Kept for offscreen renders; the card is always solid now.
     var forceSolid = false { didSet { refreshAppearance() } }
-    /// Iris ring shown while something is dragged over the card.
+    /// Cobalt outline shown while something is dragged over the card.
     var isHighlighted = false { didSet { if isHighlighted != oldValue { animateHighlight() } } }
 
-    init(cornerRadius: CGFloat = DesignTokens.Radius.window + 2, material: NSVisualEffectView.Material = .popover) {
+    init(cornerRadius: CGFloat = DesignTokens.Shape.tile) {
         self.cornerRadius = cornerRadius
         super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = false
 
-        effect.material = material
-        effect.blendingMode = .behindWindow
-        // Our app is almost never active while the card is up; keep the material vivid.
-        effect.state = .active
-        effect.wantsLayer = true
-        effect.layer?.cornerRadius = cornerRadius
-        effect.layer?.cornerCurve = .continuous
-        effect.layer?.masksToBounds = true
-        effect.autoresizingMask = [.width, .height]
-        addSubview(effect)
-
-        solid.cornerRadius = cornerRadius
-        solid.cornerCurve = .continuous
-        stroke.cornerRadius = cornerRadius
-        stroke.cornerCurve = .continuous
-        stroke.borderWidth = 1
-        glow.cornerRadius = cornerRadius
-        glow.cornerCurve = .continuous
-        glow.borderWidth = 2
-        glow.opacity = 0
-        glow.shadowOpacity = 0
-        glow.shadowRadius = 10
-        glow.shadowOffset = .zero
+        for l in [solid, stroke, outline, shadowLayer] {
+            l.cornerRadius = cornerRadius
+            l.cornerCurve = .continuous
+        }
+        stroke.borderWidth = DesignTokens.Shape.hairline
+        outline.borderWidth = DesignTokens.Component.Shelf.dropOutlineWidth
+        outline.opacity = 0
 
         contentView.autoresizingMask = [.width, .height]
         contentView.wantsLayer = true
         addSubview(contentView)
 
         shadowLayer.shadowOpacity = 1
-        shadowLayer.cornerRadius = cornerRadius
-        shadowLayer.cornerCurve = .continuous
-        shadowLayer.shadowRadius = 16
-        shadowLayer.shadowOffset = CGSize(width: 0, height: -7)
-        shadowMask.fillRule = .evenOdd
+        shadowLayer.shadowRadius = DesignTokens.Component.Elevation.floatRadius
+        shadowLayer.shadowOffset = CGSize(width: 0, height: -DesignTokens.Component.Elevation.floatOffsetY)
         layer?.insertSublayer(solid, at: 0)
         layer?.insertSublayer(shadowLayer, at: 0)
         layer?.addSublayer(stroke)
-        layer?.addSublayer(glow)
+        layer?.addSublayer(outline)
 
         refreshAppearance()
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -173,22 +184,14 @@ class ActionCardView: NSView {
 
     override func layout() {
         super.layout()
-        effect.frame = bounds
         contentView.frame = bounds
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         solid.frame = bounds
         stroke.frame = bounds
-        glow.frame = bounds.insetBy(dx: -1, dy: -1)
-        glow.cornerRadius = cornerRadius + 1
-        let shape = CGPath(roundedRect: bounds, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
+        outline.frame = bounds
         shadowLayer.frame = bounds
-        shadowLayer.shadowPath = shape
-        let outside = CGMutablePath()
-        outside.addRect(bounds.insetBy(dx: -80, dy: -80))
-        outside.addPath(shape)
-        shadowMask.frame = bounds
-        shadowMask.path = outside
+        shadowLayer.shadowPath = CGPath(roundedRect: bounds, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
         CATransaction.commit()
     }
 
@@ -201,34 +204,25 @@ class ActionCardView: NSView {
 
     func refreshAppearance() {
         let appearance = effectiveAppearance
-        let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-        let useSolid = forceSolid || ActionStyle.reduceTransparency
+        let dark = ActionStyle.isDark(appearance)
         let highContrast = ActionStyle.increaseContrast
-        effect.isHidden = useSolid
-        // Over an opaque fill the shadow can sit under the whole card; only a
-        // translucent material needs it cut to the outside.
-        shadowLayer.mask = useSolid ? nil : shadowMask
+        let e = DesignTokens.Component.Elevation.self
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         solid.backgroundColor = ActionStyle.cg(ActionStyle.solidCard, in: appearance)
-        // Some renderers only cast a shadow from a filled layer; over material
-        // the mask removes this fill, leaving only the outside shadow.
         shadowLayer.backgroundColor = solid.backgroundColor
-        solid.opacity = useSolid ? 1 : 0
+        shadowLayer.shadowColor = NSColor.black.cgColor
+        shadowLayer.shadowOpacity = Float(dark ? e.floatOpacityDark : e.floatOpacityLight)
         stroke.borderColor = ActionStyle.cg(ActionStyle.strokeColor(highContrast: highContrast), in: appearance)
-        stroke.borderWidth = highContrast ? 1.5 : 1
-        glow.borderColor = ActionStyle.cg(ActionStyle.iris, in: appearance)
-        glow.shadowColor = ActionStyle.cg(ActionStyle.iris, in: appearance)
-        shadowLayer.shadowColor = NSColor(white: 0, alpha: isDark ? 0.55 : 0.2).cgColor
+        outline.borderColor = ActionStyle.cg(ActionStyle.accentText, in: appearance)
         CATransaction.commit()
     }
 
     private func animateHighlight() {
-        let on = isHighlighted
         CATransaction.begin()
-        CATransaction.setAnimationDuration(ActionStyle.reduceMotion ? 0.08 : 0.16)
-        glow.opacity = on ? 1 : 0
-        glow.shadowOpacity = on ? 0.6 : 0
+        CATransaction.setAnimationDuration(ActionStyle.duration(DesignTokens.Curve.snap))
+        CATransaction.setAnimationTimingFunction(ActionStyle.curve(DesignTokens.Curve.snap))
+        outline.opacity = isHighlighted ? 1 : 0
         CATransaction.commit()
     }
 }
@@ -237,7 +231,7 @@ class ActionCardView: NSView {
 /// be dragged by it) and it never takes focus.
 @MainActor
 final class PassiveLabel: NSTextField {
-    convenience init(size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor = .labelColor, lines: Int = 1) {
+    convenience init(size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor = ActionStyle.ink, lines: Int = 1) {
         self.init(labelWithString: "")
         font = ActionStyle.font(size, weight)
         textColor = color
@@ -259,16 +253,20 @@ final class PassiveLabel: NSTextField {
 }
 
 /// A small round symbol button (✕, ⋯, chevron) that works on the first click
-/// even though our app isn't active. `.badge` is the opaque, shadowed style
-/// for a ✕ sitting on top of a thumbnail.
+/// even though our app isn't active. `.badge` is the opaque style for a ✕
+/// sitting on top of a thumbnail.
 @MainActor
 final class RoundSymbolButton: NSButton {
     enum Style { case plain, badge }
 
     private let fill = CALayer()
     private var style: Style = .plain
+    private var tracking: NSTrackingArea?
+    private var hovering = false { didSet { needsLayout = true } }
 
-    convenience init(symbol: String, label: String, diameter: CGFloat = 20, pointSize: CGFloat = 9.5, style: Style = .plain) {
+    convenience init(symbol: String, label: String,
+                     diameter: CGFloat = DesignTokens.Component.Shelf.controlDiameter,
+                     pointSize: CGFloat = DesignTokens.Component.Shelf.controlGlyph, style: Style = .plain) {
         self.init(frame: NSRect(x: 0, y: 0, width: diameter, height: diameter))
         self.style = style
         isBordered = false
@@ -276,42 +274,46 @@ final class RoundSymbolButton: NSButton {
         imagePosition = .imageOnly
         let config = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .bold)
         image = NSImage(systemSymbolName: symbol, accessibilityDescription: label)?.withSymbolConfiguration(config)
-        contentTintColor = .secondaryLabelColor
+        contentTintColor = ActionStyle.mist
         setAccessibilityLabel(label)
         toolTip = label
         wantsLayer = true
         layer?.masksToBounds = false
         fill.cornerRadius = diameter / 2
         fill.actions = ["backgroundColor": NSNull(), "bounds": NSNull(), "position": NSNull(), "borderColor": NSNull()]
-        if style == .badge {
-            fill.shadowColor = NSColor.black.cgColor
-            fill.shadowOpacity = 0.25
-            fill.shadowRadius = 1.5
-            fill.shadowOffset = CGSize(width: 0, height: -0.5)
-            fill.borderWidth = 0.5
-        }
+        if style == .badge { fill.borderWidth = DesignTokens.Shape.hairline }
         layer?.insertSublayer(fill, at: 0)
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
 
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let t = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self)
+        addTrackingArea(t)
+        tracking = t
+    }
+
+    override func mouseEntered(with event: NSEvent) { hovering = true }
+    override func mouseExited(with event: NSEvent) { hovering = false }
+
     override func layout() {
         super.layout()
         let appearance = effectiveAppearance
-        let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         fill.frame = bounds
-        fill.shadowPath = CGPath(ellipseIn: bounds, transform: nil)
         switch style {
         case .plain:
             fill.backgroundColor = ActionStyle.cg(ActionStyle.controlFill, in: appearance)
         case .badge:
-            fill.backgroundColor = (isDark ? ActionStyle.rgb(0x4A4853) : NSColor.white).cgColor
-            fill.borderColor = NSColor(white: isDark ? 1 : 0, alpha: 0.12).cgColor
+            fill.backgroundColor = ActionStyle.cg(ActionStyle.badgeFill, in: appearance)
+            fill.borderColor = ActionStyle.cg(ActionStyle.badgeEdge, in: appearance)
         }
         CATransaction.commit()
+        contentTintColor = hovering ? ActionStyle.ink : ActionStyle.mist
     }
 
     override func viewDidChangeEffectiveAppearance() {

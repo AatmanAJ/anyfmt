@@ -2,7 +2,8 @@ import AppKit
 import HaloCore
 import SwiftUI
 
-/// An icon shown in a card: a Finder icon, or a Quick Look thumbnail (drawn as a little print).
+/// An icon shown for a job: a Finder icon or a Quick Look thumbnail. Kept for
+/// the model; the board layout leads with the numeral instead of an icon.
 struct ProgressIconImage: Equatable {
     let image: NSImage
     let isThumbnail: Bool
@@ -26,11 +27,15 @@ struct ProgressCardRoot: View {
 
 // MARK: - The card
 
+/// Board 5: a charcoal tile, the big display numeral on the left (percent while
+/// running, the size change or time taken when done, a flame warning glyph on
+/// failure), the file and a quiet detail line on the right over a cobalt band bar.
 struct ProgressCard: View {
     @ObservedObject var model: ProgressCardModel
     @Environment(\.colorScheme) private var scheme
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
     @Environment(\.progressAppearanceOverrides) private var overrides
 
     private typealias M = ProgressTheme.Metrics
@@ -39,152 +44,138 @@ struct ProgressCard: View {
     private var s: ProgressCardState { model.state }
     private var highContrast: Bool { overrides.increasedContrast ?? (contrast == .increased) }
     private var reduceMotion: Bool { overrides.reduceMotion ?? systemReduceMotion }
+    private var flatBands: Bool { highContrast || (overrides.reduceTransparency ?? systemReduceTransparency) }
     private var secondary: Color { ProgressTheme.secondary(scheme, highContrast: highContrast) }
-    private var accent: Color { ProgressTheme.accent(scheme) }
 
     var body: some View {
-        HStack(alignment: .top, spacing: M.iconSpacing) {
-            ProgressFileIcon(icons: model.icons, isBatch: s.isBatch, failed: s.phase == .failed)
+        HStack(alignment: s.phase == .failed ? .top : .center, spacing: M.columnGap) {
+            ProgressNumeralView(numeral: s.numeral, highContrast: highContrast)
+                .frame(width: M.numeralColumn, alignment: .leading)
             VStack(alignment: .leading, spacing: 0) {
-                header
+                headline
+                detailRow.padding(.top, DesignTokens.Component.ProgressCard.rowGap)
                 switch s.phase {
-                case .failed: failureBody.transition(.opacity)
-                case .succeeded: successBody.transition(.opacity)
-                case .queued, .running, .cancelled: progressBody.transition(.opacity)
+                case .failed:
+                    failureBody.transition(.opacity)
+                case .queued, .running, .succeeded, .cancelled:
+                    ProgressBarView(fraction: s.fraction, flat: flatBands, highContrast: highContrast,
+                                    animate: !reduceMotion)
+                        .frame(height: M.barHeight)
+                        .padding(.top, M.barTop)
+                        .transition(.opacity)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, M.horizontalPadding)
-        .padding(.vertical, M.verticalPadding)
+        .padding(M.padding)
         .frame(width: M.cardWidth, alignment: .leading)
-        .modifier(ProgressCardChrome(cornerRadius: M.cornerRadius))
+        .modifier(ProgressCardChrome(highContrast: highContrast))
         .contentShape(RoundedRectangle(cornerRadius: M.cornerRadius, style: .continuous))
         .onTapGesture { if s.phase == .succeeded { model.onReveal() } }
         .modifier(ProgressAppearTransition(isShown: model.isShown, reduceMotion: reduceMotion))
         .animation(reduceMotion ? ProgressTheme.Timing.fade : ProgressTheme.Timing.state, value: s.phase)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(s.accessibilityLabel)
+        .accessibilityAddTraits(s.phase == .succeeded ? .isButton : [])
+        .accessibilityHint(s.phase == .succeeded && !s.outputs.isEmpty ? Text("Shows the result in Finder") : Text(""))
     }
 
-    private var header: some View {
-        HStack(alignment: .center, spacing: 6) {
-            Text(s.title)
-                .font(.system(size: T.title, weight: .semibold))
+    private var headline: some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.xs + DesignTokens.Space.xxs) {
+            if s.phase == .succeeded {
+                // Success is cobalt *and* a check, never colour alone.
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: T.statusGlyph, weight: .semibold))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(ProgressTheme.onAccent, ProgressTheme.accentFill)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    .accessibilityHidden(true)
+            }
+            Text(verbatim: s.headline)
+                .font(.system(size: T.headline, weight: .bold))
                 .foregroundStyle(ProgressTheme.ink(scheme))
                 .lineLimit(1)
-                .truncationMode(.tail)
-            Spacer(minLength: 4)
-            ZStack { trailingControl }
-                .frame(width: M.controlSize, height: M.controlSize)
+                .truncationMode(.middle)
         }
-        .frame(height: M.controlSize)
     }
 
-    @ViewBuilder private var trailingControl: some View {
+    private var detailRow: some View {
+        HStack(spacing: DesignTokens.Space.s) {
+            // Full wording when it fits, then the compact one, then truncate.
+            ViewThatFits(in: .horizontal) {
+                detailText(s.detail).fixedSize()
+                if let short = s.detailShort { detailText(short).fixedSize() }
+                detailText(s.detailShort ?? s.detail)
+            }
+            Spacer(minLength: DesignTokens.Space.xs)
+            ZStack { control }
+        }
+        .frame(minHeight: M.quietButtonHeight)
+    }
+
+    private func detailText(_ text: String) -> some View {
+        Text(verbatim: text)
+            .font(.system(size: T.detail, weight: .medium))
+            .foregroundStyle(secondary)
+            .monospacedDigit()
+            .lineLimit(1)
+            .truncationMode(.middle)
+    }
+
+    @ViewBuilder private var control: some View {
         switch s.phase {
-        case .succeeded:
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(ProgressTheme.success(scheme))
-                .transition(.scale(scale: 0.4).combined(with: .opacity))
-                .accessibilityHidden(true)
-        case .cancelled:
-            ProgressCircleButton(symbol: "xmark", label: String(localized: "Close"), action: model.onClose)
-                .transition(.opacity)
         case .queued, .running:
             if s.canCancel {
-                ProgressCircleButton(symbol: "xmark", label: String(localized: "Cancel"), action: model.onCancel)
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                Button(String(localized: "Cancel"), action: model.onCancel)
+                    .buttonStyle(ProgressQuietButtonStyle())
+                    .transition(.opacity)
             }
+        case .succeeded:
+            // The whole card reveals; the words appear on hover so it says so.
+            if !s.outputs.isEmpty, model.isHovered {
+                Button(String(localized: "Show in Finder"), action: model.onReveal)
+                    .buttonStyle(ProgressQuietButtonStyle(accent: true))
+                    .transition(.opacity)
+            }
+        case .cancelled:
+            Button(String(localized: "Close"), action: model.onClose)
+                .buttonStyle(ProgressQuietButtonStyle())
         case .failed:
             EmptyView()
         }
     }
 
-    private var revealHint: Bool { s.phase == .succeeded && model.isHovered && !s.outputs.isEmpty }
-
-    private var progressBody: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ProgressBarView(fraction: s.fraction, fill: accent,
-                            track: ProgressTheme.track(scheme, highContrast: highContrast),
-                            animate: !reduceMotion)
-                .frame(height: M.barHeight)
-                .padding(.top, M.barTop)
-            // Longest wording that fits without truncating anything: full, then
-            // the compact ETA, then without the skipped note; last resort, a
-            // middle-truncated caption.
-            ViewThatFits(in: .horizontal) {
-                footer(s.caption, s.trailing, truncates: false)
-                if let compact = s.trailingCompact { footer(s.caption, compact, truncates: false) }
-                if let short = s.captionShort {
-                    footer(short, s.trailing, truncates: false)
-                    if let compact = s.trailingCompact { footer(short, compact, truncates: false) }
-                }
-                footer(s.caption, s.trailingCompact ?? s.trailing, truncates: true)
-            }
-            .font(.system(size: T.detail))
-            .foregroundStyle(secondary)
-            .padding(.top, M.footerTop)
-        }
-    }
-
-    private func footer(_ caption: String, _ trailing: String, truncates: Bool) -> some View {
-        HStack(spacing: 6) {
-            Text(caption)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .fixedSize(horizontal: !truncates, vertical: false)
-            Spacer(minLength: 6)
-            Text(trailing)
-                .lineLimit(1)
-                .monospacedDigit()
-                .fixedSize()
-        }
-    }
-
-    /// Done: the bar gives way to the new file's name and where it went
-    /// ("Show in Finder" while hovered; the whole card is clickable).
-    private var successBody: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(s.caption)
-                .font(.system(size: T.detail, weight: .medium))
-                .foregroundStyle(ProgressTheme.ink(scheme).opacity(0.86))
-                .lineLimit(1)
-                .truncationMode(.middle)
-            Text(revealHint ? String(localized: "Show in Finder") : s.trailing)
-                .font(.system(size: T.detail))
-                .foregroundStyle(revealHint ? accent : secondary)
-                .lineLimit(1)
-        }
-        .padding(.top, 4)
-    }
-
     private var failureBody: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let message = s.message {
-                Text(message)
-                    .font(.system(size: T.message))
-                    .foregroundStyle(secondary)
+                Text(verbatim: message)
+                    .font(.system(size: T.headline))
+                    .foregroundStyle(ProgressTheme.ink(scheme))
                     .lineLimit(5)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 3)
+                    .padding(.top, DesignTokens.Component.ProgressCard.messageTop)
             }
-            HStack(spacing: 6) {
+            HStack(spacing: DesignTokens.Space.xs) {
                 if s.details != nil {
-                    Button(model.didCopyDetails ? String(localized: "Copied") : String(localized: "Copy details"),
-                           action: model.onCopyDetails)
-                        .buttonStyle(ProgressPillButtonStyle(kind: .quiet))
-                        .help(String(localized: "Copies technical details for a bug report"))
+                    Button(action: model.onCopyDetails) {
+                        if model.didCopyDetails {
+                            Label(String(localized: "Copied"), systemImage: "checkmark")
+                        } else {
+                            Text("Copy details")
+                        }
+                    }
+                    .buttonStyle(ProgressQuietButtonStyle(large: true))
+                    .help(String(localized: "Copies the versions, the engine’s last output and what was tried, for a bug report"))
                 }
-                Spacer(minLength: 4)
+                Spacer(minLength: DesignTokens.Space.xs)
                 Button(String(localized: "Close"), action: model.onClose)
-                    .buttonStyle(ProgressPillButtonStyle(kind: .quiet))
+                    .buttonStyle(ProgressQuietButtonStyle(large: true))
                 if s.canRetry {
                     Button(s.retryLabel, action: model.onRetry)
-                        .buttonStyle(ProgressPillButtonStyle(kind: .prominent))
+                        .buttonStyle(.haloPrimary)
                 }
             }
-            .padding(.top, 9)
+            .padding(.top, DesignTokens.Component.ProgressCard.actionsTop)
         }
     }
 }
@@ -200,23 +191,25 @@ struct ProgressSummaryCard: View {
 
     var body: some View {
         let highContrast = overrides.increasedContrast ?? (contrast == .increased)
-        let secondary = ProgressTheme.secondary(scheme, highContrast: highContrast)
-        HStack(spacing: 8) {
-            Image(systemName: "square.stack.3d.up.fill")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(secondary)
-            Text(model.state.title)
-                .font(.system(size: ProgressTheme.Typography.detail, weight: .semibold))
-                .foregroundStyle(ProgressTheme.ink(scheme))
-            Spacer(minLength: 4)
-            Text(model.state.trailing)
-                .font(.system(size: ProgressTheme.Typography.detail))
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.s) {
+            Text(verbatim: model.state.numeral.text ?? "")
+                .font(.haloDisplay(ProgressTheme.Typography.summaryNumeral))
+                .displayTracking(ProgressTheme.Typography.summaryNumeral)
                 .monospacedDigit()
-                .foregroundStyle(secondary)
+                .foregroundStyle(ProgressTheme.ink(scheme))
+            Text(verbatim: model.state.headline)
+                .font(.system(size: ProgressTheme.Typography.headline, weight: .bold))
+                .foregroundStyle(ProgressTheme.ink(scheme))
+            Text(verbatim: model.state.detail)
+                .font(.system(size: ProgressTheme.Typography.detail, weight: .medium))
+                .monospacedDigit()
+                .foregroundStyle(ProgressTheme.secondary(scheme, highContrast: highContrast))
+                .lineLimit(1)
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, ProgressTheme.Metrics.horizontalPadding)
-        .frame(width: ProgressTheme.Metrics.cardWidth, height: 30)
-        .modifier(ProgressCardChrome(cornerRadius: DesignTokens.Radius.medium))
+        .padding(.horizontal, ProgressTheme.Metrics.padding)
+        .frame(width: ProgressTheme.Metrics.cardWidth, height: ProgressTheme.Metrics.summaryHeight)
+        .modifier(ProgressCardChrome(highContrast: highContrast))
         .modifier(ProgressAppearTransition(isShown: model.isShown, reduceMotion: overrides.reduceMotion ?? systemReduceMotion))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(model.state.accessibilityLabel)
@@ -225,84 +218,58 @@ struct ProgressSummaryCard: View {
 
 // MARK: - Pieces
 
-struct ProgressFileIcon: View {
-    let icons: [ProgressIconImage]
-    let isBatch: Bool
-    let failed: Bool
+/// The big figure: Inter Display Black, tight tracking, tabular digits.
+struct ProgressNumeralView: View {
+    let numeral: ProgressCardState.Numeral
+    let highContrast: Bool
     @Environment(\.colorScheme) private var scheme
 
-    private let size = ProgressTheme.Metrics.iconSize
-
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ZStack {
-                if isBatch, icons.count > 1 {
-                    // A small fanned stack: back items tilt away.
-                    ForEach(Array(icons.prefix(3).enumerated()).reversed(), id: \.offset) { i, icon in
-                        single(icon, side: size - 8)
-                            .rotationEffect(.degrees(Double(i) * -8), anchor: .bottom)
-                            .offset(x: CGFloat(i) * -2, y: CGFloat(i) * -1.5)
-                            .opacity(1 - Double(i) * 0.12)
-                    }
-                } else if let icon = icons.first {
-                    single(icon, side: size)
-                } else {
-                    Image(systemName: "doc")
-                        .font(.system(size: 22, weight: .regular))
-                        .foregroundStyle(ProgressTheme.secondary(scheme, highContrast: false))
-                }
-            }
-            .frame(width: size, height: size)
-            if failed {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(Color.white, ProgressTheme.danger(scheme))
-                    .background(Circle().fill(ProgressTheme.solidSurface(scheme)).padding(-1.5))
-                    .offset(x: 3, y: 3)
-                    .transition(.scale(scale: 0.4).combined(with: .opacity))
-                    .accessibilityHidden(true)
+        Group {
+            switch numeral {
+            case .text(let text, let tone):
+                Text(verbatim: text)
+                    .font(.haloDisplay(ProgressTheme.Typography.numeral))
+                    .displayTracking(ProgressTheme.Typography.numeral)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .foregroundStyle(tone == .dim ? ProgressTheme.dimNumeral(scheme, highContrast: highContrast)
+                                                  : ProgressTheme.ink(scheme))
+            case .glyph(let symbol):
+                Image(systemName: symbol)
+                    .font(.system(size: ProgressTheme.Typography.glyph, weight: .bold))
+                    .foregroundStyle(ProgressTheme.danger(scheme))
+                    .padding(.top, DesignTokens.Space.xxs)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
             }
         }
-        .frame(width: size, height: size)
         .accessibilityHidden(true)
-    }
-
-    @ViewBuilder private func single(_ icon: ProgressIconImage, side: CGFloat) -> some View {
-        if icon.isThumbnail {
-            Image(nsImage: icon.image)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
-                .padding(1.5)
-                .background(RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Color.white))
-                .shadow(color: .black.opacity(0.22), radius: 1.2, x: 0, y: 0.6)
-                .frame(width: side - 4, height: side - 4)
-        } else {
-            Image(nsImage: icon.image)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: side, height: side)
-        }
     }
 }
 
+/// The cobalt band bar (`Band.cobalt`); flat cobalt with an outline under
+/// Increased Contrast or Reduce Transparency.
 struct ProgressBarView: View {
     let fraction: Double
-    let fill: Color
-    let track: Color
+    let flat: Bool
+    let highContrast: Bool
     let animate: Bool
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         let f = CGFloat(min(1, max(0, fraction.isFinite ? fraction : 0)))
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(track)
-                Capsule()
-                    .fill(LinearGradient(colors: [fill.opacity(0.82), fill], startPoint: .leading, endPoint: .trailing))
+                Capsule().fill(ProgressTheme.track(scheme, highContrast: highContrast))
+                fill
                     .frame(width: f > 0 ? max(geo.size.height, geo.size.width * f) : 0)
+                    .clipShape(Capsule())
+            }
+            .overlay {
+                if highContrast {
+                    Capsule().strokeBorder(ProgressTheme.ink(scheme), lineWidth: DesignTokens.Shape.hairline)
+                }
             }
         }
         .animation(animate ? ProgressTheme.Timing.bar : nil, value: fraction)
@@ -311,104 +278,81 @@ struct ProgressBarView: View {
         .accessibilityValue(Text(ProgressCardState.percent(fraction)))
         .accessibilityAddTraits(.updatesFrequently)
     }
-}
 
-struct ProgressCircleButton: View {
-    let symbol: String
-    let label: String
-    let action: () -> Void
-    @Environment(\.colorScheme) private var scheme
-    @State private var hovering = false
-
-    var body: some View {
-        let ink = ProgressTheme.ink(scheme)
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 7.5, weight: .bold))
-                .foregroundStyle(ink.opacity(hovering ? 0.85 : 0.55))
-                .frame(width: ProgressTheme.Metrics.controlSize, height: ProgressTheme.Metrics.controlSize)
-                .background(Circle().fill(ink.opacity(hovering ? 0.15 : 0.075)))
-                .contentShape(Circle())
+    @ViewBuilder private var fill: some View {
+        if flat {
+            Color(hex: DesignTokens.Band.cobaltFlat)
+        } else {
+            BandGradient(bands: DesignTokens.Band.cobalt)
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .accessibilityLabel(Text(label))
-        .help(label)
     }
 }
 
-struct ProgressPillButtonStyle: ButtonStyle {
-    enum Kind { case quiet, prominent }
-    let kind: Kind
+/// Text-only buttons for Cancel, Show in Finder, Copy details and Close: no
+/// fill at rest, a raised capsule on hover and press. `large` matches the pill height.
+struct ProgressQuietButtonStyle: ButtonStyle {
+    var accent = false
+    var large = false
 
     func makeBody(configuration: Configuration) -> some View {
-        PillLabel(configuration: configuration, kind: kind)
+        QuietLabel(configuration: configuration, accent: accent, large: large)
     }
 
-    private struct PillLabel: View {
+    private struct QuietLabel: View {
         let configuration: ButtonStyleConfiguration
-        let kind: Kind
+        let accent: Bool
+        let large: Bool
         @Environment(\.colorScheme) private var scheme
         @Environment(\.colorSchemeContrast) private var contrast
+        @Environment(\.accessibilityReduceMotion) private var reduceMotion
         @Environment(\.progressAppearanceOverrides) private var overrides
+        @State private var hovering = false
 
         var body: some View {
-            let ink = ProgressTheme.ink(scheme)
             let highContrast = overrides.increasedContrast ?? (contrast == .increased)
+            let base = accent ? ProgressTheme.accentText(scheme) : ProgressTheme.secondary(scheme, highContrast: highContrast)
+            let lit = hovering || configuration.isPressed
             configuration.label
-                .font(.system(size: ProgressTheme.Typography.button, weight: .medium))
-                .foregroundStyle(kind == .prominent ? Color.white : ink.opacity(highContrast ? 1 : 0.88))
-                .padding(.horizontal, 10)
-                .frame(height: ProgressTheme.Metrics.buttonHeight)
-                .background(Capsule().fill(kind == .prominent ? ProgressTheme.accent(scheme)
-                    : ink.opacity(scheme == .dark ? 0.14 : 0.075)))
-                .overlay(Capsule().strokeBorder(ink.opacity(highContrast && kind == .quiet ? 0.5 : 0), lineWidth: 1))
+                .font(.system(size: large ? DesignTokens.Typeface.Size.body : DesignTokens.Typeface.Size.label, weight: .bold))
+                .foregroundStyle(lit && !accent ? ProgressTheme.ink(scheme) : base)
+                .padding(.horizontal, DesignTokens.Space.s)
+                .frame(height: large ? DesignTokens.Component.Pill.height : ProgressTheme.Metrics.quietButtonHeight)
+                .background(Capsule().fill(ProgressTheme.color(DesignTokens.Semantic.raised, scheme)).opacity(lit ? 1 : 0))
+                .overlay {
+                    if highContrast { Capsule().strokeBorder(base, lineWidth: DesignTokens.Shape.hairline) }
+                }
                 .contentShape(Capsule())
-                .opacity(configuration.isPressed ? 0.7 : 1)
+                .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
+                .animation(ProgressTheme.Timing.press, value: configuration.isPressed)
+                .onHover { hovering = $0 }
         }
     }
 }
 
-/// Background, hairline and shadow shared by every card.
+/// The charcoal tile, its edge (light mode / Increased Contrast) and the one
+/// floating shadow. Solid by design: no material, so Reduce Transparency needs
+/// nothing extra.
 struct ProgressCardChrome: ViewModifier {
-    let cornerRadius: CGFloat
+    let highContrast: Bool
     @Environment(\.colorScheme) private var scheme
-    @Environment(\.colorSchemeContrast) private var contrast
-    @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
-    @Environment(\.progressAppearanceOverrides) private var overrides
-    @Environment(\.progressCardSurface) private var surface
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        let reduce = overrides.reduceTransparency ?? systemReduceTransparency
-        let highContrast = overrides.increasedContrast ?? (contrast == .increased)
+        let shape = RoundedRectangle(cornerRadius: ProgressTheme.Metrics.cornerRadius, style: .continuous)
+        let e = DesignTokens.Component.Elevation.self
         return content
-            .background(background(reduce: reduce).clipShape(shape))
-            .overlay(shape.strokeBorder(ProgressTheme.hairline(scheme, highContrast: highContrast),
-                                        lineWidth: highContrast ? 1 : 0.5))
-            .background(
-                // Shadow from an opaque twin so a translucent surface doesn't show it through.
-                shape.fill(Color.black)
-                    .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.18), radius: 14, x: 0, y: 7)
-                    .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.08), radius: 1, x: 0, y: 0.5)
-                    .mask(ProgressOutsideMask(cornerRadius: cornerRadius).padding(-ProgressTheme.Metrics.shadowMargin))
-            )
-    }
-
-    @ViewBuilder private func background(reduce: Bool) -> some View {
-        if reduce {
-            ProgressTheme.solidSurface(scheme)
-        } else {
-            switch surface {
-            case .vibrancy:
-                ZStack {
-                    ProgressVibrancy(cornerRadius: cornerRadius)
-                    ProgressTheme.solidSurface(scheme).opacity(scheme == .dark ? 0.22 : 0.38)
+            .background(shape.fill(ProgressTheme.tile(scheme)))
+            .overlay {
+                if let edge = ProgressTheme.edge(scheme, highContrast: highContrast) {
+                    shape.strokeBorder(edge, lineWidth: DesignTokens.Shape.hairline)
                 }
-            case .translucent:
-                ProgressTheme.solidSurface(scheme).opacity(scheme == .dark ? 0.86 : 0.84)
             }
-        }
+            .background(
+                // Cast from an opaque twin and masked to outside the card and below
+                // the stack gap, so the card above stays fully clickable.
+                shape.fill(Color.black)
+                    .shadow(color: .black.opacity(ProgressTheme.shadowOpacity(scheme)), radius: e.floatRadius, x: 0, y: e.floatOffsetY)
+                    .mask(ProgressOutsideMask().padding(-ProgressTheme.Metrics.shadowMargin))
+            )
     }
 }
 
@@ -416,8 +360,6 @@ struct ProgressCardChrome: ViewModifier {
 /// itself. Above the card the shadow stops inside the stack gap, which keeps the
 /// neighbouring card's pixels fully clear (and so clickable) where panels overlap.
 private struct ProgressOutsideMask: View {
-    let cornerRadius: CGFloat
-
     var body: some View {
         GeometryReader { geo in
             Path { p in
@@ -425,16 +367,16 @@ private struct ProgressOutsideMask: View {
                 let above = ProgressTheme.Metrics.stackSpacing - 1
                 p.addRect(CGRect(x: 0, y: m - above, width: geo.size.width, height: geo.size.height - (m - above)))
                 let inner = CGRect(x: m, y: m, width: geo.size.width - 2 * m, height: geo.size.height - 2 * m)
-                p.addPath(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).path(in: inner))
+                p.addPath(RoundedRectangle(cornerRadius: ProgressTheme.Metrics.cornerRadius, style: .continuous).path(in: inner))
             }
             .fill(style: FillStyle(eoFill: true))
         }
     }
 }
 
-/// Springs in from the drop point (above) and tucks back up towards it on the
+/// Glides in from the drop point (above) and tucks back up towards it on the
 /// way out, quickly enough to finish before the panel is ordered out. Reduce
-/// Motion: fades only.
+/// Motion: a crossfade only.
 struct ProgressAppearTransition: ViewModifier {
     let isShown: Bool
     let reduceMotion: Bool
@@ -447,42 +389,7 @@ struct ProgressAppearTransition: ViewModifier {
     func body(content: Content) -> some View {
         content
             .opacity(isShown ? 1 : 0)
-            .scaleEffect(isShown || reduceMotion ? 1 : 0.92, anchor: .top)
-            .offset(y: isShown || reduceMotion ? 0 : -8)
+            .offset(y: isShown || reduceMotion ? 0 : -DesignTokens.Space.s)
             .animation(animation, value: isShown)
-    }
-}
-
-/// Behind-window vibrancy with rounded corners (an AppKit view ignores SwiftUI clipping,
-/// so the corners come from `maskImage`).
-struct ProgressVibrancy: NSViewRepresentable {
-    let cornerRadius: CGFloat
-
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let v = NSVisualEffectView()
-        v.material = .popover
-        v.blendingMode = .behindWindow
-        v.state = .active
-        v.maskImage = Self.mask(radius: cornerRadius)
-        return v
-    }
-
-    func updateNSView(_ view: NSVisualEffectView, context: Context) {}
-
-    static func mask(radius: CGFloat) -> NSImage {
-        // Continuous corners reach ≈ 1.53 × radius along each edge.
-        let cap = (radius * 1.6).rounded(.up)
-        let edge = cap * 2 + 1
-        let image = NSImage(size: NSSize(width: edge, height: edge), flipped: false) { rect in
-            let path = RoundedRectangle(cornerRadius: radius, style: .continuous).path(in: rect).cgPath
-            guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
-            ctx.addPath(path)
-            ctx.setFillColor(NSColor.black.cgColor)
-            ctx.fillPath()
-            return true
-        }
-        image.capInsets = NSEdgeInsets(top: cap, left: cap, bottom: cap, right: cap)
-        image.resizingMode = .stretch
-        return image
     }
 }

@@ -10,8 +10,8 @@ final class ShelfCardView: ActionCardView {
     enum Mode: Equatable { case empty, collapsed, expanded }
 
     static let collapsedSize = NSSize(width: 176, height: 200)
-    static let padding: CGFloat = 14
-    static let headerHeight: CGFloat = 40
+    static let padding = DesignTokens.Component.Shelf.padding
+    static let headerHeight = DesignTokens.Component.Shelf.headerHeight
 
     static func size(mode: Mode, count: Int) -> NSSize {
         switch mode {
@@ -39,8 +39,8 @@ final class ShelfCardView: ActionCardView {
     let stackView = ShelfStackView()
     let gridView = ShelfGridView()
     private let scrollView = NSScrollView()
-    private let titleLabel = PassiveLabel(size: 12.5, weight: .semibold)
-    private let subtitleLabel = PassiveLabel(size: DesignTokens.TypeRamp.caption, color: .secondaryLabelColor)
+    private let titleLabel = PassiveLabel(size: DesignTokens.Component.Shelf.titleSize, weight: .bold)
+    private let subtitleLabel = PassiveLabel(size: DesignTokens.Component.Shelf.detailSize, weight: .medium, color: ActionStyle.mist)
     private let closeButton = RoundSymbolButton(symbol: "xmark", label: String(localized: "Clear Shelf"))
     private let menuButton = RoundSymbolButton(symbol: "ellipsis", label: String(localized: "More"))
     private let collapseButton = RoundSymbolButton(symbol: "chevron.up", label: String(localized: "Collapse"), pointSize: 9)
@@ -54,7 +54,7 @@ final class ShelfCardView: ActionCardView {
     var forceControlsVisible = false { didSet { updateControls(animated: false) } }
 
     init() {
-        super.init(cornerRadius: DesignTokens.Radius.window + 2, material: .popover)
+        super.init(cornerRadius: DesignTokens.Component.Shelf.cornerRadius)
         stackView.onCommand = { [weak self] in self?.onCommand?($0) }
         stackView.onClick = { [weak self] in self?.stackClicked() }
         gridView.onCommand = { [weak self] in self?.onCommand?($0) }
@@ -69,8 +69,10 @@ final class ShelfCardView: ActionCardView {
         scrollView.contentView.drawsBackground = false
         scrollView.automaticallyAdjustsContentInsets = false
 
-        titleLabel.alignment = .center
-        subtitleLabel.alignment = .center
+        // Left-aligned, like every other surface.
+        titleLabel.alignment = .left
+        subtitleLabel.alignment = .left
+        titleLabel.lineBreakMode = .byTruncatingMiddle
         for v in [emptyView, stackView, titleLabel, subtitleLabel, scrollView] as [NSView] { contentView.addSubview(v) }
         for b in [closeButton, menuButton, collapseButton] {
             b.target = self
@@ -138,11 +140,12 @@ final class ShelfCardView: ActionCardView {
         case .collapsed: show = [stackView, titleLabel, subtitleLabel]; hide = [emptyView, scrollView]
         case .expanded: show = [scrollView, titleLabel]; hide = [emptyView, stackView, subtitleLabel]
         }
-        let duration = animated ? (ActionStyle.reduceMotion ? DesignTokens.Motion.crossfade : 0.16) : 0
+        let duration = animated ? ActionStyle.duration(DesignTokens.Curve.glide) : 0
         for v in show { v.isHidden = false }
         if duration > 0 {
             NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = duration
+                ctx.timingFunction = ActionStyle.curve(DesignTokens.Curve.glide)
                 for v in show { v.animator().alphaValue = 1 }
                 for v in hide { v.animator().alphaValue = 0 }
             }, completionHandler: { [weak self] in
@@ -196,6 +199,12 @@ final class ShelfCardView: ActionCardView {
         if mode == .expanded { setMode(.collapsed, animated: true) }
     }
 
+    /// Offscreen renders: the state while files are dragged over the shelf.
+    func showDropTarget() {
+        isHighlighted = true
+        emptyView.isHighlighted = true
+    }
+
     // MARK: Labels
 
     private func updateLabels() {
@@ -207,7 +216,11 @@ final class ShelfCardView: ActionCardView {
             titleLabel.stringValue = items[0].name
             subtitleLabel.stringValue = ShelfSummary.detail(for: items[0].url)
         default:
-            titleLabel.stringValue = String(localized: "\(items.count) items")
+            // "5 items" with the count in the display face.
+            titleLabel.attributedStringValue = ActionStyle.countTitle(
+                items.count, noun: String(localized: "items", comment: "Follows the item count on the Float shelf: “5 items”"),
+                color: ActionStyle.ink)
+            titleLabel.setAccessibilityLabel(String(localized: "\(items.count) items"))
             subtitleLabel.stringValue = ShelfSummary.kinds(for: items.map(\.url))
         }
     }
@@ -228,26 +241,25 @@ final class ShelfCardView: ActionCardView {
         super.layout()
         let b = bounds
         let p = Self.padding
-        closeButton.frame = NSRect(x: 10, y: b.height - 30, width: 20, height: 20)
-        menuButton.frame = NSRect(x: b.width - 30, y: b.height - 30, width: 20, height: 20)
-        collapseButton.frame = NSRect(x: b.width - 54, y: b.height - 30, width: 20, height: 20)
+        let d = DesignTokens.Component.Shelf.controlDiameter
+        let countLine: CGFloat = 30 // fits the display-face count
+        closeButton.frame = NSRect(x: 10, y: b.height - 30, width: d, height: d)
+        menuButton.frame = NSRect(x: b.width - 30, y: b.height - 30, width: d, height: d)
+        collapseButton.frame = NSRect(x: b.width - 54, y: b.height - 30, width: d, height: d)
         switch mode {
         case .empty, .collapsed:
-            emptyView.frame = NSRect(x: 12, y: 12, width: b.width - 24, height: b.height - 12 - 38)
-            stackView.frame = NSRect(x: 0, y: 48, width: b.width, height: b.height - 48 - 26)
+            emptyView.frame = NSRect(x: 12, y: 12, width: b.width - 24, height: b.height - 12 - 40)
+            stackView.frame = NSRect(x: 0, y: 58, width: b.width, height: b.height - 58 - 26)
             titleLabel.frame = mode == .empty
-                ? NSRect(x: 40, y: b.height - 29, width: b.width - 80, height: 17)
-                : NSRect(x: p, y: 27, width: b.width - 2 * p, height: 17)
-            subtitleLabel.frame = NSRect(x: p, y: 12, width: b.width - 2 * p, height: 14)
+                ? NSRect(x: 38, y: b.height - 30, width: b.width - 76, height: 18)
+                : NSRect(x: p, y: 24, width: b.width - 2 * p, height: items.count >= 2 ? countLine : 18)
+            subtitleLabel.frame = NSRect(x: p, y: 10, width: b.width - 2 * p, height: 14)
         case .expanded:
-            titleLabel.frame = NSRect(x: 62, y: b.height - 29, width: b.width - 124, height: 17)
+            titleLabel.frame = NSRect(x: 38, y: b.height - 36, width: b.width - 38 - 62, height: countLine)
             let gridSize = ShelfGridView.visibleSize(count: items.count, columns: ShelfGridView.columns(for: items.count))
             let x = ((b.width - gridSize.width) / 2).rounded()
             scrollView.frame = NSRect(x: x, y: p, width: gridSize.width, height: max(0, b.height - Self.headerHeight - p))
-            stackView.frame = NSRect(x: 0, y: 48, width: b.width, height: Self.collapsedSize.height - 48 - 26)
-        }
-        if mode == .expanded {
-            titleLabel.alignment = .center
+            stackView.frame = NSRect(x: 0, y: 58, width: b.width, height: Self.collapsedSize.height - 58 - 26)
         }
     }
 
@@ -315,7 +327,8 @@ final class ShelfCardView: ActionCardView {
         closeButton.toolTip = closeButton.accessibilityLabel()
         if animated {
             NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.14
+                ctx.duration = ActionStyle.duration(DesignTokens.Curve.snap)
+                ctx.timingFunction = ActionStyle.curve(DesignTokens.Curve.snap)
                 self.closeButton.animator().alphaValue = close
                 self.menuButton.animator().alphaValue = more
                 self.collapseButton.animator().alphaValue = collapse
@@ -443,31 +456,37 @@ final class ShelfCardView: ActionCardView {
     }
 }
 
-/// Drop hint for an empty shelf (opened from the menu bar).
+/// Drop hint for an empty shelf (opened from the menu bar): a dashed zone
+/// with the tray glyph top-left and the words bottom-left. Highlighted (cobalt
+/// dash and glyph) while files are over it.
 @MainActor
 final class ShelfEmptyView: NSView {
     private let dash = CAShapeLayer()
     private let glyph = NSImageView()
-    private let title = PassiveLabel(size: 12.5, weight: .semibold)
-    private let hint = PassiveLabel(size: DesignTokens.TypeRamp.caption, color: .secondaryLabelColor)
+    private let title = PassiveLabel(size: DesignTokens.Component.Shelf.titleSize, weight: .bold)
+    private let hint = PassiveLabel(size: DesignTokens.Component.Shelf.detailSize, weight: .medium, color: ActionStyle.mist)
 
-    var isHighlighted = false { didSet { needsLayout = true } }
+    var isHighlighted = false {
+        didSet {
+            title.stringValue = isHighlighted ? String(localized: "Drop to add") : String(localized: "Drop files here")
+            needsLayout = true
+        }
+    }
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
+        let t = DesignTokens.Component.Shelf.self
         dash.fillColor = nil
-        dash.lineWidth = 1.5
-        dash.lineDashPattern = [5, 4]
+        dash.lineWidth = t.dropLineWidth
+        dash.lineDashPattern = t.dropDash.map { NSNumber(value: Double($0)) }
         dash.actions = ["path": NSNull(), "strokeColor": NSNull()]
         layer?.addSublayer(dash)
-        let config = NSImage.SymbolConfiguration(pointSize: 26, weight: .medium)
+        let config = NSImage.SymbolConfiguration(pointSize: t.emptyGlyph, weight: .semibold)
         glyph.image = NSImage(systemSymbolName: "tray.and.arrow.down", accessibilityDescription: nil)?.withSymbolConfiguration(config)
-        glyph.contentTintColor = ActionStyle.iris
+        glyph.imageAlignment = .alignBottomLeft
         title.stringValue = String(localized: "Drop files here")
-        title.alignment = .center
         hint.stringValue = String(localized: "Files stay in place.")
-        hint.alignment = .center
         for v in [glyph, title, hint] as [NSView] { addSubview(v) }
         setAccessibilityElement(false)
     }
@@ -480,17 +499,18 @@ final class ShelfEmptyView: NSView {
     override func layout() {
         super.layout()
         let b = bounds
+        let r = DesignTokens.Shape.tile
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         dash.frame = b
-        dash.path = CGPath(roundedRect: b.insetBy(dx: 0.75, dy: 0.75), cornerWidth: DesignTokens.Radius.large,
-                           cornerHeight: DesignTokens.Radius.large, transform: nil)
-        let color = isHighlighted ? ActionStyle.iris : NSColor.tertiaryLabelColor
-        dash.strokeColor = ActionStyle.cg(color, in: effectiveAppearance)
+        dash.path = CGPath(roundedRect: b.insetBy(dx: 0.75, dy: 0.75), cornerWidth: r, cornerHeight: r, transform: nil)
+        dash.strokeColor = ActionStyle.cg(isHighlighted ? ActionStyle.accentText : ActionStyle.mist, in: effectiveAppearance)
         CATransaction.commit()
-        glyph.frame = NSRect(x: (b.width - 40) / 2, y: b.midY + 4, width: 40, height: 34)
-        title.frame = NSRect(x: 8, y: b.midY - 18, width: b.width - 16, height: 17)
-        hint.frame = NSRect(x: 8, y: b.midY - 34, width: b.width - 16, height: 14)
+        glyph.contentTintColor = ActionStyle.accentText
+        let inset: CGFloat = 14
+        glyph.frame = NSRect(x: inset, y: b.height - inset - 30, width: 40, height: 30)
+        title.frame = NSRect(x: inset, y: inset + 16, width: b.width - 2 * inset, height: 18)
+        hint.frame = NSRect(x: inset, y: inset, width: b.width - 2 * inset, height: 14)
     }
 
     override func viewDidChangeEffectiveAppearance() {

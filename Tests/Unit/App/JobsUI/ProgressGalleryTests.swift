@@ -14,10 +14,10 @@ final class ProgressGalleryTests: XCTestCase {
 
     func testRenderProgressCardScreens() throws {
         let written = try ProgressCardGallery.render(into: screensDirectory)
-        XCTAssertEqual(written.count, ProgressCardGallery.scenes().count)
+        XCTAssertEqual(written.count, ProgressCardGallery.scenes().count + ProgressCardGallery.toastScenes().count)
         for url in written {
             let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
-            XCTAssertGreaterThan(size, 5_000, "\(url.lastPathComponent) looks empty")
+            XCTAssertGreaterThan(size, 3_000, "\(url.lastPathComponent) looks empty")
             let image = try XCTUnwrap(NSImage(contentsOf: url))
             XCTAssertGreaterThan(image.size.width, 300)
         }
