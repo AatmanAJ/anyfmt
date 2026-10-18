@@ -16,6 +16,7 @@
     "%@ licence" : {},
     "%@ lives in the menu bar, with no Dock icon and no window. Start it with your Mac so the wheel is always there." : {},
     "%@ never connects to the internet unless you ask it to." : {},
+    "%@ off" : {},
     "%@ opens %@" : {},
     "%@ opens an editor, then saves %@" : {},
     "%@ options" : {
@@ -141,6 +142,7 @@
     "Actions" : {
       "comment" : "Name of the file actions wheel"
     },
+    "Actions for %@" : {},
     "Actions work on any file or folder, even ones with nothing to convert." : {},
     "Add %@ to Favourites" : {},
     "Add a key to go with the modifiers." : {},
@@ -208,6 +210,7 @@
     "Box" : {},
     "Broadcast (EBU R128)" : {},
     "Built with" : {},
+    "Built-in" : {},
     "Bundled engines" : {},
     "Camera, location and author details stay in the copy." : {},
     "Cancel" : {
@@ -320,6 +323,7 @@
     "Defaults for converting to %@" : {},
     "Delete" : {},
     "Delete page" : {},
+    "Delete Preset" : {},
     "Delete selected" : {},
     "Delete selected pages (⌫)" : {},
     "Deleted" : {},
@@ -455,6 +459,7 @@
     "Hidden formats stay available from the command line." : {},
     "Hidden from the wheel" : {},
     "Hide" : {},
+    "Hide Built-in Preset" : {},
     "Hide Float Shelf" : {},
     "High" : {},
     "High-quality background removal" : {},
@@ -568,7 +573,9 @@
     "Mode" : {},
     "mono" : {},
     "Mono" : {},
-    "More" : {},
+    "More" : {
+      "comment" : "Wheel segment that shows the next page of targets"
+    },
     "Move %@ to your Applications folder to launch it at login." : {},
     "Move %lld items to" : {},
     "Move Down" : {},
@@ -609,6 +616,7 @@
     },
     "No permissions needed" : {},
     "No permissions? Use the Services menu" : {},
+    "No presets for %@ yet." : {},
     "no sound" : {},
     "No tools" : {
       "comment" : "Hub text when no editing tool applies"
@@ -716,7 +724,10 @@
     "Preparing preview…" : {},
     "Presentations" : {},
     "Preset" : {},
+    "Preset %lld" : {},
+    "Preset name" : {},
     "Presets" : {},
+    "Presets show next to %@ on the wheel. Click a name to rename it." : {},
     "Press a key mid-drag: tap it or hold it. A key you were already holding when the drag started is ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two." : {},
     "Press and hold on the photo, then move it." : {},
     "Press and let go within %@, or make taps more relaxed above." : {},
@@ -793,6 +804,7 @@
     "Reset to Default" : {},
     "Resolution" : {},
     "Restore %@" : {},
+    "Restore Built-in Presets" : {},
     "Restore default shortcut" : {},
     "Restore Defaults" : {},
     "Result" : {},
@@ -819,6 +831,7 @@
     "Saturation" : {},
     "Save converted files" : {},
     "Save copy" : {},
+    "Save Current Defaults as Preset" : {},
     "Save to" : {},
     "Saved %@ beside the original" : {},
     "Saved beside the original" : {},
@@ -1024,6 +1037,7 @@
     "Usage" : {},
     "Use #RRGGBB or #RRGGBBAA" : {},
     "Use an https:// address. Plain http only works for servers on this Mac." : {},
+    "Use as Defaults" : {},
     "Use four numbers: x, y, width, height" : {},
     "Use one key on its own." : {},
     "Use page numbers and ranges, like 1-3, 5" : {},
