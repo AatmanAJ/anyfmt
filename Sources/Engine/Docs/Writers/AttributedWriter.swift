@@ -73,11 +73,13 @@ final class AttributedBuilder {
 
     func font(_ c: Ctx) -> NSFont {
         if c.code { return NSFont.userFixedPitchFont(ofSize: c.size - 1) ?? NSFont.monospacedSystemFont(ofSize: c.size - 1, weight: .regular) }
-        var traits: NSFontTraitMask = []
-        if c.bold { traits.insert(.boldFontMask) }
-        if c.italic { traits.insert(.italicFontMask) }
+        // Font descriptors (thread-safe), not NSFontManager: engines run off the main thread.
         let base = NSFont(name: "Helvetica", size: c.size) ?? NSFont.systemFont(ofSize: c.size)
-        return NSFontManager.shared.font(withFamily: base.familyName ?? "Helvetica", traits: traits, weight: c.bold ? 9 : 5, size: c.size) ?? base
+        var traits: NSFontDescriptor.SymbolicTraits = []
+        if c.bold { traits.insert(.bold) }
+        if c.italic { traits.insert(.italic) }
+        guard !traits.isEmpty else { return base }
+        return NSFont(descriptor: base.fontDescriptor.withSymbolicTraits(traits), size: c.size) ?? base
     }
 
     func paragraphStyle(_ c: Ctx, spacingAfter: CGFloat = 6, headerLevel: Int = 0) -> NSParagraphStyle {

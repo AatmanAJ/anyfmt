@@ -80,6 +80,36 @@ final class RobustnessTests: XCTestCase {
         }
     }
 
+    /// The job queue runs several conversions at once: WebKit renders serialise, AppKit text work runs in parallel.
+    func testConcurrentConversionsAreSafe() async throws {
+        let jobs: [(String, FormatID, FormatID, any ConversionEngine)] = [
+            ("sample.md", Formats.md, Formats.pdf, WebKitPDFEngine()), ("sample.docx", Formats.docx, Formats.pdf, WebKitPDFEngine()),
+            ("sample.html", Formats.html, Formats.pdf, WebKitPDFEngine()), ("sample.xlsx", Formats.xlsx, Formats.pdf, SheetsEngine()),
+            ("sample.md", Formats.md, Formats.rtf, AttributedTextEngine()), ("sample.docx", Formats.docx, Formats.rtfd, AttributedTextEngine()),
+            ("sample.rtf", Formats.rtf, Formats.docx, OOXMLEngine()), ("sample.epub", Formats.epub, Formats.docx, OOXMLEngine()),
+            ("sample.pptx", Formats.pptx, Formats.pdf, QuickLookEngine()), ("sample.doc", Formats.doc, Formats.md, MarkdownEngine()),
+        ]
+        let inputs = try jobs.map { try DocsFixtures.url($0.0) }
+        let results = try await withThrowingTaskGroup(of: (Int, URL).self) { group -> [Int: URL] in
+            for round in 0..<2 {
+                for (k, job) in jobs.enumerated() {
+                    let input = inputs[k]
+                    group.addTask {
+                        let out = try await runEngine(job.3, input, from: job.1, to: job.2, baseName: "c\(round)-\(k)")
+                        return (k, out[0])
+                    }
+                }
+            }
+            var d: [Int: URL] = [:]
+            for try await (k, url) in group { d[k] = url }
+            return d
+        }
+        XCTAssertEqual(results.count, jobs.count)
+        for (k, url) in results where jobs[k].2 == Formats.pdf {
+            XCTAssertGreaterThan(PDFKitPageCount(url), 0, "\(jobs[k].0) → pdf")
+        }
+    }
+
     func testLargeCSVToXLSXIsFast() throws {
         var csv = "id,name,amount,date,flag\n"
         csv.reserveCapacity(10_000_000)
