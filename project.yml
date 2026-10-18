@@ -205,6 +205,8 @@ schemes:
     test:
       config: Debug
       gatherCoverageData: false
+      environmentVariables:
+        HALO_ENGINES_DIR: $(ENGINES_DIST)
       targets:
         - CoreTests
         - AppTests

@@ -192,6 +192,12 @@ public enum StandardSchemas {
         OptionSpec(OptionKey.maxDimension, L("Max size"), .integer(min: 0, max: 32768, unit: "px"), default: .int(0)),
     ])
 
+    public static let imageOpaqueLossless = OptionsSchema("image.opaque.lossless", [
+        OptionSpec(OptionKey.background, L("Background for transparency"), .color, default: .string("#FFFFFF")),
+        OptionSpec(OptionKey.maxDimension, L("Max size"), .integer(min: 0, max: 32768, unit: "px"), default: .int(0),
+                   help: L("Longest edge in pixels. 0 keeps the original size.")),
+    ])
+
     public static let pdfRender = OptionsSchema("pdf.render", [
         OptionSpec(OptionKey.dpi, L("Resolution"), .choice([
             OptionChoice("72", "72 DPI"), OptionChoice("150", "150 DPI"),
@@ -280,7 +286,7 @@ public enum StandardSchemas {
     ])
 
     public static let all: [OptionsSchema] = [
-        .none, imageLossy, imageLosslessCapable, imageLossless, imageOpaque, pdfRender, toPDF, documentPDF,
+        .none, imageLossy, imageLosslessCapable, imageLossless, imageOpaque, imageOpaqueLossless, pdfRender, toPDF, documentPDF,
         audioLossy, audioLossless, video, gif, archive, subtitleText, sheet,
     ]
 

@@ -64,20 +64,12 @@ public enum ImageRoutes {
 
     // MARK: Schemas and flags
 
-    /// BMP can't hold alpha but has no quality knob. Lane-local until
-    /// StandardSchemas gains it (docs/contract-changes/D-image.md).
-    public static let opaqueLosslessSchema = OptionsSchema("image.opaque.lossless", [
-        OptionSpec(OptionKey.background, L("Background for transparency"), .color, default: .string("#FFFFFF")),
-        OptionSpec(OptionKey.maxDimension, L("Max size"), .integer(min: 0, max: 32768, unit: "px"), default: .int(0),
-                   help: L("Longest edge in pixels. 0 keeps the original size.")),
-    ])
-
     static func schema(for to: FormatID) -> OptionsSchema {
         switch to {
         case Formats.jpg: StandardSchemas.imageOpaque
         case Formats.webp: StandardSchemas.imageLosslessCapable
         case Formats.heic, Formats.heif, Formats.avif, Formats.jp2: StandardSchemas.imageLossy
-        case Formats.bmp: opaqueLosslessSchema
+        case Formats.bmp: StandardSchemas.imageOpaqueLossless
         case Formats.pdf: StandardSchemas.toPDF
         default: StandardSchemas.imageLossless // png tiff gif psd tga exr ico icns
         }
