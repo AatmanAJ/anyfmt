@@ -1,0 +1,7 @@
+$ halo tool meta.strip <tmp>/photo.png --json
+exit: 0
+--- stdout
+{"event":"start","jobs":1}
+{"event":"output","file":"<tmp>/photo.png","path":"<tmp>/photo-clean.png"}
+{"event":"done","exitCode":0,"failed":0,"skipped":0,"succeeded":1}
+--- stderr

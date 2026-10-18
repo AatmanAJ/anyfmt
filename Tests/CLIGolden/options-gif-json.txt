@@ -1,0 +1,123 @@
+$ halo options gif --json
+exit: 0
+--- stdout
+{
+  "format" : "gif",
+  "options" : [
+    {
+      "choices" : [
+        {
+          "id" : "0",
+          "label" : "Keep"
+        },
+        {
+          "id" : "960",
+          "label" : "960 px"
+        },
+        {
+          "id" : "720",
+          "label" : "720 px"
+        },
+        {
+          "id" : "640",
+          "label" : "640 px"
+        },
+        {
+          "id" : "480",
+          "label" : "480 px"
+        },
+        {
+          "id" : "320",
+          "label" : "320 px"
+        }
+      ],
+      "default" : "640",
+      "id" : "gifWidth",
+      "kind" : "choice",
+      "label" : "Width"
+    },
+    {
+      "choices" : [
+        {
+          "id" : "10",
+          "label" : "10 fps"
+        },
+        {
+          "id" : "15",
+          "label" : "15 fps"
+        },
+        {
+          "id" : "24",
+          "label" : "24 fps"
+        },
+        {
+          "id" : "30",
+          "label" : "30 fps"
+        }
+      ],
+      "default" : "15",
+      "id" : "fps",
+      "kind" : "choice",
+      "label" : "Frame rate"
+    },
+    {
+      "choices" : [
+        {
+          "id" : "forever",
+          "label" : "Forever"
+        },
+        {
+          "id" : "once",
+          "label" : "Play once"
+        }
+      ],
+      "default" : "forever",
+      "id" : "gifLoop",
+      "kind" : "choice",
+      "label" : "Loop"
+    },
+    {
+      "choices" : [
+        {
+          "id" : "256",
+          "label" : "256 colours"
+        },
+        {
+          "id" : "128",
+          "label" : "128 colours"
+        },
+        {
+          "id" : "64",
+          "label" : "64 colours"
+        },
+        {
+          "id" : "32",
+          "label" : "32 colours"
+        }
+      ],
+      "default" : "256",
+      "help" : "Fewer colours make a smaller file.",
+      "id" : "gifColors",
+      "kind" : "choice",
+      "label" : "Colours"
+    },
+    {
+      "default" : true,
+      "help" : "Smooths gradients. Off gives flat colour areas and a smaller file.",
+      "id" : "gifDither",
+      "kind" : "toggle",
+      "label" : "Dither"
+    },
+    {
+      "default" : 0,
+      "id" : "maxDimension",
+      "kind" : "integer",
+      "label" : "Max size",
+      "max" : 32768,
+      "min" : 0,
+      "unit" : "px"
+    }
+  ],
+  "schema" : "gif+image.lossless"
+}
+--- stderr

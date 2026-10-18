@@ -1,0 +1,65 @@
+$ halo help --json
+exit: 0
+--- stdout
+{
+  "commands" : [
+    "convert",
+    "targets",
+    "formats",
+    "options",
+    "tool",
+    "tools",
+    "presets",
+    "jobs",
+    "doctor",
+    "schema",
+    "route",
+    "mcp",
+    "version",
+    "help"
+  ],
+  "exitCodes" : [
+    {
+      "code" : 0,
+      "meaning" : "Success: every file converted (or nothing needed converting).",
+      "name" : "ok"
+    },
+    {
+      "code" : 2,
+      "meaning" : "Bad command line: unknown command, flag, format, option or value.",
+      "name" : "usage"
+    },
+    {
+      "code" : 3,
+      "meaning" : "No route from the input format to the target (or the tool doesn't apply).",
+      "name" : "unsupported_route"
+    },
+    {
+      "code" : 4,
+      "meaning" : "An input file is missing, unreadable or of an unknown kind.",
+      "name" : "input_missing"
+    },
+    {
+      "code" : 5,
+      "meaning" : "An engine ran and failed; the original is untouched.",
+      "name" : "engine_failed"
+    },
+    {
+      "code" : 6,
+      "meaning" : "Batch finished with some files failed (or an output name was taken with --overwrite never).",
+      "name" : "partial"
+    },
+    {
+      "code" : 7,
+      "meaning" : "Cancelled (SIGINT / MCP cancellation).",
+      "name" : "cancelled"
+    },
+    {
+      "code" : 8,
+      "meaning" : "The request needs the cloud (Pro), which the CLI never uses.",
+      "name" : "cloud_unavailable"
+    }
+  ],
+  "usage" : "usage: halo <command> [options]\n\nconvert <file>... --to <format> [--opt key=value]... [--preset <id|title>]\n        [--out-dir <dir>] [--overwrite rename|never] [--metadata keep|private|strip] [--dry-run]\ntargets <file>...              formats these files can become (with routes)\nformats [--from <format>]      every conversion in the live capability table\noptions <format>               options for converting to <format>\ntool <tool-id> <file>... [--opt key=value]... [--out-dir <dir>] [--metadata …]\ntools                          tools and their options\npresets [list [--format <f>] | show <id> | add --format <f> --title <t> --opt k=v... | rm <id>]\njobs                           recent conversions made with the app\ndoctor                         engines, packs, paths, signature, permissions\nschema                         everything above in one document (schemaVersion 1)\nroute <from> <to>              the planned route between two formats\nmcp                            Model Context Protocol server on stdin/stdout\nversion\nhelp\n\nEvery command takes --json (pretty JSON on stdout; convert and tool stream NDJSON).\nHuman messages go to stderr. Outputs never overwrite anything: name.png, then\nname 2.png … Exit codes: 0 ok, 2 usage, 3 unsupported route, 4 input missing,\n5 engine failed, 6 partial batch, 7 cancelled, 8 cloud unavailable."
+}
+--- stderr

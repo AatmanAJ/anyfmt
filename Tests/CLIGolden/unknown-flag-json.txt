@@ -1,0 +1,12 @@
+$ halo formats --bogus --json
+exit: 2
+--- stdout
+{
+  "error" : {
+    "code" : "usage",
+    "exitCode" : 2,
+    "message" : "unknown flag --bogus"
+  }
+}
+--- stderr
+error: unknown flag --bogus

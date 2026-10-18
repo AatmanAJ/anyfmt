@@ -1,0 +1,5 @@
+$ halo targets <tmp>/gone.png
+exit: 4
+--- stdout
+--- stderr
+error: no such file: <tmp>/gone.png

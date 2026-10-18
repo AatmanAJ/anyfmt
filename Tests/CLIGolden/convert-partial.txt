@@ -1,0 +1,8 @@
+$ halo convert <tmp>/photo.png <tmp>/gone.png --to jpg --json
+exit: 6
+--- stdout
+{"event":"start","jobs":2}
+{"code":"input_missing","event":"error","file":"<tmp>/gone.png","message":"no such file or not readable: <tmp>/gone.png"}
+{"event":"output","file":"<tmp>/photo.png","path":"<tmp>/photo.jpg"}
+{"event":"done","exitCode":6,"failed":1,"skipped":0,"succeeded":1}
+--- stderr

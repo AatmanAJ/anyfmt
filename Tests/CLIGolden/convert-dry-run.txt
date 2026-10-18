@@ -1,0 +1,7 @@
+$ halo convert <tmp>/photo.png --to jpg --dry-run
+exit: 0
+--- stdout
+<tmp>/photo.jpg
+--- stderr
+<tmp>/photo.png
+  route: png → jpg [imageio]

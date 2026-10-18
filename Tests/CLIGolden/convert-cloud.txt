@@ -1,0 +1,5 @@
+$ halo convert <tmp>/photo.png --to mp4 --opt cloud=true
+exit: 8
+--- stdout
+--- stderr
+error: cloud conversion (Pro) runs in the app; the CLI only converts on this Mac. Drop --opt cloud=true.

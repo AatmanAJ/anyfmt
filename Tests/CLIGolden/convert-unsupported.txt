@@ -1,0 +1,7 @@
+$ halo convert <tmp>/photo.png --to srt --json
+exit: 3
+--- stdout
+{"event":"start","jobs":1}
+{"code":"unsupported_route","event":"error","file":"<tmp>/photo.png","message":"PNG → SRT isn’t supported"}
+{"event":"done","exitCode":3,"failed":1,"skipped":0,"succeeded":0}
+--- stderr

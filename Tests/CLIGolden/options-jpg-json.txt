@@ -1,0 +1,60 @@
+$ halo options jpg --json
+exit: 0
+--- stdout
+{
+  "format" : "jpg",
+  "options" : [
+    {
+      "default" : 85,
+      "id" : "quality",
+      "kind" : "slider",
+      "label" : "Quality",
+      "max" : 100,
+      "min" : 1,
+      "step" : 1,
+      "unit" : "%"
+    },
+    {
+      "default" : "#FFFFFF",
+      "id" : "background",
+      "kind" : "color",
+      "label" : "Background for transparency"
+    },
+    {
+      "default" : 0,
+      "id" : "maxDimension",
+      "kind" : "integer",
+      "label" : "Max size",
+      "max" : 32768,
+      "min" : 0,
+      "unit" : "px"
+    },
+    {
+      "choices" : [
+        {
+          "id" : "72",
+          "label" : "72 DPI"
+        },
+        {
+          "id" : "150",
+          "label" : "150 DPI"
+        },
+        {
+          "id" : "300",
+          "label" : "300 DPI"
+        },
+        {
+          "id" : "600",
+          "label" : "600 DPI"
+        }
+      ],
+      "default" : "300",
+      "help" : "Used when the source is a PDF.",
+      "id" : "dpi",
+      "kind" : "choice",
+      "label" : "Resolution"
+    }
+  ],
+  "schema" : "image.opaque+pdf.render"
+}
+--- stderr

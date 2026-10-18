@@ -1,0 +1,5 @@
+$ halo tool cloud.transcribe <tmp>/photo.png
+exit: 8
+--- stdout
+--- stderr
+error: “Transcribe” runs in the cloud (Pro); use the app

@@ -1,0 +1,7 @@
+$ halo convert <tmp>/photo.png --to png --json
+exit: 0
+--- stdout
+{"event":"start","jobs":0}
+{"event":"skip","file":"<tmp>/photo.png","reason":"already PNG"}
+{"event":"done","exitCode":0,"failed":0,"skipped":1,"succeeded":0}
+--- stderr

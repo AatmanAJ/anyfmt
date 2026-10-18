@@ -1,0 +1,7 @@
+$ halo convert <tmp>/photo.png --to jpg --opt quality=70 --out-dir <tmp>/out --json
+exit: 0
+--- stdout
+{"event":"start","jobs":1}
+{"event":"output","file":"<tmp>/photo.png","path":"<tmp>/out/photo.jpg"}
+{"event":"done","exitCode":0,"failed":0,"skipped":0,"succeeded":1}
+--- stderr

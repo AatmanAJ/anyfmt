@@ -4,552 +4,1362 @@ exit: 0
 {
   "tools" : [
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.compress",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "quality",
+              "label" : "Quality"
+            },
+            {
+              "id" : "size",
+              "label" : "Target size"
+            },
+            {
+              "id" : "percent",
+              "label" : "Percentage"
+            }
+          ],
           "default" : "quality",
           "id" : "sizeMode",
+          "kind" : "choice",
           "label" : "Mode"
         },
         {
-          "default" : "70",
+          "default" : 70,
           "id" : "quality",
-          "label" : "Quality"
+          "kind" : "slider",
+          "label" : "Quality",
+          "max" : 100,
+          "min" : 1,
+          "step" : 1,
+          "unit" : "%",
+          "visibleWhen" : {
+            "sizeMode" : "quality"
+          }
         },
         {
-          "default" : "1000000",
+          "default" : 1000000,
           "id" : "targetSize",
-          "label" : "Target size"
+          "kind" : "fileSize",
+          "label" : "Target size",
+          "unit" : "bytes",
+          "visibleWhen" : {
+            "sizeMode" : "size"
+          }
         },
         {
-          "default" : "50",
+          "default" : 50,
           "id" : "percent",
-          "label" : "Percentage of original"
+          "kind" : "slider",
+          "label" : "Percentage of original",
+          "max" : 95,
+          "min" : 5,
+          "step" : 5,
+          "unit" : "%",
+          "visibleWhen" : {
+            "sizeMode" : "percent"
+          }
         }
       ],
+      "suffix" : "compressed",
       "title" : "Compress"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.resize",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "preset",
+              "label" : "Preset"
+            },
+            {
+              "id" : "pixels",
+              "label" : "Exact size"
+            },
+            {
+              "id" : "percent",
+              "label" : "Percentage"
+            }
+          ],
           "default" : "percent",
           "id" : "mode",
+          "kind" : "choice",
           "label" : "Mode"
         },
         {
+          "choices" : [
+            {
+              "id" : "3840",
+              "label" : "3840 px"
+            },
+            {
+              "id" : "2048",
+              "label" : "2048 px"
+            },
+            {
+              "id" : "1920",
+              "label" : "1920 px"
+            },
+            {
+              "id" : "1280",
+              "label" : "1280 px"
+            },
+            {
+              "id" : "1080",
+              "label" : "1080 px"
+            },
+            {
+              "id" : "800",
+              "label" : "800 px"
+            },
+            {
+              "id" : "512",
+              "label" : "512 px"
+            }
+          ],
           "default" : "1920",
           "id" : "preset",
-          "label" : "Preset"
+          "kind" : "choice",
+          "label" : "Preset",
+          "visibleWhen" : {
+            "mode" : "preset"
+          }
         },
         {
-          "default" : "1920",
+          "default" : 1920,
           "id" : "width",
-          "label" : "Width"
+          "kind" : "integer",
+          "label" : "Width",
+          "max" : 32768,
+          "min" : 1,
+          "unit" : "px",
+          "visibleWhen" : {
+            "mode" : "pixels"
+          }
         },
         {
-          "default" : "0",
+          "default" : 0,
+          "help" : "0 keeps the aspect ratio",
           "id" : "height",
-          "label" : "Height"
+          "kind" : "integer",
+          "label" : "Height",
+          "max" : 32768,
+          "min" : 0,
+          "unit" : "px",
+          "visibleWhen" : {
+            "mode" : "pixels"
+          }
         },
         {
-          "default" : "50",
+          "default" : 50,
           "id" : "percent",
-          "label" : "Scale"
+          "kind" : "slider",
+          "label" : "Scale",
+          "max" : 400,
+          "min" : 5,
+          "step" : 5,
+          "unit" : "%",
+          "visibleWhen" : {
+            "mode" : "percent"
+          }
         }
       ],
+      "suffix" : "resized",
       "title" : "Resize"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.crop",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
           "default" : "0,0,1,1",
           "id" : "rect",
+          "kind" : "rect",
           "label" : "Crop"
         },
         {
+          "choices" : [
+            {
+              "id" : "free",
+              "label" : "Free"
+            },
+            {
+              "id" : "1:1",
+              "label" : "Square"
+            },
+            {
+              "id" : "4:3",
+              "label" : "4:3"
+            },
+            {
+              "id" : "3:2",
+              "label" : "3:2"
+            },
+            {
+              "id" : "16:9",
+              "label" : "16:9"
+            },
+            {
+              "id" : "9:16",
+              "label" : "9:16"
+            }
+          ],
           "default" : "free",
           "id" : "aspect",
+          "kind" : "choice",
           "label" : "Aspect"
         }
       ],
+      "suffix" : "cropped",
       "title" : "Crop"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.adjust",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
-          "default" : "0.0",
+          "default" : 0,
           "id" : "exposure",
-          "label" : "Exposure"
+          "kind" : "decimal",
+          "label" : "Exposure",
+          "max" : 2,
+          "min" : -2,
+          "step" : 0.05
         },
         {
-          "default" : "1.0",
+          "default" : 1,
           "id" : "contrast",
-          "label" : "Contrast"
+          "kind" : "decimal",
+          "label" : "Contrast",
+          "max" : 1.5,
+          "min" : 0.5,
+          "step" : 0.01
         },
         {
-          "default" : "1.0",
+          "default" : 1,
           "id" : "saturation",
-          "label" : "Saturation"
+          "kind" : "decimal",
+          "label" : "Saturation",
+          "max" : 2,
+          "min" : 0,
+          "step" : 0.01
         },
         {
-          "default" : "0.0",
+          "default" : 0,
           "id" : "warmth",
-          "label" : "Warmth"
+          "kind" : "decimal",
+          "label" : "Warmth",
+          "max" : 1,
+          "min" : -1,
+          "step" : 0.01
         }
       ],
+      "suffix" : "adjusted",
       "title" : "Adjust"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.annotate",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
           "default" : "[]",
+          "help" : "JSON array of marks; coordinates 0…1 from the top-left",
           "id" : "annotations",
+          "kind" : "text",
           "label" : "Annotations"
         }
       ],
+      "suffix" : "annotated",
       "title" : "Annotate"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.redact",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "blur",
+              "label" : "Blur"
+            },
+            {
+              "id" : "pixelate",
+              "label" : "Pixelate"
+            },
+            {
+              "id" : "solid",
+              "label" : "Solid"
+            }
+          ],
           "default" : "pixelate",
           "id" : "style",
+          "kind" : "choice",
           "label" : "Style"
         },
         {
           "default" : "#000000",
           "id" : "color",
-          "label" : "Fill colour"
+          "kind" : "color",
+          "label" : "Fill colour",
+          "visibleWhen" : {
+            "style" : "solid"
+          }
         },
         {
           "default" : "",
+          "help" : "Semicolon-separated rects x,y,w,h (0…1)",
           "id" : "regions",
+          "kind" : "text",
           "label" : "Regions"
         }
       ],
+      "suffix" : "redacted",
       "title" : "Redact"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.removeBackground",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
 
       ],
+      "suffix" : "cutout",
       "title" : "Remove background"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.addBackground",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "solid",
+              "label" : "Solid"
+            },
+            {
+              "id" : "gradient",
+              "label" : "Gradient"
+            },
+            {
+              "id" : "image",
+              "label" : "Image"
+            }
+          ],
           "default" : "gradient",
           "id" : "fill",
+          "kind" : "choice",
           "label" : "Fill"
         },
         {
           "default" : "#6E56F8",
           "id" : "color1",
+          "kind" : "color",
           "label" : "Colour"
         },
         {
           "default" : "#22C3A6",
           "id" : "color2",
-          "label" : "Second colour"
+          "kind" : "color",
+          "label" : "Second colour",
+          "visibleWhen" : {
+            "fill" : "gradient"
+          }
         },
         {
-          "default" : "135",
+          "default" : 135,
           "id" : "angle",
-          "label" : "Gradient angle"
+          "kind" : "slider",
+          "label" : "Gradient angle",
+          "max" : 360,
+          "min" : 0,
+          "step" : 1,
+          "unit" : "°",
+          "visibleWhen" : {
+            "fill" : "gradient"
+          }
         },
         {
           "default" : "",
           "id" : "imagePath",
-          "label" : "Background image"
+          "kind" : "text",
+          "label" : "Background image",
+          "visibleWhen" : {
+            "fill" : "image"
+          }
         },
         {
-          "default" : "10",
+          "default" : 10,
           "id" : "padding",
-          "label" : "Padding"
+          "kind" : "slider",
+          "label" : "Padding",
+          "max" : 40,
+          "min" : 0,
+          "step" : 1,
+          "unit" : "%"
         },
         {
-          "default" : "4",
+          "default" : 4,
           "id" : "cornerRadius",
-          "label" : "Corner radius"
+          "kind" : "slider",
+          "label" : "Corner radius",
+          "max" : 20,
+          "min" : 0,
+          "step" : 1,
+          "unit" : "%"
         },
         {
-          "default" : "true",
+          "default" : true,
           "id" : "shadow",
+          "kind" : "toggle",
           "label" : "Shadow"
         }
       ],
+      "suffix" : "background",
       "title" : "Add background"
     },
     {
+      "arity" : {
+        "kind" : "combine",
+        "minimum" : 2
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.collage",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "grid",
+              "label" : "Grid"
+            },
+            {
+              "id" : "row",
+              "label" : "Row"
+            },
+            {
+              "id" : "column",
+              "label" : "Column"
+            }
+          ],
           "default" : "grid",
           "id" : "layout",
+          "kind" : "choice",
           "label" : "Layout"
         },
         {
-          "default" : "16",
+          "default" : 16,
           "id" : "gap",
-          "label" : "Gap"
+          "kind" : "slider",
+          "label" : "Gap",
+          "max" : 80,
+          "min" : 0,
+          "step" : 2,
+          "unit" : "px"
         },
         {
           "default" : "#FFFFFF",
           "id" : "color1",
+          "kind" : "color",
           "label" : "Background"
         },
         {
-          "default" : "3000",
+          "default" : 3000,
           "id" : "width",
-          "label" : "Output width"
+          "kind" : "integer",
+          "label" : "Output width",
+          "max" : 16384,
+          "min" : 256,
+          "unit" : "px"
         },
         {
           "default" : "",
+          "help" : "Comma-separated input indices; empty keeps drag order",
           "id" : "order",
+          "kind" : "text",
           "label" : "Order"
         }
       ],
+      "suffix" : "collage",
       "title" : "Collage"
     },
     {
+      "arity" : {
+        "kind" : "combine",
+        "minimum" : 1
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.toPDF",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "fit",
+              "label" : "Fit each image"
+            },
+            {
+              "id" : "a4",
+              "label" : "A4"
+            },
+            {
+              "id" : "letter",
+              "label" : "US Letter"
+            }
+          ],
           "default" : "fit",
           "id" : "pageSize",
+          "kind" : "choice",
           "label" : "Page size"
         },
         {
           "default" : "",
+          "help" : "Comma-separated input indices; empty keeps drag order",
           "id" : "order",
+          "kind" : "text",
           "label" : "Order"
         }
       ],
+      "suffix" : "combined",
       "title" : "Images to PDF"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "image.readCodes",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
 
       ],
-      "title" : "Read QR \/ barcode"
+      "suffix" : "codes",
+      "title" : "Read QR / barcode"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.trim",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
           "default" : "",
           "id" : "range",
+          "kind" : "timeRange",
           "label" : "Range"
         },
         {
-          "default" : "true",
+          "default" : true,
           "id" : "lossless",
+          "kind" : "toggle",
           "label" : "Lossless when possible"
         }
       ],
+      "suffix" : "trimmed",
       "title" : "Trim"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.crop",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
           "default" : "0,0,1,1",
           "id" : "rect",
+          "kind" : "rect",
           "label" : "Crop"
         },
         {
+          "choices" : [
+            {
+              "id" : "free",
+              "label" : "Free"
+            },
+            {
+              "id" : "1:1",
+              "label" : "Square"
+            },
+            {
+              "id" : "4:3",
+              "label" : "4:3"
+            },
+            {
+              "id" : "3:2",
+              "label" : "3:2"
+            },
+            {
+              "id" : "16:9",
+              "label" : "16:9"
+            },
+            {
+              "id" : "9:16",
+              "label" : "9:16"
+            }
+          ],
           "default" : "free",
           "id" : "aspect",
+          "kind" : "choice",
           "label" : "Aspect"
         }
       ],
+      "suffix" : "cropped",
       "title" : "Crop video"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.speed",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "0.25",
+              "label" : "0.25×"
+            },
+            {
+              "id" : "0.5",
+              "label" : "0.5×"
+            },
+            {
+              "id" : "0.75",
+              "label" : "0.75×"
+            },
+            {
+              "id" : "1.25",
+              "label" : "1.25×"
+            },
+            {
+              "id" : "1.5",
+              "label" : "1.5×"
+            },
+            {
+              "id" : "2",
+              "label" : "2×"
+            },
+            {
+              "id" : "4",
+              "label" : "4×"
+            }
+          ],
           "default" : "2",
           "id" : "factor",
+          "kind" : "choice",
           "label" : "Speed"
         },
         {
-          "default" : "true",
+          "default" : true,
           "id" : "keepPitch",
+          "kind" : "toggle",
           "label" : "Keep audio pitch"
         }
       ],
+      "suffix" : "speed",
       "title" : "Change speed"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.split",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "at",
+              "label" : "At times"
+            },
+            {
+              "id" : "every",
+              "label" : "Every N seconds"
+            }
+          ],
           "default" : "every",
           "id" : "mode",
+          "kind" : "choice",
           "label" : "Split"
         },
         {
           "default" : "",
           "id" : "at",
-          "label" : "Split points (s)"
+          "kind" : "text",
+          "label" : "Split points (s)",
+          "visibleWhen" : {
+            "mode" : "at"
+          }
         },
         {
-          "default" : "60",
+          "default" : 60,
           "id" : "every",
-          "label" : "Segment length"
+          "kind" : "integer",
+          "label" : "Segment length",
+          "max" : 36000,
+          "min" : 1,
+          "unit" : "s",
+          "visibleWhen" : {
+            "mode" : "every"
+          }
         }
       ],
+      "suffix" : "part",
       "title" : "Split"
     },
     {
+      "arity" : {
+        "kind" : "combine",
+        "minimum" : 2
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.join",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
 
       ],
+      "suffix" : "joined",
       "title" : "Join"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.snapshot",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
           "default" : "",
+          "help" : "Comma-separated seconds; empty = middle frame",
           "id" : "times",
+          "kind" : "text",
           "label" : "Times (s)"
         },
         {
+          "choices" : [
+            {
+              "id" : "png",
+              "label" : "PNG"
+            },
+            {
+              "id" : "jpg",
+              "label" : "JPG"
+            }
+          ],
           "default" : "png",
           "id" : "format",
+          "kind" : "choice",
           "label" : "Format"
         }
       ],
+      "suffix" : "frame",
       "title" : "Snapshot frame"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "video.compress",
+      "kinds" : [
+        "video"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "quality",
+              "label" : "Preset"
+            },
+            {
+              "id" : "size",
+              "label" : "Target size"
+            }
+          ],
           "default" : "quality",
           "id" : "sizeMode",
+          "kind" : "choice",
           "label" : "Mode"
         },
         {
+          "choices" : [
+            {
+              "id" : "high",
+              "label" : "High"
+            },
+            {
+              "id" : "balanced",
+              "label" : "Balanced"
+            },
+            {
+              "id" : "small",
+              "label" : "Small file"
+            }
+          ],
           "default" : "balanced",
           "id" : "videoQuality",
-          "label" : "Preset"
+          "kind" : "choice",
+          "label" : "Preset",
+          "visibleWhen" : {
+            "sizeMode" : "quality"
+          }
         },
         {
-          "default" : "25000000",
+          "default" : 25000000,
           "id" : "targetSize",
-          "label" : "Target size"
+          "kind" : "fileSize",
+          "label" : "Target size",
+          "unit" : "bytes",
+          "visibleWhen" : {
+            "sizeMode" : "size"
+          }
         },
         {
+          "choices" : [
+            {
+              "id" : "0",
+              "label" : "Keep"
+            },
+            {
+              "id" : "1080",
+              "label" : "1080p"
+            },
+            {
+              "id" : "720",
+              "label" : "720p"
+            },
+            {
+              "id" : "480",
+              "label" : "480p"
+            }
+          ],
           "default" : "0",
           "id" : "resolution",
+          "kind" : "choice",
           "label" : "Resolution"
         }
       ],
+      "suffix" : "compressed",
       "title" : "Compress video"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "audio.trim",
+      "kinds" : [
+        "audio"
+      ],
       "options" : [
         {
           "default" : "",
           "id" : "range",
+          "kind" : "timeRange",
           "label" : "Range"
         },
         {
-          "default" : "true",
+          "default" : true,
           "id" : "lossless",
+          "kind" : "toggle",
           "label" : "Lossless when possible"
         }
       ],
+      "suffix" : "trimmed",
       "title" : "Trim audio"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "audio.normalize",
+      "kinds" : [
+        "audio",
+        "video"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "-14",
+              "label" : "−14 LUFS (streaming)"
+            },
+            {
+              "id" : "-16",
+              "label" : "−16 LUFS (podcast)"
+            },
+            {
+              "id" : "-23",
+              "label" : "−23 LUFS (EBU R128 broadcast)"
+            }
+          ],
           "default" : "-16",
           "id" : "target",
+          "kind" : "choice",
           "label" : "Loudness target"
         }
       ],
+      "suffix" : "normalized",
       "title" : "Normalize"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "audio.bleep",
+      "kinds" : [
+        "audio"
+      ],
       "options" : [
         {
           "default" : "",
+          "help" : "Semicolon-separated start-end seconds",
           "id" : "ranges",
+          "kind" : "text",
           "label" : "Ranges"
         },
         {
+          "choices" : [
+            {
+              "id" : "tone",
+              "label" : "1 kHz tone"
+            },
+            {
+              "id" : "silence",
+              "label" : "Silence"
+            }
+          ],
           "default" : "tone",
           "id" : "style",
+          "kind" : "choice",
           "label" : "Replace with"
         }
       ],
+      "suffix" : "bleeped",
       "title" : "Bleep"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "audio.channels",
+      "kinds" : [
+        "audio"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "mono",
+              "label" : "Mono"
+            },
+            {
+              "id" : "stereo",
+              "label" : "Stereo"
+            },
+            {
+              "id" : "swap",
+              "label" : "Swap left/right"
+            }
+          ],
           "default" : "mono",
           "id" : "mode",
+          "kind" : "choice",
           "label" : "Channels"
         }
       ],
+      "suffix" : "channels",
       "title" : "Change channels"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "meta.edit",
+      "kinds" : [
+        "audio",
+        "image",
+        "pdf",
+        "video"
+      ],
       "options" : [
         {
           "default" : "",
+          "help" : "JSON object of field → value to set; null removes",
           "id" : "fields",
+          "kind" : "text",
           "label" : "Fields"
         }
       ],
+      "suffix" : "edited",
       "title" : "Edit metadata"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "meta.strip",
+      "kinds" : [
+        "audio",
+        "image",
+        "pdf",
+        "video"
+      ],
       "options" : [
 
       ],
+      "suffix" : "clean",
       "title" : "Strip metadata"
     },
     {
+      "arity" : {
+        "kind" : "combine",
+        "minimum" : 1
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "pdf.organize",
+      "kinds" : [
+        "pdf"
+      ],
       "options" : [
         {
           "default" : "",
+          "help" : "Comma list of input:page[:rotation], e.g. 1:1,1:3:90,2:1. Empty = merge all in order",
           "id" : "order",
+          "kind" : "text",
           "label" : "Page order"
         },
         {
-          "default" : "false",
+          "default" : false,
           "id" : "split",
+          "kind" : "toggle",
           "label" : "Split into single pages"
         }
       ],
-      "title" : "Merge \/ split \/ reorder"
+      "suffix" : "organized",
+      "title" : "Merge / split / reorder"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : true,
       "cloud" : false,
+      "formats" : [
+
+      ],
       "id" : "pdf.compress",
+      "kinds" : [
+        "pdf"
+      ],
       "options" : [
         {
+          "choices" : [
+            {
+              "id" : "quality",
+              "label" : "Preset"
+            },
+            {
+              "id" : "size",
+              "label" : "Target size"
+            }
+          ],
           "default" : "quality",
           "id" : "sizeMode",
+          "kind" : "choice",
           "label" : "Mode"
         },
         {
-          "default" : "60",
+          "default" : 60,
           "id" : "quality",
-          "label" : "Image quality"
+          "kind" : "slider",
+          "label" : "Image quality",
+          "max" : 95,
+          "min" : 10,
+          "step" : 5,
+          "unit" : "%",
+          "visibleWhen" : {
+            "sizeMode" : "quality"
+          }
         },
         {
+          "choices" : [
+            {
+              "id" : "72",
+              "label" : "72 DPI"
+            },
+            {
+              "id" : "150",
+              "label" : "150 DPI"
+            },
+            {
+              "id" : "200",
+              "label" : "200 DPI"
+            },
+            {
+              "id" : "300",
+              "label" : "300 DPI"
+            }
+          ],
           "default" : "150",
           "id" : "dpi",
-          "label" : "Image resolution"
+          "kind" : "choice",
+          "label" : "Image resolution",
+          "visibleWhen" : {
+            "sizeMode" : "quality"
+          }
         },
         {
-          "default" : "2000000",
+          "default" : 2000000,
           "id" : "targetSize",
-          "label" : "Target size"
+          "kind" : "fileSize",
+          "label" : "Target size",
+          "unit" : "bytes",
+          "visibleWhen" : {
+            "sizeMode" : "size"
+          }
         }
       ],
+      "suffix" : "compressed",
       "title" : "Compress PDF"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : false,
       "cloud" : true,
+      "formats" : [
+
+      ],
       "id" : "cloud.transcribe",
+      "kinds" : [
+        "audio",
+        "video"
+      ],
       "options" : [
 
       ],
+      "suffix" : "transcript",
       "title" : "Transcribe"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : false,
       "cloud" : true,
+      "formats" : [
+
+      ],
       "id" : "cloud.upscale",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
 
       ],
+      "suffix" : "upscaled",
       "title" : "Upscale"
     },
     {
+      "arity" : {
+        "kind" : "perFile"
+      },
       "available" : false,
       "cloud" : true,
+      "formats" : [
+
+      ],
       "id" : "cloud.removeBackgroundHQ",
+      "kinds" : [
+        "image"
+      ],
       "options" : [
 
       ],
+      "suffix" : "cutout-hq",
       "title" : "Remove background HQ"
     }
   ]
