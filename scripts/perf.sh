@@ -63,9 +63,10 @@ row "12 MP HEIC → JPG (engine time, CLI start-up subtracted)" "${heic} ms" "< 
 for hw in true false; do
   rm -rf "$WORK/out"
   s=$(python3 -c 'import time;print(time.time())')
-  "$CLI" convert "$WORK/1min.mov" --to mp4 --opt hardware=$hw --opt videoQuality=high --opt resolution=1080 --out "$WORK/out" >/dev/null
+  # Downscaling forces a real re-encode (quality alone keeps the stream copy).
+  "$CLI" convert "$WORK/1min.mov" --to mp4 --opt hardware=$hw --opt resolution=720 --out "$WORK/out" >/dev/null
   e=$(python3 -c 'import time;print(time.time())')
-  row "1 min 1080p MOV → MP4, re-encode, hardware=$hw" "$(python3 -c "print(f'{$e-$s:.2f} s')")" "report; HW where faster"
+  row "1 min 1080p MOV → MP4 720p (forced re-encode), hardware=$hw" "$(python3 -c "print(f'{$e-$s:.2f} s')")" "report; HW where faster"
 done
 rm -rf "$WORK/out"
 s=$(python3 -c 'import time;print(time.time())')
