@@ -55,10 +55,13 @@ public struct FFmpegAVEngine: ConversionEngine {
     private func execute(_ plan: AVConversionPlan, ffmpeg: FFmpeg, duration: Double?, progress: ProgressSink) async throws {
         let fm = FileManager.default
         defer { for url in plan.scratch { try? fm.removeItem(at: url) } }
+        // ffmpeg prints `progress=end` even when it stops on SIGTERM, so passes
+        // only ever reach 99.9 %; 100 % is reported once the output checks out.
+        let capped = ProgressSink { progress(min($0, 0.999)) }
         do {
             var done = 0.0
             for pass in plan.passes {
-                let sink = progress.scaled(done...min(1, done + pass.weight))
+                let sink = capped.scaled(done...min(1, done + pass.weight))
                 try await ffmpeg.run(pass.arguments, duration: duration, progress: sink)
                 done += pass.weight
             }
@@ -72,6 +75,7 @@ public struct FFmpegAVEngine: ConversionEngine {
             try? fm.removeItem(at: plan.output)
             throw ConversionError.outputMissing(plan.output.lastPathComponent)
         }
+        progress(1)
     }
 
     /// An encoder that couldn't open (no VideoToolbox session, AudioToolbox

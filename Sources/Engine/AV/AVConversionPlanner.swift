@@ -109,6 +109,8 @@ enum AVConversionPlanner {
         } else {
             throw ConversionError.unsupported(from: from, to: to)
         }
+        // Progress every 250 ms instead of ffmpeg's default 500 ms (the bar feels live).
+        plan.passes = plan.passes.map { AVPass(arguments: ["-stats_period", "0.25"] + $0.arguments, weight: $0.weight) }
         if context.allowHardware || context.allowAudioToolbox {
             var soft = context
             soft.allowHardware = false
@@ -128,7 +130,6 @@ enum AVConversionPlanner {
         }
         var args = ["-i", context.input.path]
         var plan = AVConversionPlan(passes: [], output: context.output)
-        var movflags = AVCodecTables.quickTimeFamily.contains(to) ? ["+faststart"] : []
         var streamSpecs: [(spec: String, source: Int)] = []
 
         if let v = facts.video {
@@ -182,11 +183,8 @@ enum AVConversionPlanner {
             subIndex += 1
         }
 
-        let meta = metadataArguments(context.metadata, facts: facts, streams: streamSpecs,
-                                     appleKeysTo: AVCodecTables.quickTimeFamily.contains(to))
-        args += meta.arguments
-        movflags += meta.movflags
-        if !movflags.isEmpty { args += ["-movflags", movflags.joined()] }
+        args += metadataArguments(context.metadata, facts: facts, streams: streamSpecs)
+        if AVCodecTables.quickTimeFamily.contains(to) { args += ["-movflags", "+faststart"] }
         args += ["-f", AVCodecTables.muxer(to), context.output.path]
         plan.passes = [AVPass(arguments: args, weight: 1)]
         return plan
@@ -305,7 +303,7 @@ enum AVConversionPlanner {
             args += ["-vn"]
         }
 
-        args += metadataArguments(context.metadata, facts: facts, streams: streams, appleKeysTo: false).arguments
+        args += metadataArguments(context.metadata, facts: facts, streams: streams)
         switch to {
         case Formats.mp3: args += ["-id3v2_version", "3"]
         case Formats.aiff where context.metadata != .stripAll: args += ["-write_id3v2", "1"]
@@ -422,22 +420,22 @@ enum AVConversionPlanner {
         return prefixes.contains { k.hasPrefix($0) }
     }
 
-    /// Demuxer pseudo-tags that must not be written back as metadata.
+    /// Demuxer pseudo-tags (ftyp brands) that must never be written back as
+    /// metadata; Matroska would otherwise store them as tags.
     static let pseudoTags = ["major_brand", "minor_version", "compatible_brands"]
 
-    static func metadataArguments(_ policy: MetadataPolicy, facts: AVInputFacts, streams: [(spec: String, source: Int)],
-                                  appleKeysTo quickTime: Bool) -> (arguments: [String], movflags: [String]) {
+    /// - keep: everything ffmpeg can carry, plus Apple's QuickTime keys translated (below).
+    /// - stripPrivate: the same minus every `isPrivateTag` key, container and stream level.
+    /// - stripAll: nothing, not even chapters or ffmpeg's versioned encoder string.
+    static func metadataArguments(_ policy: MetadataPolicy, facts: AVInputFacts, streams: [(spec: String, source: Int)]) -> [String] {
         switch policy {
         case .stripAll:
-            return (["-map_metadata", "-1", "-map_chapters", "-1", "-fflags", "+bitexact"], [])
+            return ["-map_metadata", "-1", "-map_chapters", "-1", "-fflags", "+bitexact"]
         case .keep, .stripPrivate:
             var args = ["-map_metadata", "0"]
-            var flags: [String] = []
-            // QuickTime keys (com.apple.quicktime.*) only survive into mp4/mov with mdta metadata.
-            let hasAppleKeys = facts.formatTags.keys.contains { $0.hasPrefix("com.apple.quicktime.") && (policy == .keep || !isPrivateTag($0)) }
-            if quickTime && hasAppleKeys {
-                flags.append("+use_metadata_tags")
-                for k in pseudoTags where facts.formatTags[k] != nil { args += ["-metadata", "\(k)="] }
+            for k in pseudoTags where facts.formatTags[k] != nil { args += ["-metadata", "\(k)="] }
+            for (key, value) in appleTagTranslations(facts.formatTags, includePrivate: policy == .keep) {
+                args += ["-metadata", "\(key)=\(value)"]
             }
             if policy == .stripPrivate {
                 for k in facts.formatTags.keys.sorted() where isPrivateTag(k) { args += ["-metadata", "\(k)="] }
@@ -447,8 +445,54 @@ enum AVConversionPlanner {
                     }
                 }
             }
-            return (args, flags)
+            return args
         }
+    }
+
+    /// iPhone and AVFoundation files keep metadata as `com.apple.quicktime.*` keys.
+    /// ffmpeg's mp4/mov muxers drop those, and `-movflags use_metadata_tags` writes
+    /// them in a form AVFoundation reads back as numbered iTunes items, so the
+    /// useful ones become standard tags Apple apps do read (©nam, ©day, ©xyz, ©mak,
+    /// ©mod, movie creation time). Checked with AVURLAsset; see docs/lanes/E-av.md.
+    static func appleTagTranslations(_ tags: [String: String], includePrivate: Bool) -> [(String, String)] {
+        let q = "com.apple.quicktime."
+        var out: [(String, String)] = []
+        func carry(_ standard: String, _ appleKey: String) {
+            guard tags[standard] == nil, let v = tags[q + appleKey], !v.isEmpty else { return }
+            out.append((standard, v))
+        }
+        carry("title", "title")
+        carry("artist", "artist")
+        carry("comment", "comment")
+        carry("description", "description")
+        if let created = tags[q + "creationdate"], !created.isEmpty {
+            if tags["date"] == nil { out.append(("date", created)) }
+            // The capture time beats the container's, which is often the export time.
+            if let utc = utcTimestamp(created) { out.append(("creation_time", utc)) }
+        }
+        if includePrivate {
+            carry("location", "location.ISO6709")
+            carry("make", "make")
+            carry("model", "model")
+        }
+        return out
+    }
+
+    /// "2024-05-01T12:00:00+0200" → "2024-05-01T10:00:00Z" (ffmpeg's creation_time wants UTC).
+    static func utcTimestamp(_ text: String) -> String? {
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        var date: Date?
+        for format in ["yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ssXXXXX", "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"] {
+            parser.dateFormat = format
+            if let d = parser.date(from: text) { date = d; break }
+        }
+        guard let date else { return nil }
+        let out = DateFormatter()
+        out.locale = Locale(identifier: "en_US_POSIX")
+        out.timeZone = TimeZone(identifier: "UTC")
+        out.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        return out.string(from: date)
     }
 
     // MARK: - Geometry

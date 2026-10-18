@@ -6,8 +6,9 @@ import Foundation
 ///   video → GIF, video → audio extraction, and GIF → video as direct rows
 ///   (the router only lets still ⇄ time-based cross in one direct step).
 /// - AVFoundation passthrough (priority 110) wins MOV ⇄ MP4 ⇄ M4V: same
-///   speed as an ffmpeg remux, but keeps QuickTime tracks and metadata intact.
-///   It hands anything needing a re-encode to ffmpeg.
+///   speed as an ffmpeg remux, but it carries iPhone metadata (location,
+///   capture date, title) that an ffmpeg remux drops. It hands anything
+///   needing a re-encode, or stripping all metadata, to ffmpeg.
 /// - AVFoundation → M4A (priority 40) is a fallback for builds without ffmpeg.
 public enum AVRoutes {
     static let audioInputs: [FormatID] = [Formats.mp3, Formats.m4a, Formats.wav, Formats.flac, Formats.ogg,

@@ -50,11 +50,10 @@ ff -filter_complex "testsrc2=size=321x241:rate=30:duration=2[v]" -map "[v]" -c:v
 ff -filter_complex "$PICT[v]" -map "[v]" -c:v libx264 -preset veryfast -pix_fmt yuv420p "$OUT/edge-noaudio.mp4"
 ff -filter_complex "$PICT,select='not(between(mod(n\,30)\,10\,19))'[v];$TONE[a]" -map "[v]" -map "[a]" \
    -fps_mode vfr -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac_at "$OUT/edge-vfr.mp4"
-ff -i "$OUT/sample.mov" -c copy -movflags use_metadata_tags \
-   -metadata location="+37.3349-122.0090/" \
-   -metadata com.apple.quicktime.location.ISO6709="+37.3349-122.0090+010.000/" \
-   -metadata com.apple.quicktime.make="Apple" -metadata com.apple.quicktime.model="iPhone 15 Pro" \
-   -metadata com.apple.quicktime.software="17.0" -metadata title="Private trip" \
+# Camera-style QuickTime user data (©xyz ©mak ©mod ©nam). iPhone-style `mdta` keys need
+# AVFoundation to write correctly; the unit tests build that file themselves.
+ff -i "$OUT/sample.mov" -c copy -metadata location="+37.3349-122.0090/" \
+   -metadata make="Apple" -metadata model="iPhone 15 Pro" -metadata title="Private trip" \
    -metadata creation_time="2024-05-01T10:00:00Z" "$OUT/edge-location.mov"
 ff -i "$OUT/sample.mp4" -c copy -metadata location="+37.3349-122.0090/" -metadata title="Private trip" \
    -metadata creation_time="2024-05-01T10:00:00Z" "$OUT/edge-location.mp4"

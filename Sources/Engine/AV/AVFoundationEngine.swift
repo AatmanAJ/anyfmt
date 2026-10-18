@@ -4,12 +4,14 @@ import Foundation
 /// Apple-framework fast path: `AVAssetExportSession` passthrough remux between
 /// MOV, MP4 and M4V, and AppleM4A export.
 ///
-/// Passthrough copies samples untouched and, unlike an ffmpeg remux, keeps
-/// QuickTime-specific tracks and metadata (timecode, Apple keys, HDR/spatial
-/// metadata) exactly. Whenever the user's options need a re-encode, or the
-/// source isn't passthrough-compatible with the target, the request goes to
-/// `FFmpegAVEngine` instead, so options are never silently ignored. Only when
-/// ffmpeg is missing does this engine re-encode itself with export presets.
+/// Passthrough copies samples untouched, as fast as an ffmpeg remux, and is the
+/// only path that carries an iPhone clip's QuickTime metadata correctly: it
+/// translates location, capture date and title into the MP4/M4V keyspace and
+/// keeps everything verbatim in MOV (ffmpeg drops those keys). `stripPrivate`
+/// uses Apple's own `forSharing` filter. Whenever the options need a re-encode,
+/// all metadata must go, or the source isn't passthrough-compatible, the
+/// request goes to `FFmpegAVEngine`, so options are never silently ignored.
+/// Only when ffmpeg is missing does this engine re-encode with export presets.
 public struct AVFoundationEngine: ConversionEngine {
     public let id = EngineIDs.avFoundation
 
@@ -33,7 +35,10 @@ public struct AVFoundationEngine: ConversionEngine {
     enum Decision: Equatable {
         case passthrough
         case appleM4A
+        /// Hand the whole request to ffmpeg (reason, for the log).
         case delegate(String)
+        /// No ffmpeg in this build: re-encode with this export preset.
+        case reencode(String)
     }
 
     /// What to do before looking inside the file. Pure, for tests.
@@ -42,13 +47,22 @@ public struct AVFoundationEngine: ConversionEngine {
             // ffmpeg honours bitrate/sample rate/channels and keeps cover art; AppleM4A can't.
             return ffmpegAvailable ? .delegate("m4a options") : .appleM4A
         }
-        let o = AVVideoOptions(request.options)
-        if o.maxShortEdge != nil { return .delegate("resolution") }
-        if o.fps != nil { return .delegate("frame rate") }
-        if o.quality == .small { return .delegate("small file") }
-        if o.removeAudio { return .delegate("remove audio") }
-        if o.codec != nil { return .delegate("explicit codec") }
+        if let why = reencodeReason(AVVideoOptions(request.options)) {
+            return ffmpegAvailable ? .delegate(why) : .reencode(reencodePreset(request.options))
+        }
+        // Passthrough always writes a creation date, even with `metadata = []`; ffmpeg removes everything.
+        if request.metadata == .stripAll && ffmpegAvailable { return .delegate("strip all metadata") }
         return .passthrough
+    }
+
+    /// Why the options rule out a passthrough remux, or nil if they don't.
+    static func reencodeReason(_ o: AVVideoOptions) -> String? {
+        if o.maxShortEdge != nil { return "resolution" }
+        if o.fps != nil { return "frame rate" }
+        if o.quality == .small { return "small file" }
+        if o.removeAudio { return "remove audio" }
+        if o.codec != nil { return "explicit codec" }
+        return nil
     }
 
     public func convert(_ request: ConversionRequest, context: EngineContext) async throws -> ConversionOutput {
@@ -59,6 +73,9 @@ public struct AVFoundationEngine: ConversionEngine {
             return try await ffmpeg.convert(request, context: context)
         case .appleM4A:
             return try await export(request, preset: AVAssetExportPresetAppleM4A, context: context)
+        case .reencode(let preset):
+            context.logger.notice("avfoundation: no ffmpeg, re-encoding with \(preset, privacy: .public); frame rate, codec and audio options are approximated")
+            return try await export(request, preset: preset, context: context)
         case .passthrough:
             do {
                 return try await export(request, preset: AVAssetExportPresetPassthrough, context: context)
@@ -67,7 +84,8 @@ public struct AVFoundationEngine: ConversionEngine {
                 try? FileManager.default.removeItem(at: request.defaultOutputURL)
                 return try await ffmpeg.convert(request, context: context)
             } catch let error as ConversionError {
-                // No ffmpeg in this build: re-encode with an export preset rather than fail.
+                // No ffmpeg in this build: if the source just can't be passed through, re-encode with a preset.
+                guard case .unsupported = error else { throw error }
                 context.logger.notice("avfoundation passthrough failed (\(error.technicalDetails, privacy: .public)), re-encoding")
                 try? FileManager.default.removeItem(at: request.defaultOutputURL)
                 return try await export(request, preset: Self.reencodePreset(request.options), context: context)

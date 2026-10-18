@@ -1,6 +1,13 @@
+import AVFoundation
 import Foundation
 import XCTest
 @testable import HaloCore
+
+/// Carries a non-Sendable value into a `@Sendable` callback (tests only).
+final class UncheckedBox<T>: @unchecked Sendable {
+    let value: T
+    init(_ value: T) { self.value = value }
+}
 
 /// Shared test support for lane E: finds the bundled engines, generates the
 /// lane fixtures once per run (via Tests/Fixtures/lanes/av.sh), and runs
@@ -115,6 +122,58 @@ enum LaneE {
     static func formatTags(_ url: URL) async throws -> [String: String] {
         let json = try await probeJSON(url)
         return ((json["format"] as? [String: Any])?["tags"] as? [String: String]) ?? [:]
+    }
+
+    /// A synthetic H.264 + AAC clip (testsrc2 + tone) of any length, for slow-path tests.
+    static func makeClip(seconds: Int, size: String, ext: String = "mov") async throws -> URL {
+        let out = try tempDirectory().appendingPathComponent("clip.\(ext)")
+        try await ffmpeg(["-filter_complex", "testsrc2=size=\(size):rate=30:duration=\(seconds)[v];sine=frequency=440:sample_rate=48000:duration=\(seconds)[a]",
+                          "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                          "-c:a", "aac_at", out.path])
+        return out
+    }
+
+    /// An iPhone-style MOV: real QuickTime `mdta` metadata (location, make, model,
+    /// software, capture date, title), written by AVFoundation as a camera would.
+    static func makeAppleMetadataMovie() async throws -> URL {
+        let out = try tempDirectory().appendingPathComponent("iphone.mov")
+        let asset = AVURLAsset(url: try fixture("sample.mov"))
+        guard let s = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough) else { throw XCTSkip("no export session") }
+        func item(_ id: AVMetadataIdentifier, _ value: String) -> AVMetadataItem {
+            let m = AVMutableMetadataItem()
+            m.identifier = id
+            m.value = value as NSString
+            m.dataType = kCMMetadataBaseDataType_UTF8 as String
+            return m
+        }
+        s.outputURL = out
+        s.outputFileType = .mov
+        s.metadata = [
+            item(.quickTimeMetadataLocationISO6709, "+37.3349-122.0090+010.000/"),
+            item(.quickTimeMetadataMake, "Apple"),
+            item(.quickTimeMetadataModel, "iPhone 15 Pro"),
+            item(.quickTimeMetadataSoftware, "17.0"),
+            item(.quickTimeMetadataCreationDate, "2024-05-01T12:00:00+0200"),
+            item(.quickTimeMetadataTitle, "Private trip"),
+        ]
+        let box = UncheckedBox(s)
+        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in box.value.exportAsynchronously { c.resume() } }
+        guard s.status == .completed else { throw XCTSkip("could not build the iPhone-style fixture: \(s.status.rawValue)") }
+        return out
+    }
+
+    /// What Apple's own reader sees: identifier → string value, plus "creationDate" (UTC ISO 8601).
+    static func appleMetadata(_ url: URL) async throws -> [String: String] {
+        let asset = AVURLAsset(url: url)
+        var out: [String: String] = [:]
+        for i in try await asset.load(.metadata) {
+            if let id = i.identifier?.rawValue, let v = try? await i.load(.stringValue) { out[id] = v }
+        }
+        if let item = try await asset.load(.creationDate), let date = try? await item.load(.dateValue) {
+            let f = ISO8601DateFormatter()
+            out["creationDate"] = f.string(from: date)
+        }
+        return out
     }
 
     /// Runs the bundled ffmpeg directly (test media generation).
