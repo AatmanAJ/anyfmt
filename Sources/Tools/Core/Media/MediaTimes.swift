@@ -108,8 +108,10 @@ public enum TrimPlanner {
     public static let maxSnap: Double = 1.0
 
     /// Plans a video trim. Cut points are first snapped to frame boundaries.
-    /// Lossless keeps the request inside the result: in snaps back to the
-    /// keyframe at or before it, out forward to the keyframe at or after it.
+    /// Lossless prefers keeping the request inside the result (in snaps back to
+    /// the keyframe at or before it, out forward to the one at or after it);
+    /// when that keyframe is more than `maxSnap` away it takes the nearest one
+    /// on the other side instead, if that's within `maxSnap`.
     public static func plan(requested: ClosedRange<Double>, duration: Double, frameDuration fd: Double,
                             keyframes: KeyframeIndex?, lossless: Bool) -> TrimPlan {
         let start = snapToFrame(max(0, requested.lowerBound), fd)
@@ -117,7 +119,12 @@ public enum TrimPlanner {
         guard lossless else { return .reencode(start: start, end: end, reason: .losslessOff) }
         guard let k = keyframes, !k.keyframes.isEmpty else { return .reencode(start: start, end: end, reason: .noVideoIndex) }
         let tol = fd / 2
-        guard let kIn = k.keyframe(atOrBefore: start, tolerance: tol), start - kIn <= maxSnap else {
+        let kIn: Double
+        if let before = k.keyframe(atOrBefore: start, tolerance: tol), start - before <= maxSnap {
+            kIn = before
+        } else if let after = k.keyframe(atOrAfter: start, tolerance: tol), after - start <= maxSnap, after < end - fd {
+            kIn = after
+        } else {
             return .reencode(start: start, end: end, reason: .noKeyframeNearStart)
         }
         if end >= duration - tol {
@@ -127,6 +134,9 @@ public enum TrimPlanner {
             return kOut >= duration - tol ? .copy(start: kIn, end: duration, toEnd: true) : .copy(start: kIn, end: kOut, toEnd: false)
         }
         if duration - end <= maxSnap { return .copy(start: kIn, end: duration, toEnd: true) }
+        if let kOut = k.keyframe(atOrBefore: end, tolerance: tol), kOut > kIn + tol, end - kOut <= maxSnap {
+            return .copy(start: kIn, end: kOut, toEnd: false)
+        }
         return .reencode(start: start, end: end, reason: .noKeyframeNearEnd)
     }
 

@@ -32,6 +32,18 @@ final class MediaPlanningTests: XCTestCase {
         XCTAssertEqual(toEnd, .copy(start: 2, end: 4, toEnd: true))
     }
 
+    func testTrimPlanUsesTheNearSideWhenTheEnclosingKeyframeIsFar() {
+        // 2 s GOP offset by 0.37 s, as hardware encoders often produce.
+        let k = KeyframeIndex(keyframes: [0, 2.37, 4.37, 6.37, 8.37, 10.37], packets: [])
+        let fd = 1.0 / 30
+        let p = TrimPlanner.plan(requested: 4.2...7.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        XCTAssertEqual(p, .copy(start: 4.37, end: 8.37, toEnd: false), "0.17 s late beats 1.83 s early")
+        let q = TrimPlanner.plan(requested: 3...9.9, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        XCTAssertEqual(q, .copy(start: 2.37, end: 10.37, toEnd: false))
+        let r = TrimPlanner.plan(requested: 3...7.0, duration: 12, frameDuration: fd, keyframes: k, lossless: true)
+        XCTAssertEqual(r, .copy(start: 2.37, end: 6.37, toEnd: false), "out falls back to the keyframe before it")
+    }
+
     func testTrimPlanFallsBackWhenKeyframesAreFar() {
         let sparse = KeyframeIndex(keyframes: [0], packets: [])
         let p = TrimPlanner.plan(requested: 2.5...3, duration: 10, frameDuration: 1.0 / 30, keyframes: sparse, lossless: true)
