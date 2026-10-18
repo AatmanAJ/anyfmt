@@ -85,6 +85,7 @@ netcheck: generate
 ## Regenerates the README format table from the capability registry.
 readme-formats: build
 	$(PRODUCTS)/$(SLUG) formats --markdown > docs/FORMATS.md
+	python3 scripts/splice-readme.py
 
 dmg: generate
 	./packaging/make-dmg.sh
