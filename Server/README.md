@@ -18,7 +18,7 @@ server exists only for features that cost servers (BUILD.md §9b):
 | Cloud jobs | `/v1/jobs/*`, `/v1/files/*` | Heavy video conversions, transcription → SRT/VTT, upscale, HQ background removal |
 | Sync | `/v1/sync/documents/*` | Opaque JSON documents with versions and conditional PUT |
 | Inbox | `/v1/inbox/*` | Files sent from a phone or browser land in a folder on the Mac |
-| Public conversion API | `/v1/api-keys`, `/v1/files`, `/v1/conversions/*`, `/v1/formats`, `/v1/schema`, `/v1/webhooks/*`, `/v1/usage` | Pay-per-use, API-key auth. Narrative docs and curl examples: [`docs/API.md`](../docs/API.md); TypeScript SDK: [`packages/sdk`](../packages/sdk) |
+| Public conversion API | `/v1/api-keys`, `/v1/files`, `/v1/conversions/*`, `/v1/formats`, `/v1/schema`, `/v1/webhooks/*`, `/v1/usage` | Pay-per-use, API-key auth. Narrative docs and curl examples: [`docs/API.md`](../docs/API.md); TypeScript SDK: [`sdk/typescript`](../sdk/typescript) |
 | Licences | `/v1/licences/*` | Optional Pro licence activation for the Mac app (seat count per key) |
 
 The app also links to two **web pages** (not API): the sign-in page
@@ -202,5 +202,5 @@ development servers.
    webhook delivery queue with the documented retry schedule, SSRF-safe
    fetching for `input.url` and webhook URLs (refuse private/loopback/
    link-local addresses after DNS resolution), usage metering for billing,
-   and licence issuance. Run `packages/sdk`'s tests against the real server
+   and licence issuance. Run `sdk/typescript`'s tests against the real server
    (they only need `baseUrl` and a way to mint a key) as its contract test.

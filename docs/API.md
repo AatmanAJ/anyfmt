@@ -6,7 +6,7 @@
 >
 > - the contract, [`Server/openapi.yaml`](../Server/openapi.yaml) (OpenAPI 3.1, lint-clean under `redocly lint`);
 > - an in-memory mock that implements every operation, [`Tests/Mock/server.mjs`](../Tests/Mock/server.mjs). Its conversions are fake: the output is the input bytes renamed;
-> - a TypeScript SDK, [`packages/sdk`](../packages/sdk), tested against the mock (`make sdk-test`).
+> - a TypeScript SDK, [`sdk/typescript`](../sdk/typescript), tested against the mock (`make sdk-test`).
 >
 > The hosted domain isn't chosen yet. Every example below uses
 > `https://halo.example.com`. To try them for real, run the mock and use

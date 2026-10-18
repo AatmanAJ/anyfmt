@@ -17,7 +17,7 @@ A TypeScript client for the Halo pay-per-use conversion API
 Not on npm yet. From this repo:
 
 ```bash
-cd packages/sdk && npm ci && npm run build   # → dist/
+cd sdk/typescript && npm ci && npm run build   # → dist/
 ```
 
 ## Quick start

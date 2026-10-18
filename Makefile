@@ -45,14 +45,14 @@ test-packages:
 test-unit:
 	$(XCB) -scheme Halo -configuration Debug test -quiet
 
-## TypeScript SDK (packages/sdk) + public API contract, run against Tests/Mock/server.mjs.
+## TypeScript SDK (sdk/typescript) + public API contract, run against Tests/Mock/server.mjs.
 ## Lints Server/openapi.yaml, checks the generated types are current, builds, tests.
 ## Skips with a message when Node 18+/npm is missing or `npm ci` can't install
 ## (e.g. offline CI without a cache); SDK_TEST_REQUIRED=1 turns the skip into a failure.
 sdk-test:
-	@cd packages/sdk && { command -v npm >/dev/null && node -e 'process.exit(parseInt(process.versions.node, 10) < 18 ? 1 : 0)' \
+	@cd sdk/typescript && { command -v npm >/dev/null && node -e 'process.exit(parseInt(process.versions.node, 10) < 18 ? 1 : 0)' \
 	  && npm ci --no-audit --no-fund --prefer-offline --loglevel=error; } || { \
-	  echo "sdk-test: SKIPPED: couldn't install packages/sdk dev dependencies (needs Node 18+, npm and the registry or a warm cache)."; \
+	  echo "sdk-test: SKIPPED: couldn't install sdk/typescript dev dependencies (needs Node 18+, npm and the registry or a warm cache)."; \
 	  [ -z "$$SDK_TEST_REQUIRED" ] || exit 1; exit 0; }; \
 	npm test
 
