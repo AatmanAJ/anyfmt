@@ -25,9 +25,20 @@ final class FilmstripLoader: ObservableObject {
     func layout(width: CGFloat, height: CGFloat) {
         let count = max(4, min(60, Int((width / (height * aspect)).rounded(.up))))
         guard count != requestedCount else { return }
+        let first = requestedCount == 0
         requestedCount = count
-        if assetURL != nil { load(count: count) }
+        guard assetURL != nil else { return }
+        if first { load(count: count); return }
+        // Live window resizes: wait for the size to settle before regenerating.
+        relayout?.cancel()
+        relayout = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled, let self, self.requestedCount == count else { return }
+            self.load(count: count)
+        }
     }
+
+    private var relayout: Task<Void, Never>?
 
     /// True once every requested thumbnail is in (or nothing has been requested yet).
     var isComplete: Bool { requestedCount == 0 || (!thumbnails.isEmpty && thumbnails.allSatisfy { $0 != nil }) }
