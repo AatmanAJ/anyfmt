@@ -1,0 +1,1337 @@
+openapi: 3.1.0
+info:
+  title: Halo Cloud API
+  version: 1.0.0
+  summary: The contract between the Halo Mac app (cloud client) and a Halo server.
+  description: |
+    Everything that runs on the Mac is free and never talks to this API.
+    This API backs only the Pro features (BUILD.md §9b): share links, cloud
+    jobs (heavy video + GPU AI tools), sync of settings/presets, and the
+    phone/browser inbox.
+
+    The app is AGPL-3.0 and can point at any server that implements this
+    contract (Settings › Account › Server URL), exactly like Cap's self-host
+    story. The reference mock lives in `Tests/Mock/server.mjs`.
+
+    ## Conventions
+    - All paths are under `/v1`. Breaking changes get `/v2`; additive
+      changes (new optional fields, new endpoints, new enum values the
+      client can ignore) do not.
+    - JSON bodies use camelCase, UTF-8, `application/json`. The one
+      exception is the OAuth token/revoke endpoints, which follow
+      RFC 6749 / RFC 7009 exactly (form-encoded request, snake_case JSON
+      response) so an off-the-shelf OAuth library can implement them.
+    - Timestamps are RFC 3339 / ISO 8601 in UTC with a `Z` suffix and
+      optional fractional seconds.
+    - IDs are opaque strings. Clients never parse them.
+    - Sizes are bytes (int64). Durations are seconds unless the name says
+      otherwise (`pollAfterMs`).
+    - Every response carries `X-Request-Id`. Clients include it in bug
+      reports ("Copy details") and never anything else.
+    - Every authenticated response carries the rate-limit headers
+      (`RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`).
+      `429` and `503` also carry `Retry-After` (seconds).
+    - Errors always use the `Error` schema. `error.code` is a stable,
+      machine-readable string; `error.message` is a human sentence the app
+      may show as-is.
+
+    ## Privacy rules the server must keep
+    - No analytics, no third-party trackers on any page the API serves
+      (including share-link landing pages).
+    - Uploaded content is used only to perform the requested operation.
+      Job inputs and results are deleted when the job's results expire.
+    - Passwords for share links are stored as a slow hash (argon2id),
+      never in plain text and never logged.
+    - Tokens are never logged by either side.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: https://cloud.example.invalid
+    description: Placeholder for the hosted service (AJ replaces this; see Server/README.md).
+  - url: http://127.0.0.1:{port}
+    description: Local mock server (`node Tests/Mock/server.mjs --port 0`).
+    variables:
+      port:
+        default: "8787"
+
+tags:
+  - name: meta
+  - name: auth
+    description: Browser sign-in (magic link or anything the server's web page offers) with OAuth 2.0 authorization code + PKCE back to the app's URL scheme.
+  - name: account
+  - name: uploads
+    description: Resumable, chunked uploads used by share links, cloud jobs and the inbox.
+  - name: links
+  - name: jobs
+  - name: files
+  - name: sync
+  - name: inbox
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/health:
+    get:
+      tags: [meta]
+      operationId: getHealth
+      summary: Liveness + identity check
+      description: |
+        Unauthenticated. The app calls this only when the user presses
+        "Validate" next to the Server URL field, to confirm the URL points
+        at a Halo-compatible server before they sign in.
+      security: []
+      responses:
+        "200":
+          description: Server is up and speaks this contract.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/auth/authorize:
+    get:
+      tags: [auth]
+      operationId: authorize
+      summary: Browser sign-in page (opened by the app in the user's default browser)
+      description: |
+        This is **not** called by the app's HTTP client. The app opens this
+        URL in the default browser with `NSWorkspace.open`. The page asks for
+        the user's email and sends a magic link (the server may also offer
+        passkeys, OAuth providers or SSO here; the app doesn't care).
+
+        When the user opens the magic link, the server redirects the browser
+        to `redirect_uri?code=…&state=…`, which macOS hands to the app via its
+        registered URL scheme (`halo://auth/callback`, scheme derived from
+        the brand). If the user opens the link on another device, the page
+        instead shows the `code` so they can type it into the app; the PKCE
+        verifier (kept in the app) is still required to redeem it.
+
+        On failure or cancel the redirect carries
+        `error=access_denied&state=…` (RFC 6749 §4.1.2.1).
+      security: []
+      parameters:
+        - { name: response_type, in: query, required: true, schema: { type: string, const: code } }
+        - { name: client_id, in: query, required: true, schema: { type: string, examples: [halo-mac] } }
+        - name: redirect_uri
+          in: query
+          required: true
+          description: Must exactly match a registered redirect for `client_id`. For the Mac app this is `<scheme>://auth/callback`.
+          schema: { type: string, format: uri, examples: ["halo://auth/callback"] }
+        - name: code_challenge
+          in: query
+          required: true
+          description: BASE64URL(SHA256(code_verifier)), no padding (RFC 7636).
+          schema: { type: string, minLength: 43, maxLength: 128 }
+        - { name: code_challenge_method, in: query, required: true, schema: { type: string, const: S256 } }
+        - name: state
+          in: query
+          required: true
+          description: Opaque CSRF token generated by the app; echoed back unchanged.
+          schema: { type: string, minLength: 16, maxLength: 256 }
+      responses:
+        "200":
+          description: HTML sign-in page.
+          content:
+            text/html:
+              schema: { type: string }
+        "302":
+          description: Redirect to `redirect_uri` with `code` + `state` (or `error` + `state`).
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+        "400":
+          description: Invalid client_id / redirect_uri / PKCE parameters (shown as an HTML error page; never redirects to an unregistered URI).
+
+  /v1/auth/token:
+    post:
+      tags: [auth]
+      operationId: token
+      summary: Exchange an authorization code, or refresh an access token (RFC 6749 §4.1.3, §6)
+      description: |
+        Authorization codes are single-use and expire after 10 minutes.
+        Refresh tokens rotate: every successful refresh returns a new
+        refresh token and invalidates the old one. Re-use of an already
+        rotated refresh token revokes the whole token family (theft
+        detection) and returns `invalid_grant`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/TokenRequestAuthorizationCode"
+                - $ref: "#/components/schemas/TokenRequestRefresh"
+      responses:
+        "200":
+          description: Tokens issued.
+          headers:
+            Cache-Control: { schema: { type: string, const: no-store } }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "400":
+          description: RFC 6749 §5.2 error (`invalid_grant` for a bad/expired/used code or refresh token, a wrong PKCE verifier or a redirect mismatch).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OAuthError" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/auth/revoke:
+    post:
+      tags: [auth]
+      operationId: revoke
+      summary: Sign out this device (RFC 7009)
+      description: Revokes the refresh token and every access token issued from it. Always 200, even for unknown tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+                token_type_hint: { type: string, enum: [refresh_token, access_token] }
+                client_id: { type: string }
+      responses:
+        "200": { description: Revoked (or already invalid). }
+
+  /v1/devices:
+    get:
+      tags: [auth]
+      operationId: listDevices
+      summary: Signed-in devices (optional; shown in the web dashboard)
+      responses:
+        "200":
+          description: Devices with a live refresh token.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Device" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/devices/{deviceId}:
+    delete:
+      tags: [auth]
+      operationId: revokeDevice
+      summary: Sign out another device
+      parameters:
+        - { name: deviceId, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Revoked. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/me:
+    get:
+      tags: [account]
+      operationId: getMe
+      summary: The signed-in user, their plan, features and quotas
+      description: |
+        The app calls this right after sign-in, when the user presses
+        Refresh in Settings › Account, and at the start of each cloud action
+        (so quotas shown in the UI are current). It is never polled in the
+        background. Entitlements are advisory for UI; the server enforces
+        them on every endpoint regardless.
+      responses:
+        "200":
+          description: Account.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Account" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/uploads:
+    post:
+      tags: [uploads]
+      operationId: createUpload
+      summary: Start a resumable upload
+      description: |
+        Declares the file up front (size + SHA-256). The server answers with
+        the upload id and the largest chunk it accepts. Uploads that are not
+        completed expire (`expiresAt`, at least 24 h) and their bytes are
+        deleted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UploadCreate" }
+      responses:
+        "201":
+          description: Upload created.
+          headers:
+            Location: { schema: { type: string }, description: "/v1/uploads/{id}" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Upload" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402": { $ref: "#/components/responses/QuotaExceeded" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/uploads/{uploadId}:
+    parameters:
+      - { name: uploadId, in: path, required: true, schema: { type: string } }
+    head:
+      tags: [uploads]
+      operationId: headUpload
+      summary: Cheap resume probe
+      description: Returns the committed offset in `Upload-Offset`. Clients call this after any interrupted chunk, then continue from that byte.
+      responses:
+        "204":
+          description: Upload exists.
+          headers:
+            Upload-Offset: { $ref: "#/components/headers/Upload-Offset" }
+            Upload-Length: { schema: { type: integer, format: int64 }, description: Declared total size. }
+            Upload-Expires: { schema: { type: string, format: date-time } }
+        "401": { description: Unauthorized (no body for HEAD). }
+        "404": { description: Unknown or expired upload (no body for HEAD). }
+    get:
+      tags: [uploads]
+      operationId: getUpload
+      summary: Upload status (same information as HEAD, as JSON)
+      responses:
+        "200":
+          description: Upload.
+          headers:
+            Upload-Offset: { $ref: "#/components/headers/Upload-Offset" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Upload" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [uploads]
+      operationId: putUploadChunk
+      summary: Append one chunk
+      description: |
+        The body is raw bytes. `Content-Range` must start exactly at the
+        committed offset; otherwise the server answers `409 offset_mismatch`
+        with the real offset and the client continues from there.
+
+        The server commits bytes as they arrive, so a connection that drops
+        mid-chunk leaves a committed offset somewhere inside the chunk. That
+        is why clients always resume from `Upload-Offset`, never from their
+        own chunk boundary.
+
+        Clients send chunks of `min(8 MiB, upload.maxChunkSize)`.
+      parameters:
+        - name: Content-Range
+          in: header
+          required: true
+          description: "`bytes {first}-{last}/{total}` (inclusive, RFC 9110 §14.4)."
+          schema: { type: string, examples: ["bytes 0-8388607/52428800"] }
+        - name: Upload-Offset
+          in: header
+          required: false
+          description: Redundant with `first` in Content-Range; if present it must match.
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: { type: string, contentMediaType: application/octet-stream }
+      responses:
+        "200":
+          description: Chunk committed.
+          headers:
+            Upload-Offset: { $ref: "#/components/headers/Upload-Offset" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Upload" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`offset_mismatch`: the chunk doesn't start at the committed offset. Body carries the real offset."
+          headers:
+            Upload-Offset: { $ref: "#/components/headers/Upload-Offset" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OffsetMismatchError" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+    delete:
+      tags: [uploads]
+      operationId: abortUpload
+      summary: Abort an upload and delete its bytes
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/uploads/{uploadId}/complete:
+    post:
+      tags: [uploads]
+      operationId: completeUpload
+      summary: Finalise an upload and verify its SHA-256
+      parameters:
+        - { name: uploadId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sha256]
+              properties:
+                sha256: { $ref: "#/components/schemas/Sha256" }
+      responses:
+        "200":
+          description: Bytes verified; the upload can now be used by links and jobs.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Upload" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`upload_incomplete`: offset < size."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          description: "`checksum_mismatch`: stored bytes don't hash to `sha256`. The upload is discarded; start a new one."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /v1/links:
+    get:
+      tags: [links]
+      operationId: listLinks
+      summary: The user's share links, newest first
+      parameters:
+        - { $ref: "#/components/parameters/Cursor" }
+        - { $ref: "#/components/parameters/Limit" }
+        - name: include
+          in: query
+          schema: { type: string, enum: [active, all], default: active }
+      responses:
+        "200":
+          description: Page of links.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ShareLink" }
+                  nextCursor: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [links]
+      operationId: createLink
+      summary: Create a share link for one or more completed uploads
+      description: |
+        Limits come from the plan (`Entitlements.quotas`). On the free plan
+        the server clamps nothing silently: an expiry beyond
+        `shareLinkMaxExpiryHours` is a `422 validation_failed`, a custom
+        domain is `403 feature_not_in_plan`, and an exhausted monthly quota
+        is `402 quota_exceeded`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ShareLinkCreate" }
+      responses:
+        "201":
+          description: Link created.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShareLink" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402": { $ref: "#/components/responses/QuotaExceeded" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/links/{linkId}:
+    parameters:
+      - { name: linkId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [links]
+      operationId: getLink
+      responses:
+        "200":
+          description: Link.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShareLink" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [links]
+      operationId: revokeLink
+      summary: Revoke a link immediately (downloads stop; files are deleted)
+      responses:
+        "204": { description: Revoked. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/links/{linkId}/stats:
+    get:
+      tags: [links]
+      operationId: getLinkStats
+      summary: Download counts (no viewer IPs, no fingerprints)
+      parameters:
+        - { name: linkId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Stats.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShareLinkStats" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/jobs:
+    post:
+      tags: [jobs]
+      operationId: createJob
+      summary: Run a conversion or an AI tool on an uploaded file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/JobCreate" }
+      responses:
+        "202":
+          description: Job accepted (queued).
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402": { $ref: "#/components/responses/QuotaExceeded" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422":
+          description: "`unsupported_operation` (the server can't do this route/tool) or `validation_failed`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/jobs/{jobId}:
+    get:
+      tags: [jobs]
+      operationId: getJob
+      summary: Poll job status + progress
+      description: Clients poll no faster than `pollAfterMs` (default 1000 ms).
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Job.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/jobs/{jobId}/events:
+    get:
+      tags: [jobs]
+      operationId: streamJobEvents
+      summary: Server-sent events alternative to polling (optional for servers)
+      description: |
+        `text/event-stream`. Events: `progress` (data: Job), `status`
+        (data: Job), `done` (data: Job, then the stream closes). Servers
+        that don't implement SSE return 404 and clients fall back to
+        polling `GET /v1/jobs/{jobId}`. The reference client polls.
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Event stream.
+          content:
+            text/event-stream:
+              schema: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/jobs/{jobId}/cancel:
+    post:
+      tags: [jobs]
+      operationId: cancelJob
+      summary: Cancel a queued or running job (idempotent)
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Job (status `cancelled`, or its terminal status if it had already finished).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/files/{fileId}:
+    get:
+      tags: [files]
+      operationId: downloadFile
+      summary: Download a job result or inbox item
+      description: |
+        `Job.results[].downloadUrl` and `InboxItem.downloadUrl` point here
+        or to a pre-signed object-storage URL on another host. Clients send
+        their bearer token **only** when the URL's origin equals the
+        configured server origin; pre-signed URLs carry their own
+        authorisation and must never receive the token.
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - { name: fileId, in: path, required: true, schema: { type: string } }
+        - name: sig
+          in: query
+          required: false
+          description: Signature for unauthenticated, time-limited access.
+          schema: { type: string }
+      responses:
+        "200":
+          description: File bytes.
+          headers:
+            Content-Length: { schema: { type: integer, format: int64 } }
+            Digest: { schema: { type: string }, description: "`sha-256=<base64>` (optional; clients also verify the hex `sha256` from the referencing object)." }
+          content:
+            application/octet-stream:
+              schema: { type: string, contentMediaType: application/octet-stream }
+        "302": { description: Redirect to object storage. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "410": { description: Expired. }
+
+  /v1/sync/documents:
+    get:
+      tags: [sync]
+      operationId: listSyncDocuments
+      summary: Versions of every sync document (cheap; no data)
+      responses:
+        "200":
+          description: Index.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/SyncDocumentHead" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+
+  /v1/sync/documents/{namespace}:
+    parameters:
+      - $ref: "#/components/parameters/Namespace"
+    get:
+      tags: [sync]
+      operationId: getSyncDocument
+      responses:
+        "200":
+          description: Document.
+          headers:
+            ETag: { $ref: "#/components/headers/ETag" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncDocument" }
+        "304": { description: Not modified (when `If-None-Match` matched). }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [sync]
+      operationId: putSyncDocument
+      summary: Conditional write
+      description: |
+        Exactly one precondition is required:
+        - `If-Match: "<version>"` to replace the version the client last saw, or
+        - `If-None-Match: *` to create a document that must not exist yet.
+
+        A failed precondition is `409 version_conflict` with the server's
+        current document in the body, so the client can resolve without a
+        second round trip. A missing precondition is `428`.
+      parameters:
+        - name: If-Match
+          in: header
+          schema: { type: string, examples: ['"3"'] }
+        - name: If-None-Match
+          in: header
+          schema: { type: string, const: "*" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SyncDocumentWrite" }
+      responses:
+        "200":
+          description: Stored; `version` incremented by one.
+          headers:
+            ETag: { $ref: "#/components/headers/ETag" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncDocument" }
+        "201":
+          description: Created (version 1).
+          headers:
+            ETag: { $ref: "#/components/headers/ETag" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncDocument" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+        "409":
+          description: "`version_conflict`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncConflict" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "428":
+          description: "`precondition_required`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [sync]
+      operationId: deleteSyncDocument
+      parameters:
+        - name: If-Match
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`version_conflict`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncConflict" }
+
+  /v1/inbox:
+    get:
+      tags: [inbox]
+      operationId: listInbox
+      summary: Items sent to this account from a phone or browser
+      description: |
+        The Mac polls this only when the user has turned the inbox on
+        (Settings › Account), at most every `pollIntervalSeconds` from
+        `Entitlements.quotas` (default 300).
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, all], default: pending }
+        - { $ref: "#/components/parameters/Cursor" }
+        - { $ref: "#/components/parameters/Limit" }
+      responses:
+        "200":
+          description: Items, oldest first.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+            RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+            X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InboxItem" }
+                  nextCursor: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+    post:
+      tags: [inbox]
+      operationId: sendToInbox
+      summary: Send a completed upload to the inbox (used by the phone/browser clients, not the Mac)
+      description: |
+        Optionally asks the server to convert first; the inbox item then
+        appears when the job succeeds.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [uploadId]
+              properties:
+                uploadId: { type: string }
+                note: { type: string, maxLength: 500 }
+                operation: { $ref: "#/components/schemas/JobOperation" }
+      responses:
+        "201":
+          description: Item queued.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InboxItem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/FeatureNotInPlan" }
+
+  /v1/inbox/{itemId}:
+    delete:
+      tags: [inbox]
+      operationId: deleteInboxItem
+      summary: Discard an item without downloading it
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/inbox/{itemId}/ack:
+    post:
+      tags: [inbox]
+      operationId: ackInboxItem
+      summary: Mark an item delivered (after the Mac saved it); the server deletes its bytes
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sha256: { $ref: "#/components/schemas/Sha256" }
+      responses:
+        "204": { description: Acknowledged (idempotent). }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: |
+        Short-lived access token from `/v1/auth/token` (`expires_in`,
+        typically 3600 s). On `401` the client refreshes once with its
+        refresh token and retries the request once; if the refresh fails
+        with `invalid_grant` the client signs out locally.
+
+
+  headers:
+    X-Request-Id:
+      description: Opaque id for this request, for support.
+      schema: { type: string }
+    RateLimit-Limit:
+      description: Requests allowed in the current window (IETF draft-ietf-httpapi-ratelimit-headers).
+      schema: { type: integer }
+    RateLimit-Remaining:
+      description: Requests left in the current window.
+      schema: { type: integer }
+    RateLimit-Reset:
+      description: Seconds until the window resets.
+      schema: { type: integer }
+    Retry-After:
+      description: Seconds to wait before retrying.
+      schema: { type: integer }
+    Upload-Offset:
+      description: Bytes committed so far.
+      schema: { type: integer, format: int64 }
+    ETag:
+      description: Quoted document version, e.g. `"3"`.
+      schema: { type: string }
+
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor from a previous page's `nextCursor`.
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    Namespace:
+      name: namespace
+      in: path
+      required: true
+      description: |
+        Document name. The Mac app uses `favourites`, `wheel-order`,
+        `presets`, `recipes`, `settings`. Servers accept any name matching
+        the pattern (at most 32 documents per user).
+      schema: { $ref: "#/components/schemas/Namespace" }
+
+  responses:
+    Unauthorized:
+      description: "`unauthorized` (missing/invalid token) or `token_expired`."
+      headers:
+        WWW-Authenticate: { schema: { type: string, examples: ['Bearer error="invalid_token"'] } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: "`not_found`."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationFailed:
+      description: "`validation_failed`; `error.details` lists offending fields."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    QuotaExceeded:
+      description: "`quota_exceeded`; `error.details.quota` names the quota and `error.details.resetsAt` when it renews."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    FeatureNotInPlan:
+      description: "`feature_not_in_plan`; `error.details.feature` is a `CloudFeature` value."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    PayloadTooLarge:
+      description: "`payload_too_large`; `error.details.maxBytes`."
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: "`rate_limited`."
+      headers:
+        Retry-After: { $ref: "#/components/headers/Retry-After" }
+        RateLimit-Limit: { $ref: "#/components/headers/RateLimit-Limit" }
+        RateLimit-Remaining: { $ref: "#/components/headers/RateLimit-Remaining" }
+        RateLimit-Reset: { $ref: "#/components/headers/RateLimit-Reset" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unavailable:
+      description: "`maintenance` / `server_busy`."
+      headers:
+        Retry-After: { $ref: "#/components/headers/Retry-After" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable machine code. Clients must treat unknown codes by HTTP status.
+              enum:
+                - unauthorized
+                - token_expired
+                - forbidden
+                - feature_not_in_plan
+                - quota_exceeded
+                - not_found
+                - validation_failed
+                - payload_too_large
+                - offset_mismatch
+                - upload_incomplete
+                - checksum_mismatch
+                - version_conflict
+                - precondition_required
+                - unsupported_operation
+                - rate_limited
+                - server_busy
+                - maintenance
+                - internal
+            message: { type: string, description: Human sentence, safe to show. }
+            requestId: { type: string }
+            details: { type: object, additionalProperties: true }
+      examples:
+        - error: { code: quota_exceeded, message: "You’ve used this month’s 5 free share links.", requestId: "req_01J…", details: { quota: shareLinksPerMonth, resetsAt: "2026-11-01T00:00:00Z" } }
+
+    OAuthError:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string, enum: [invalid_request, invalid_client, invalid_grant, unauthorized_client, unsupported_grant_type, invalid_scope] }
+        error_description: { type: string }
+
+    OffsetMismatchError:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          required: [offset]
+          properties:
+            offset: { type: integer, format: int64 }
+
+    Health:
+      type: object
+      required: [status, api]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        api: { type: string, const: "1", description: Contract major version. }
+        name: { type: string, description: "Display name, e.g. \"Halo Cloud\" or \"Acme self-hosted\"." }
+        version: { type: string, description: Server build version. }
+        selfHosted: { type: boolean }
+        capabilities:
+          type: array
+          description: Feature families this server implements (a self-host may skip GPU tools).
+          items: { $ref: "#/components/schemas/CloudFeature" }
+
+    TokenRequestAuthorizationCode:
+      type: object
+      required: [grant_type, code, code_verifier, redirect_uri, client_id]
+      properties:
+        grant_type: { type: string, const: authorization_code }
+        code: { type: string }
+        code_verifier: { type: string, minLength: 43, maxLength: 128 }
+        redirect_uri: { type: string }
+        client_id: { type: string }
+        device_name: { type: string, maxLength: 100, description: Shown in the device list only. }
+
+    TokenRequestRefresh:
+      type: object
+      required: [grant_type, refresh_token, client_id]
+      properties:
+        grant_type: { type: string, const: refresh_token }
+        refresh_token: { type: string }
+        client_id: { type: string }
+
+    TokenResponse:
+      type: object
+      required: [access_token, token_type, expires_in, refresh_token]
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, const: Bearer }
+        expires_in: { type: integer, description: Seconds. }
+        refresh_token: { type: string }
+        scope: { type: string }
+        device_id: { type: string }
+
+    Device:
+      type: object
+      required: [id, name, createdAt, lastSeenAt, current]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        createdAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+        current: { type: boolean }
+
+    Plan:
+      type: string
+      enum: [free, pro, team]
+      description: Mirrors `Plan` in Sources/Shared/Entitlements.swift.
+
+    CloudFeature:
+      type: string
+      enum: [shareLink, shareLinkCustomDomain, cloudJobs, sync, inbox, transcription, upscale, backgroundRemovalHQ]
+      description: Mirrors `CloudFeature` in Sources/Shared/Entitlements.swift. Clients ignore unknown values.
+
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: [string, "null"] }
+        teamName: { type: [string, "null"] }
+
+    Quotas:
+      type: object
+      description: "`null` means unlimited."
+      properties:
+        shareLinksPerMonth: { type: [integer, "null"], examples: [5] }
+        shareLinksUsed: { type: integer }
+        shareLinkMaxExpiryHours: { type: [integer, "null"], examples: [72] }
+        shareLinkMaxDownloads: { type: [integer, "null"] }
+        maxUploadBytes: { type: integer, format: int64 }
+        storageBytes: { type: [integer, "null"], format: int64 }
+        storageUsedBytes: { type: integer, format: int64 }
+        cloudJobMinutesPerMonth: { type: [integer, "null"] }
+        cloudJobMinutesUsed: { type: number }
+        pollIntervalSeconds: { type: integer, default: 300, description: Minimum inbox poll interval the server wants. }
+        periodResetsAt: { type: string, format: date-time }
+
+    Entitlements:
+      type: object
+      required: [plan, features, quotas]
+      properties:
+        plan: { $ref: "#/components/schemas/Plan" }
+        features:
+          type: array
+          items: { $ref: "#/components/schemas/CloudFeature" }
+        quotas: { $ref: "#/components/schemas/Quotas" }
+        customDomains:
+          type: array
+          description: Verified domains the user may put on share links (needs `shareLinkCustomDomain`).
+          items: { type: string, examples: ["files.example.com"] }
+
+    Account:
+      type: object
+      required: [user, entitlements]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        entitlements: { $ref: "#/components/schemas/Entitlements" }
+
+    Sha256:
+      type: string
+      pattern: "^[0-9a-f]{64}$"
+      description: Lowercase hex SHA-256 of the whole file.
+
+    UploadCreate:
+      type: object
+      required: [filename, size, sha256]
+      properties:
+        filename: { type: string, maxLength: 255, description: Display name only; servers never use it as a path. }
+        size: { type: integer, format: int64, minimum: 0 }
+        contentType: { type: string, default: application/octet-stream }
+        sha256: { $ref: "#/components/schemas/Sha256" }
+        purpose: { type: string, enum: [share, job, inbox], default: share }
+
+    Upload:
+      type: object
+      required: [id, size, offset, status, maxChunkSize, expiresAt]
+      properties:
+        id: { type: string }
+        filename: { type: string }
+        size: { type: integer, format: int64 }
+        offset: { type: integer, format: int64, description: Bytes committed. }
+        status: { type: string, enum: [pending, complete] }
+        maxChunkSize: { type: integer, format: int64, description: Largest PUT body accepted (≥ 1 MiB). }
+        sha256: { $ref: "#/components/schemas/Sha256" }
+        expiresAt: { type: string, format: date-time }
+
+    ShareLinkCreate:
+      type: object
+      required: [uploadIds]
+      properties:
+        uploadIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { type: string }
+        title: { type: string, maxLength: 200 }
+        expiresInHours: { type: [integer, "null"], minimum: 1, description: "`null` = never (plan permitting)." }
+        password: { type: [string, "null"], minLength: 4, maxLength: 200 }
+        maxDownloads: { type: [integer, "null"], minimum: 1 }
+        customDomain: { type: [string, "null"], description: One of `Entitlements.customDomains`. }
+
+    ShareLink:
+      type: object
+      required: [id, url, createdAt, downloads, hasPassword, files]
+      properties:
+        id: { type: string }
+        url: { type: string, format: uri, examples: ["https://cloud.example.invalid/s/k3J9x2"] }
+        title: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+        maxDownloads: { type: [integer, "null"] }
+        downloads: { type: integer }
+        hasPassword: { type: boolean }
+        customDomain: { type: [string, "null"] }
+        revoked: { type: boolean, default: false }
+        files:
+          type: array
+          items:
+            type: object
+            required: [name, size]
+            properties:
+              name: { type: string }
+              size: { type: integer, format: int64 }
+
+    ShareLinkStats:
+      type: object
+      required: [linkId, views, downloads]
+      properties:
+        linkId: { type: string }
+        views: { type: integer }
+        downloads: { type: integer }
+        lastDownloadAt: { type: [string, "null"], format: date-time }
+        byDay:
+          type: array
+          items:
+            type: object
+            required: [date, downloads]
+            properties:
+              date: { type: string, format: date }
+              downloads: { type: integer }
+
+    JobOperation:
+      oneOf:
+        - type: object
+          required: [type, target]
+          properties:
+            type: { const: convert }
+            target: { type: string, description: "Halo FormatID of the output, e.g. `mp4`, `webm`, `mov`." }
+            options:
+              type: object
+              description: Halo `OptionValues` for the target's options schema (string/number/bool values).
+              additionalProperties: { type: [string, number, boolean] }
+        - type: object
+          required: [type, tool]
+          properties:
+            type: { const: tool }
+            tool:
+              type: string
+              enum: [cloud.transcribe, cloud.upscale, cloud.removeBackgroundHQ]
+              description: Halo ToolID.
+            target: { type: string, description: "Output format where the tool has a choice: `srt`/`vtt`/`txt` for transcribe, `png`/`jpg` for upscale." }
+            options:
+              type: object
+              description: "Tool options, e.g. `{\"language\": \"auto\"}` for transcribe, `{\"scale\": 4}` for upscale."
+              additionalProperties: { type: [string, number, boolean] }
+
+    JobCreate:
+      type: object
+      required: [uploadId, operation]
+      properties:
+        uploadId: { type: string }
+        operation: { $ref: "#/components/schemas/JobOperation" }
+        clientReference: { type: string, maxLength: 100, description: Idempotency key; a repeated create with the same key returns the existing job. }
+
+    JobResult:
+      type: object
+      required: [name, size, sha256, downloadUrl]
+      properties:
+        name: { type: string, description: Suggested file name; clients sanitise it and choose the final name themselves. }
+        size: { type: integer, format: int64 }
+        sha256: { $ref: "#/components/schemas/Sha256" }
+        contentType: { type: string }
+        downloadUrl: { type: string, format: uri }
+        expiresAt: { type: string, format: date-time }
+
+    Job:
+      type: object
+      required: [id, status, progress, createdAt]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [queued, running, succeeded, failed, cancelled] }
+        progress: { type: number, minimum: 0, maximum: 1, description: Processing progress only (upload/download are the client's). }
+        stage: { type: [string, "null"], description: "Short human label, e.g. \"Transcribing\"." }
+        etaSeconds: { type: [number, "null"] }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: [string, "null"], format: date-time }
+        pollAfterMs: { type: integer, default: 1000 }
+        operation: { $ref: "#/components/schemas/JobOperation" }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/JobResult" }
+        error:
+          description: Present when `status` is `failed`.
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+
+    Namespace:
+      type: string
+      pattern: "^[a-z][a-z0-9.-]{0,63}$"
+
+    SyncDocumentHead:
+      type: object
+      required: [namespace, version, updatedAt]
+      properties:
+        namespace: { $ref: "#/components/schemas/Namespace" }
+        version: { type: integer, minimum: 1 }
+        updatedAt: { type: string, format: date-time }
+        updatedBy: { type: [string, "null"], description: Device name that wrote this version. }
+        size: { type: integer }
+
+    SyncDocument:
+      allOf:
+        - $ref: "#/components/schemas/SyncDocumentHead"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              description: Arbitrary JSON (object or array) owned by the client. At most 256 KiB serialised.
+
+    SyncDocumentWrite:
+      type: object
+      required: [data]
+      properties:
+        data: { description: Arbitrary JSON (object or array). }
+        deviceName: { type: string, maxLength: 100 }
+
+    SyncConflict:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          required: [current]
+          properties:
+            current:
+              description: The server's current document, or `null` if it was deleted.
+              oneOf:
+                - $ref: "#/components/schemas/SyncDocument"
+                - type: "null"
+
+    InboxItem:
+      type: object
+      required: [id, name, size, sha256, createdAt, downloadUrl, status]
+      properties:
+        id: { type: string }
+        name: { type: string, description: Display name; clients sanitise it (no path components) before saving. }
+        size: { type: integer, format: int64 }
+        sha256: { $ref: "#/components/schemas/Sha256" }
+        contentType: { type: string }
+        source: { type: string, enum: [phone, browser, email, api] }
+        note: { type: [string, "null"] }
+        status: { type: string, enum: [pending, delivered] }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+        downloadUrl: { type: string, format: uri }
