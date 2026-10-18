@@ -127,6 +127,7 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
                 load(web)
             }
         } onTimeout: { [weak self] in
+            Log.engine.error("webkit pdf: page load timed out")
             self?.loadContinuation?.resume(throwing: Failure.timeout)
             self?.loadContinuation = nil
             web.stopLoading()

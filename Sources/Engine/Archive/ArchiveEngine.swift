@@ -162,6 +162,8 @@ public struct ArchiveEngine: ConversionEngine {
                 try Gzip.decompress(archive, to: dest.appendingPathComponent(sanitize(inner)))
             } else if !onlyRefusals(err) {
                 throw ConversionError.engineFailed("bsdtar", status: result.status, detail: err)
+            } else {
+                Log.engine.notice("archive: skipped unsafe members in \(archive.lastPathComponent, privacy: .private): \(err, privacy: .public)")
             }
         }
         // Finder's sidecar metadata folder isn't content.
@@ -240,7 +242,8 @@ public enum Gzip {
         let b = [UInt8](head)
         guard b.count > 10, b[0] == 0x1F, b[1] == 0x8B, b[3] & 0x08 != 0 else { return nil }
         var i = 10
-        if b[3] & 0x04 != 0, b.count > 12 { i += 2 + Int(b[10]) | Int(b[11]) << 8 }
+        if b[3] & 0x04 != 0, b.count > 12 { i += 2 + (Int(b[10]) | Int(b[11]) << 8) }
+        guard i < b.count else { return nil }
         guard let end = b[i...].firstIndex(of: 0) else { return nil }
         let name = String(decoding: b[i..<end], as: UTF8.self)
         return (name as NSString).lastPathComponent.isEmpty ? nil : (name as NSString).lastPathComponent

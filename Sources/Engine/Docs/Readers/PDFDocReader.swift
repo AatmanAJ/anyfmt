@@ -48,7 +48,10 @@ public enum PDFDocReader {
             guard let page = doc.page(at: i) else { continue }
             var pageLines = lines(page, index: i)
             let scanned = pageLines.isEmpty && options.ocr
-            if scanned { pageLines = ocrLines(page, index: i) }
+            if scanned {
+                pageLines = ocrLines(page, index: i)
+                Log.engine.debug("pdf: page \(i + 1) has no text layer; OCR found \(pageLines.count) lines")
+            }
             var elements = pageLines.map(Element.line)
             // Tables: geometry-based grid detection replaces the cells' text lines.
             let tables = scanned ? [] : PDFTableExtractor.tables(page)

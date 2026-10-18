@@ -65,6 +65,7 @@ public struct QuickLookEngine: ConversionEngine {
         let bundle = out.appendingPathComponent(staged.lastPathComponent + ".qlpreview")
         let html = bundle.appendingPathComponent("Preview.html")
         guard FileManager.default.fileExists(atPath: html.path) else {
+            Log.engine.error("quicklook: qlmanage produced no Preview.html for a .\(input.pathExtension, privacy: .public) file")
             throw ConversionError.other(L("Quick Look couldn’t produce a preview of this file."), detail: "no Preview.html in \(out.path)")
         }
         return html
