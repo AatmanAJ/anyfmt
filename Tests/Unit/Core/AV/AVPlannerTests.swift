@@ -218,6 +218,8 @@ final class AVPlannerTests: XCTestCase {
         XCTAssertTrue(args(ogg).contains("-c:a libvorbis -q:a 4"))
         let opus = try plan(facts(audio: [mp3]), Formats.mp3, Formats.opus, [OptionKey.sampleRate: .string("44100")])
         XCTAssertTrue(args(opus).contains("-c:a libopus -b:a 256k -vbr on -ar 48000"), "Opus is always 48 kHz")
+        let monoOpus = try plan(facts(audio: [mp3]), Formats.mp3, Formats.opus, [OptionKey.bitrate: .string("320"), OptionKey.channels: .string("mono")])
+        XCTAssertTrue(args(monoOpus).contains("-b:a 256k"), "libopus caps at 256 kbps per channel")
         let mono = try plan(facts(audio: [mp3]), Formats.mp3, Formats.flac, [OptionKey.channels: .string("mono"), OptionKey.sampleRate: .string("48000")])
         XCTAssertTrue(args(mono).contains("-ar 48000 -ac 1"))
         let lame = try plan(facts(audio: [aac()]), Formats.m4a, Formats.mp3)

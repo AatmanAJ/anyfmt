@@ -352,7 +352,9 @@ enum AVConversionPlanner {
             args = ["-c:a", name, "-q:a", "\(AVDefaultAudio.vorbisQuality(kbps: o.bitrate))"]
         case Formats.opus:
             name = "libopus"
-            args = ["-c:a", name, "-b:a", "\(o.bitrate)k", "-vbr", "on"]
+            // libopus refuses more than 256 kbps per channel (e.g. 320 kbps mono).
+            let kbps = min(o.bitrate, 256 * max(1, channels ?? a.channels ?? 2))
+            args = ["-c:a", name, "-b:a", "\(kbps)k", "-vbr", "on"]
             sampleRate = 48000 // Opus always runs at 48 kHz.
         case Formats.wav:
             name = depth == 24 ? "pcm_s24le" : "pcm_s16le"

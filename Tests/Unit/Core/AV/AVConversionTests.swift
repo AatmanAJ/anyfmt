@@ -59,6 +59,11 @@ final class AVConversionTests: XCTestCase {
         XCTAssertEqual(mono.primaryAudio?.sampleRate, 48000)
         XCTAssertEqual(Double(mono.primaryAudio?.bitRate ?? 0), 96_000, accuracy: 4_000)
 
+        for to in [Formats.opus, Formats.m4a, Formats.mp3, Formats.ogg] {
+            let (_, f) = try await check("sample.wav", to: to, options: [OptionKey.channels: .string("mono"), OptionKey.bitrate: .string("320")],
+                                         Expect(audio: AVCodecTables.canonicalAudioCodec(to)))
+            XCTAssertEqual(f.primaryAudio?.channels, 1, "\(to) at the highest bitrate, mono")
+        }
         let (_, hi) = try await check("edge-24bit.flac", to: Formats.wav, options: [OptionKey.bitDepth: .string("24")], Expect(audio: "pcm_s24le"))
         XCTAssertEqual(hi.primaryAudio?.sampleRate, 96000)
         try await check("edge-24bit.flac", to: Formats.aiff, Expect(audio: "pcm_s16be"))
