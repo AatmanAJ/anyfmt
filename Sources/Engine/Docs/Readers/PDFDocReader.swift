@@ -2,6 +2,7 @@ import AppKit
 import CoreGraphics
 import Foundation
 import PDFKit
+import Vision
 
 /// PDF → `DocModel` reconstruction. PDFs have no structure, so this infers it:
 /// lines (PDFKit text + geometry) are grouped into paragraphs by spacing,
@@ -13,6 +14,8 @@ public enum PDFDocReader {
     public struct Options: Sendable {
         public var pageBreaks = true
         public var images = true
+        /// Recognise text on pages that have none (scans) with Vision, locally.
+        public var ocr = true
         public init() {}
     }
 
@@ -41,10 +44,14 @@ public enum PDFDocReader {
         }
         var pages: [[Element]] = []
         for i in 0..<doc.pageCount {
+            try Task.checkCancellation()
             guard let page = doc.page(at: i) else { continue }
-            var elements = lines(page, index: i).map(Element.line)
+            var pageLines = lines(page, index: i)
+            let scanned = pageLines.isEmpty && options.ocr
+            if scanned { pageLines = ocrLines(page, index: i) }
+            var elements = pageLines.map(Element.line)
             // Tables: geometry-based grid detection replaces the cells' text lines.
-            let tables = PDFTableExtractor.tables(page)
+            let tables = scanned ? [] : PDFTableExtractor.tables(page)
             if !tables.isEmpty {
                 elements.removeAll { e in
                     guard case .line(let l) = e else { return false }
@@ -61,7 +68,12 @@ public enum PDFDocReader {
                 }
             }
             if options.images {
-                let imgs = PDFImageExtractor.images(page)
+                var imgs = PDFImageExtractor.images(page)
+                if scanned, !pageLines.isEmpty {
+                    // The page scan itself isn't a figure once its text has been recognised.
+                    let area = page.bounds(for: .mediaBox).width * page.bounds(for: .mediaBox).height
+                    imgs.removeAll { $0.1.width * $0.1.height > area * 0.5 }
+                }
                 elements = merge(elements, images: imgs, pageHeight: page.bounds(for: .mediaBox).height)
             }
             pages.append(elements)
@@ -114,6 +126,38 @@ public enum PDFDocReader {
             out.append(line)
         }
         return out
+    }
+
+    /// Text lines of an image-only page via Vision (on-device, accurate mode).
+    static func ocrLines(_ page: PDFPage, index: Int) -> [Line] {
+        let size = PDFRaster.size(page)
+        let scale = min(3, 2400 / max(size.width, size.height, 1))
+        guard let image = PDFRaster.render(page, scale: scale) else { return [] }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        let handler = VNImageRequestHandler(cgImage: image, options: [:])
+        do { try handler.perform([request]) } catch { return [] }
+        let observations = request.results ?? []
+        let bounds = page.bounds(for: .mediaBox)
+        var out: [Line] = []
+        for o in observations {
+            guard let text = o.topCandidates(1).first?.string, !text.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+            let b = o.boundingBox  // normalised, origin bottom-left (same as PDF space)
+            let rect = CGRect(x: bounds.minX + b.minX * size.width, y: bounds.minY + b.minY * size.height,
+                              width: b.width * size.width, height: b.height * size.height)
+            // Box height ≈ ascender-to-descender ≈ 1.2 × point size; round to half points so sizes cluster.
+            let pt = ((Double(rect.height) / 1.2) * 2).rounded() / 2
+            out.append(Line(text: text, rect: rect, size: pt, bold: false, runs: [.text(text)], page: index))
+        }
+        // Box heights jitter with ascenders/descenders: snap ordinary lines to the page's median size
+        // and only keep a distinct size for clearly taller lines (headings).
+        let median = out.map(\.size).sorted().dropFirst(out.count / 2).first ?? 11
+        for k in out.indices {
+            out[k].size = out[k].size > median * 1.3 ? (out[k].size / 2).rounded() * 2 : median
+        }
+        // Reading order: top to bottom, then left to right.
+        return out.sorted { a, b in abs(a.rect.midY - b.rect.midY) < min(a.rect.height, b.rect.height) * 0.5 ? a.rect.minX < b.rect.minX : a.rect.midY > b.rect.midY }
     }
 
     static func linkAnnotations(_ page: PDFPage) -> [(CGRect, String)] {

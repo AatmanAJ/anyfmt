@@ -70,6 +70,42 @@ final class PDFRouteTests: XCTestCase {
         XCTAssertEqual(back.headings().first?.1, "Annual Report")
     }
 
+    /// An image-only "scan": text rasterised into a bitmap that fills the page.
+    static func scannedPDF() throws -> URL {
+        let w = 1190, h = 1684  // A4 at 144 dpi
+        let cg = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
+                           bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
+        cg.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        cg.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: cg, flipped: false)
+        func draw(_ s: String, _ size: CGFloat, _ y: CGFloat, bold: Bool = false) {
+            let font = bold ? NSFont.boldSystemFont(ofSize: size) : NSFont.systemFont(ofSize: size)
+            (s as NSString).draw(at: NSPoint(x: 140, y: y), withAttributes: [.font: font, .foregroundColor: NSColor.black])
+        }
+        draw("Scanned Report", 56, CGFloat(h) - 260, bold: true)
+        draw("The quarterly numbers improved across every region this year.", 26, CGFloat(h) - 420)
+        draw("Shipping times fell while customer satisfaction kept rising.", 26, CGFloat(h) - 520)
+        NSGraphicsContext.restoreGraphicsState()
+        let url = try tempDir("scan").appendingPathComponent("scan.pdf")
+        var box = CGRect(x: 0, y: 0, width: 595.28, height: 841.89)
+        let ctx = CGContext(url as CFURL, mediaBox: &box, nil)!
+        ctx.beginPDFPage(nil)
+        ctx.draw(cg.makeImage()!, in: box)
+        ctx.endPDFPage()
+        ctx.closePDF()
+        return url
+    }
+
+    func testScannedPDFIsRecognisedWithVision() throws {
+        let pdf = try Self.scannedPDF()
+        XCTAssertEqual(PDFDocument(url: pdf)?.string?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "", "", "fixture has no text layer")
+        let model = try PDFDocReader.read(pdf)
+        XCTAssertEqual(model.headings().first?.1, "Scanned Report", "\(model.blocks)")
+        XCTAssertTrue(model.text.contains("quarterly numbers improved"), model.text)
+        XCTAssertTrue(model.allImages.isEmpty, "the page scan itself isn't kept as a figure")
+    }
+
     func testPDFToPPTXMakesOneSlidePerPage() async throws {
         let pdf = try await Self.longPDF()
         let pages = PDFDocument(url: pdf)!.pageCount

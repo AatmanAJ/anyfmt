@@ -100,6 +100,8 @@ final class DocsRouteMatrixTests: XCTestCase {
                 if try EPUBReader.read(first).text.isEmpty { return "empty epub" }
             case Formats.pdf:
                 guard let doc = PDFDocument(url: first), doc.pageCount > 0 else { return "pdf unreadable" }
+                // Every lane F source has text, so a blank render is a failure.
+                if (doc.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines).count < 5 { return "pdf has no text" }
             case Formats.pptx:
                 let z = try ZipReader(url: first)
                 if try XMLTree.parse(z.data("ppt/presentation.xml")).all("sldId").isEmpty { return "no slides" }
