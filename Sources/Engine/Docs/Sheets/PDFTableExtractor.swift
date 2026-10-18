@@ -25,29 +25,37 @@ public enum PDFTableExtractor {
         return Workbook(sheets: [Sheet(name: name, rows: rows).trimmed])
     }
 
+    /// Whitespace-separated tokens with their on-page bounds. Geometry comes from
+    /// `PDFSelection` (consistent with `page.string`; per-character bounds drift).
     static func words(_ page: PDFPage) -> [Word] {
         guard let s = page.string, !s.isEmpty else { return [] }
         let ns = s as NSString
         var out: [Word] = []
-        var cur = ""
-        var rect = CGRect.null
-        func flush() {
-            if !cur.isEmpty, !rect.isNull { out.append(Word(text: cur, rect: rect)) }
-            cur = ""
-            rect = .null
+        var start = -1
+        func flush(_ end: Int) {
+            guard start >= 0, end > start else { start = -1; return }
+            let r = NSRange(location: start, length: end - start)
+            start = -1
+            guard let sel = page.selection(for: r) else { return }
+            let text = ns.substring(with: r)
+            // A token PDFKit glued across lines splits into its line selections.
+            let lines = sel.selectionsByLine()
+            if lines.count > 1 {
+                for l in lines {
+                    let t = (l.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    let b = l.bounds(for: page)
+                    if !t.isEmpty, b.width > 0 { out.append(Word(text: t, rect: b)) }
+                }
+            } else {
+                let b = sel.bounds(for: page)
+                if b.width > 0 || b.height > 0 { out.append(Word(text: text, rect: b)) }
+            }
         }
         for i in 0..<ns.length {
-            guard let scalar = Unicode.Scalar(ns.character(at: i)) else { continue }
-            let ch = Character(scalar)
-            if ch.isWhitespace { flush(); continue }
-            let b = page.characterBounds(at: i)
-            if b.width <= 0 && b.height <= 0 { continue }
-            // A big jump inside one "word" means PDFKit glued separate runs.
-            if !rect.isNull, abs(b.midY - rect.midY) > max(rect.height, b.height) * 0.6 || b.minX - rect.maxX > max(b.height, 4) * 0.6 { flush() }
-            cur.append(ch)
-            rect = rect.isNull ? b : rect.union(b)
+            let isSpace = Unicode.Scalar(ns.character(at: i)).map { CharacterSet.whitespacesAndNewlines.contains($0) } ?? true
+            if isSpace { flush(i) } else if start < 0 { start = i }
         }
-        flush()
+        flush(ns.length)
         return out
     }
 

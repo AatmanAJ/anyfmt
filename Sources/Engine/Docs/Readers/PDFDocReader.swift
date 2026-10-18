@@ -136,24 +136,27 @@ public enum PDFDocReader {
         return out
     }
 
-    /// Drops lines in the top/bottom bands that repeat across pages (running heads,
-    /// footers) and bare page numbers.
+    /// Drops running heads/footers: only a page's first and last lines are
+    /// candidates, they must sit in the outer 6 % of the page, and they go if
+    /// they're a bare page number or a short line repeated on most pages.
     static func stripRunningHeaders(_ pages: inout [[Element]], doc: PDFDocument) {
-        guard pages.count >= 2 else {
-            if pages.count == 1 { pages[0].removeAll { if case .line(let l) = $0 { return isPageNumber(l.text) && isInBand(l, doc) }; return false } }
-            return
+        func edgeLines(_ p: [Element]) -> [Int] {
+            let idx = p.indices.filter { if case .line = p[$0] { return true }; return false }
+            guard let first = idx.first, let last = idx.last else { return [] }
+            return first == last ? [first] : [first, last]
         }
         var counts: [String: Int] = [:]
         for p in pages {
             var seen = Set<String>()
-            for case .line(let l) in p where isInBand(l, doc) { seen.insert(normalizeForRepeat(l.text)) }
+            for i in edgeLines(p) { if case .line(let l) = p[i], isInBand(l, doc) { seen.insert(normalizeForRepeat(l.text)) } }
             for s in seen { counts[s, default: 0] += 1 }
         }
-        let threshold = max(2, Int(Double(pages.count) * 0.5))
+        let threshold = max(2, Int((Double(pages.count) * 0.5).rounded(.up)))
         for k in pages.indices {
-            pages[k].removeAll { e in
-                guard case .line(let l) = e, isInBand(l, doc) else { return false }
-                return isPageNumber(l.text) || (counts[normalizeForRepeat(l.text)] ?? 0) >= threshold
+            for i in edgeLines(pages[k]).reversed() {
+                guard case .line(let l) = pages[k][i], isInBand(l, doc) else { continue }
+                let repeated = pages.count >= 2 && l.text.count <= 90 && (counts[normalizeForRepeat(l.text)] ?? 0) >= threshold
+                if isPageNumber(l.text) || repeated { pages[k].remove(at: i) }
             }
         }
     }
@@ -161,8 +164,8 @@ public enum PDFDocReader {
     static func isInBand(_ l: Line, _ doc: PDFDocument) -> Bool {
         guard let page = doc.page(at: l.page) else { return false }
         let b = page.bounds(for: .mediaBox)
-        let band = b.height * 0.075
-        return l.rect.maxY > b.maxY - band || l.rect.minY < b.minY + band
+        let band = b.height * 0.06
+        return l.rect.minY > b.maxY - band || l.rect.maxY < b.minY + band
     }
 
     static func normalizeForRepeat(_ s: String) -> String {
@@ -187,7 +190,8 @@ public enum PDFDocReader {
         var text: String { inlines.plainText }
     }
 
-    static let bulletPattern = #"^\s*([•◦▪‣●○■□►–—\-\*])\s+"#
+    /// Bullet glyphs may touch the text; dashes and asterisks need a space (so "-5" stays a number).
+    static let bulletPattern = #"^\s*(?:[•◦▪‣●○■□►]\s*|[–—\-\*]\s+)"#
     static let numberPattern = #"^\s*(\d{1,3})[.)]\s+"#
 
     static func assemble(_ pages: [[Element]], pageBreaks: Bool) -> [DocBlock] {

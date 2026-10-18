@@ -91,7 +91,9 @@ public struct ArchiveEngine: ConversionEngine {
         case Formats.zip:
             let out = dir.appendingPathComponent(baseName).appendingPathExtension("zip")
             if sources.count == 1 {
-                _ = try await ProcessRunner.run(ditto, ["-c", "-k", "--sequesterRsrc", "--keepParent", "--zlibCompressionLevel", "\(level)", sources[0].path, out.path])
+                // --keepParent embeds a folder's own name; for a single file it would embed the file's *parent*.
+                let keep = isDirectory(sources[0]) ? ["--keepParent"] : []
+                _ = try await ProcessRunner.run(ditto, ["-c", "-k", "--sequesterRsrc"] + keep + ["--zlibCompressionLevel", "\(level)", sources[0].path, out.path])
             } else if let staging {
                 _ = try await ProcessRunner.run(ditto, ["-c", "-k", "--sequesterRsrc", "--zlibCompressionLevel", "\(level)", staging.path, out.path])
             }

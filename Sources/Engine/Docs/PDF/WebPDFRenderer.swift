@@ -85,7 +85,11 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
     private static func blockRemoteRules() async -> WKContentRuleList? {
         if ruleListTried { return ruleList }
         ruleListTried = true
-        let json = #"[{"trigger":{"url-filter":"^(https?|ftp|wss?|blob):"},"action":{"type":"block"}}]"#
+        // WebKit's rule regexes have no alternation, so one rule per scheme.
+        let rules = ["^https?:", "^ftp:", "^wss?:", "^blob:"].map { scheme in
+            "{\"trigger\":{\"url-filter\":\"\(scheme)\"},\"action\":{\"type\":\"block\"}}"
+        }
+        let json = "[" + rules.joined(separator: ",") + "]"
         guard let store = WKContentRuleListStore.default() else { return nil }
         ruleList = await withCheckedContinuation { (c: CheckedContinuation<WKContentRuleList?, Never>) in
             store.compileContentRuleList(forIdentifier: "halo.block-remote", encodedContentRuleList: json) { list, _ in
@@ -98,7 +102,6 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
     // MARK: Instance
 
     private var loadContinuation: CheckedContinuation<Void, Error>?
-    private var printContinuation: CheckedContinuation<Bool, Never>?
 
     private func run(output: URL, page: PageSetup, timeout: TimeInterval, rules: WKContentRuleList?, load: (WKWebView) -> Void) async throws {
         let cfg = WKWebViewConfiguration()
@@ -132,7 +135,8 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
 
         let info = NSPrintInfo()
         info.paperSize = NSSize(width: paper.width, height: paper.height)
-        info.orientation = page.landscape ? .landscape : .portrait
+        // NSPrintInfo swaps width/height to match the orientation, so derive it from the paper itself.
+        info.orientation = paper.width > paper.height ? .landscape : .portrait
         info.topMargin = page.margin
         info.bottomMargin = page.margin
         info.leftMargin = page.margin
@@ -147,16 +151,14 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
         op.showsPrintPanel = false
         op.showsProgressPanel = false
         op.view?.frame = web.bounds
+        // AppKit finishes the operation on its own print thread, so the completion
+        // lands on a non-isolated delegate object, never on main-actor state.
+        let completion = PrintCompletion()
         let ok: Bool = await withCheckedContinuation { (c: CheckedContinuation<Bool, Never>) in
-            self.printContinuation = c
-            op.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(_:success:contextInfo:)), contextInfo: nil)
+            completion.set(c)
+            op.runModal(for: window, delegate: completion, didRun: #selector(PrintCompletion.printOperationDidRun(_:success:contextInfo:)), contextInfo: nil)
         }
         guard ok, FileManager.default.fileExists(atPath: output.path) else { throw Failure.printFailed }
-    }
-
-    @objc private func printOperationDidRun(_ op: NSPrintOperation, success: Bool, contextInfo: UnsafeMutableRawPointer?) {
-        printContinuation?.resume(returning: success)
-        printContinuation = nil
     }
 
     private func withTimeout(_ seconds: TimeInterval, _ body: () async throws -> Void, onTimeout: @escaping @MainActor () -> Void) async throws {
@@ -193,5 +195,26 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         loadContinuation?.resume(throwing: Failure.loadFailed("web content process terminated"))
         loadContinuation = nil
+    }
+}
+
+/// Receives `NSPrintOperation`'s completion (AppKit calls it on its print thread)
+/// and resumes the waiting task exactly once.
+private final class PrintCompletion: NSObject, @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Bool, Never>?
+
+    func set(_ c: CheckedContinuation<Bool, Never>) {
+        lock.lock()
+        continuation = c
+        lock.unlock()
+    }
+
+    @objc func printOperationDidRun(_ op: NSPrintOperation, success: Bool, contextInfo: UnsafeMutableRawPointer?) {
+        lock.lock()
+        let c = continuation
+        continuation = nil
+        lock.unlock()
+        c?.resume(returning: success)
     }
 }

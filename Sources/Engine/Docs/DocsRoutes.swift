@@ -30,6 +30,9 @@ public enum DocsRoutes {
 
     static func flags(from: FormatID, to: FormatID) -> CapabilityFlags {
         if to == F.txt { return [.lossyStructure, .terminalOnly] }
+        // A rendered PDF is an end product: never feed it back into PDF reconstruction
+        // (no DOCX → PDF → XLSX/PPTX detours).
+        if to == F.pdf { return [.terminalOnly] }
         // Lossless enough to chain through: our own structured formats.
         if [F.docx, F.odt, F.html].contains(to) && from != F.pdf { return [.lossless] }
         return []
@@ -70,7 +73,7 @@ public enum DocsRoutes {
 
     /// Slides through Quick Look's Office generator (best effort, low priority).
     static let slideRows: [Capability] = [
-        Capability(F.pptx, F.pdf, EngineIDs.quickLook, schema: .none, priority: 40, cost: 3),
+        Capability(F.pptx, F.pdf, EngineIDs.quickLook, schema: .none, priority: 40, cost: 3, flags: [.terminalOnly]),
         Capability(F.pptx, F.png, EngineIDs.quickLook, schema: DocsSchemas.slideImages, priority: 40, cost: 4, flags: [.multiOutput]),
         Capability(F.pptx, F.jpg, EngineIDs.quickLook, schema: DocsSchemas.slideImages, priority: 40, cost: 4, flags: [.multiOutput]),
     ]
@@ -90,6 +93,7 @@ public enum DocsRoutes {
                 default: schema = .none
                 }
                 var flags: CapabilityFlags = multiSheet ? [.multiOutput] : []
+                if to == F.pdf { flags.insert(.terminalOnly) }
                 if [F.xlsx, F.ods].contains(to) { flags.insert(.lossless) }
                 rows.append(Capability(from, to, EngineIDs.sheets, schema: schema, priority: 100, cost: to == F.pdf ? 2.5 : 1, flags: flags))
             }

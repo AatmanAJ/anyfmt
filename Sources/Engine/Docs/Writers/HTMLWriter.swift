@@ -106,7 +106,7 @@ public struct HTMLWriter {
 
     public static let printCSS = """
     html { -webkit-print-color-adjust: exact; }
-    body { font: 11pt/1.45 -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; color: #000; margin: 0; padding: 0; }
+    body { font: 11pt/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; color: #000; margin: 0; padding: 0; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.2em 0 0.4em; break-after: avoid; page-break-after: avoid; }
     h1 { font-size: 20pt; } h2 { font-size: 16pt; } h3 { font-size: 13.5pt; } h4 { font-size: 12pt; } h5, h6 { font-size: 11pt; }
     body > :first-child { margin-top: 0; }
@@ -126,6 +126,11 @@ public struct HTMLWriter {
     blockquote { padding: 0 0 0 10pt; border-left: 2pt solid #c7c7cc; color: #333; margin-left: 0; }
     hr { border: 0; border-top: 0.75pt solid #aeaeb2; margin: 1.5em 0; }
     li.task { list-style: none; }
+    /* Bullets as real text: WebKit paints disc markers as shapes, which leaves PDFs with no bullet characters to copy or re-read. */
+    ul { list-style: none; padding-left: 1.5em; }
+    ul > li:not(.task)::before { content: "•"; display: inline-block; width: 1.1em; margin-left: -1.1em; }
+    ul ul > li:not(.task)::before { content: "◦"; }
+    ul ul ul > li:not(.task)::before { content: "▪"; }
     .page-break { break-after: page; page-break-after: always; height: 0; margin: 0; }
     """
 
