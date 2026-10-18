@@ -99,7 +99,7 @@ public struct AVInputFacts: Sendable, Hashable {
 
 /// Runs the bundled ffprobe once and decodes both the shared `MediaProbe`
 /// contract and the extra fields lane E needs (disposition, display-matrix
-/// rotation, sample depth, per-stream bitrate). See docs/contract-changes/E.md.
+/// rotation, sample depth, per-stream bitrate). See docs/contract-changes/E-av.md.
 enum AVProbe {
     static func facts(for url: URL, locator: EngineLocator) async throws -> AVInputFacts {
         guard let exe = locator.ffprobe else {

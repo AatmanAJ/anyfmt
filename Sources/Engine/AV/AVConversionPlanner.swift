@@ -67,7 +67,7 @@ struct AVAudioOptions: Sendable, Hashable {
     var bitrate: Int
     var sampleRate: Int?
     var channels: Int?
-    /// 16 or 24; nil = keep the source depth ("keep"/"0", see docs/contract-changes/E.md).
+    /// 16 or 24; nil = keep the source depth ("keep"/"0", see docs/contract-changes/E-av.md).
     var bitDepth: Int?
 
     init(_ o: OptionValues) {
