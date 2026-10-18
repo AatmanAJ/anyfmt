@@ -369,6 +369,11 @@ struct ImageAnnotateCanvas: View {
             }
             if a.kind == .text { model.textFocusRequest += 1 }
         }
+        // A click (no drag) on a text mark puts the caret in its text field.
+        if case .moving(let id, _) = action, model.annotations == snapshot,
+           model.annotations.first(where: { $0.id == id })?.kind == .text {
+            model.textFocusRequest += 1
+        }
         if model.annotations != snapshot {
             // Record the state before this gesture.
             let after = model.annotations

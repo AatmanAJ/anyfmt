@@ -185,7 +185,7 @@ job UI shows Read QR results; (3) optional size on `EditorWindow.present`;
   DCT passthrough, QR round trip, metadata round trips (JPEG lossless scan,
   JPEG XMP consistency, PNG IDAT identical, HEIC, PDF, MP3, MP4), strips (JPEG,
   PNG, HEIC, WebP chunks, animated GIF, PDF XMP, MP3 tags, MP4 location).
-- App-hosted (`Tests/Unit/App/EditorsImage/`, target `AppTests`): 16 model /
+- App-hosted (`Tests/Unit/App/EditorsImage/`, target `AppTests`): 15 model /
   factory tests + 9 render tests. `ImageEditors.open` returns true for all 8
   editor tools (and via `EditorFactory`), false otherwise; Esc closes; every
   model produces the right options; adjust preview re-render worst case < 50 ms
