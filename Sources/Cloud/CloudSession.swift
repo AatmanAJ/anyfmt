@@ -45,6 +45,7 @@ final class CloudSession: ObservableObject {
     private let sync: SyncEngine
     private let inbox: InboxService
     private var observation: UUID?
+    private var mirroredStateError: String?
 
     init(state: CloudState, preferences: CloudPreferences, vault: CloudCredentialVault, client: CloudAPIClient,
          auth: CloudAuth, sync: SyncEngine, inbox: InboxService) {
@@ -97,10 +98,16 @@ final class CloudSession: ObservableObject {
         if plan != e.plan { plan = e.plan }
         if syncEnabled != s.syncEnabled { syncEnabled = s.syncEnabled }
         if inboxEnabled != s.inboxEnabled { inboxEnabled = s.inboxEnabled }
-        if let err = s.lastError, err != lastError { lastError = err }
+        // Background steps (finishing sign-in, a revoked session) report through the
+        // shared state; mirror changes so a fixed problem also clears in the UI.
+        if s.lastError != mirroredStateError {
+            mirroredStateError = s.lastError
+            lastError = s.lastError
+        }
     }
 
     var isSignedIn: Bool { status == .signedIn }
+    var inboxIntervalMinutes: Int { preferences.inboxIntervalMinutes }
     var serverDisplayName: String { CloudServerAddress.displayName(for: serverURL) }
     var isDefaultServer: Bool { CloudServerAddress.isDefault(serverURL) }
 
@@ -132,6 +139,7 @@ final class CloudSession: ObservableObject {
         await inbox.stop()
         await auth.signOut()
         syncNotices = []
+        lastError = nil
     }
 
     /// The small refresh button beside the usage line.

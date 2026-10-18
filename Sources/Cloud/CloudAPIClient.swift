@@ -234,11 +234,9 @@ actor CloudAPIClient {
         switch u.code {
         case .cancelled: return CancellationError()
         case .notConnectedToInternet, .dataNotAllowed, .internationalRoamingOff: return CloudError.offline
+        // A dropped connection mid-transfer: uploads resume from the server's offset.
         case .networkConnectionLost: return CloudError.connectionLost
-        case .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .timedOut, .secureConnectionFailed,
-             .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateNotYetValid,
-             .appTransportSecurityRequiresSecureConnection, .badServerResponse:
-            return CloudError.serverUnreachable(host)
+        // DNS, refused, timed out, TLS trust, ATS…: all "couldn't reach the server" to a person.
         default: return CloudError.serverUnreachable(host)
         }
     }

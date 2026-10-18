@@ -124,7 +124,7 @@ enum CloudCopy {
         case .shareLink:
             String(localized: "Drop files on Share link to upload them and copy a link you can send to anyone. Links can expire, need a password or stop after a number of downloads.")
         case .shareLinkCustomDomain:
-            String(localized: "Share links that use your own domain instead of ours.")
+            String(localized: "Share links that use your own domain instead of the server's address.")
         case .cloudJobs:
             String(localized: "Send a heavy video conversion to the cloud when your Mac is busy or on battery. The result lands beside the original, as usual.")
         case .sync:

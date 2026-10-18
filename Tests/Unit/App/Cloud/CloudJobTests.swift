@@ -151,4 +151,19 @@ final class CloudJobTests: MockServerTestCase {
         XCTAssertTrue(CloudJobOperation.wantsCloud(OptionValues([OptionKey.cloud: .bool(true)])))
         XCTAssertFalse(CloudJobOperation.wantsCloud(StandardSchemas.video.defaults))
     }
+
+    func testEveryProToolInTheCatalogueHasACloudJob() {
+        let pro = ToolCatalog.all.filter { $0.cloudFeature != nil }
+        XCTAssertEqual(Set(pro.map(\.id)), [ToolIDs.transcribe, ToolIDs.upscale, ToolIDs.removeBackgroundHQ])
+        for spec in pro {
+            let op = CloudJobOperation.forTool(spec.id)
+            XCTAssertNotNil(op, "\(spec.id)")
+            XCTAssertEqual(op?.feature, spec.cloudFeature)
+        }
+        XCTAssertNil(CloudJobOperation.forTool(ToolIDs.compressImage), "local tools never become cloud jobs")
+        XCTAssertEqual(CloudJobOperation.forTool(ToolIDs.transcribe, options: OptionValues(["format": .string("vtt")]))?.target, Formats.vtt)
+        XCTAssertEqual(CloudJobOperation.forTool(ToolIDs.transcribe)?.target, Formats.srt)
+        guard case .tool(_, _, let options)? = CloudJobOperation.forTool(ToolIDs.upscale) else { return XCTFail() }
+        XCTAssertEqual(options["scale"], .int(2))
+    }
 }

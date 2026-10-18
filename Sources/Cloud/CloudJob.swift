@@ -176,6 +176,25 @@ extension CloudJobOperation {
 
     static let removeBackgroundHQ = CloudJobOperation.tool(ToolIDs.removeBackgroundHQ, target: Formats.png, options: OptionValues())
 
+    /// The job for a Pro tool from `ToolCatalog` (its `cloudFeature` is set),
+    /// reading `format` / `language` / `scale` from the options when present.
+    static func forTool(_ tool: ToolID, options: OptionValues = OptionValues()) -> CloudJobOperation? {
+        switch tool {
+        case ToolIDs.transcribe:
+            var o = options
+            if o["language"] == nil { o["language"] = .string("auto") }
+            return .tool(tool, target: FormatID(options.string("format", default: Formats.srt.rawValue)), options: o)
+        case ToolIDs.upscale:
+            var o = options
+            if o["scale"] == nil { o["scale"] = .int(2) }
+            return .tool(tool, target: Formats.png, options: o)
+        case ToolIDs.removeBackgroundHQ:
+            return .tool(tool, target: Formats.png, options: options)
+        default:
+            return nil
+        }
+    }
+
     /// True when the options ask for a cloud conversion (the video schema's `cloud` toggle).
     static func wantsCloud(_ options: OptionValues) -> Bool {
         options.bool(OptionKey.cloud, default: false)

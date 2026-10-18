@@ -188,7 +188,7 @@ struct AccountSettingsView: View {
         Section {
             Toggle(isOn: Binding(get: { session.inboxEnabled }, set: { session.setInboxEnabled($0) })) {
                 featureLabel(String(localized: "Receive files from your phone or browser"),
-                             detail: String(localized: "New files are saved to the folder below, then removed from the server."),
+                             detail: String(localized: "New files are saved to a folder you choose, then removed from the server."),
                              feature: .inbox)
             }
             .disabled(!session.entitlements.can(.inbox))
@@ -204,7 +204,7 @@ struct AccountSettingsView: View {
                     }
                 }
                 HStack {
-                    Text(String(localized: "Checks every \(CloudConfig.inboxDefaultIntervalMinutes) minutes while \(Brand.name) is running."))
+                    Text(String(localized: "Checks every \(session.inboxIntervalMinutes) minutes while \(Brand.name) is running."))
                         .font(.system(size: TypeRamp.caption + 1)).foregroundStyle(.secondary)
                     Spacer()
                     Button(String(localized: "Check Now")) { Task { await session.checkInboxNow() } }
