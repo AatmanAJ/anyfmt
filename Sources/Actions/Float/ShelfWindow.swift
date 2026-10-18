@@ -71,6 +71,8 @@ final class ShelfWindowPresenter: ShelfPresenting {
     func show(items: [ShelfItem], near point: CGPoint?, savedOrigin: CGPoint?) {
         hiding = false
         card.layer?.removeAllAnimations()
+        // Always reopen as the pile, whatever state it was hidden in.
+        if card.mode == .expanded { card.setMode(.collapsed, animated: false) }
         card.apply(items: items, change: nil, animated: false)
         let size = ShelfCardView.size(mode: card.mode, count: items.count)
         let frame = Self.initialCardFrame(size: size, near: point, savedOrigin: savedOrigin)
