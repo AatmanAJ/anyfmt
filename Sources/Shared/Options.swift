@@ -163,6 +163,9 @@ public enum OptionKey {
     public static let hardware = "hardware"         // bool: prefer VideoToolbox
     public static let audio = "audio"               // "keep" | "remove"
     public static let gifWidth = "gifWidth"
+    public static let gifLoop = "gifLoop"           // "forever" | "once"
+    public static let gifColors = "gifColors"       // palette size: "256" | "128" | "64" | "32"
+    public static let gifDither = "gifDither"       // bool: error-diffusion dithering
     public static let compression = "compression"   // archive level 0...9
     public static let timestamps = "timestamps"     // bool, subtitle → txt
     public static let sheet = "sheet"               // "first" | "all"
@@ -202,10 +205,13 @@ public enum StandardSchemas {
         OptionSpec(OptionKey.dpi, L("Resolution"), .choice([
             OptionChoice("72", "72 DPI"), OptionChoice("150", "150 DPI"),
             OptionChoice("300", "300 DPI"), OptionChoice("600", "600 DPI"),
-        ]), default: .string("300")),
+        ]), default: .string("300"), help: L("Used when the source is a PDF.")),
         OptionSpec(OptionKey.pages, L("Pages"), .pageRange, default: .string(""), help: L("Leave empty for all pages, or e.g. 1-3,5")),
         OptionSpec(OptionKey.quality, L("Quality"), .slider(min: 1, max: 100, step: 1, unit: "%"), default: .int(90)),
     ])
+
+    /// PDF pages to a lossless image (PNG, TIFF, BMP): no quality to choose.
+    public static let pdfRenderLossless = OptionsSchema("pdf.render.lossless", pdfRender.specs.filter { $0.id != OptionKey.quality })
 
     public static let toPDF = OptionsSchema("to.pdf", [
         OptionSpec(OptionKey.pageSize, L("Page size"), .choice([
@@ -221,7 +227,7 @@ public enum StandardSchemas {
 
     public static let audioLossy = OptionsSchema("audio.lossy", [
         OptionSpec(OptionKey.bitrate, L("Bitrate"), .choice([
-            OptionChoice("96", "96 kbps"), OptionChoice("128", "128 kbps"), OptionChoice("192", "192 kbps"),
+            OptionChoice("64", "64 kbps"), OptionChoice("96", "96 kbps"), OptionChoice("128", "128 kbps"), OptionChoice("192", "192 kbps"),
             OptionChoice("256", "256 kbps"), OptionChoice("320", "320 kbps"),
         ]), default: .string("256")),
         OptionSpec(OptionKey.sampleRate, L("Sample rate"), .choice([
@@ -264,11 +270,20 @@ public enum StandardSchemas {
 
     public static let gif = OptionsSchema("gif", [
         OptionSpec(OptionKey.gifWidth, L("Width"), .choice([
-            OptionChoice("0", L("Keep")), OptionChoice("960", "960 px"), OptionChoice("640", "640 px"), OptionChoice("480", "480 px"), OptionChoice("320", "320 px"),
+            OptionChoice("0", L("Keep")), OptionChoice("960", "960 px"), OptionChoice("720", "720 px"), OptionChoice("640", "640 px"), OptionChoice("480", "480 px"), OptionChoice("320", "320 px"),
         ]), default: .string("640")),
         OptionSpec(OptionKey.fps, L("Frame rate"), .choice([
             OptionChoice("10", "10 fps"), OptionChoice("15", "15 fps"), OptionChoice("24", "24 fps"), OptionChoice("30", "30 fps"),
         ]), default: .string("15")),
+        OptionSpec(OptionKey.gifLoop, L("Loop"), .choice([
+            OptionChoice("forever", L("Forever")), OptionChoice("once", L("Play once")),
+        ]), default: .string("forever")),
+        OptionSpec(OptionKey.gifColors, L("Colours"), .choice([
+            OptionChoice("256", L("256 colours")), OptionChoice("128", L("128 colours")),
+            OptionChoice("64", L("64 colours")), OptionChoice("32", L("32 colours")),
+        ]), default: .string("256"), help: L("Fewer colours make a smaller file.")),
+        OptionSpec(OptionKey.gifDither, L("Dither"), .toggle, default: .bool(true),
+                   help: L("Smooths gradients. Off gives flat colour areas and a smaller file.")),
     ])
 
     public static let archive = OptionsSchema("archive", [
@@ -286,7 +301,7 @@ public enum StandardSchemas {
     ])
 
     public static let all: [OptionsSchema] = [
-        .none, imageLossy, imageLosslessCapable, imageLossless, imageOpaque, imageOpaqueLossless, pdfRender, toPDF, documentPDF,
+        .none, imageLossy, imageLosslessCapable, imageLossless, imageOpaque, imageOpaqueLossless, pdfRender, pdfRenderLossless, toPDF, documentPDF,
         audioLossy, audioLossless, video, gif, archive, subtitleText, sheet,
     ]
 

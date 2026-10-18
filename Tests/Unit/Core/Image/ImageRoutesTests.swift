@@ -26,7 +26,8 @@ final class ImageRoutesTests: XCTestCase {
     func testFlagsAndSchemas() throws {
         for r in rows where r.from == Formats.pdf && r.to != Formats.txt {
             XCTAssertTrue(r.flags.contains(.multiOutput), "\(r)")
-            XCTAssertEqual(r.schema, StandardSchemas.pdfRender)
+            let lossless = [Formats.png, Formats.tiff, Formats.bmp].contains(r.to)
+            XCTAssertEqual(r.schema, lossless ? StandardSchemas.pdfRenderLossless : StandardSchemas.pdfRender, "\(r)")
         }
         let txt = try XCTUnwrap(rows.first { $0.from == Formats.pdf && $0.to == Formats.txt })
         XCTAssertTrue(txt.flags.contains(.terminalOnly) && txt.flags.contains(.lossyStructure))

@@ -195,6 +195,14 @@ private struct FormatDetail: View {
     let format: Format
     let schema: OptionsSchema
     @ObservedObject var settings: AppSettings
+    @StateObject private var presets: FormatPresetsModel
+
+    init(format: Format, schema: OptionsSchema, settings: AppSettings) {
+        self.format = format
+        self.schema = schema
+        self.settings = settings
+        _presets = StateObject(wrappedValue: FormatPresetsModel(format: format.id, schema: schema))
+    }
 
     var body: some View {
         Form {
@@ -266,6 +274,10 @@ private struct FormatDetail: View {
                     FootnoteText(text: String(localized: "Used every time. You can still change them for one file in the wheel’s options."))
                 }
             }
+
+            if !schema.specs.isEmpty {
+                PresetsSection(format: format, model: presets, settings: settings, currentValues: valuesBinding.wrappedValue)
+            }
         }
         .formStyle(.grouped)
     }
@@ -279,6 +291,197 @@ private struct FormatDetail: View {
                 settings.formatDefaults[format.id] = diff.values.isEmpty ? nil : diff
             }
         )
+    }
+}
+
+// MARK: - Presets
+
+private struct PresetsSection: View {
+    let format: Format
+    @ObservedObject var model: FormatPresetsModel
+    @ObservedObject var settings: AppSettings
+    let currentValues: OptionValues
+
+    var body: some View {
+        Section {
+            if model.presets.isEmpty {
+                Text("No presets for \(format.label) yet.")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(model.presets) { preset in
+                PresetRow(preset: preset, model: model) {
+                    let diff = OptionsFormLogic.nonDefault(model.schema.defaults.merging(preset.values), schema: model.schema)
+                    settings.formatDefaults[format.id] = diff.values.isEmpty ? nil : diff
+                }
+            }
+            HStack {
+                Button("Save Current Defaults as Preset") { model.saveAsPreset(currentValues) }
+                    .accessibilityIdentifier("formats.presets.save")
+                Spacer()
+            }
+        } header: {
+            HStack {
+                Text("Presets")
+                Spacer()
+                Button("Restore Built-in Presets") { model.restoreBuiltIns() }
+                    .controlSize(.small)
+                    .disabled(!model.hasHiddenBuiltIns)
+                    .accessibilityIdentifier("formats.presets.restore")
+            }
+        } footer: {
+            FootnoteText(text: String(localized: "Presets show next to \(format.label) on the wheel. Click a name to rename it."))
+        }
+    }
+}
+
+private struct PresetRow: View {
+    let preset: ConversionPreset
+    @ObservedObject var model: FormatPresetsModel
+    let useAsDefaults: () -> Void
+    @State private var title = ""
+    @FocusState private var editing: Bool
+
+    var body: some View {
+        HStack(spacing: DesignTokens.Space.s) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
+                if preset.isBuiltIn {
+                    Text(verbatim: preset.title)
+                } else {
+                    TextField("", text: $title, prompt: Text("Preset name"))
+                        .textFieldStyle(.plain)
+                        .focused($editing)
+                        .onSubmit(commit)
+                        .onChange(of: editing) { focused in if !focused { commit() } }
+                        .accessibilityLabel(Text("Preset name"))
+                        .accessibilityIdentifier("formats.presets.name")
+                }
+                let summary = model.summary(of: preset)
+                if !summary.isEmpty {
+                    Text(verbatim: summary)
+                        .font(.system(size: DesignTokens.TypeRamp.label))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: DesignTokens.Space.s)
+            if preset.isBuiltIn {
+                Text("Built-in")
+                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, DesignTokens.Space.s)
+                    .padding(.vertical, DesignTokens.Space.xxs)
+                    .background(Capsule().fill(Color.primary.opacity(0.06)))
+            }
+            Menu {
+                menuItems
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .accessibilityLabel(Text("Actions for \(preset.title)"))
+        }
+        .font(.system(size: DesignTokens.TypeRamp.body))
+        .contextMenu { menuItems }
+        .onAppear { title = preset.title }
+        .onChange(of: preset.title) { new in if !editing { title = new } }
+    }
+
+    @ViewBuilder private var menuItems: some View {
+        Button("Use as Defaults", action: useAsDefaults)
+        Divider()
+        Button("Move Up") { model.move(preset.id, by: -1) }
+            .disabled(!model.canMove(preset.id, by: -1))
+        Button("Move Down") { model.move(preset.id, by: 1) }
+            .disabled(!model.canMove(preset.id, by: 1))
+        Divider()
+        if preset.isBuiltIn {
+            Button("Hide Built-in Preset") { model.delete(preset.id) }
+        } else {
+            Button("Delete Preset") { model.delete(preset.id) }
+        }
+    }
+
+    private func commit() {
+        let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if t.isEmpty { title = preset.title; return }
+        if t != preset.title { model.rename(preset.id, to: t) }
+    }
+}
+
+/// The Presets section's state for one format. Reads and writes `PresetStore`
+/// and refreshes after its own edits (the store's single `onChange` slot is
+/// left to sync).
+@MainActor
+final class FormatPresetsModel: ObservableObject {
+    let format: FormatID
+    let schema: OptionsSchema
+    let store: PresetStore
+    @Published private(set) var presets: [ConversionPreset] = []
+    @Published private(set) var hasHiddenBuiltIns = false
+
+    init(format: FormatID, schema: OptionsSchema, store: PresetStore = .shared) {
+        self.format = format
+        self.schema = schema
+        self.store = store
+        reload()
+    }
+
+    func reload() {
+        presets = store.presets(for: format)
+        hasHiddenBuiltIns = !store.hiddenBuiltIns(for: format).isEmpty
+    }
+
+    func rename(_ id: String, to title: String) { store.rename(id, to: title); reload() }
+    func delete(_ id: String) { store.delete(id); reload() }
+    func restoreBuiltIns() { store.restoreBuiltIns(for: format); reload() }
+
+    func move(_ id: String, by offset: Int) {
+        guard canMove(id, by: offset) else { return }
+        store.move(id, by: offset)
+        reload()
+    }
+
+    /// Only user presets move, and only among themselves (built-ins follow).
+    func canMove(_ id: String, by offset: Int) -> Bool {
+        let user = presets.filter { !$0.isBuiltIn }
+        guard let i = user.firstIndex(where: { $0.id == id }) else { return false }
+        return user.indices.contains(i + offset)
+    }
+
+    /// Saves `values` (the defaults as shown: schema defaults plus the user's
+    /// changes) as a new preset named "Preset N".
+    @discardableResult
+    func saveAsPreset(_ values: OptionValues) -> ConversionPreset {
+        let taken = Set(presets.map(\.title))
+        var n = presets.filter { !$0.isBuiltIn }.count + 1
+        while taken.contains(Self.untitled(n)) { n += 1 }
+        let preset = store.add(Self.untitled(n), format: format, values: PresetStore.validated(values, against: schema))
+        reload()
+        return preset
+    }
+
+    static func untitled(_ n: Int) -> String { String(localized: "Preset \(n)") }
+
+    /// "480 px · 10 fps · Dither off": the preset's values in schema order,
+    /// choices by their labels.
+    func summary(of preset: ConversionPreset) -> String {
+        schema.specs.compactMap { spec -> String? in
+            guard let v = preset.values[spec.id] else { return nil }
+            switch spec.kind {
+            case .choice(let choices):
+                return choices.first { $0.id == v.description }.map(\.label)
+            case .toggle:
+                guard case .bool(let on) = v else { return nil }
+                return on ? spec.label : String(localized: "\(spec.label) off")
+            case .slider(_, _, _, let unit), .integer(_, _, let unit):
+                return "\(spec.label) \(v.description)" + (unit.map { $0 == "%" ? " %" : " \($0)" } ?? "")
+            default:
+                return "\(spec.label) \(v.description)"
+            }
+        }
+        .joined(separator: " · ")
     }
 }
 
@@ -353,19 +556,12 @@ extension SettingsModel {
         return Formats.all.filter { targets.contains($0.id) }
     }
 
-    /// Options schema for converting *to* `format`, minus per-job choices that
-    /// don't belong in a saved default (running in the cloud).
+    /// Options schema for converting *to* `format` (`OptionsSchema.forTarget`),
+    /// minus per-job choices that don't belong in a saved default (running in
+    /// the cloud, page ranges).
     func defaultsSchema(for format: FormatID) -> OptionsSchema {
-        let rows = router.table.rows
-        let schema: OptionsSchema
-        if rows.isEmpty {
-            schema = FormatSchemaFallback.schema(for: format)
-        } else {
-            schema = rows.filter { $0.to == format }
-                .sorted { $0.priority > $1.priority }
-                .map(\.schema)
-                .first { !$0.specs.isEmpty } ?? .none
-        }
+        guard router.table.rows.isEmpty else { return OptionsSchema.forTarget(format, table: router.table) ?? .none }
+        let schema = FormatSchemaFallback.schema(for: format)
         return OptionsSchema(schema.id, schema.specs.filter { $0.id != OptionKey.cloud })
     }
 }

@@ -59,7 +59,7 @@ public enum ImageRoutes {
     ]
 
     static let pdfRows: [Capability] =
-        pdfImageOutputs.map { Capability(Formats.pdf, $0, EngineIDs.pdfKit, schema: StandardSchemas.pdfRender, priority: 100, cost: 2, flags: .multiOutput) }
+        pdfImageOutputs.map { Capability(Formats.pdf, $0, EngineIDs.pdfKit, schema: pdfSchema(for: $0), priority: 100, cost: 2, flags: .multiOutput) }
         + [Capability(Formats.pdf, Formats.txt, EngineIDs.pdfKit, schema: .none, priority: 100, cost: 1, flags: [.terminalOnly, .lossyStructure])]
 
     // MARK: Schemas and flags
@@ -73,6 +73,11 @@ public enum ImageRoutes {
         case Formats.pdf: StandardSchemas.toPDF
         default: StandardSchemas.imageLossless // png tiff gif psd tga exr ico icns
         }
+    }
+
+    /// PDF page renders: quality only where the target is lossy.
+    static func pdfSchema(for to: FormatID) -> OptionsSchema {
+        losslessOutputs.contains(to) ? StandardSchemas.pdfRenderLossless : StandardSchemas.pdfRender
     }
 
     static func flags(for to: FormatID) -> CapabilityFlags {

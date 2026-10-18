@@ -53,3 +53,44 @@ public struct CapabilityTable: Sendable {
         return issues
     }
 }
+
+// MARK: - Options for a target format
+
+extension OptionsSchema {
+    /// Options that make sense as a saved default or preset for converting *to*
+    /// `format`, whatever the source: the highest-priority row's schema first
+    /// (rows that need an optional pack rank last; ties: the row with more
+    /// options, then table order), then options only other rows to that target
+    /// have (e.g. PDF render DPI for PNG). Per-job
+    /// options (page or time ranges, crop rects, run in the cloud) are left out.
+    /// Nil when no row targets `format`. Settings › Formats, the presets and the
+    /// CLI all read this, so they agree on what a format's options are.
+    public static func forTarget(_ format: FormatID, table: CapabilityTable = .default) -> OptionsSchema? {
+        let rows = table.rows.enumerated().filter { $0.element.to == format }
+        guard !rows.isEmpty else { return nil }
+        func keep(_ spec: OptionSpec) -> Bool {
+            switch spec.kind {
+            case .pageRange, .timeRange, .rect: return false
+            default: return spec.id != OptionKey.cloud
+            }
+        }
+        let ordered = rows.sorted { a, b in
+            let (ra, rb) = (a.element, b.element)
+            let (pa, pb) = (ra.flags.contains(.needsPack), rb.flags.contains(.needsPack))
+            if pa != pb { return pb }
+            if ra.priority != rb.priority { return ra.priority > rb.priority }
+            let (ca, cb) = (ra.schema.specs.filter(keep).count, rb.schema.specs.filter(keep).count)
+            if ca != cb { return ca > cb }
+            return a.offset < b.offset
+        }
+        var seenSchemas = Set<String>(), seenKeys = Set<String>()
+        var ids: [String] = [], specs: [OptionSpec] = []
+        for (_, row) in ordered where seenSchemas.insert(row.schema.id).inserted {
+            let added = row.schema.specs.filter { keep($0) && seenKeys.insert($0.id).inserted }
+            guard !added.isEmpty else { continue }
+            ids.append(row.schema.id)
+            specs += added
+        }
+        return OptionsSchema(ids.isEmpty ? OptionsSchema.none.id : ids.joined(separator: "+"), specs)
+    }
+}

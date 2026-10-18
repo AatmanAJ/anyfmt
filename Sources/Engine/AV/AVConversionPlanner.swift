@@ -382,7 +382,8 @@ enum AVConversionPlanner {
     // MARK: - GIF
 
     /// Two passes: palettegen over the whole clip (stats_mode=diff favours what
-    /// moves), then paletteuse with sierra2_4a dithering. Two passes instead of
+    /// moves, `max_colors` from gifColors), then paletteuse with sierra2_4a
+    /// dithering (or none when gifDither is off). Two passes instead of
     /// a split filter so a long clip never buffers every frame in memory.
     static func gifPlan(_ facts: AVInputFacts, options: OptionValues, context: Context) throws -> AVConversionPlan {
         guard let v = facts.video else {
@@ -393,17 +394,26 @@ enum AVConversionPlanner {
         let requestedFPS = Double(max(1, options.int(OptionKey.fps, default: 15)))
         let fps = min(requestedFPS, (v.frameRate ?? v.nominalFrameRate).map { max(1, $0) } ?? requestedFPS)
         let chain = "fps=\(formatNumber(fps)),scale=\(width):-1:flags=lanczos"
+        let colors = gifColors(options)
+        let dither = options.bool(OptionKey.gifDither, default: true) ? "sierra2_4a" : "none"
+        // GIF muxer: -loop 0 = loop forever, -1 = play once (no NETSCAPE loop block).
+        let loop = options.string(OptionKey.gifLoop, default: "forever") == "once" ? "-1" : "0"
         let palette = context.scratchDirectory.appendingPathComponent(".palette-\(UUID().uuidString).png")
-        let pass1 = ["-i", context.input.path, "-map", "0:\(v.index)", "-vf", "\(chain),palettegen=stats_mode=diff",
+        let pass1 = ["-i", context.input.path, "-map", "0:\(v.index)", "-vf", "\(chain),palettegen=stats_mode=diff:max_colors=\(colors)",
                      "-frames:v", "1", "-update", "1", "-f", "image2", palette.path]
         let pass2 = ["-i", context.input.path, "-i", palette.path,
-                     "-filter_complex", "[0:\(v.index)]\(chain)[x];[x][1:v]paletteuse=dither=sierra2_4a:diff_mode=rectangle",
-                     "-an", "-map_metadata", "-1", "-loop", "0", "-f", "gif", context.output.path]
+                     "-filter_complex", "[0:\(v.index)]\(chain)[x];[x][1:v]paletteuse=dither=\(dither):diff_mode=rectangle",
+                     "-an", "-map_metadata", "-1", "-loop", loop, "-f", "gif", context.output.path]
         var plan = AVConversionPlan(passes: [AVPass(arguments: pass1, weight: 0.35), AVPass(arguments: pass2, weight: 0.65)],
                                     output: context.output)
         plan.scratch = [palette]
         plan.video = .encode("gif")
         return plan
+    }
+
+    /// Palette size from `gifColors`, clamped to what palettegen accepts (4...256).
+    static func gifColors(_ options: OptionValues) -> Int {
+        min(256, max(4, options.int(OptionKey.gifColors, default: 256)))
     }
 
     // MARK: - Metadata

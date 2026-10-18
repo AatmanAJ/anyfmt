@@ -1,4 +1,5 @@
 import XCTest
+import ImageIO
 @testable import HaloCore
 
 /// Real conversions on tiny generated media (2 s, 320×240): a representative
@@ -183,6 +184,40 @@ final class AVConversionTests: XCTestCase {
         try await check("sample.webm", to: Formats.gif, options: [OptionKey.gifWidth: .string("160"), OptionKey.fps: .string("10")],
                         Expect(video: "gif", audio: nil, size: (160, 120), duration: nil))
         try await check("edge-rotated.mp4", to: Formats.gif, Expect(video: "gif", audio: nil, size: (240, 320), duration: nil))
+    }
+
+    func testGIFOptionsOnARealConversion() async throws {
+        let opts: [String: OptionValue] = [OptionKey.gifWidth: .string("160"), OptionKey.fps: .string("10")]
+        let expect = Expect(video: "gif", audio: nil, size: (160, 120), duration: nil)
+        let (forever, _) = try await check("sample.mp4", to: Formats.gif, options: opts, expect)
+        let (once, _) = try await check("sample.mp4", to: Formats.gif, options: opts.merging([OptionKey.gifLoop: .string("once")]) { $1 }, expect)
+        let netscape = Data("NETSCAPE2.0".utf8)
+        XCTAssertNotNil(try Data(contentsOf: forever).range(of: netscape), "forever writes the loop block")
+        XCTAssertNil(try Data(contentsOf: once).range(of: netscape), "play once writes no loop block")
+
+        let (few, _) = try await check("sample.mp4", to: Formats.gif, options: opts.merging([OptionKey.gifColors: .string("32")]) { $1 }, expect)
+        XCTAssertLessThanOrEqual(try Self.distinctColours(firstFrameOf: few), 32)
+        XCTAssertGreaterThan(try Self.distinctColours(firstFrameOf: forever), 32)
+        XCTAssertLessThan(try Data(contentsOf: few).count, try Data(contentsOf: forever).count, "fewer colours, smaller file")
+
+        let (flat, _) = try await check("sample.mp4", to: Formats.gif, options: opts.merging([OptionKey.gifDither: .bool(false)]) { $1 }, expect)
+        XCTAssertNotEqual(try Data(contentsOf: flat), try Data(contentsOf: forever), "dither off changes the pixels")
+    }
+
+    private static func distinctColours(firstFrameOf url: URL) throws -> Int {
+        guard let src = CGImageSourceCreateWithURL(url as CFURL, nil), let image = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
+            throw ConversionError.other("unreadable gif", detail: url.path)
+        }
+        let w = image.width, h = image.height
+        var pixels = [UInt32](repeating: 0, count: w * h)
+        let ok = pixels.withUnsafeMutableBytes { buf -> Bool in
+            guard let ctx = CGContext(data: buf.baseAddress, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                      space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+            return true
+        }
+        XCTAssertTrue(ok)
+        return Set(pixels).count
     }
 
     func testGIFToVideo() async throws {

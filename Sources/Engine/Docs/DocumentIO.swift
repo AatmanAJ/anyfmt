@@ -29,6 +29,9 @@ public enum DocsSchemas {
         ]), default: .string("150")),
         OptionSpec(OptionKey.quality, L("Quality"), .slider(min: 1, max: 100, step: 1, unit: "%"), default: .int(90)),
     ])
+
+    /// Slides → PNG: resolution only (PNG has no quality).
+    public static let slideImagesLossless = OptionsSchema("slides.images.lossless", slideImages.specs.filter { $0.id != OptionKey.quality })
 }
 
 /// Reads any supported document format into a `DocModel` and writes one back out.
