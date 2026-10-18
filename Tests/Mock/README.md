@@ -45,17 +45,35 @@ browser redirects straight back to `halo://auth/callback`.
 - **Sync** enforces `If-Match` / `If-None-Match: *` and returns `409` with the
   current document.
 - Every `/v1` response carries `X-Request-Id` and the `RateLimit-*` headers.
+- **Public API** ([`docs/API.md`](../../docs/API.md)): API keys
+  (`halo_sk_…`, scopes `read`/`convert`; managed with the app token, or minted
+  directly with `POST /__mock/api-keys`), `POST /v1/files` (≤
+  `directUploadMaxBytes`), `GET /v1/files/{id}/content` with `Range`, and
+  conversions that are `queued` for the first quarter of `conversionMs`
+  (default 200 ms), then `running`, then `succeeded` with the input bytes
+  copied under the target's extension (`failConversions: true` or the request
+  header `X-Mock-Outcome: fail` makes them fail). Options are validated
+  against a copy of the app's option schemas; `Idempotency-Key` replays and
+  conflicts like the contract says. Input URLs are really fetched.
+- **Webhooks** are really delivered (POST to the registered URL, signed with
+  `Halo-Signature`), retried after `webhookRetryMs` (default 50/100/200 ms)
+  on any non-2xx or network error; every attempt is logged.
+- **Rate limiting:** the request header `X-Mock-Rate-Limit: N` allows N
+  requests per 1-second window for that credential and then answers
+  `429 rate_limited` with `Retry-After`. Faults with `status: 429` work too.
+- **Licences:** `HALO-MOCK-PRO0-0001` (pro, 2 devices) is seeded; add more
+  with `POST /__mock/licences`.
 
 ## Test-control endpoints (`/__mock/…`, never logged)
 
 | Method + path | Body / query | Does |
 |---|---|---|
 | `POST /__mock/reset` | `{config?}` | Fresh state, optional config overrides |
-| `POST /__mock/config` | any config keys | Merge config (`jobPolls`, `pollAfterMs`, `failJobs`, `nextEmail`, `nextPlan`, `autoApprove`, `maxChunkSize`, `accessTokenTTL`, `signedHost`, `rateLimit`) |
+| `POST /__mock/config` | any config keys | Merge config (`jobPolls`, `pollAfterMs`, `failJobs`, `nextEmail`, `nextPlan`, `autoApprove`, `maxChunkSize`, `accessTokenTTL`, `signedHost`, `rateLimit`, `conversionMs`, `failConversions`, `webhookRetryMs`, `webhookTimeoutMs`, `directUploadMaxBytes`) |
 | `POST /__mock/users` | `{email, plan, customDomains?, linksUsed?}` | Create/update a user |
 | `POST /__mock/faults` | `{method, pathPrefix, skip, times, mode, status?, keepBytes?, retryAfter?}` | Arm a fault for the next matching request(s) after `skip` |
 | `DELETE /__mock/faults` | | Disarm all faults |
-| `GET` / `DELETE /__mock/requests` | | Request log: method, path, `hasAuth`, host, Content-Range, If-Match, If-None-Match, User-Agent, status |
+| `GET` / `DELETE /__mock/requests` | | Request log: method, path, `hasAuth`, host, Content-Range, If-Match, If-None-Match, User-Agent, Idempotency-Key, Range, status |
 | `POST /__mock/expire-tokens` | | Expire every access token (forces a 401 → refresh) |
 | `GET /__mock/auth/latest` | | Last issued `{code, state, redirectUri}` |
 | `POST /__mock/sync` | `{namespace, data, deviceName?, email?}` | Another Mac writes a sync document (bumps the version) |
@@ -66,6 +84,13 @@ browser redirects straight back to `halo://auth/callback`.
 | `GET /__mock/uploads` | | Uploads including `putCount` |
 | `GET /__mock/links` | | Links (password shown only as `set`) |
 | `GET /__mock/state` | | Users and token counts |
+| `POST /__mock/api-keys` | `{email?, scopes?, name?, expiresAt?, plan?}` | Mint an API key; returns `{apiKey, secret}` |
+| `GET /__mock/api-keys` | | All keys with owner email (no secrets) |
+| `GET /__mock/conversions` | | Conversions including owner and `fail` |
+| `GET /__mock/webhooks/deliveries` | | Every delivery attempt: `webhookId, eventId, type, url, attempt, status, error` |
+| `POST /__mock/webhooks/sign` | `{secret, body, t?}` | The `Halo-Signature` the mock would send |
+| `POST /__mock/licences` | `{key?, plan?, status?, maxDevices?, expiresAt?}` | Seed a licence |
+| `GET /__mock/licences` | | Licences with keys and devices |
 
 Fault modes:
 
@@ -77,5 +102,6 @@ Fault modes:
 
 ## Not a real server
 
-No persistence, no email, no TLS, no rate limiting beyond headers. It's
+No persistence, no email, no TLS, no real rate limiting (headers plus the
+`X-Mock-Rate-Limit` test hook), no real conversions. It's
 test scaffolding; the server design lives in [`Server/README.md`](../../Server/README.md).

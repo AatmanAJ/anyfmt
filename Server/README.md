@@ -18,6 +18,8 @@ server exists only for features that cost servers (BUILD.md §9b):
 | Cloud jobs | `/v1/jobs/*`, `/v1/files/*` | Heavy video conversions, transcription → SRT/VTT, upscale, HQ background removal |
 | Sync | `/v1/sync/documents/*` | Opaque JSON documents with versions and conditional PUT |
 | Inbox | `/v1/inbox/*` | Files sent from a phone or browser land in a folder on the Mac |
+| Public conversion API | `/v1/api-keys`, `/v1/files`, `/v1/conversions/*`, `/v1/formats`, `/v1/schema`, `/v1/webhooks/*`, `/v1/usage` | Pay-per-use, API-key auth. Narrative docs and curl examples: [`docs/API.md`](../docs/API.md); TypeScript SDK: [`packages/sdk`](../packages/sdk) |
+| Licences | `/v1/licences/*` | Optional Pro licence activation for the Mac app (seat count per key) |
 
 The app also links to two **web pages** (not API): the sign-in page
 `/v1/auth/authorize` and the plan page `/account/plan`.
@@ -46,6 +48,17 @@ The app also links to two **web pages** (not API): the sign-in page
   `GET /v1/jobs/{id}/events` (SSE) is optional; the shipped client polls.
 - Result and inbox downloads may be pre-signed object-storage URLs on another
   host. The client sends its bearer token **only** to the server's own origin.
+- Two credentials, never interchangeable: the app's OAuth token
+  (`bearerAuth`) and public API keys (`apiKeyAuth`, `Bearer halo_sk_…`,
+  scopes `read`/`convert`). Keys are managed only with the app token; the
+  public API rejects app tokens (`401 invalid_api_key`). Exceptions:
+  `/v1/usage` takes either, and the resumable `/v1/uploads` flow takes
+  either (completed uploads carry a `fileId` for conversions).
+- Public API conversions take `Idempotency-Key` (24 h, per account; same
+  body → `200` + `Idempotent-Replayed: true`, different body →
+  `409 idempotency_conflict`). Webhooks are signed
+  `Halo-Signature: t=<unix>,v1=<hex HMAC-SHA256(secret, t.body)>` with a
+  5-minute tolerance and retried with backoff for about two days.
 
 ## Stack options
 
@@ -184,3 +197,10 @@ development servers.
    (they drive `Tests/Mock/server.mjs`) into server-side tests, and diff
    responses against `openapi.yaml` with a schema validator in CI.
 8. Docker images + `docker-compose.yml` + a self-host guide.
+9. The public conversion API ([`docs/API.md`](../docs/API.md)): API keys
+   stored hashed (show the secret once), idempotency records, a durable
+   webhook delivery queue with the documented retry schedule, SSRF-safe
+   fetching for `input.url` and webhook URLs (refuse private/loopback/
+   link-local addresses after DNS resolution), usage metering for billing,
+   and licence issuance. Run `packages/sdk`'s tests against the real server
+   (they only need `baseUrl` and a way to mint a key) as its contract test.
