@@ -125,12 +125,14 @@ OpenAPI contract (`Server/openapi.yaml`, 31 operations) and a mock server
 
 ## B-007 Older macOS versions (13, 14, 15)
 
-**Why blocked.** Only macOS 27.0.1 was available. Everything targets macOS 13, newer
-APIs are behind `#available` with fallbacks, and capability rows are gated at
-runtime (AVIF encode via `CGImageDestinationCopyTypeIdentifiers`, Vision requests,
-ImageIO decoders). None of this has run on 13–15, though. Run `make test && make matrix`
-on a macOS 13 machine or VM; expect only rows to drop out (e.g. ImageIO AVIF → the
-ffmpeg AVIF fallback), not failures.
+**Why blocked.** Only macOS 27.0.1 was available: no VM, no second Mac.
+
+**What is verified without one:**
+- The deployment target is macOS 13 everywhere, and Swift makes any unguarded use of a newer API a *compile error*. So a clean build proves every newer call sits behind `#available` with a fallback.
+- Every Mach-O we ship has minimum OS **13.0** (`vtool -show-build`: app, HaloCore, CLI, ffmpeg/ffprobe, all libav* dylibs, resvg). Sparkle's prebuilt binaries are 12.0.
+- Rows that depend on OS features are gated at runtime, not by version guesses: ImageIO AVIF encode via `CGImageDestinationCopyTypeIdentifiers`, Vision requests, decoders.
+
+**Still untested:** actual runtime behaviour on 13–15. Run `make test && make matrix` on a macOS 13 machine or VM. Expect rows to drop out (e.g. ImageIO AVIF → the ffmpeg fallback; remove background → people only), not failures.
 
 ## B-008 Contributor agreement setup
 
