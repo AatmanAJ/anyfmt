@@ -248,6 +248,22 @@ enum CLIPaths {
         return nil
     }
 
+    /// True when `locateBundledEngines` pointed HALO_ENGINES_DIR at our own Helpers folder.
+    nonisolated(unsafe) static var enginesBesideCLI = false
+
+    /// Run from a PATH symlink, argv[0] is just "halo", so EngineLocator can't
+    /// see the engines next to the real binary (Halo.app/Contents/Helpers, or
+    /// the Homebrew formula's libexec/Helpers). Point it there, unless the
+    /// caller already chose a folder. Call before anything converts.
+    static func locateBundledEngines() {
+        guard (ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"] ?? "").isEmpty else { return }
+        let dir = executable.deletingLastPathComponent()
+        guard dir.lastPathComponent == "Helpers",
+              FileManager.default.isExecutableFile(atPath: dir.appendingPathComponent("ffmpeg").path) else { return }
+        setenv("HALO_ENGINES_DIR", dir.deletingLastPathComponent().path, 1)
+        enginesBesideCLI = true
+    }
+
     /// Test hook: `HALO_TEST_DELAY_MS` delays each conversion job (cancellably)
     /// so exit-code 7 and MCP cancellation can be tested deterministically.
     static var testDelay: UInt64? {

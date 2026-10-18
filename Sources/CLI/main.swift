@@ -8,6 +8,7 @@ import HaloCore
 // SIGINT cancels the running command: engines stop (ProcessRunner terminates
 // child processes), temp files are removed, and the exit code is 7.
 MainActor.assumeIsolated {
+    CLIPaths.locateBundledEngines()
     let app = NSApplication.shared
     app.setActivationPolicy(.prohibited)
     let args = Array(CommandLine.arguments.dropFirst())

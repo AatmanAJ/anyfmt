@@ -44,7 +44,8 @@ enum Doctor {
                 let path = u.resolvingSymlinksInPath().path
                 e["found"] = true
                 e["path"] = path
-                if let envDir, u.path.hasPrefix(envDir) { e["source"] = "HALO_ENGINES_DIR" }
+                if CLIPaths.enginesBesideCLI { e["source"] = "bundled" }
+                else if let envDir, u.path.hasPrefix(envDir) { e["source"] = "HALO_ENGINES_DIR" }
                 else if let app, path.hasPrefix(app.path) { e["source"] = "bundled" }
                 else { e["source"] = "beside the CLI or a source checkout" }
                 if let v = versionLine(u, arg: name == "resvg" ? "--version" : "-version") { e["version"] = v }
