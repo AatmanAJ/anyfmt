@@ -92,8 +92,11 @@ enum ContentRenderer {
                 let rect = CGRect(x: (size.width - glyphSize.width) / 2, y: y, width: glyphSize.width, height: glyphSize.height)
                 drawImage(glyph, in: rect, tint: glyphTint)
                 if let cornerBadge {
-                    let x = min(size.width - cornerBadge.size.width, rect.maxX - 5)
-                    cornerBadge.draw(CGPoint(x: max(0, x), y: rect.maxY - cornerBadge.size.height + 5))
+                    // Overlap the glyph's top-right quarter and stay inside the stack's
+                    // box: on outer-ring wedges the box corners sit at the curved edge.
+                    let x = min(size.width - cornerBadge.size.width, rect.maxX - cornerBadge.size.width * 0.55)
+                    let top = min(size.height, rect.maxY + 1)
+                    cornerBadge.draw(CGPoint(x: max(0, x), y: top - cornerBadge.size.height))
                 }
                 if accessoryBesideGlyph, let accessory = item.accessory {
                     let a = glyphImage(accessory, pointSize: m.badge + 1)
