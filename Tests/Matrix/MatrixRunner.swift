@@ -116,6 +116,14 @@ struct MatrixRunner {
         return passed == results.count && issues.isEmpty ? 0 : 1
     }
 
+    /// Options whose final step isn't `.hiddenByDefault` (what a new user sees).
+    static func defaultVisibleCount(_ router: Router) -> Int {
+        let starts = Set(router.table.rows.map(\.from))
+        return starts.reduce(0) { total, from in
+            total + router.allRoutes(from: from).values.filter { !($0.hops.last?.flags.contains(.hiddenByDefault) ?? false) }.count
+        }
+    }
+
     nonisolated static func size(of url: URL) -> Int64 {
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
@@ -141,6 +149,7 @@ struct MatrixRunner {
         | | |
         |---|---|
         | **Conversion options shipped** | **\(router.optionCount())** |
+        | Shown on the wheel by default (rest enabled in Settings › Formats) | \(Self.defaultVisibleCount(router)) |
         | Routes run | \(results.count) |
         | Passed | \(passed) |
         | Failed | \(results.count - passed) |
