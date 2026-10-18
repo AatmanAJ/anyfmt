@@ -28,8 +28,8 @@ enum TestEngineSetup {
 
 /// Sample media for editor tests and screenshots, made once per run with the
 /// bundled ffmpeg, PDFKit and CoreGraphics.
-actor EditorSamples {
-    static let store = EditorSamples()
+actor MediaEditorSamples {
+    static let store = MediaEditorSamples()
     private var built: Set<String> = []
     let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g2-editor-samples-\(ProcessInfo.processInfo.processIdentifier)")
 

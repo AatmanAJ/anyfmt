@@ -9,7 +9,7 @@ final class MediaEditorModelTests: XCTestCase {
     private func spec(_ id: ToolID) throws -> ToolSpec { try XCTUnwrap(ToolCatalog.spec(id)) }
 
     func testTrimVideoOptions() async throws {
-        let clip = try await EditorSamples.url("Intro.mp4")
+        let clip = try await MediaEditorSamples.url("Intro.mp4")
         let m = TrimVideoModel(tool: try spec(ToolIDs.trimVideo), inputs: [clip], options: try spec(ToolIDs.trimVideo).defaultOptions)
         m.start()
         await m.settle()
@@ -34,7 +34,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testFormatsAVFoundationCantPlayGetAPreviewProxy() async throws {
-        let mkv = try await EditorSamples.url("Clip.mkv")
+        let mkv = try await MediaEditorSamples.url("Clip.mkv")
         let tool = try spec(ToolIDs.trimVideo)
         let m = TrimVideoModel(tool: tool, inputs: [mkv], options: tool.defaultOptions)
         m.start()
@@ -50,7 +50,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testCropOptionsRoundTripToExactPixels() async throws {
-        let clip = try await EditorSamples.url("Intro.mp4")
+        let clip = try await MediaEditorSamples.url("Intro.mp4")
         let tool = try spec(ToolIDs.cropVideo)
         let m = CropVideoModel(tool: tool, inputs: [clip], options: tool.defaultOptions)
         m.start()
@@ -75,27 +75,27 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testCropGeometryKeepsRatioAndBounds() {
-        let rn = CropGeometry.normalisedRatio(1, frame: CGSize(width: 960, height: 540))
+        let rn = VideoCropGeometry.normalisedRatio(1, frame: CGSize(width: 960, height: 540))
         let start = CGRectValue(x: 0.3, y: 0.2, width: 0.3, height: 0.3 / rn)
-        for h in CropGeometry.Handle.allCases {
-            let r = CropGeometry.resize(start, handle: h, to: CGPoint(x: 1.4, y: 1.3), ratio: rn)
+        for h in VideoCropGeometry.Handle.allCases {
+            let r = VideoCropGeometry.resize(start, handle: h, to: CGPoint(x: 1.4, y: 1.3), ratio: rn)
             XCTAssertEqual(r.width / r.height, rn, accuracy: 1e-6, "\(h)")
             XCTAssertGreaterThanOrEqual(r.x, 0)
             XCTAssertGreaterThanOrEqual(r.y, 0)
             XCTAssertLessThanOrEqual(r.x + r.width, 1 + 1e-9, "\(h)")
             XCTAssertLessThanOrEqual(r.y + r.height, 1 + 1e-9, "\(h)")
         }
-        let free = CropGeometry.resize(start, handle: .bottomRight, to: CGPoint(x: 0.9, y: 0.95), ratio: nil)
+        let free = VideoCropGeometry.resize(start, handle: .bottomRight, to: CGPoint(x: 0.9, y: 0.95), ratio: nil)
         XCTAssertEqual(free.x + free.width, 0.9, accuracy: 1e-9)
         XCTAssertEqual(free.y + free.height, 0.95, accuracy: 1e-9)
-        let moved = CropGeometry.move(start, dx: 5, dy: -5)
+        let moved = VideoCropGeometry.move(start, dx: 5, dy: -5)
         XCTAssertEqual(moved.x + moved.width, 1, accuracy: 1e-9)
         XCTAssertEqual(moved.y, 0)
-        XCTAssertEqual(CropGeometry.maximal(rn).height, 1, accuracy: 1e-9)
+        XCTAssertEqual(VideoCropGeometry.maximal(rn).height, 1, accuracy: 1e-9)
     }
 
     func testSplitOptions() async throws {
-        let clip = try await EditorSamples.url("Intro.mp4")
+        let clip = try await MediaEditorSamples.url("Intro.mp4")
         let tool = try spec(ToolIDs.splitVideo)
         let m = SplitVideoModel(tool: tool, inputs: [clip], options: tool.defaultOptions)
         m.start()
@@ -118,7 +118,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testJoinOrderIsTheInputOrder() async throws {
-        let a = try await EditorSamples.url("Intro.mp4"), b = try await EditorSamples.url("Sunset.mov")
+        let a = try await MediaEditorSamples.url("Intro.mp4"), b = try await MediaEditorSamples.url("Sunset.mov")
         let tool = try spec(ToolIDs.joinVideo)
         let m = JoinVideoModel(tool: tool, inputs: [a, b], options: tool.defaultOptions)
         m.start()
@@ -135,7 +135,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testSnapshotOptions() async throws {
-        let clip = try await EditorSamples.url("Intro.mp4")
+        let clip = try await MediaEditorSamples.url("Intro.mp4")
         let tool = try spec(ToolIDs.snapshotVideo)
         let m = SnapshotVideoModel(tool: tool, inputs: [clip], options: tool.defaultOptions)
         m.start()
@@ -152,7 +152,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testTrimAudioOptions() async throws {
-        let audio = try await EditorSamples.url("Interview.m4a")
+        let audio = try await MediaEditorSamples.url("Interview.m4a")
         let tool = try spec(ToolIDs.trimAudio)
         let m = TrimAudioModel(tool: tool, inputs: [audio], options: OptionValues(["range": .string("1.25-3.5")]))
         m.start()
@@ -168,7 +168,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testBleepOptionsMergeOverlaps() async throws {
-        let audio = try await EditorSamples.url("Interview.m4a")
+        let audio = try await MediaEditorSamples.url("Interview.m4a")
         let tool = try spec(ToolIDs.bleepAudio)
         let m = BleepAudioModel(tool: tool, inputs: [audio], options: tool.defaultOptions)
         m.start()
@@ -189,7 +189,7 @@ final class MediaEditorModelTests: XCTestCase {
     }
 
     func testOrganizePDFOptions() async throws {
-        let a = try await EditorSamples.url("Report.pdf"), b = try await EditorSamples.url("Appendix.pdf")
+        let a = try await MediaEditorSamples.url("Report.pdf"), b = try await MediaEditorSamples.url("Appendix.pdf")
         let tool = try spec(ToolIDs.organizePDF)
         let single = OrganizePDFModel(tool: tool, inputs: [a], options: tool.defaultOptions)
         XCTAssertEqual(single.pages.count, 5)

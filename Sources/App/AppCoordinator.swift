@@ -20,6 +20,8 @@ final class AppCoordinator {
     private var hotKey: GlobalHotKey?
     private var finderShortcut: FinderReturnShortcut?
     private var cancellables = Set<AnyCancellable>()
+    /// Tool batches whose results need extra UI when they finish (Read QR).
+    private var resultTools: [UUID: ToolSpec] = [:]
 
     init(settings: AppSettings = .shared, launch: LaunchOptions = LaunchOptions()) {
         self.settings = settings
@@ -39,6 +41,7 @@ final class AppCoordinator {
         wheel.onCancel = { [weak self] in self?.sense.cancelWheel() }
         wheel.markVisible = { [weak self] in self?.sense.markWheelVisible() }
         wheel.rememberedOptions = settings.formatDefaults
+        jobs.onJobFinished = { [weak self] record in self?.jobFinished(record) }
         sense.onEvent = { [weak self] event in self?.handle(event) }
         sense.start()
         wheel.prewarm()
@@ -125,11 +128,22 @@ final class AppCoordinator {
         if tool.needsEditor {
             let opened = EditorFactory.open(tool, inputs: files) { [weak self] result in
                 guard let self else { return }
-                _ = self.jobs.runTool(result.tool, on: result.inputs, options: result.options, near: NSEvent.mouseLocation)
+                self.track(self.jobs.runTool(result.tool, on: result.inputs, options: result.options, near: NSEvent.mouseLocation), tool)
             }
             if opened { return }
         }
-        _ = jobs.runTool(tool.id, on: files, near: point)
+        track(jobs.runTool(tool.id, on: files, near: point), tool)
+    }
+
+    private func track(_ batch: UUID, _ tool: ToolSpec) {
+        if tool.id == ToolIDs.readCodes { resultTools[batch] = tool }
+    }
+
+    /// Shows tool-specific results (the codes Read QR found) once the job succeeds.
+    private func jobFinished(_ record: JobRecord) {
+        guard let batch = record.batchID ?? Optional(record.id), let tool = resultTools[batch] else { return }
+        if record.didSucceed { EditorFactory.presentResult(tool, outputs: record.outputs) }
+        if record.isFinished { resultTools[batch] = nil }
     }
 
     private func perform(_ action: ActionSpec, urls: [URL], promises: [NSFilePromiseReceiver], at point: CGPoint) {

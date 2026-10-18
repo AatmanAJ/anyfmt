@@ -4,7 +4,7 @@ import SwiftUI
 import HaloCore
 
 /// Pure crop-rectangle math in normalised coordinates (0…1, origin top-left).
-enum CropGeometry {
+enum VideoCropGeometry {
     enum Handle: CaseIterable { case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left }
 
     /// Minimum crop side, as a fraction of the frame.
@@ -143,7 +143,7 @@ final class CropVideoModel: MediaEditorModel {
     }
 
     /// Normalised ratio for the current preset, nil when free.
-    var lockedRatio: Double? { CropGeometry.ratio(aspect).map { CropGeometry.normalisedRatio($0, frame: frame) } }
+    var lockedRatio: Double? { VideoCropGeometry.ratio(aspect).map { VideoCropGeometry.normalisedRatio($0, frame: frame) } }
 
     /// The crop that will be written. With a locked preset the size is an exact
     /// multiple of the ratio in even pixels (4:3 → 8m × 6m), so 4:3 really is 4:3.
@@ -171,7 +171,7 @@ final class CropVideoModel: MediaEditorModel {
 
     private func applyAspect() {
         guard let rn = lockedRatio else { return }
-        rect = rect == .full ? CropGeometry.maximal(rn) : CropGeometry.fit(rn, around: rect)
+        rect = rect == .full ? VideoCropGeometry.maximal(rn) : VideoCropGeometry.fit(rn, around: rect)
     }
 
     func reset() {
@@ -189,7 +189,7 @@ final class CropVideoModel: MediaEditorModel {
         }
         w = min(1, w); h = min(1, h)
         let cx = rect.x + rect.width / 2, cy = rect.y + rect.height / 2
-        rect = CropGeometry.clamp(CGRectValue(x: cx - w / 2, y: cy - h / 2, width: w, height: h))
+        rect = VideoCropGeometry.clamp(CGRectValue(x: cx - w / 2, y: cy - h / 2, width: w, height: h))
     }
 
     var isFull: Bool { pixels.width >= Int(frame.width) - 1 && pixels.height >= Int(frame.height) - 1 }
@@ -327,7 +327,7 @@ private struct CropOverlay: View {
                 .accessibilityElement()
                 .accessibilityLabel(Text("Crop area"))
                 .accessibilityValue(Text("\(model.pixels.width) by \(model.pixels.height) pixels"))
-            ForEach(CropGeometry.Handle.allCases, id: \.self) { h in handleView(h, crop: crop) }
+            ForEach(VideoCropGeometry.Handle.allCases, id: \.self) { h in handleView(h, crop: crop) }
             Text("\(model.pixels.width) × \(model.pixels.height)")
                 .font(MediaStyle.caption(.semibold).monospacedDigit())
                 .foregroundStyle(.white)
@@ -339,7 +339,7 @@ private struct CropOverlay: View {
         }
     }
 
-    private func position(_ h: CropGeometry.Handle, _ c: CGRect) -> CGPoint {
+    private func position(_ h: VideoCropGeometry.Handle, _ c: CGRect) -> CGPoint {
         switch h {
         case .topLeft: CGPoint(x: c.minX, y: c.minY)
         case .top: CGPoint(x: c.midX, y: c.minY)
@@ -352,7 +352,7 @@ private struct CropOverlay: View {
         }
     }
 
-    private func handleView(_ h: CropGeometry.Handle, crop: CGRect) -> some View {
+    private func handleView(_ h: VideoCropGeometry.Handle, crop: CGRect) -> some View {
         let p = position(h, crop)
         let corner = [.topLeft, .topRight, .bottomRight, .bottomLeft].contains(h)
         let horizontal = h == .top || h == .bottom
@@ -371,7 +371,7 @@ private struct CropOverlay: View {
                     let base = dragStart ?? model.rect
                     let basePoint = position(h, rectInView(base))
                     let point = CGPoint(x: basePoint.x + v.translation.width, y: basePoint.y + v.translation.height)
-                    model.rect = CropGeometry.resize(base, handle: h, to: normalised(point), ratio: model.lockedRatio)
+                    model.rect = VideoCropGeometry.resize(base, handle: h, to: normalised(point), ratio: model.lockedRatio)
                 }
                 .onEnded { _ in dragStart = nil; active = false })
             .accessibilityHidden(true)
@@ -383,7 +383,7 @@ private struct CropOverlay: View {
                 active = true
                 if dragStart == nil { dragStart = model.rect }
                 guard let base = dragStart else { return }
-                model.rect = CropGeometry.move(base, dx: Double(v.translation.width / area.width), dy: Double(v.translation.height / area.height))
+                model.rect = VideoCropGeometry.move(base, dx: Double(v.translation.width / area.width), dy: Double(v.translation.height / area.height))
             }
             .onEnded { _ in dragStart = nil; active = false }
     }
@@ -426,7 +426,7 @@ private struct AspectButton: View {
 
     @ViewBuilder
     private var glyph: some View {
-        if let r = CropGeometry.ratio(id) {
+        if let r = VideoCropGeometry.ratio(id) {
             let w: CGFloat = r >= 1 ? 22 : 22 * CGFloat(r), h: CGFloat = r >= 1 ? 22 / CGFloat(r) : 22
             RoundedRectangle(cornerRadius: 2).strokeBorder(lineWidth: 1.5).frame(width: max(8, w * 0.8), height: max(8, h * 0.8))
         } else {

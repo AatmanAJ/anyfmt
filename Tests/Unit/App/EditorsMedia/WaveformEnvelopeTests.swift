@@ -35,7 +35,7 @@ final class WaveformEnvelopeTests: XCTestCase {
     }
 
     func testLoaderMeasuresARealFile() async throws {
-        let wav = try await EditorSamples.url("Short.wav") // 1 s, 440 Hz, amplitude 1/8, 8 kHz
+        let wav = try await MediaEditorSamples.url("Short.wav") // 1 s, 440 Hz, amplitude 1/8, 8 kHz
         let box = EnvelopeBox()
         try await WaveformLoader.load(wav) { env, done in if done { box.set(env) } }
         let env = try XCTUnwrap(box.value)

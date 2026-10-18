@@ -180,10 +180,16 @@ public enum ToolSchemas {
         OptionSpec("warmth", L("Warmth"), .decimal(min: -1, max: 1, step: 0.01), default: .double(0)),
     ])
 
+    public static let annotate = OptionsSchema("tool.annotate", [
+        OptionSpec("annotations", L("Annotations"), .text, default: .string("[]"),
+                   help: L("JSON array of marks; coordinates 0…1 from the top-left")),
+    ])
+
     public static let redact = OptionsSchema("tool.redact", [
         OptionSpec("style", L("Style"), .choice([
             OptionChoice("blur", L("Blur")), OptionChoice("pixelate", L("Pixelate")), OptionChoice("solid", L("Solid")),
         ]), default: .string("pixelate")),
+        OptionSpec("color", L("Fill colour"), .color, default: .string("#000000"), visibleWhen: ["style": .string("solid")]),
         OptionSpec("regions", L("Regions"), .text, default: .string(""), help: L("Semicolon-separated rects x,y,w,h (0…1)")),
     ])
 
@@ -193,6 +199,8 @@ public enum ToolSchemas {
         ]), default: .string("gradient")),
         OptionSpec("color1", L("Colour"), .color, default: .string("#6E56F8")),
         OptionSpec("color2", L("Second colour"), .color, default: .string("#22C3A6"), visibleWhen: ["fill": .string("gradient")]),
+        OptionSpec("angle", L("Gradient angle"), .slider(min: 0, max: 360, step: 1, unit: "°"), default: .int(135),
+                   visibleWhen: ["fill": .string("gradient")]),
         OptionSpec("imagePath", L("Background image"), .text, default: .string(""), visibleWhen: ["fill": .string("image")]),
         OptionSpec("padding", L("Padding"), .slider(min: 0, max: 40, step: 1, unit: "%"), default: .int(10)),
         OptionSpec("cornerRadius", L("Corner radius"), .slider(min: 0, max: 20, step: 1, unit: "%"), default: .int(4)),
@@ -206,6 +214,7 @@ public enum ToolSchemas {
         OptionSpec("gap", L("Gap"), .slider(min: 0, max: 80, step: 2, unit: "px"), default: .int(16)),
         OptionSpec("color1", L("Background"), .color, default: .string("#FFFFFF")),
         OptionSpec("width", L("Output width"), .integer(min: 256, max: 16384, unit: "px"), default: .int(3000)),
+        OptionSpec("order", L("Order"), .text, default: .string(""), help: L("Comma-separated input indices; empty keeps drag order")),
     ])
 
     public static let imagesToPDF = OptionsSchema("tool.imagesToPDF", [
@@ -302,7 +311,7 @@ public enum ToolCatalog {
         ToolSpec(ToolIDs.resizeImage, L("Resize"), glyph: "arrow.up.left.and.down.right.magnifyingglass", kinds: [.image], needsEditor: false, schema: ToolSchemas.resize, suffix: "resized"),
         ToolSpec(ToolIDs.cropImage, L("Crop"), glyph: "crop", kinds: [.image], needsEditor: true, schema: ToolSchemas.crop, suffix: "cropped"),
         ToolSpec(ToolIDs.adjustImage, L("Adjust"), glyph: "slider.horizontal.3", kinds: [.image], needsEditor: true, schema: ToolSchemas.adjust, suffix: "adjusted"),
-        ToolSpec(ToolIDs.annotateImage, L("Annotate"), glyph: "pencil.tip.crop.circle", kinds: [.image], needsEditor: true, suffix: "annotated"),
+        ToolSpec(ToolIDs.annotateImage, L("Annotate"), glyph: "pencil.tip.crop.circle", kinds: [.image], needsEditor: true, schema: ToolSchemas.annotate, suffix: "annotated"),
         ToolSpec(ToolIDs.redactImage, L("Redact"), glyph: "eye.slash", kinds: [.image], needsEditor: true, schema: ToolSchemas.redact, suffix: "redacted"),
         ToolSpec(ToolIDs.removeBackground, L("Remove background"), glyph: "person.crop.rectangle", kinds: [.image], needsEditor: false, suffix: "cutout"),
         ToolSpec(ToolIDs.addBackground, L("Add background"), glyph: "rectangle.inset.filled", kinds: [.image], needsEditor: true, schema: ToolSchemas.addBackground, suffix: "background"),

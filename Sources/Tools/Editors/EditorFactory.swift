@@ -11,4 +11,11 @@ public enum EditorFactory {
         if MediaEditors.open(tool, inputs: inputs, onSave: onSave) { return true }
         return false
     }
+
+    /// Shows extra UI for a finished tool job (e.g. the codes found by Read QR).
+    /// Returns false when the tool has nothing to show beyond its files.
+    @discardableResult
+    public static func presentResult(_ tool: ToolSpec, outputs: [URL]) -> Bool {
+        ImageEditors.presentResult(tool, outputs: outputs)
+    }
 }

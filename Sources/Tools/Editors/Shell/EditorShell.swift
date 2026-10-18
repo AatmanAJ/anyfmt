@@ -81,7 +81,7 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
                         Label(String(localized: "Before / After"), systemImage: "square.split.2x1")
                     }
                     .toggleStyle(.button)
-                    .help(String(localized: "Hold to compare with the original (B)"))
+                    .help(String(localized: "Compare with the original (B)"))
                     .keyboardShortcut("b", modifiers: [])
                     if let s = model.statusLine {
                         Text(s).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(.secondary)
@@ -131,13 +131,14 @@ public final class EditorWindow: NSWindowController, NSWindowDelegate {
     private var onCloseHandler: (() -> Void)?
 
     /// Presents `content` (an `EditorShell`) titled after the tool and first input.
-    public static func present<Content: View>(title: String, content: Content, onClose: (() -> Void)? = nil) -> EditorWindow {
+    public static func present<Content: View>(title: String, content: Content, size: NSSize = defaultSize,
+                                              onClose: (() -> Void)? = nil) -> EditorWindow {
         let hosting = NSHostingController(rootView: content)
         let window = NSWindow(contentViewController: hosting)
         window.title = title
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView]
         window.titlebarAppearsTransparent = false
-        window.setContentSize(defaultSize)
+        window.setContentSize(size)
         window.contentMinSize = NSSize(width: 720, height: 460)
         window.isReleasedWhenClosed = false
         window.center()
