@@ -59,8 +59,8 @@ public enum XLSXReader {
         var sheets: [Sheet] = []
         for s in wb.first("sheets")?.children("sheet") ?? [] {
             let name = s["name"] ?? "Sheet\(sheets.count + 1)"
-            guard let rid = s["r:id"] ?? s["id"], let rel = rels[rid], let x = try? XMLTree.parse(zip.data(rel.target)) else { continue }
-            sheets.append(sheet(x, name: name, shared: shared, dateStyles: dateStyles, timeStyles: timeStyles, date1904: date1904).trimmed)
+            guard let rid = s["r:id"] ?? s["id"], let rel = rels[rid], let part = try? zip.data(rel.target) else { continue }
+            sheets.append(sheet(part, name: name, shared: shared, dateStyles: dateStyles, timeStyles: timeStyles, date1904: date1904).trimmed)
         }
         return Workbook(sheets: sheets)
     }
@@ -97,47 +97,131 @@ public enum XLSXReader {
         return any ? n - 1 : nil
     }
 
-    static func sheet(_ x: XNode, name: String, shared: [String], dateStyles: Set<Int>, timeStyles: Set<Int>, date1904: Bool) -> Sheet {
-        var rows: [[Cell]] = []
-        guard let data = x.first("sheetData") else { return Sheet(name: name, rows: []) }
-        var nextRow = 0
-        for r in data.children("row") {
-            let ri = (r["r"].flatMap(Int.init).map { $0 - 1 }) ?? nextRow
-            guard ri >= 0, ri < 1_048_576 else { continue }
-            // Pad up to sparse row index (bounded).
-            if ri > rows.count, ri - rows.count < 100_000 { rows.append(contentsOf: Array(repeating: [], count: ri - rows.count)) }
-            var row: [Cell] = []
-            var nextCol = 0
-            for c in r.children("c") {
-                let ci = c["r"].flatMap(columnIndex) ?? nextCol
-                guard ci < 16384 else { continue }
-                while row.count < ci { row.append(.empty) }
-                let style = c["s"].flatMap(Int.init) ?? 0
-                let v = c.child("v")?.text
-                var cell: Cell = .empty
-                switch c["t"] ?? "n" {
-                case "s": if let i = v.flatMap(Int.init), i >= 0, i < shared.count { cell = .string(shared[i]) }
-                case "str": cell = v.map(Cell.string) ?? .empty
-                case "inlineStr": cell = c.child("is").map { .string(richText($0)) } ?? .empty
-                case "b": cell = .bool(v == "1" || v?.lowercased() == "true")
-                case "e": cell = v.map(Cell.string) ?? .empty
-                case "d": cell = v.flatMap(Cell.isoDate) ?? v.map(Cell.string) ?? .empty
-                default:
-                    if let v, let d = Double(v) {
-                        if dateStyles.contains(style) {
-                            cell = .date(Cell.date(fromExcelSerial: d, date1904: date1904), time: timeStyles.contains(style) || d != d.rounded())
-                        } else {
-                            cell = .number(d)
-                        }
-                    }
-                }
-                if row.count == ci { row.append(cell) } else if ci < row.count { row[ci] = cell }
-                nextCol = ci + 1
-            }
-            if ri < rows.count { rows[ri] = row } else { rows.append(row) }
-            nextRow = ri + 1
+    /// Streams a worksheet part straight into rows (no XML tree: big sheets have
+    /// millions of cells).
+    static func sheet(_ data: Data, name: String, shared: [String], dateStyles: Set<Int>, timeStyles: Set<Int>, date1904: Bool) -> Sheet {
+        let builder = SheetSAX(shared: shared, dateStyles: dateStyles, timeStyles: timeStyles, date1904: date1904)
+        let parser = XMLParser(data: data)
+        parser.shouldProcessNamespaces = false
+        parser.shouldResolveExternalEntities = false
+        parser.delegate = builder
+        _ = parser.parse()  // a truncated part keeps the rows read so far
+        builder.finishRow()
+        return Sheet(name: name, rows: builder.rows)
+    }
+}
+
+/// SAX state machine for `<sheetData><row r><c r t s><v/><is><t/></is></c></row>`.
+private final class SheetSAX: NSObject, XMLParserDelegate {
+    let shared: [String]
+    let dateStyles: Set<Int>
+    let timeStyles: Set<Int>
+    let date1904: Bool
+    var rows: [[Cell]] = []
+    private var row: [Cell] = []
+    private var rowIndex = -1
+    private var nextRow = 0
+    private var nextCol = 0
+    private var inRow = false
+    // Current cell.
+    private var cellCol = -1
+    private var cellType = "n"
+    private var cellStyle = 0
+    private var value = ""
+    private var inline = ""
+    private var capture: Capture = .none
+    private enum Capture { case none, value, inlineText }
+
+    init(shared: [String], dateStyles: Set<Int>, timeStyles: Set<Int>, date1904: Bool) {
+        self.shared = shared
+        self.dateStyles = dateStyles
+        self.timeStyles = timeStyles
+        self.date1904 = date1904
+    }
+
+    private static func local(_ name: String) -> Substring {
+        if let i = name.firstIndex(of: ":") { return name[name.index(after: i)...] }
+        return Substring(name)
+    }
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?,
+                qualifiedName qName: String?, attributes a: [String: String] = [:]) {
+        switch Self.local(elementName) {
+        case "row":
+            finishRow()
+            inRow = true
+            let ri = a["r"].flatMap(Int.init).map { $0 - 1 } ?? nextRow
+            rowIndex = (ri >= 0 && ri < 1_048_576) ? ri : -1
+            row = []
+            nextCol = 0
+        case "c":
+            guard inRow else { return }
+            cellCol = a["r"].flatMap(XLSXReader.columnIndex) ?? nextCol
+            cellType = a["t"] ?? "n"
+            cellStyle = a["s"].flatMap(Int.init) ?? 0
+            value = ""
+            inline = ""
+        case "v":
+            capture = .value
+        case "t":
+            if cellCol >= 0 { capture = .inlineText }
+        default:
+            break
         }
-        return Sheet(name: name, rows: rows)
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        switch capture {
+        case .value: value += string
+        case .inlineText: inline += string
+        case .none: break
+        }
+    }
+
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        switch Self.local(elementName) {
+        case "v", "t":
+            capture = .none
+        case "c":
+            if cellCol >= 0, cellCol < 16384 {
+                while row.count < cellCol { row.append(.empty) }
+                let cell = makeCell()
+                if row.count == cellCol { row.append(cell) } else { row[cellCol] = cell }
+                nextCol = cellCol + 1
+            }
+            cellCol = -1
+        case "row":
+            finishRow()
+        default:
+            break
+        }
+    }
+
+    func finishRow() {
+        guard inRow else { return }
+        inRow = false
+        guard rowIndex >= 0 else { return }
+        if rowIndex > rows.count, rowIndex - rows.count < 100_000 { rows.append(contentsOf: Array(repeating: [], count: rowIndex - rows.count)) }
+        if rowIndex < rows.count { rows[rowIndex] = row } else { rows.append(row) }
+        nextRow = rowIndex + 1
+    }
+
+    private func makeCell() -> Cell {
+        let v = value
+        switch cellType {
+        case "s": if let i = Int(v), i >= 0, i < shared.count { return .string(shared[i]) }; return .empty
+        case "str": return v.isEmpty ? .empty : .string(v)
+        case "inlineStr": return inline.isEmpty ? .empty : .string(inline)
+        case "b": return .bool(v == "1" || v.lowercased() == "true")
+        case "e": return v.isEmpty ? .empty : .string(v)
+        case "d": return Cell.isoDate(v) ?? (v.isEmpty ? .empty : .string(v))
+        default:
+            guard let d = Double(v) else { return .empty }
+            if dateStyles.contains(cellStyle) {
+                return .date(Cell.date(fromExcelSerial: d, date1904: date1904), time: timeStyles.contains(cellStyle) || d != d.rounded())
+            }
+            return .number(d)
+        }
     }
 }
 
@@ -160,7 +244,7 @@ public enum ODSReader {
         for e in node.elements {
             switch e.name {
             case "table-row":
-                let rep = e["table:number-rows-repeated"].flatMap(Int.init) ?? 1
+                let rep = max(1, e["table:number-rows-repeated"].flatMap(Int.init) ?? 1)
                 let row = cells(e)
                 let count = row.allSatisfy(\.isEmpty) ? min(rep, 2000) : min(rep, 100_000)
                 for _ in 0..<count { rows.append(row) }
@@ -174,7 +258,7 @@ public enum ODSReader {
     static func cells(_ row: XNode) -> [Cell] {
         var out: [Cell] = []
         for c in row.elements where c.name == "table-cell" || c.name == "covered-table-cell" {
-            let rep = c["table:number-columns-repeated"].flatMap(Int.init) ?? 1
+            let rep = max(1, c["table:number-columns-repeated"].flatMap(Int.init) ?? 1)
             let cell = value(c)
             let count = cell.isEmpty ? min(rep, 2000) : min(rep, 16384)
             for _ in 0..<count { out.append(cell) }
@@ -277,51 +361,60 @@ public enum CSVReader {
         return n
     }
 
+    /// RFC 4180 over UTF-8 bytes (delimiters, quotes and line ends are ASCII, so
+    /// this is safe for any UTF-8 text and far lighter than walking Characters).
     public static func parse(_ text: String, delimiter: Character) -> [[String]] {
+        guard let d = delimiter.asciiValue else { return [] }
+        var copy = text
+        return copy.withUTF8 { parse(bytes: $0, delimiter: d) }
+    }
+
+    static func parse(bytes b: UnsafeBufferPointer<UInt8>, delimiter d: UInt8) -> [[String]] {
+        let quote: UInt8 = 0x22, cr: UInt8 = 0x0D, lf: UInt8 = 0x0A
         var rows: [[String]] = []
         var row: [String] = []
-        var field = ""
+        var field: [UInt8] = []
         var inQuotes = false
-        var fieldStarted = false
-        let it = Array(text.hasPrefix("\u{FEFF}") ? String(text.dropFirst()) : text)
-        var i = 0
-        let n = it.count
+        var started = false
+        let n = b.count
+        var i = (n >= 3 && b[0] == 0xEF && b[1] == 0xBB && b[2] == 0xBF) ? 3 : 0
+        func endField() {
+            row.append(String(decoding: field, as: UTF8.self))
+            field.removeAll(keepingCapacity: true)
+            started = false
+        }
         while i < n {
-            let ch = it[i]
+            let c = b[i]
             if inQuotes {
-                if ch == "\"" {
-                    if i + 1 < n, it[i + 1] == "\"" { field.append("\""); i += 2; continue }
+                if c == quote {
+                    if i + 1 < n, b[i + 1] == quote { field.append(quote); i += 2; continue }
                     inQuotes = false
-                    i += 1
-                    continue
+                } else {
+                    field.append(c)
                 }
-                field.append(ch)
                 i += 1
                 continue
             }
-            if ch == "\"" && !fieldStarted {
+            if c == quote && !started {
                 inQuotes = true
-                fieldStarted = true
+                started = true
                 i += 1
                 continue
             }
-            if ch == delimiter {
-                row.append(field); field = ""; fieldStarted = false
-                i += 1
+            if c == d { endField(); i += 1; continue }
+            if c == cr || c == lf {
+                endField()
+                rows.append(row)
+                row = []
+                i += (c == cr && i + 1 < n && b[i + 1] == lf) ? 2 : 1
                 continue
             }
-            if ch == "\n" || ch == "\r\n" || ch == "\r" {
-                row.append(field); field = ""; fieldStarted = false
-                rows.append(row); row = []
-                i += 1
-                continue
-            }
-            field.append(ch)
-            fieldStarted = true
+            field.append(c)
+            started = true
             i += 1
         }
-        if fieldStarted || !field.isEmpty || !row.isEmpty {
-            row.append(field)
+        if started || !field.isEmpty || !row.isEmpty {
+            endField()
             rows.append(row)
         }
         // Drop fully empty trailing lines.

@@ -284,10 +284,10 @@ struct ODTFlow {
         func addRows(_ container: XNode, header: Bool) {
             for r in container.elements {
                 if r.name == "table-row" {
-                    let repeatCount = min(r["table:number-rows-repeated"].flatMap(Int.init) ?? 1, 1000)
+                    let repeatCount = max(1, min(r["table:number-rows-repeated"].flatMap(Int.init) ?? 1, 1000))
                     var cells: [DocTableCell] = []
                     for cnode in r.elements where cnode.name == "table-cell" || cnode.name == "covered-table-cell" {
-                        let rep = min(cnode["table:number-columns-repeated"].flatMap(Int.init) ?? 1, 64)
+                        let rep = max(1, min(cnode["table:number-columns-repeated"].flatMap(Int.init) ?? 1, 64))
                         var blocks: [DocBlock] = []
                         if cnode.name == "table-cell" {
                             var nested = ODTFlow(zip: zip, styles: styles)

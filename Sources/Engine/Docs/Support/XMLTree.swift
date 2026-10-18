@@ -20,7 +20,8 @@ public struct XNode: Sendable, Hashable {
     /// Attribute by qualified name ("r:id"), then by local name ("val").
     public subscript(_ key: String) -> String? {
         if let a = attributes.first(where: { $0.qname == key }) { return a.value }
-        let local = key.split(separator: ":").last.map(String.init) ?? key
+        guard let i = key.firstIndex(of: ":") else { return attributes.first(where: { $0.local == key })?.value }
+        let local = key[key.index(after: i)...]
         return attributes.first(where: { $0.local == local })?.value
     }
 
@@ -75,8 +76,13 @@ public struct XNode: Sendable, Hashable {
 public struct XAttr: Sendable, Hashable {
     public let qname: String
     public let value: String
-    public var local: String { qname.split(separator: ":").last.map(String.init) ?? qname }
-    public init(_ qname: String, _ value: String) { self.qname = qname; self.value = value }
+    /// Local name (prefix stripped), computed once: lookups run per attribute per element.
+    public let local: String
+    public init(_ qname: String, _ value: String) {
+        self.qname = qname
+        self.value = value
+        if let i = qname.firstIndex(of: ":") { local = String(qname[qname.index(after: i)...]) } else { local = qname }
+    }
 }
 
 public enum XContent: Sendable, Hashable {
@@ -165,8 +171,7 @@ private final class TreeBuilder: NSObject, XMLParserDelegate {
                 qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
         flushText()
         let (prefix, local) = XMLTree.split(elementName)
-        // Keep attribute order stable (dictionary order isn't) for deterministic behaviour.
-        let attrs = attributeDict.keys.sorted().map { XAttr($0, attributeDict[$0] ?? "") }
+        let attrs = attributeDict.map { XAttr($0.key, $0.value) }
         stack.append(XNode(name: local, prefix: prefix, attributes: attrs))
     }
 

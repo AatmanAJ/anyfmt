@@ -57,7 +57,7 @@ public enum Cell: Sendable, Hashable {
         case .string(let s): s
         case .number(let d): Cell.format(d)
         case .bool(let b): b ? "TRUE" : "FALSE"
-        case .date(let d, let t): t ? Cell.dateTimeFormatter.string(from: d) : Cell.dateFormatter.string(from: d)
+        case .date(let d, let t): Cell.isoString(d, time: t)
         }
     }
 
@@ -67,21 +67,51 @@ public enum Cell: Sendable, Hashable {
         return "\(d)"
     }
 
-    static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(identifier: "UTC")
-        f.dateFormat = "yyyy-MM-dd"
-        return f
-    }()
+    // Dates are wall-clock values kept as UTC seconds. Calendar maths is done by hand
+    // (Hinnant's civil-day algorithms): DateFormatter is far too slow per CSV cell.
 
-    static let dateTimeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(identifier: "UTC")
-        f.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return f
-    }()
+    /// Days since 1970-01-01 of a proleptic Gregorian date.
+    static func daysFromCivil(_ y: Int, _ m: Int, _ d: Int) -> Int {
+        let y2 = m <= 2 ? y - 1 : y
+        let era = (y2 >= 0 ? y2 : y2 - 399) / 400
+        let yoe = y2 - era * 400
+        let doy = (153 * ((m + 9) % 12) + 2) / 5 + d - 1
+        let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+        return era * 146_097 + doe - 719_468
+    }
+
+    static func civilFromDays(_ days: Int) -> (Int, Int, Int) {
+        let z = days + 719_468
+        let era = (z >= 0 ? z : z - 146_096) / 146_097
+        let doe = z - era * 146_097
+        let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365
+        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
+        let mp = (5 * doy + 2) / 153
+        let d = doy - (153 * mp + 2) / 5 + 1
+        let m = mp < 10 ? mp + 3 : mp - 9
+        return (yoe + era * 400 + (m <= 2 ? 1 : 0), m, d)
+    }
+
+    static func daysInMonth(_ y: Int, _ m: Int) -> Int {
+        switch m {
+        case 2: (y % 4 == 0 && y % 100 != 0) || y % 400 == 0 ? 29 : 28
+        case 4, 6, 9, 11: 30
+        default: 31
+        }
+    }
+
+    /// `yyyy-MM-dd` or `yyyy-MM-dd HH:mm:ss`.
+    public static func isoString(_ date: Date, time: Bool) -> String {
+        let secs = Int(date.timeIntervalSince1970.rounded())
+        let days = Int((Double(secs) / 86400).rounded(.down))
+        let rem = secs - days * 86400
+        let (y, m, d) = civilFromDays(days)
+        func p2(_ v: Int) -> String { v < 10 ? "0\(v)" : "\(v)" }
+        let year = y >= 0 && y < 10000 ? String(String(y + 10000).dropFirst()) : "\(y)"
+        var s = "\(year)-\(p2(m))-\(p2(d))"
+        if time { s += " \(p2(rem / 3600)):\(p2(rem % 3600 / 60)):\(p2(rem % 60))" }
+        return s
+    }
 
     /// Excel serial day number (1900 system, epoch 1899-12-30) ↔ Date.
     public static func excelSerial(_ d: Date) -> Double { d.timeIntervalSince1970 / 86400 + 25569 }
@@ -94,37 +124,101 @@ public enum Cell: Sendable, Hashable {
 
     /// Infers a typed cell from text (CSV/TSV): numbers, TRUE/FALSE, ISO dates.
     public static func infer(_ raw: String, decimalComma: Bool = false) -> Cell {
+        if raw.isEmpty { return .empty }
         let s = raw.trimmingCharacters(in: .whitespaces)
-        if s.isEmpty { return raw.isEmpty ? .empty : .string(raw) }
-        let upper = s.uppercased()
-        if upper == "TRUE" { return .bool(true) }
-        if upper == "FALSE" { return .bool(false) }
-        if let n = number(s, decimalComma: decimalComma) { return .number(n) }
+        if s.isEmpty { return .string(raw) }
+        let n = s.utf8.count
+        if n == 4, s.caseInsensitiveCompare("TRUE") == .orderedSame { return .bool(true) }
+        if n == 5, s.caseInsensitiveCompare("FALSE") == .orderedSame { return .bool(false) }
+        if let v = number(s, decimalComma: decimalComma) { return .number(v) }
         if let d = isoDate(s) { return d }
         return .string(raw)
     }
 
+    @inline(__always) static func isDigit(_ c: UInt8) -> Bool { c >= 0x30 && c <= 0x39 }
+
+    /// `[-+]? (digits [. digits] | . digits) [e [-+] digits]`, keeping identifiers
+    /// like `007` and numbers beyond double precision (> 15 digits) as text.
     static func number(_ s: String, decimalComma: Bool) -> Double? {
-        var t = s
-        if decimalComma, t.range(of: #"^[-+]?\d+,\d+$"#, options: .regularExpression) != nil { t = t.replacingOccurrences(of: ",", with: ".") }
-        guard t.range(of: #"^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$"#, options: .regularExpression) != nil else { return nil }
-        // Keep identifiers like 007 or long digit strings as text.
-        let digits = t.filter(\.isNumber)
-        let intPart = t.drop { $0 == "-" || $0 == "+" }.prefix { $0 != "." && $0 != "e" && $0 != "E" }
-        if intPart.count > 1, intPart.hasPrefix("0") { return nil }
-        if digits.count > 15 { return nil }
-        return Double(t)
+        var b = Array(s.utf8)
+        guard let f = b.first, isDigit(f) || f == 0x2D || f == 0x2B || f == 0x2E else { return nil }
+        if decimalComma, let comma = b.firstIndex(of: 0x2C), !b.contains(0x2E) {
+            let before = b[..<comma].drop { $0 == 0x2D || $0 == 0x2B }
+            let after = b[(comma + 1)...]
+            if !before.isEmpty, !after.isEmpty, before.allSatisfy(isDigit), after.allSatisfy(isDigit) { b[comma] = 0x2E }
+        }
+        var i = 0
+        let n = b.count
+        if b[i] == 0x2D || b[i] == 0x2B { i += 1 }
+        let intStart = i
+        while i < n, isDigit(b[i]) { i += 1 }
+        let intLen = i - intStart
+        var fracLen = 0
+        if i < n, b[i] == 0x2E {
+            i += 1
+            let fs = i
+            while i < n, isDigit(b[i]) { i += 1 }
+            fracLen = i - fs
+        }
+        guard intLen + fracLen > 0 else { return nil }
+        if i < n, b[i] == 0x65 || b[i] == 0x45 {
+            i += 1
+            if i < n, b[i] == 0x2D || b[i] == 0x2B { i += 1 }
+            let es = i
+            while i < n, isDigit(b[i]) { i += 1 }
+            guard i > es else { return nil }
+        }
+        guard i == n else { return nil }
+        if intLen > 1, b[intStart] == 0x30 { return nil }
+        if intLen + fracLen > 15 { return nil }
+        return Double(String(decoding: b, as: UTF8.self))
     }
 
+    /// `yyyy-MM-dd`, optionally `[T ]HH:mm[:ss[.fff]]` and a `Z`/`±HH[:]MM` suffix
+    /// (accepted; the wall-clock time is kept as written).
     static func isoDate(_ s: String) -> Cell? {
-        guard s.count >= 10, s.range(of: #"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$"#, options: .regularExpression) != nil else { return nil }
-        if s.count == 10 { return dateFormatter.date(from: s).map { .date($0, time: false) } }
-        var t = s.replacingOccurrences(of: "T", with: " ")
-        if let dot = t.firstIndex(of: ".") { t = String(t[..<dot]) }
-        if t.hasSuffix("Z") { t.removeLast() }
-        if let r = t.range(of: #"[+-]\d{2}:?\d{2}$"#, options: .regularExpression) { t = String(t[..<r.lowerBound]) }
-        if t.count == 16 { t += ":00" }
-        return dateTimeFormatter.date(from: t).map { .date($0, time: true) }
+        let b = Array(s.utf8)
+        guard b.count >= 10, b[4] == 0x2D, b[7] == 0x2D else { return nil }
+        func num(_ r: Range<Int>) -> Int? {
+            guard r.lowerBound >= 0, r.upperBound <= b.count else { return nil }
+            var v = 0
+            for k in r {
+                guard isDigit(b[k]) else { return nil }
+                v = v * 10 + Int(b[k] - 0x30)
+            }
+            return v
+        }
+        guard let y = num(0..<4), let mo = num(5..<7), let d = num(8..<10), (1...12).contains(mo), d >= 1, d <= daysInMonth(y, mo) else { return nil }
+        var secs = daysFromCivil(y, mo, d) * 86400
+        if b.count == 10 { return .date(Date(timeIntervalSince1970: TimeInterval(secs)), time: false) }
+        guard b.count >= 16, b[10] == 0x54 || b[10] == 0x20, b[13] == 0x3A, let h = num(11..<13), let mi = num(14..<16), h < 24, mi < 60 else { return nil }
+        var i = 16
+        var sec = 0
+        if i < b.count, b[i] == 0x3A {
+            guard let sv = num(17..<19), sv < 61 else { return nil }
+            sec = sv
+            i = 19
+            if i < b.count, b[i] == 0x2E {
+                i += 1
+                let start = i
+                while i < b.count, isDigit(b[i]) { i += 1 }
+                guard i > start else { return nil }
+            }
+        }
+        if i < b.count {
+            if b[i] == 0x5A {
+                i += 1
+            } else if b[i] == 0x2B || b[i] == 0x2D {
+                guard num((i + 1)..<(i + 3)) != nil else { return nil }
+                i += 3
+                if i < b.count, b[i] == 0x3A { i += 1 }
+                guard num(i..<(i + 2)) != nil else { return nil }
+                i += 2
+            }
+        }
+        guard i == b.count else { return nil }
+        secs += h * 3600 + mi * 60 + sec
+        return .date(Date(timeIntervalSince1970: TimeInterval(secs)), time: true)
     }
 }
 

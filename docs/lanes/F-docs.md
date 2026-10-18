@@ -128,8 +128,8 @@ iWork opt-in 13 (`.optIn`), Office pack 33 and pandoc pack 6 (`.needsPack`).
 
 ## Tests
 
-`CoreTests` (HaloCoreTests): 63 tests in the lane F classes, 79 with the two
-existing suites, all green in 6.9 s (`xcodebuild … test -only-testing:CoreTests`).
+`CoreTests` (HaloCoreTests): 68 tests in the lane F classes, 84 with the two
+existing suites, all green in 11 s (`xcodebuild … test -only-testing:CoreTests`).
 
 | Class | What it covers |
 |---|---|
@@ -141,12 +141,16 @@ existing suites, all green in 6.9 s (`xcodebuild … test -only-testing:CoreTest
 | `ArchiveTests` | Folder → ZIP/TAR/GZ/7z → folder (unicode/space names, top folder unwrapped), multi-input combine incl. `-dash` names, RAR/7z/gzip extraction, archive→archive layout, path traversal never escapes, streaming gzip vs `/usr/bin/gzip -t` |
 | `SlidesAndPackTests` | Quick Look PPTX → PDF (3 pages, 16:9) and PNG (3 files), slide-size parsing, pack installer with a fake system (unpinned refusal, checksum mismatch, install, reinstall, zip layout, permissions, uninstall), pandoc pin = versions.env, pack availability/priorities, iWork opt-in gating and AppleScript generation |
 | `OfficeInteropTests` | Apple's Office Quick Look generator renders our DOCX (table, image, nested list), XLSX (dates as ISO) and PPTX (every slide) |
+| `RobustnessTests` | Truncated / bit-flipped / empty / random variants of every fixture through every reader (must throw or degrade, never trap), pathological Markdown nesting, hostile ODS repeat counts, corrupt PDFs; 200k-row CSV → XLSX → read back; 20-page PDF reconstruction speed |
 | `DocsRouteMatrixTests` | Lane table integrity, then **every shipped route (194) on its fixture**, output opened and checked (DOCX via our reader + AppKit, OCF rules for EPUB/ODT, PDF must have text, archives listed by bsdtar, images decoded…) |
 
 Perf (M5 Max, Debug): whole lane matrix, 194 routes, in 3.4–9 s. WebKit PDF ≈ 0.1–0.3 s
 per document after the first (≈ 0.6 s cold); Quick Look PPTX → PDF ≈ 0.15 s;
 PDF → DOCX for a 3-page PDF ≈ 0.2 s; OCR ≈ 0.3 s per scanned page.
-Verified from a plain command-line process (async `main`) as well as XCTest.
+200 000-row × 5-column CSV: parse 0.75 s, XLSX write 0.8 s, XLSX read 2.4 s (Debug;
+byte-level CSV parser, hand-written number/ISO-date inference, streaming SAX for
+worksheet parts). Verified from a plain command-line process (async `main`) as
+well as XCTest.
 
 ## Fixtures (`Tests/Fixtures/lanes/docs.sh`, ~2 s)
 

@@ -206,7 +206,7 @@ public struct ODSWriter {
             case .bool(let b):
                 s += "<table:table-cell office:value-type=\"boolean\" office:boolean-value=\"\(b ? "true" : "false")\"\(style)><text:p>\(b ? "TRUE" : "FALSE")</text:p></table:table-cell>"
             case .date(let d, let t):
-                let iso = t ? Cell.dateTimeFormatter.string(from: d).replacingOccurrences(of: " ", with: "T") : Cell.dateFormatter.string(from: d)
+                let iso = Cell.isoString(d, time: t).replacingOccurrences(of: " ", with: "T")
                 s += "<table:table-cell table:style-name=\"\(t ? "ce_datetime" : "ce_date")\" office:value-type=\"date\" office:date-value=\"\(iso)\"><text:p>\(c.text)</text:p></table:table-cell>"
             }
         }
