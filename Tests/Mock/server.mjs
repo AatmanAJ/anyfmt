@@ -849,6 +849,7 @@ ctl('POST', '/faults', async (req, res) => {
   state.faults.push(f);
   send(res, 200, f);
 });
+ctl('DELETE', '/faults', (req, res) => { state.faults = []; send(res, 204); });
 ctl('GET', '/requests', (req, res) => send(res, 200, { items: state.requests }));
 ctl('DELETE', '/requests', (req, res) => { state.requests = []; send(res, 204); });
 ctl('POST', '/expire-tokens', (req, res) => {
