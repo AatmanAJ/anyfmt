@@ -1,0 +1,3535 @@
+$ halo formats --json
+exit: 0
+--- stdout
+{
+  "formats" : [
+    {
+      "from" : "jpg",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "png",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "heic",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "webp",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "avif",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "tiff",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "gif",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "bmp",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "heif",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "jp2",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "psd",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "ico",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "icns",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "tga",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "exr",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "svg",
+      "kind" : "vector",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 2
+        },
+        {
+          "format" : "bmp",
+          "hops" : 2
+        },
+        {
+          "format" : "docx",
+          "hops" : 3
+        },
+        {
+          "format" : "epub",
+          "hops" : 3
+        },
+        {
+          "format" : "exr",
+          "hops" : 2
+        },
+        {
+          "format" : "gif",
+          "hops" : 2
+        },
+        {
+          "format" : "heic",
+          "hops" : 2
+        },
+        {
+          "format" : "heif",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 3
+        },
+        {
+          "format" : "icns",
+          "hops" : 2
+        },
+        {
+          "format" : "ico",
+          "hops" : 2
+        },
+        {
+          "format" : "jp2",
+          "hops" : 2
+        },
+        {
+          "format" : "jpg",
+          "hops" : 2
+        },
+        {
+          "format" : "md",
+          "hops" : 3
+        },
+        {
+          "format" : "odt",
+          "hops" : 3
+        },
+        {
+          "format" : "pdf",
+          "hops" : 2
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 3
+        },
+        {
+          "format" : "psd",
+          "hops" : 2
+        },
+        {
+          "format" : "rtf",
+          "hops" : 3
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 3
+        },
+        {
+          "format" : "tga",
+          "hops" : 2
+        },
+        {
+          "format" : "tiff",
+          "hops" : 2
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "webp",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 3
+        }
+      ]
+    },
+    {
+      "from" : "pdf",
+      "kind" : "pdf",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "heic",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "mp3",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "m4a",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "wav",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "flac",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "aiff",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "ogg",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "opus",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "caf",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "wma",
+      "kind" : "audio",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "mp4",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "mov",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "webm",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "mkv",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "avi",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "wmv",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "m4v",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "m4v",
+      "kind" : "video",
+      "to" : [
+        {
+          "format" : "aiff",
+          "hops" : 1
+        },
+        {
+          "format" : "avi",
+          "hops" : 1
+        },
+        {
+          "format" : "caf",
+          "hops" : 1
+        },
+        {
+          "format" : "flac",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "m4a",
+          "hops" : 1
+        },
+        {
+          "format" : "mkv",
+          "hops" : 1
+        },
+        {
+          "format" : "mov",
+          "hops" : 1
+        },
+        {
+          "format" : "mp3",
+          "hops" : 1
+        },
+        {
+          "format" : "mp4",
+          "hops" : 1
+        },
+        {
+          "format" : "ogg",
+          "hops" : 1
+        },
+        {
+          "format" : "opus",
+          "hops" : 1
+        },
+        {
+          "format" : "wav",
+          "hops" : 1
+        },
+        {
+          "format" : "webm",
+          "hops" : 1
+        },
+        {
+          "format" : "wmv",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "docx",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "md",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "txt",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "html",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "rtf",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "rtfd",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "odt",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "doc",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "webarchive",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "textclipping",
+      "kind" : "document",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "epub",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "pptx",
+      "kind" : "slides",
+      "to" : [
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "xlsx",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "csv",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "json",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "ods",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tsv",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        }
+      ]
+    },
+    {
+      "from" : "csv",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "json",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "ods",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tsv",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "tsv",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "csv",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "json",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "ods",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "ods",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "csv",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "json",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tsv",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "xls",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "csv",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "json",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "ods",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tsv",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "json",
+      "kind" : "spreadsheet",
+      "to" : [
+        {
+          "format" : "csv",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "ods",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tsv",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 2
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "epub",
+      "kind" : "ebook",
+      "to" : [
+        {
+          "format" : "docx",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 1
+        },
+        {
+          "format" : "odt",
+          "hops" : 1
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 1
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "srt",
+      "kind" : "subtitle",
+      "to" : [
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "vtt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "vtt",
+      "kind" : "subtitle",
+      "to" : [
+        {
+          "format" : "srt",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "zip",
+      "kind" : "archive",
+      "to" : [
+        {
+          "format" : "7z",
+          "hops" : 1
+        },
+        {
+          "format" : "folder",
+          "hops" : 1
+        },
+        {
+          "format" : "gz",
+          "hops" : 1
+        },
+        {
+          "format" : "tar",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "tar",
+      "kind" : "archive",
+      "to" : [
+        {
+          "format" : "7z",
+          "hops" : 1
+        },
+        {
+          "format" : "folder",
+          "hops" : 1
+        },
+        {
+          "format" : "gz",
+          "hops" : 1
+        },
+        {
+          "format" : "zip",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "gz",
+      "kind" : "archive",
+      "to" : [
+        {
+          "format" : "7z",
+          "hops" : 1
+        },
+        {
+          "format" : "folder",
+          "hops" : 1
+        },
+        {
+          "format" : "tar",
+          "hops" : 1
+        },
+        {
+          "format" : "zip",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "rar",
+      "kind" : "archive",
+      "to" : [
+        {
+          "format" : "7z",
+          "hops" : 1
+        },
+        {
+          "format" : "folder",
+          "hops" : 1
+        },
+        {
+          "format" : "gz",
+          "hops" : 1
+        },
+        {
+          "format" : "tar",
+          "hops" : 1
+        },
+        {
+          "format" : "zip",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "7z",
+      "kind" : "archive",
+      "to" : [
+        {
+          "format" : "folder",
+          "hops" : 1
+        },
+        {
+          "format" : "gz",
+          "hops" : 1
+        },
+        {
+          "format" : "tar",
+          "hops" : 1
+        },
+        {
+          "format" : "zip",
+          "hops" : 1
+        }
+      ]
+    },
+    {
+      "from" : "folder",
+      "kind" : "folder",
+      "to" : [
+        {
+          "format" : "7z",
+          "hops" : 1
+        },
+        {
+          "format" : "gz",
+          "hops" : 1
+        },
+        {
+          "format" : "tar",
+          "hops" : 1
+        },
+        {
+          "format" : "zip",
+          "hops" : 1
+        }
+      ]
+    }
+  ],
+  "options" : 793
+}
+--- stderr

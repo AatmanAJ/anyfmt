@@ -1,0 +1,16 @@
+$ halo help
+exit: 0
+--- stdout
+usage: halo <command> [options]
+
+commands:
+  convert <file>... --to <format> [--opt key=value]... [--out <dir>] [--metadata keep|private|strip]
+  tool <tool-id> <file>... [--opt key=value]... [--out <dir>]
+  formats [--from <format>] [--json]     list conversions (from the live capability table)
+  tools [--json]                         list tools and their options
+  route <from> <to>                      show the planned route
+  version
+
+Outputs are written beside each original (or into --out) and never overwrite
+anything: name.png, then name 2.png, name 3.png …
+--- stderr

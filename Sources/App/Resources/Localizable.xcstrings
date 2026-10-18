@@ -334,6 +334,7 @@
     "Double-click a slider to reset it." : {},
     "Double-click the slider to reset" : {},
     "Double-click to reset" : {},
+    "Drag %@ and, while you hold the mouse button, press %@. Tap it or hold it." : {},
     "Drag %@ and, while you hold the mouse button, tap %@." : {},
     "Drag a file, tap ⇧ Shift: every format it can become" : {
       "comment" : "Demo GIF caption"
@@ -341,6 +342,7 @@
     "Drag across the waveform to mark a bleep" : {},
     "Drag across the waveform to mark what to bleep" : {},
     "Drag clips to reorder" : {},
+    "Drag it, then press a trigger key. Or use the actions to open a wheel." : {},
     "Drag it, then tap a trigger key. Or use the actions to open a wheel." : {},
     "Drag on the image to cover an area. Drag an area to move it, or its corner to resize." : {},
     "Drag order" : {},
@@ -352,6 +354,7 @@
     "Drag to cover an area. Select an area and press Delete to remove it." : {},
     "Drag to move every item out of the shelf. Press to show them all." : {},
     "Drag to move or resize. Arrow keys nudge by one pixel, with Shift by ten." : {},
+    "Drag. Press. Drop." : {},
     "Drag. Tap. Drop." : {},
     "Draw" : {},
     "Drop files" : {
@@ -497,6 +500,7 @@
     "Keep audio pitch" : {},
     "Keep everything" : {},
     "Keep favourites, wheel order, presets and settings the same on every Mac you use." : {},
+    "Keep holding the mouse, and press %@." : {},
     "Keep holding the mouse, and tap %@: press and let go." : {},
     "Keep the original’s dates" : {},
     "Key %lld" : {},
@@ -717,6 +721,7 @@
     "Presentations" : {},
     "Preset" : {},
     "Presets" : {},
+    "Press %@ or %@ mid-drag for the other wheels." : {},
     "Press a key mid-drag: tap it or hold it. A key you were already holding when the drag started is ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two." : {},
     "Press and hold on the photo, then move it." : {},
     "Press and let go within %@, or make taps more relaxed above." : {},
@@ -918,6 +923,7 @@
     "Square" : {},
     "Star a format to pin it to the start of the ring." : {},
     "Start" : {},
+    "Start dragging the photo first, then press the key." : {},
     "Start dragging the photo first, then tap." : {},
     "Start signing in again, then enter the new code." : {},
     "Start Using %@" : {},

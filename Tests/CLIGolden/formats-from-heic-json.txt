@@ -1,0 +1,115 @@
+$ halo formats --from heic --json
+exit: 0
+--- stdout
+{
+  "formats" : [
+    {
+      "from" : "heic",
+      "kind" : "image",
+      "to" : [
+        {
+          "format" : "avif",
+          "hops" : 1
+        },
+        {
+          "format" : "bmp",
+          "hops" : 1
+        },
+        {
+          "format" : "docx",
+          "hops" : 2
+        },
+        {
+          "format" : "epub",
+          "hops" : 2
+        },
+        {
+          "format" : "exr",
+          "hops" : 1
+        },
+        {
+          "format" : "gif",
+          "hops" : 1
+        },
+        {
+          "format" : "heif",
+          "hops" : 1
+        },
+        {
+          "format" : "html",
+          "hops" : 2
+        },
+        {
+          "format" : "icns",
+          "hops" : 1
+        },
+        {
+          "format" : "ico",
+          "hops" : 1
+        },
+        {
+          "format" : "jp2",
+          "hops" : 1
+        },
+        {
+          "format" : "jpg",
+          "hops" : 1
+        },
+        {
+          "format" : "md",
+          "hops" : 2
+        },
+        {
+          "format" : "odt",
+          "hops" : 2
+        },
+        {
+          "format" : "pdf",
+          "hops" : 1
+        },
+        {
+          "format" : "png",
+          "hops" : 1
+        },
+        {
+          "format" : "pptx",
+          "hops" : 2
+        },
+        {
+          "format" : "psd",
+          "hops" : 1
+        },
+        {
+          "format" : "rtf",
+          "hops" : 2
+        },
+        {
+          "format" : "rtfd",
+          "hops" : 2
+        },
+        {
+          "format" : "tga",
+          "hops" : 1
+        },
+        {
+          "format" : "tiff",
+          "hops" : 1
+        },
+        {
+          "format" : "txt",
+          "hops" : 1
+        },
+        {
+          "format" : "webp",
+          "hops" : 1
+        },
+        {
+          "format" : "xlsx",
+          "hops" : 2
+        }
+      ]
+    }
+  ],
+  "options" : 793
+}
+--- stderr

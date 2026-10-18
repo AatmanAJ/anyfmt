@@ -13,9 +13,9 @@ A free, open-source file converter that lives in your Mac's menu bar.</p>
 
 ---
 
-Start dragging any file in Finder and **tap ⇧ Shift**: a wheel of every format
+Start dragging any file in Finder and **press ⇧ Shift** (tap it or hold it): a wheel of every format
 that file can become opens around your pointer. Drop on a segment and a
-converted copy appears beside the original. **Tap ⌘ Command** for tools
+converted copy appears beside the original. **Press ⌘ Command** for tools
 (compress, crop, trim, remove background…) and **⌃ Control** for actions
 (AirDrop, Float, Copy, Move, Copy Path, Terminal).
 
@@ -48,8 +48,8 @@ Halo appears in the menu bar. There's no Dock icon and no main window.
 
 - Let go of the key and keep dragging: the wheel **stays open** until you drop
   or move back to the centre to cancel.
-- Tap another key to **switch wheels** without letting go of the file.
-- Right-click a format, or hover over it for a moment, to set **options**:
+- Press another key to **switch wheels** without letting go of the file.
+- Hover over a format for a moment mid-drag (or right-click it in keyboard mode) to set **options**:
   quality, target size, DPI, codec and more.
 - **No dragging?** Select files in Finder and use **Finder › Services ›
   Open in Halo Wheel** (bind it to any shortcut), or press **⌃⌥Space** to open an

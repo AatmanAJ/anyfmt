@@ -1,0 +1,5 @@
+$ halo convert /nonexistent/halo.png
+exit: 64
+--- stdout
+--- stderr
+error: missing --to <format>

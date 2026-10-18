@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import HaloCore
 
-/// Screen 1: drag Sample.heic around a small stage and tap the real trigger keys.
+/// Screen 1: drag Sample.heic around a small stage and press the real trigger keys.
 struct OnboardingDemoPage: View {
     @ObservedObject var demo: DemoModel
     @ObservedObject var settings: AppSettings
@@ -12,13 +12,15 @@ struct OnboardingDemoPage: View {
     var body: some View {
         let triggers = demo.triggers
         VStack(spacing: DesignTokens.Space.m) {
-            PageHeader(title: String(localized: "Drag. Tap. Drop."),
-                       subtitle: String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, tap \(triggers[.convert].displayName)."))
+            PageHeader(title: settings.opensOnPress ? String(localized: "Drag. Press. Drop.") : String(localized: "Drag. Tap. Drop."),
+                       subtitle: settings.opensOnPress
+                           ? String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, press \(triggers[.convert].displayName). Tap it or hold it.")
+                           : String(localized: "Drag \(DemoModel.fileName) and, while you hold the mouse button, tap \(triggers[.convert].displayName)."))
                 .padding(.bottom, DesignTokens.Space.xs)
             DemoStage(demo: demo, wheelHook: wheelHook, reduceMotion: reduceMotion)
             KeyLegend(triggers: triggers, active: demo.openKind?.role, pressing: demo.pressing)
                 .padding(.top, DesignTokens.Space.xxs)
-            HintLine(hint: demo.hint, triggers: triggers, threshold: settings.tapThreshold)
+            HintLine(hint: demo.hint, triggers: triggers, threshold: settings.tapThreshold, press: settings.opensOnPress)
                 .frame(height: 16)
         }
         .onAppear { demo.start() }
@@ -67,7 +69,7 @@ private struct DemoStage: View {
                 .animation(demo.phase == .dragging || demo.openKind != nil ? .interactiveSpring(response: 0.12) : spring, value: demo.tileCenter)
                 .accessibilityElement()
                 .accessibilityLabel(Text("\(DemoModel.fileName), a sample photo"))
-                .accessibilityHint(Text("Drag it, then tap a trigger key. Or use the actions to open a wheel."))
+                .accessibilityHint(Text("Drag it, then press a trigger key. Or use the actions to open a wheel."))
                 .accessibilityAction(named: Text("Open the Convert wheel")) { demo.openForAccessibility(.convert) }
                 .accessibilityAction(named: Text("Open the Tools wheel")) { demo.openForAccessibility(.tools) }
                 .accessibilityAction(named: Text("Open the Actions wheel")) { demo.openForAccessibility(.actions) }
@@ -227,6 +229,7 @@ private struct HintLine: View {
     let hint: DemoModel.Hint
     let triggers: TriggerAssignment
     let threshold: Double
+    var press = true
 
     var body: some View {
         Text(verbatim: text)
@@ -242,14 +245,20 @@ private struct HintLine: View {
         let s = OptionsFormLogic.display(threshold, decimals: 2, unit: "s")
         switch hint {
         case .start: return String(localized: "Press and hold on the photo, then move it.")
-        case .tapNow: return String(localized: "Keep holding the mouse, and tap \(triggers[.convert].displayName): press and let go.")
+        case .tapNow:
+            return press ? String(localized: "Keep holding the mouse, and press \(triggers[.convert].displayName).")
+                : String(localized: "Keep holding the mouse, and tap \(triggers[.convert].displayName): press and let go.")
         case .chooseSegment: return String(localized: "Move onto a segment and let go. Drop in the middle to cancel.")
         case .held: return String(localized: "That was a hold. A tap is a quick press, under \(s).")
         case .chord: return String(localized: "Use one key on its own.")
         case .unassigned(let k): return String(localized: "\(k.name) isn’t assigned to a wheel. Change keys in Settings › Keys.")
-        case .dragFirst: return String(localized: "Start dragging the photo first, then tap.")
+        case .dragFirst:
+            return press ? String(localized: "Start dragging the photo first, then press the key.")
+                : String(localized: "Start dragging the photo first, then tap.")
         case .cancelled: return String(localized: "Cancelled. Nothing happened to the file.")
-        case .done: return String(localized: "Tap \(triggers[.tools].displayName) or \(triggers[.actions].displayName) mid-drag for the other wheels.")
+        case .done:
+            return press ? String(localized: "Press \(triggers[.tools].displayName) or \(triggers[.actions].displayName) mid-drag for the other wheels.")
+                : String(localized: "Tap \(triggers[.tools].displayName) or \(triggers[.actions].displayName) mid-drag for the other wheels.")
         }
     }
 }

@@ -24,7 +24,7 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 | Drop confirm | wheel disappears | 90 ms fill pulse, then dissolve toward the drop point | ✅ |
 | Screen edges | not shown | pushed inward on any display; nothing selectable until the pointer moves 8 pt | ✅ |
 | Material | light frosted wedges over wallpaper | behind-window vibrancy masked per wedge, hairline inner stroke, light/dark/contrast/opaque variants | 👁 Masks and shapes were verified from our own window captures, but the backdrop can't be captured without Screen Recording. Check `.popover` vs `.hudWindow` live. |
-| Options | not shown | right-click / hover-hold → schema-driven popover; the popover is itself a drop target | ✅ |
+| Options | not shown | hover-hold mid-drag (0.6 s; right-click only in keyboard mode, since the button is held during a drag) → schema-driven popover; the popover is itself a drop target. Phase 2 replaces the mid-drag dwell (PLAN-PHASE2 §B) | ✅ |
 | Keyboard | Enter on selection, arrows, Enter, Escape | + Tab cycles wheels, 1–9 jump, Page Up/Down, VoiceOver radio buttons | ✅ |
 | Accessibility | not shown | Reduce Motion, Increase Contrast, Reduce Transparency, VoiceOver labels per segment | ✅ |
 

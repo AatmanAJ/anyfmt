@@ -26,7 +26,7 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 | Always a new copy, never overwrite | ✅ | `renamex_np(RENAME_EXCL)`, Finder-style `name 2.ext` |
 | Everything local, no uploads | ✅ | `make netcheck`: 0 sockets. ffmpeg built `--disable-network` |
 | Apple silicon, macOS 13+ | 🟡 | arm64, macOS 13 target; verified on macOS 27 only (B-007) |
-| ➕ Options per target | ✅ | Right-click/hover popover from the schema (quality, size, DPI, codec, cloud) |
+| ➕ Options per target | ✅ | Hover popover from the schema mid-drag (right-click in keyboard mode): quality, size, DPI, codec, cloud |
 | ➕ More than 8 targets | ✅ | Second ring 9–20, paging above |
 | ➕ Command-line tool | ✅ | `halo convert/tool/formats/route` over the same table |
 

@@ -1,0 +1,5 @@
+$ halo route foo bar
+exit: 1
+--- stdout
+--- stderr
+no route

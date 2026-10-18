@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import HaloCore
 
 /// The app's single doorway into cloud features. Every entitlement check lives
@@ -7,6 +8,7 @@ import HaloCore
 @MainActor
 enum CloudIntegration {
     private static var observer: UUID?
+    private static var syncChanges: AnyCancellable?
 
     /// Start background cloud services only when they were opted into (inbox/sync).
     /// Touching `.shared` makes no request while signed out (CloudNetworkGate).
@@ -15,6 +17,13 @@ enum CloudIntegration {
         wheel.cloud.entitlements = services.entitlements
         wheel.cloud.onProTapWhileSignedOut = { CloudPanels.showProExplainer(for: $0) }
         wheel.cloud.onProTapWithoutPlan = { CloudPanels.showProExplainer(for: $0) }
+        if syncChanges == nil {
+            // Sync stays inert unless signed in, entitled and switched on (SyncEngine.isActive).
+            services.setSyncSource(SettingsSyncSource(settings: .shared))
+            syncChanges = SettingsSyncSource.changes(of: .shared).sink { namespace in
+                services.noteLocalChange(namespace)
+            }
+        }
         if observer == nil {
             observer = services.state.observe { [weak wheel] snapshot in
                 Task { @MainActor in wheel?.cloud.entitlements = snapshot.entitlements }

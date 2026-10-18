@@ -1,0 +1,557 @@
+$ halo tools --json
+exit: 0
+--- stdout
+{
+  "tools" : [
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.compress",
+      "options" : [
+        {
+          "default" : "quality",
+          "id" : "sizeMode",
+          "label" : "Mode"
+        },
+        {
+          "default" : "70",
+          "id" : "quality",
+          "label" : "Quality"
+        },
+        {
+          "default" : "1000000",
+          "id" : "targetSize",
+          "label" : "Target size"
+        },
+        {
+          "default" : "50",
+          "id" : "percent",
+          "label" : "Percentage of original"
+        }
+      ],
+      "title" : "Compress"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.resize",
+      "options" : [
+        {
+          "default" : "percent",
+          "id" : "mode",
+          "label" : "Mode"
+        },
+        {
+          "default" : "1920",
+          "id" : "preset",
+          "label" : "Preset"
+        },
+        {
+          "default" : "1920",
+          "id" : "width",
+          "label" : "Width"
+        },
+        {
+          "default" : "0",
+          "id" : "height",
+          "label" : "Height"
+        },
+        {
+          "default" : "50",
+          "id" : "percent",
+          "label" : "Scale"
+        }
+      ],
+      "title" : "Resize"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.crop",
+      "options" : [
+        {
+          "default" : "0,0,1,1",
+          "id" : "rect",
+          "label" : "Crop"
+        },
+        {
+          "default" : "free",
+          "id" : "aspect",
+          "label" : "Aspect"
+        }
+      ],
+      "title" : "Crop"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.adjust",
+      "options" : [
+        {
+          "default" : "0.0",
+          "id" : "exposure",
+          "label" : "Exposure"
+        },
+        {
+          "default" : "1.0",
+          "id" : "contrast",
+          "label" : "Contrast"
+        },
+        {
+          "default" : "1.0",
+          "id" : "saturation",
+          "label" : "Saturation"
+        },
+        {
+          "default" : "0.0",
+          "id" : "warmth",
+          "label" : "Warmth"
+        }
+      ],
+      "title" : "Adjust"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.annotate",
+      "options" : [
+        {
+          "default" : "[]",
+          "id" : "annotations",
+          "label" : "Annotations"
+        }
+      ],
+      "title" : "Annotate"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.redact",
+      "options" : [
+        {
+          "default" : "pixelate",
+          "id" : "style",
+          "label" : "Style"
+        },
+        {
+          "default" : "#000000",
+          "id" : "color",
+          "label" : "Fill colour"
+        },
+        {
+          "default" : "",
+          "id" : "regions",
+          "label" : "Regions"
+        }
+      ],
+      "title" : "Redact"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.removeBackground",
+      "options" : [
+
+      ],
+      "title" : "Remove background"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.addBackground",
+      "options" : [
+        {
+          "default" : "gradient",
+          "id" : "fill",
+          "label" : "Fill"
+        },
+        {
+          "default" : "#6E56F8",
+          "id" : "color1",
+          "label" : "Colour"
+        },
+        {
+          "default" : "#22C3A6",
+          "id" : "color2",
+          "label" : "Second colour"
+        },
+        {
+          "default" : "135",
+          "id" : "angle",
+          "label" : "Gradient angle"
+        },
+        {
+          "default" : "",
+          "id" : "imagePath",
+          "label" : "Background image"
+        },
+        {
+          "default" : "10",
+          "id" : "padding",
+          "label" : "Padding"
+        },
+        {
+          "default" : "4",
+          "id" : "cornerRadius",
+          "label" : "Corner radius"
+        },
+        {
+          "default" : "true",
+          "id" : "shadow",
+          "label" : "Shadow"
+        }
+      ],
+      "title" : "Add background"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.collage",
+      "options" : [
+        {
+          "default" : "grid",
+          "id" : "layout",
+          "label" : "Layout"
+        },
+        {
+          "default" : "16",
+          "id" : "gap",
+          "label" : "Gap"
+        },
+        {
+          "default" : "#FFFFFF",
+          "id" : "color1",
+          "label" : "Background"
+        },
+        {
+          "default" : "3000",
+          "id" : "width",
+          "label" : "Output width"
+        },
+        {
+          "default" : "",
+          "id" : "order",
+          "label" : "Order"
+        }
+      ],
+      "title" : "Collage"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.toPDF",
+      "options" : [
+        {
+          "default" : "fit",
+          "id" : "pageSize",
+          "label" : "Page size"
+        },
+        {
+          "default" : "",
+          "id" : "order",
+          "label" : "Order"
+        }
+      ],
+      "title" : "Images to PDF"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "image.readCodes",
+      "options" : [
+
+      ],
+      "title" : "Read QR \/ barcode"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.trim",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "range",
+          "label" : "Range"
+        },
+        {
+          "default" : "true",
+          "id" : "lossless",
+          "label" : "Lossless when possible"
+        }
+      ],
+      "title" : "Trim"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.crop",
+      "options" : [
+        {
+          "default" : "0,0,1,1",
+          "id" : "rect",
+          "label" : "Crop"
+        },
+        {
+          "default" : "free",
+          "id" : "aspect",
+          "label" : "Aspect"
+        }
+      ],
+      "title" : "Crop video"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.speed",
+      "options" : [
+        {
+          "default" : "2",
+          "id" : "factor",
+          "label" : "Speed"
+        },
+        {
+          "default" : "true",
+          "id" : "keepPitch",
+          "label" : "Keep audio pitch"
+        }
+      ],
+      "title" : "Change speed"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.split",
+      "options" : [
+        {
+          "default" : "every",
+          "id" : "mode",
+          "label" : "Split"
+        },
+        {
+          "default" : "",
+          "id" : "at",
+          "label" : "Split points (s)"
+        },
+        {
+          "default" : "60",
+          "id" : "every",
+          "label" : "Segment length"
+        }
+      ],
+      "title" : "Split"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.join",
+      "options" : [
+
+      ],
+      "title" : "Join"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.snapshot",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "times",
+          "label" : "Times (s)"
+        },
+        {
+          "default" : "png",
+          "id" : "format",
+          "label" : "Format"
+        }
+      ],
+      "title" : "Snapshot frame"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "video.compress",
+      "options" : [
+        {
+          "default" : "quality",
+          "id" : "sizeMode",
+          "label" : "Mode"
+        },
+        {
+          "default" : "balanced",
+          "id" : "videoQuality",
+          "label" : "Preset"
+        },
+        {
+          "default" : "25000000",
+          "id" : "targetSize",
+          "label" : "Target size"
+        },
+        {
+          "default" : "0",
+          "id" : "resolution",
+          "label" : "Resolution"
+        }
+      ],
+      "title" : "Compress video"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "audio.trim",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "range",
+          "label" : "Range"
+        },
+        {
+          "default" : "true",
+          "id" : "lossless",
+          "label" : "Lossless when possible"
+        }
+      ],
+      "title" : "Trim audio"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "audio.normalize",
+      "options" : [
+        {
+          "default" : "-16",
+          "id" : "target",
+          "label" : "Loudness target"
+        }
+      ],
+      "title" : "Normalize"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "audio.bleep",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "ranges",
+          "label" : "Ranges"
+        },
+        {
+          "default" : "tone",
+          "id" : "style",
+          "label" : "Replace with"
+        }
+      ],
+      "title" : "Bleep"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "audio.channels",
+      "options" : [
+        {
+          "default" : "mono",
+          "id" : "mode",
+          "label" : "Channels"
+        }
+      ],
+      "title" : "Change channels"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "meta.edit",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "fields",
+          "label" : "Fields"
+        }
+      ],
+      "title" : "Edit metadata"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "meta.strip",
+      "options" : [
+
+      ],
+      "title" : "Strip metadata"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "pdf.organize",
+      "options" : [
+        {
+          "default" : "",
+          "id" : "order",
+          "label" : "Page order"
+        },
+        {
+          "default" : "false",
+          "id" : "split",
+          "label" : "Split into single pages"
+        }
+      ],
+      "title" : "Merge \/ split \/ reorder"
+    },
+    {
+      "available" : true,
+      "cloud" : false,
+      "id" : "pdf.compress",
+      "options" : [
+        {
+          "default" : "quality",
+          "id" : "sizeMode",
+          "label" : "Mode"
+        },
+        {
+          "default" : "60",
+          "id" : "quality",
+          "label" : "Image quality"
+        },
+        {
+          "default" : "150",
+          "id" : "dpi",
+          "label" : "Image resolution"
+        },
+        {
+          "default" : "2000000",
+          "id" : "targetSize",
+          "label" : "Target size"
+        }
+      ],
+      "title" : "Compress PDF"
+    },
+    {
+      "available" : false,
+      "cloud" : true,
+      "id" : "cloud.transcribe",
+      "options" : [
+
+      ],
+      "title" : "Transcribe"
+    },
+    {
+      "available" : false,
+      "cloud" : true,
+      "id" : "cloud.upscale",
+      "options" : [
+
+      ],
+      "title" : "Upscale"
+    },
+    {
+      "available" : false,
+      "cloud" : true,
+      "id" : "cloud.removeBackgroundHQ",
+      "options" : [
+
+      ],
+      "title" : "Remove background HQ"
+    }
+  ]
+}
+--- stderr

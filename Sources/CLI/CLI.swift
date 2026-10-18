@@ -228,6 +228,17 @@ enum CLI {
 
     static func tools(_ args: [String]) -> Int32 {
         let available = ToolRegistry.default.ids
+        if args.contains("--json") {
+            let rows: [[String: Any]] = ToolCatalog.all.map { t in
+                ["id": t.id.rawValue, "title": t.title, "cloud": t.cloudFeature != nil,
+                 "available": t.cloudFeature == nil && available.contains(t.id),
+                 "options": t.schema.specs.map { ["id": $0.id, "label": $0.label, "default": "\($0.defaultValue)"] }]
+            }
+            if let d = try? JSONSerialization.data(withJSONObject: ["tools": rows], options: [.prettyPrinted, .sortedKeys]) {
+                out(String(decoding: d, as: UTF8.self))
+            }
+            return 0
+        }
         for t in ToolCatalog.all {
             let state = t.cloudFeature != nil ? "cloud (Pro)" : (available.contains(t.id) ? "" : "not in this build")
             out("\(t.id.rawValue.padding(toLength: 24, withPad: " ", startingAt: 0)) \(t.title) \(state.isEmpty ? "" : "[\(state)]")")

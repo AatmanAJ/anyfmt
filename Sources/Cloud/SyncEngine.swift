@@ -20,7 +20,7 @@ enum SyncNamespace: String, CaseIterable, Sendable, Codable {
     }
 }
 
-/// The app side of sync. The Settings lane implements this with the real
+/// The app side of sync. `SettingsSyncSource` implements this with the real
 /// favourites, wheel order, presets, recipes and settings, each as JSON.
 protocol SyncDocumentSource: Sendable {
     /// Current local JSON for `namespace`, or nil when there's nothing to sync yet.

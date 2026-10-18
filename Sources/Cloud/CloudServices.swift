@@ -78,10 +78,16 @@ final class CloudServices {
     @discardableResult
     func handleCallback(_ url: URL) -> Bool { auth.handleCallback(url) }
 
-    /// The app's local data for sync (wired by the Settings lane).
+    /// The app's local data for sync (`SettingsSyncSource`, set by CloudIntegration.start).
     func setSyncSource(_ source: (any SyncDocumentSource)?) {
         let sync = self.sync
         Task { await sync.setSource(source) }
+    }
+
+    /// Local data in `namespace` changed: push it after the debounce (no-op while sync is inactive).
+    func noteLocalChange(_ namespace: SyncNamespace) {
+        let sync = self.sync
+        Task { await sync.noteLocalChange(namespace) }
     }
 
     /// A job for the normal queue + progress window.
