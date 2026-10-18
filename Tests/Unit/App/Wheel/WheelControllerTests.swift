@@ -235,6 +235,23 @@ final class WheelGalleryTests: XCTestCase {
         XCTAssertFalse(files.isEmpty)
     }
 
+    /// Dev hook: opens the interactive gallery window and captures it into HALO_GALLERY_OUT.
+    func testGalleryWindowCapture() async throws {
+        guard let out = ProcessInfo.processInfo.environment["HALO_GALLERY_OUT"], !out.isEmpty else {
+            throw XCTSkip("set HALO_GALLERY_OUT to capture the gallery window")
+        }
+        WheelGallery.showWindow()
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        guard let window = NSApp.windows.first(where: { $0.title == String(localized: "Wheel Gallery") }) else {
+            return XCTFail("no gallery window")
+        }
+        let id = CGWindowID(window.windowNumber)
+        let image = try XCTUnwrap(CGWindowListCreateImage(.null, .optionIncludingWindow, id, [.bestResolution, .boundsIgnoreFraming]))
+        let data = try XCTUnwrap(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
+        try data.write(to: URL(fileURLWithPath: out).appendingPathComponent("gallery-window.png"))
+        window.close()
+    }
+
     func testRenderAllWritesEveryCase() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("wheel-gallery-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: dir) }

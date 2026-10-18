@@ -184,6 +184,40 @@ final class RadialMenuViewTests: XCTestCase {
         XCTAssertNil(view.hitTest(NSPoint(x: 1, y: 1)), "canvas corners are click-through")
     }
 
+    func testMovementGuardAfterEdgePush() {
+        let (view, _) = makeView(8)
+        let c = view.wheelCenter
+        let start = NSPoint(x: c.x + 88, y: c.y) // pointer started over a segment
+        view.movementGuard = start
+        view.updateHover(at: start)
+        XCTAssertNil(view.highlightedItemIndex, "no accidental selection under a pushed wheel")
+        view.updateHover(at: NSPoint(x: start.x + 3, y: start.y))
+        XCTAssertNil(view.highlightedItemIndex)
+        view.updateHover(at: NSPoint(x: start.x + 12, y: start.y))
+        XCTAssertEqual(view.highlightedItemIndex, 2)
+        XCTAssertNil(view.movementGuard)
+    }
+
+    func testPanelArmsGuardOnlyWhenPushed() {
+        let panel = RadialMenuPanel()
+        let screen = RadialScreen(frame: CGRect(x: 0, y: 0, width: 1000, height: 800), backingScale: 2)
+        panel.screensProvider = { [screen] }
+        panel.menuView.setItems(items(6), animated: false)
+        panel.show(at: CGPoint(x: 500, y: 400), animated: false)
+        XCTAssertNil(panel.menuView.movementGuard, "centred on the pointer")
+        panel.show(at: CGPoint(x: 995, y: 400), animated: false)
+        XCTAssertNotNil(panel.menuView.movementGuard, "pushed in from the right edge")
+        panel.dismiss(animated: false)
+    }
+
+    func testHighlightBitmapsRenderLazily() {
+        let (view, _) = makeView(4)
+        view.highlightItem(at: 1, animated: false)
+        let image = RadialMenuSnapshot.render(view: view, backdrop: .none, cropToWheel: true, scale: 1)
+        let side = ceil(2 * (view.wheelRadius + 22))
+        XCTAssertEqual(image.size, CGSize(width: side, height: side))
+    }
+
     func testDropZoneShowsWhenEmpty() {
         let (view, _) = makeView(0)
         view.dropZone = RadialDropZone(title: "Drop files")

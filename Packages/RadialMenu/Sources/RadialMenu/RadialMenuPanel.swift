@@ -94,6 +94,9 @@ public final class RadialMenuPanel: NSPanel {
         menuView.registerForDraggedTypes(draggedTypes)
         position(animated: false)
         menuView.prepareForDisplay()
+        let local = menuView.convert(convertPoint(fromScreen: point), from: nil)
+        let offset = hypot(local.x - menuView.wheelCenter.x, local.y - menuView.wheelCenter.y)
+        menuView.movementGuard = offset > menuView.configuration.deadZoneRadius ? local : nil
         alphaValue = 1
         observeVisibility()
         if allowsKeyboard {

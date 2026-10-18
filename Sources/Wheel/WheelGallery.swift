@@ -243,30 +243,38 @@ private struct WheelGalleryView: View {
     }
 
     private var controls: some View {
-        HStack(spacing: DesignTokens.Space.l) {
-            Picker(String(localized: "File", comment: "Gallery control"), selection: $sampleIndex) {
-                ForEach(WheelGalleryData.samples.indices, id: \.self) { Text(verbatim: WheelGalleryData.samples[$0].name).tag($0) }
+        VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
+            HStack(spacing: DesignTokens.Space.l) {
+                Picker(String(localized: "File", comment: "Gallery control"), selection: $sampleIndex) {
+                    ForEach(WheelGalleryData.samples.indices, id: \.self) { Text(verbatim: WheelGalleryData.samples[$0].name).tag($0) }
+                }
+                .fixedSize()
+                Picker(String(localized: "Wheel", comment: "Gallery control"), selection: $kind) {
+                    ForEach(WheelKind.allCases, id: \.self) { Text(verbatim: $0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
+                Picker(String(localized: "Appearance", comment: "Gallery control"), selection: $appearanceIndex) {
+                    ForEach(WheelGallery.appearances.indices, id: \.self) { Text(verbatim: WheelGallery.appearances[$0].tag).tag($0) }
+                }
+                .fixedSize()
+                Picker(String(localized: "Material", comment: "Gallery control"), selection: $material) {
+                    ForEach(RadialMenuStyle.Material.allCases, id: \.self) { Text(verbatim: $0.rawValue).tag($0) }
+                }
+                .fixedSize()
+                Spacer()
             }
-            .frame(width: 180)
-            Picker(String(localized: "Wheel", comment: "Gallery control"), selection: $kind) {
-                ForEach(WheelKind.allCases, id: \.self) { Text(verbatim: $0.title).tag($0) }
+            HStack(spacing: DesignTokens.Space.l) {
+                Toggle(String(localized: "Segment count", comment: "Gallery control"), isOn: $useCount)
+                    .fixedSize()
+                Slider(value: $count, in: 1...24, step: 1)
+                    .frame(width: 180)
+                    .disabled(!useCount)
+                Text(verbatim: "\(Int(count))").monospacedDigit().frame(width: 24, alignment: .leading)
+                Stepper(String(localized: "Hovered segment: \(hovered)", comment: "Gallery control"), value: $hovered, in: -1...23)
+                    .fixedSize()
+                Spacer()
             }
-            .pickerStyle(.segmented)
-            .frame(width: 240)
-            Picker(String(localized: "Appearance", comment: "Gallery control"), selection: $appearanceIndex) {
-                ForEach(WheelGallery.appearances.indices, id: \.self) { Text(verbatim: WheelGallery.appearances[$0].tag).tag($0) }
-            }
-            .frame(width: 220)
-            Picker(String(localized: "Material", comment: "Gallery control"), selection: $material) {
-                ForEach(RadialMenuStyle.Material.allCases, id: \.self) { Text(verbatim: $0.rawValue).tag($0) }
-            }
-            .frame(width: 170)
-            Toggle(String(localized: "Count", comment: "Gallery control"), isOn: $useCount)
-            Slider(value: $count, in: 1...24, step: 1)
-                .frame(width: 120)
-                .disabled(!useCount)
-            Text(verbatim: "\(Int(count))").monospacedDigit()
-            Stepper(String(localized: "Hover \(hovered)", comment: "Gallery control"), value: $hovered, in: -1...23)
         }
     }
 

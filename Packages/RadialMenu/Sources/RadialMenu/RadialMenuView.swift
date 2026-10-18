@@ -384,6 +384,14 @@ public final class RadialMenuView: NSView {
         if style.appearanceOverride == nil { refreshAppearance() }
     }
 
+    /// Behind-window vibrancy for the transparent overlay panel; within-window
+    /// when the wheel sits inside an ordinary window (onboarding demo, gallery).
+    public override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let vfx = materialView, let window else { return }
+        vfx.blendingMode = window.isOpaque ? .withinWindow : .behindWindow
+    }
+
     public override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()
         let scale = window?.backingScaleFactor ?? 2
@@ -450,6 +458,15 @@ public final class RadialMenuView: NSView {
     func updateHover(at point: NSPoint, animated: Bool = true) {
         lastPointer = point
         guard !isDismissing else { return }
+        if let guardPoint = movementGuard {
+            // The wheel was pushed in from a screen edge, so the pointer may start
+            // over a segment. Nothing is selected until it actually moves.
+            if hypot(point.x - guardPoint.x, point.y - guardPoint.y) < Self.movementGuardDistance {
+                setHighlightedSlot(nil, animated: animated)
+                return
+            }
+            movementGuard = nil
+        }
         switch radialLayout.hitTest(relative(point), current: highlightedSlot) {
         case .slot(let s): setHighlightedSlot(s, animated: animated)
         case .deadZone, .outside: setHighlightedSlot(nil, animated: animated)
@@ -554,6 +571,12 @@ public final class RadialMenuView: NSView {
     }
 
     // MARK: Motion
+
+    /// Where the pointer was when the wheel appeared off-centre (view coordinates).
+    /// Hover stays off until the pointer moves away from it, so a wheel pushed in
+    /// from a screen edge never selects (or receives a drop on) a segment by accident.
+    public var movementGuard: NSPoint?
+    static let movementGuardDistance: CGFloat = 8
 
     /// Resets transforms/opacities left by a previous close so the view can be shown again.
     public func prepareForDisplay() {
