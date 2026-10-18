@@ -1,0 +1,37 @@
+{
+  "name": "@halo/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Halo pay-per-use conversion API.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "generate": "openapi-typescript ../../Server/openapi.yaml --output src/generated/openapi.ts",
+    "generate:check": "openapi-typescript ../../Server/openapi.yaml --output src/generated/openapi.ts --check",
+    "lint:openapi": "redocly lint ../../Server/openapi.yaml --format=summary",
+    "build": "tsc -p tsconfig.json",
+    "typecheck:tests": "tsc -p tsconfig.test.json",
+    "test": "npm run build && npm run generate:check && npm run lint:openapi && npm run typecheck:tests && node --test --test-concurrency=1 test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@redocly/cli": "2.64.1",
+    "@types/node": "18.19.130",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}
