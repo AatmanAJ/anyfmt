@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import HaloCore
 
 @main
@@ -26,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             renderGallery(into: dir)
             exit(0)
         }
+        if AppShellUI.handleLaunchArguments() { NSApp.terminate(nil); return }
         let c = AppCoordinator(launch: launch)
         c.start()
         coordinator = c
@@ -59,12 +61,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-/// Settings, About and onboarding presenters. Filled in when the UI lane lands.
+/// Settings, About and onboarding: hooks the UI lane's windows into the
+/// coordinator, the cloud account pane and the action preferences.
 @MainActor
 enum AppShell {
     static func install(on coordinator: AppCoordinator, launch: LaunchOptions) {
-        coordinator.setMenuPresenters(settings: {}, about: { NSApp.orderFrontStandardAboutPanel(nil) }, onboarding: {})
+        SettingsWindowController.hooks = SettingsHooks(
+            accountPane: { AnyView(AccountSettingsView(session: CloudServices.shared.session)) },
+            terminalPicker: { AnyView(ActionMenuItems()) },
+            packs: { PackCatalog.statuses() },
+            onCheckForUpdates: { [weak coordinator] in coordinator?.updater.checkNow() },
+            onUpdateChecksChanged: { [weak coordinator] _ in coordinator?.settingsChanged() },
+            onTriggerKeysChanged: { [weak coordinator] in coordinator?.settingsChanged() },
+            onFinderShortcutChanged: { [weak coordinator] _ in coordinator?.settingsChanged() })
+        OnboardingWindowController.hooks = OnboardingHooks(
+            onUpdateChecksChanged: { [weak coordinator] _ in coordinator?.settingsChanged() },
+            onFinderShortcutChanged: { [weak coordinator] _ in coordinator?.settingsChanged() })
+        coordinator.setMenuPresenters(settings: { AppShellUI.showSettings() },
+                                      about: { AppShellUI.showAbout() },
+                                      onboarding: { OnboardingWindowController.show(settings: .shared) })
+        // --show-onboarding is handled by AppShellUI.handleLaunchArguments().
+        if !launch.noOnboarding && !launch.showOnboarding { AppShellUI.showOnboardingIfNeeded() }
     }
 
-    static func renderScreens(into dir: URL) -> Int { 0 }
+    /// Settings, onboarding and About screenshots for `make gallery`.
+    static func renderScreens(into dir: URL) -> Int {
+        (try? UIScreenshots.renderAll(to: dir).count) ?? 0
+    }
+}
+
+/// Optional, user-downloaded engine packs shown in Settings › Engines.
+/// Filled by the docs lane's pack installers when present.
+@MainActor
+enum PackCatalog {
+    static func statuses() -> [PackStatus] { [] }
 }

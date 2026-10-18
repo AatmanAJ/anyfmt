@@ -47,7 +47,7 @@ row "Idle memory (phys_footprint / RSS)" "${fp:-n/a} / ${rss}" "< 40 MB"
 kill "$PID" 2>/dev/null || true; PID=""
 
 # 12 MP HEIC → JPG
-"$FF" -v error -f lavfi -i "testsrc2=size=4032x3024:rate=1" -frames:v 1 "$WORK/12mp.png"
+"$FF" -v error -filter_complex "testsrc2=size=4032x3024:rate=1" -frames:v 1 "$WORK/12mp.png"
 sips -s format heic "$WORK/12mp.png" --out "$WORK/12mp.heic" >/dev/null
 t0=$(python3 -c 'import time;print(time.time())')
 "$CLI" version >/dev/null
@@ -58,7 +58,7 @@ heic="$(python3 -c "print(int((($t2-$t1)-($t1-$t0))*1000))")"
 row "12 MP HEIC → JPG (engine time, CLI start-up subtracted)" "${heic} ms" "< 400 ms"
 
 # 1 minute 1080p MOV → MP4
-"$FF" -v error -f lavfi -i "testsrc2=size=1920x1080:rate=30" -f lavfi -i "sine=frequency=440:sample_rate=48000" \
+"$FF" -v error -filter_complex "testsrc2=size=1920x1080:rate=30[v];sine=frequency=440:sample_rate=48000[a]" -map "[v]" -map "[a]" \
   -t 60 -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 160k "$WORK/1min.mov"
 for hw in true false; do
   rm -rf "$WORK/out"

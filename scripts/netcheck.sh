@@ -21,8 +21,9 @@ sleep 3
 
 # Workload: conversions through the same engines the wheel uses.
 FF="$APP/Contents/Helpers/ffmpeg"
-"$FF" -v error -f lavfi -i testsrc2=size=640x480:rate=1 -frames:v 1 "$WORK/a.png"
-"$FF" -v error -f lavfi -i "testsrc2=size=320x240:rate=25" -f lavfi -i sine -t 3 -c:v libx264 -c:a aac "$WORK/v.mov"
+# (The bundled ffmpeg has no lavfi device; sources come from -filter_complex.)
+"$FF" -v error -filter_complex "testsrc2=size=640x480:rate=1" -frames:v 1 "$WORK/a.png"
+"$FF" -v error -filter_complex "testsrc2=size=320x240:rate=25[v];sine=frequency=440[a]" -map "[v]" -map "[a]" -t 3 -c:v libx264 -c:a aac "$WORK/v.mov"
 ( for i in 1 2 3; do
     "$CLI" convert "$WORK/a.png" --to jpg --out "$WORK/o" >/dev/null 2>&1 || true
     "$CLI" convert "$WORK/a.png" --to webp --out "$WORK/o" >/dev/null 2>&1 || true
