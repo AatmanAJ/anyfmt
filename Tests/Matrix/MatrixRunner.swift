@@ -116,11 +116,11 @@ struct MatrixRunner {
         return passed == results.count && issues.isEmpty ? 0 : 1
     }
 
-    /// Options whose final step isn't `.hiddenByDefault` (what a new user sees).
+    /// Options the wheel offers out of the box (`Route.isShownByDefault`).
     static func defaultVisibleCount(_ router: Router) -> Int {
         let starts = Set(router.table.rows.map(\.from))
         return starts.reduce(0) { total, from in
-            total + router.allRoutes(from: from).values.filter { !($0.hops.last?.flags.contains(.hiddenByDefault) ?? false) }.count
+            total + router.allRoutes(from: from).values.filter(\.isShownByDefault).count
         }
     }
 

@@ -75,7 +75,7 @@ public struct WheelContentProvider: Sendable {
     private func convertEntries(_ formats: [FormatID], preferences: WheelPreferences) -> [WheelEntry] {
         let all = targets(formats).filter { target in
             if preferences.hiddenFormats.contains(target.format) { return false }
-            let hiddenByDefault = target.routes.values.contains { $0.hops.last?.flags.contains(.hiddenByDefault) == true }
+            let hiddenByDefault = target.routes.values.contains { !$0.isShownByDefault }
             if hiddenByDefault {
                 return preferences.shownFormats.contains(target.format) || preferences.favouriteFormats.contains(target.format)
             }

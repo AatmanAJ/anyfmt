@@ -113,3 +113,21 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(issues, [], issues.joined(separator: "\n"))
     }
 }
+
+final class RouteVisibilityTests: XCTestCase {
+    private let e: EngineID = "e"
+
+    func testCrossFamilyMultiHopIsHiddenButPDFAndSameFamilyShow() {
+        let r = Router(table: CapabilityTable([
+            Capability("jpg", "pdf", e), Capability("pdf", "docx", e),
+            Capability("svg", "png", e), Capability("png", "jpg", e),
+            Capability("md", "html", e), Capability("html", "pdf", e),
+            Capability("jpg", "txt", e, flags: [.terminalOnly, .hiddenByDefault]),
+        ]))
+        XCTAssertEqual(r.route(from: "jpg", to: "pdf")?.isShownByDefault, true, "direct")
+        XCTAssertEqual(r.route(from: "jpg", to: "docx")?.isShownByDefault, false, "photo → DOCX via PDF is opt-in")
+        XCTAssertEqual(r.route(from: "svg", to: "jpg")?.isShownByDefault, true, "vector and raster are one family")
+        XCTAssertEqual(r.route(from: "md", to: "pdf")?.isShownByDefault, true, "anything → PDF shows")
+        XCTAssertEqual(r.route(from: "jpg", to: "txt")?.isShownByDefault, false, "hidden row")
+    }
+}

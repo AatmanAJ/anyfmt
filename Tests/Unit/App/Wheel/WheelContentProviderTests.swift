@@ -43,8 +43,13 @@ final class WheelContentProviderTests: XCTestCase {
 
     func testImageConvertTargetsFollowTheRouter() {
         let entries = provider.entries(for: input("photo.jpg"), kind: .convert, preferences: prefs)
-        // ico is reachable via PNG, txt/docx via PDF; bmp is hidden by default.
-        XCTAssertEqual(Set(formats(entries)), ["png", "heic", "webp", "tiff", "pdf", "ico", "txt", "docx"])
+        // ico is reachable via PNG; txt/docx via PDF jump families, so they're opt-in
+        // (Route.isShownByDefault); bmp is hidden by default.
+        XCTAssertEqual(Set(formats(entries)), ["png", "heic", "webp", "tiff", "pdf", "ico"])
+        var shown = prefs
+        shown.shownFormats = ["docx"]
+        XCTAssertTrue(formats(provider.entries(for: input("photo.jpg"), kind: .convert, preferences: shown)).contains("docx"),
+                      "Settings › Formats can switch a cross-family target on")
         XCTAssertFalse(formats(entries).contains("bmp"), "hiddenByDefault rows stay off the wheel")
         guard case .convert(let ico)? = entries.first(where: { $0.id == "convert.ico" }) else { return XCTFail("no ico") }
         XCTAssertTrue(ico.isMultiHop)

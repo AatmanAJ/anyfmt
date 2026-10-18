@@ -14,6 +14,26 @@ public struct Route: Sendable, Hashable, CustomStringConvertible {
     public var description: String {
         ([from.rawValue] + hops.map { "\($0.to.rawValue)(\($0.engine))" }).joined(separator: " → ")
     }
+
+    /// Whether the wheel offers this route without the user switching it on in
+    /// Settings › Formats. Hidden: anything through a `.hiddenByDefault` row, and
+    /// multi-hop routes that jump between families (a photo → DOCX via PDF + OCR).
+    /// Direct rows, routes within a family and anything ending in PDF stay visible.
+    /// Every route is still shipped: CLI, matrix, and opt-in on the wheel.
+    public var isShownByDefault: Bool {
+        if hops.contains(where: { $0.flags.contains(.hiddenByDefault) }) { return false }
+        if isDirect || Formats.kind(to) == .pdf { return true }
+        return Self.family(Formats.kind(from)) == Self.family(Formats.kind(to))
+    }
+
+    static func family(_ kind: FileKind) -> String {
+        switch kind {
+        case .image, .vector: "visual"
+        case .document, .ebook: "text"
+        case .archive, .folder: "archive"
+        default: kind.rawValue
+        }
+    }
 }
 
 /// A target offered for a set of dragged files.
