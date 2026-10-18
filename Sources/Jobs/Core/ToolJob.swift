@@ -71,10 +71,13 @@ public final class ToolJob: Job, JobDescribing {
         let placer = OutputPlacer(policy: context.policy)
         let groups: [[URL]] = isCombine ? [inputs] : inputs.map { [$0] }
         let n = Double(groups.count)
+        let runDir = { (i: Int) in context.tempDirectory.appendingPathComponent("run\(i + 1)", isDirectory: true) }
+        // JobRunner removes the whole scratch folder; this covers direct callers too.
+        defer { for i in groups.indices { try? FileManager.default.removeItem(at: runDir(i)) } }
         var placed: [URL] = []
         for (i, group) in groups.enumerated() {
             try Task.checkCancellation()
-            let dir = context.tempDirectory.appendingPathComponent("run\(i + 1)", isDirectory: true)
+            let dir = runDir(i)
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let request = ToolRequest(tool: tool, inputs: group, options: options, outputDirectory: dir,
                                       baseName: OutputNamer.stem(of: group[0]), metadata: context.policy.metadata)

@@ -67,6 +67,8 @@ public final class ConversionJob: Job, JobDescribing {
             throw ConversionError.noRoute(from: from, to: target)
         }
         let work = context.tempDirectory.appendingPathComponent("work", isDirectory: true)
+        // JobRunner removes the whole scratch folder; this covers direct callers too.
+        defer { try? FileManager.default.removeItem(at: work) }
         let naming = namingInput(first)
         let engineContext = EngineContext(progress: driver.sink(0...0.97), locator: context.engine.locator,
                                           logger: context.engine.logger)

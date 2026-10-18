@@ -1,6 +1,6 @@
 # Lane C: jobs core, router internals, progress windows
 
-Branch: this worktree. Three commits; each builds and passes its tests.
+Branch: this worktree. Four commits; each builds and passes its tests.
 
 ## What I built
 
