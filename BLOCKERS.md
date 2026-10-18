@@ -41,6 +41,19 @@ covered with fakes in unit tests, and every screen is rendered offscreen.
   (D-004).
 - ⏳ Still to do by hand: opening straight onto ⌘ / ⌃ (only switching was tried), a
   few more latency samples for a real p95, and steps 2–8 below.
+- ⏳ **Phase 2 feel checks** (unit-tested, but only hands can judge; D-038):
+  - **Sticky aim:** with the GIF segment highlighted, wobble toward a neighbour.
+    It should hold until you're clearly inside the next wedge. Tell me if it feels
+    sluggish (lower `stickyFraction` 0.3 / `switchDelay` 60 ms) or still twitchy.
+  - **⌥ tap mid-drag:** locks (outline + "GIF · Locked"). Drift and the hub can't
+    change it. Drop anywhere on the wheel and GIF runs. Tap ⌥ again to unlock.
+  - **Preset chips:** dwell about 0.4 s on GIF, or lock it. Chips appear outside the
+    rim. Move out to one and drop: it converts with that preset, and "Last used"
+    appears next time.
+  - **Configure after the drop:** drop on GIF's outer edge (the pill reads
+    "GIF · Options"), or hold ⌥ while dropping. The options panel opens with live
+    size, duration and frame estimates. Convert / Save as Preset / Remember as default.
+  - **Mid-drag hover** no longer pops an options popover.
 
 **Two ways to finish it:**
 - **Let Claude do it:** turn on *Settings → This computer → Computer use* in the Claude desktop
