@@ -13,7 +13,7 @@ struct EnginesPane: View {
                 HStack(spacing: DesignTokens.Space.m) {
                     Image(systemName: "lock.laptopcomputer")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(Color.iris)
+                        .foregroundStyle(Color.accentText)
                         .frame(width: 36, height: 36)
                         .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.iris.opacity(0.12)))
                     VStack(alignment: .leading, spacing: 2) {
@@ -58,7 +58,7 @@ struct EnginesPane: View {
                                 Text("Licence…")
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(Color.iris)
+                            .foregroundStyle(Color.accentText)
                             .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
                             .gridColumnAlignment(.trailing)
                             .accessibilityLabel(Text("\(engine.name) licence"))

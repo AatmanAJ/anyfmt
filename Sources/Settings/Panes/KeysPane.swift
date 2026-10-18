@@ -155,7 +155,7 @@ private struct ServicesNote: View {
         HStack(alignment: .top, spacing: DesignTokens.Space.m) {
             Image(systemName: "contextualmenu.and.cursorarrow")
                 .font(.system(size: 15))
-                .foregroundStyle(Color.iris)
+                .foregroundStyle(Color.accentText)
                 .frame(width: 28, height: 28)
                 .background(Circle().fill(Color.iris.opacity(0.12)))
             VStack(alignment: .leading, spacing: 3) {

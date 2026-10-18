@@ -503,7 +503,7 @@ private struct ToolsList: View {
                                 HStack(spacing: DesignTokens.Space.m) {
                                     Image(systemName: tool.glyph)
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundStyle(Color.iris)
+                                        .foregroundStyle(Color.accentText)
                                         .frame(width: 22)
                                     VStack(alignment: .leading, spacing: 1) {
                                         Text(verbatim: tool.title)

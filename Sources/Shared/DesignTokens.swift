@@ -111,17 +111,47 @@ public enum DesignTokens {
         public static let reducedCrossfade = 0.12
     }
 
-    // MARK: - Legacy palette (pre-phase-2; removed by the migration)
+    /// Component tokens. Each area extends this in its own file
+    /// (`DesignTokens+<Area>.swift`) so redesign work never collides in one file.
+    public enum Component {
+        public enum Pill {
+            public static let height: CGFloat = 30
+            public static let largeHeight: CGFloat = 36
+            public static let horizontalPadding: CGFloat = 18
+        }
+        public enum Tile {
+            public static let padding: CGFloat = 16
+            public static let spacing: CGFloat = 10
+        }
+        public enum Stat {
+            public static let valueSize: CGFloat = Typeface.Size.displayL
+            public static let compactValueSize: CGFloat = Typeface.Size.displayM
+        }
+        public enum Focus {
+            public static let ringWidth: CGFloat = 2
+            public static let ringOffset: CGFloat = 2
+        }
+    }
+
+    // MARK: - Palette (phase 2: the legacy names, now bound to the new primitives)
+    //
+    // Call sites predate the semantic layer; these names keep them working with
+    // the new direction. New code uses `Semantic`, `Band` and `Shape`.
 
     public enum Palette {
-        /// sRGB hex, light / dark.
-        public static let iris = (light: 0x6E56F8, dark: 0x8B78FF)
-        public static let mint = (light: 0x14B8A0, dark: 0x3DD9BF)
-        public static let ink = (light: 0x1C1B22, dark: 0xF4F3F8)
-        public static let mist = (light: 0x6B6977, dark: 0xA19FAD)
-        public static let danger = (light: 0xE5484D, dark: 0xFF6369)
-        public static let success = (light: 0x30A46C, dark: 0x4CC38A)
-        public static let proGold = (light: 0xC28A00, dark: 0xF5C451)
+        /// sRGB hex, light / dark. Accent *fill* (buttons, selection, progress).
+        /// As small text on black use `Semantic.accentPrimaryText` (4.97:1 vs 3.95:1).
+        public static let iris = (light: Primitive.cobalt500, dark: Primitive.cobalt500)
+        /// Secondary accent (fills with black text).
+        public static let mint = (light: Primitive.orange500, dark: Primitive.orange500)
+        public static let ink = (light: Primitive.ink950, dark: Primitive.paper0)
+        public static let mist = (light: Primitive.ink300, dark: Primitive.ink400)
+        /// Errors: ember on white (5.9:1), flame on black (6.6:1). Always with an icon + label.
+        public static let danger = (light: Primitive.ember700, dark: Primitive.flame500)
+        /// Success is cobalt + a check glyph (no green, no colour-only meaning).
+        public static let success = (light: Primitive.cobalt700, dark: Primitive.cobalt400)
+        /// Pro marks: orange (light text needs the deeper shade, 5.3:1 on white).
+        public static let proGold = (light: 0xB54A00, dark: Primitive.orange500)
     }
 
     public enum Space {

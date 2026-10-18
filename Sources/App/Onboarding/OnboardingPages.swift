@@ -92,7 +92,7 @@ private struct WelcomeLine: View {
         Label {
             Text(verbatim: text).fixedSize(horizontal: false, vertical: true)
         } icon: {
-            Image(systemName: symbol).foregroundStyle(Color.iris)
+            Image(systemName: symbol).foregroundStyle(Color.accentText)
         }
         .font(.system(size: DesignTokens.TypeRamp.body))
     }

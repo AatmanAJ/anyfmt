@@ -15,7 +15,7 @@ struct AccountPane: View {
                     VStack(spacing: DesignTokens.Space.m) {
                         Image(systemName: "icloud")
                             .font(.system(size: 34, weight: .light))
-                            .foregroundStyle(Color.iris)
+                            .foregroundStyle(Color.accentText)
                             .padding(.top, DesignTokens.Space.s)
                         Text("Cloud features are optional")
                             .font(.system(size: DesignTokens.TypeRamp.title, weight: .semibold))

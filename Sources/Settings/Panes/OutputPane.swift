@@ -169,7 +169,7 @@ struct NamingPatternRow: View {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(Capsule().fill(Color.iris.opacity(0.12)))
-                            .foregroundStyle(Color.iris)
+                            .foregroundStyle(Color.accentText)
                     }
                     .buttonStyle(.plain)
                     .help(Text(verbatim: token.title))

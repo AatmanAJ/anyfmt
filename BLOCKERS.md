@@ -91,7 +91,10 @@ make build && open build/DerivedData/Build/Products/Debug/Halo.app
 The in-app latency probe (`DragSense.diagnostics.latencySummary()`) gives the
 real key tap → wheel visible p95 for docs/PERF.md (the estimate there is ≈ 30 ms).
 
-## B-014 Approve the redesign direction (phase 2 checkpoint)
+## B-014 Approve the redesign direction (phase 2 checkpoint) ✅ resolved 2026-10-18
+
+**Resolved:** you approved the direction board. The app-wide migration and the polish pass followed (docs/REDESIGN.md).
+
 
 **Why blocked.** The approved phase 2 plan puts one deliberate stop before the
 app-wide redesign: you approve the visual direction first.

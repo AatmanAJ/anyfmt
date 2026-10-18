@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import HaloCore
 
-// SwiftUI / AppKit colours built from `DesignTokens.Palette`. Every colour is
+// SwiftUI / AppKit colours built from `DesignTokens` (Palette + Semantic). Every colour is
 // dynamic: it resolves to the light or dark value for the view's appearance.
 
 extension NSColor {
@@ -32,6 +32,13 @@ extension Color {
     static let haloMist = Color(nsColor: .halo(DesignTokens.Palette.mist))
     static let haloDanger = Color(nsColor: .halo(DesignTokens.Palette.danger))
     static let haloSuccess = Color(nsColor: .halo(DesignTokens.Palette.success))
+    /// The accent as text or small glyphs (AA on both appearances).
+    static let accentText = Color(nsColor: .halo(DesignTokens.Semantic.accentPrimaryText))
+    static let haloWindow = Color(nsColor: .halo(DesignTokens.Semantic.windowBackground))
+    static let haloTile = Color(nsColor: .halo(DesignTokens.Semantic.tile))
+    static let haloRaised = Color(nsColor: .halo(DesignTokens.Semantic.raised))
+    static let haloHairline = Color(nsColor: .halo(DesignTokens.Semantic.hairline))
+    static let haloSecondaryText = Color(nsColor: .halo(DesignTokens.Semantic.textSecondary))
 }
 
 extension Font {

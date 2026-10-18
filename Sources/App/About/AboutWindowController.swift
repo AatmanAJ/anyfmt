@@ -87,7 +87,7 @@ struct AboutView: View {
                             Text(verbatim: url.host.map { $0 + url.path } ?? url.absoluteString)
                                 .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                         }
-                        .foregroundStyle(Color.iris)
+                        .foregroundStyle(Color.accentText)
                         .accessibilityIdentifier("about.source")
                     }
                 }
