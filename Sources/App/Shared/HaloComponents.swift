@@ -122,3 +122,21 @@ struct StatNumeral: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+/// The named motion curves (DesignTokens.Curve) as SwiftUI animations.
+/// `reduceMotion` swaps any of them for the short crossfade.
+enum HaloMotion {
+    case snap, glide, settle, exit
+
+    func animation(reduceMotion: Bool = false) -> Animation {
+        if reduceMotion { return .easeOut(duration: DesignTokens.Curve.reducedCrossfade) }
+        let c: (c1: CGPoint, c2: CGPoint, duration: Double)
+        switch self {
+        case .snap: c = DesignTokens.Curve.snap
+        case .glide: c = DesignTokens.Curve.glide
+        case .settle: c = DesignTokens.Curve.settle
+        case .exit: c = DesignTokens.Curve.exit
+        }
+        return .timingCurve(c.c1.x, c.c1.y, c.c2.x, c.c2.y, duration: c.duration)
+    }
+}
