@@ -247,6 +247,7 @@ extension FileKind {
 enum SystemSettingsLink {
     static let accessibility = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
     static let automation = "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"
+    static let inputMonitoring = "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"
     static let keyboardShortcuts = "x-apple.systempreferences:com.apple.preference.keyboard?Shortcuts"
 
     @MainActor

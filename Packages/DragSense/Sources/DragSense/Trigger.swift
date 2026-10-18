@@ -24,3 +24,14 @@ public enum RetapBehavior: String, Codable, Sendable, CaseIterable {
     /// any trigger tap reopens it.
     case close
 }
+
+/// When a trigger key opens (or switches) the wheel.
+public enum TriggerActivation: String, Codable, Sendable, CaseIterable {
+    /// As soon as the key goes down mid-drag, so a quick tap and a hold both
+    /// work (default). A key already held when the drag started (Finder's ⌘
+    /// move / ⌥ copy drags) never fires, so those keep working.
+    case press
+    /// Only a quick tap: press and release within the tap threshold with no
+    /// other modifier involved. Holding a key never opens the wheel.
+    case tap
+}

@@ -193,12 +193,25 @@ final class DemoModel: ObservableObject {
         monitor = nil
         detector.reset()
         pressing = nil
+        lastKeys = []
     }
+
+    private var lastKeys: Set<TriggerKey> = []
 
     func flagsChanged(_ keys: Set<TriggerKey>, at time: TimeInterval) {
         detector.threshold = settings.tapThreshold
+        let newlyDown = keys.subtracting(lastKeys)
+        lastKeys = keys
         let outcome = detector.flagsChanged(to: keys, at: time)
         pressing = detector.pendingKey
+        if settings.opensOnPress {
+            // Same rule as the drag sensor: a trigger key going down opens (or switches) the wheel.
+            for key in newlyDown.sorted(by: { $0.rawValue < $1.rawValue }) {
+                guard let role = triggers.role(for: key) else { hint = .unassigned(key); continue }
+                tapped(DemoWheelKind(role))
+            }
+            return
+        }
         guard let outcome else { return }
         switch outcome {
         case .tap(let key, _):

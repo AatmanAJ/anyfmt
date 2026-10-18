@@ -81,9 +81,10 @@ final class DemoModelTests: XCTestCase {
         XCTAssertEqual(demo.openKind, .actions)
     }
 
-    func testHoldAndChordDoNotOpenAWheel() throws {
-        let (demo, _, cleanup) = try makeDemo()
+    func testHoldAndChordDoNotOpenAWheelInTapMode() throws {
+        let (demo, settings, cleanup) = try makeDemo()
         defer { cleanup() }
+        settings.triggerActivation = "tap"
         let home = DemoModel.homeCenter
         demo.dragChanged(start: home, location: CGPoint(x: home.x + 100, y: home.y))
         demo.flagsChanged([.shift], at: 0)
@@ -94,6 +95,20 @@ final class DemoModelTests: XCTestCase {
         demo.flagsChanged([], at: 2.1)
         XCTAssertNil(demo.openKind)
         XCTAssertEqual(demo.hint, .chord)
+    }
+
+    func testPressModeOpensOnKeyDownAndHoldWorks() throws {
+        let (demo, settings, cleanup) = try makeDemo()
+        defer { cleanup() }
+        XCTAssertTrue(settings.opensOnPress, "press is the default")
+        let home = DemoModel.homeCenter
+        demo.dragChanged(start: home, location: CGPoint(x: home.x + 100, y: home.y))
+        demo.flagsChanged([.shift], at: 0)
+        XCTAssertEqual(demo.openKind, .convert, "opens as the key goes down")
+        demo.flagsChanged([], at: 0.9) // a long hold, then release: the wheel stays open
+        XCTAssertEqual(demo.openKind, .convert)
+        demo.flagsChanged([.command], at: 1.2)
+        XCTAssertEqual(demo.openKind, .tools, "pressing another key switches")
     }
 
     func testUsesRemappedKeysAndThreshold() throws {

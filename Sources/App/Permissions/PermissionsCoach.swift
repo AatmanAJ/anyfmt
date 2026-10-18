@@ -5,9 +5,10 @@ import SwiftUI
 import HaloCore
 
 /// The only permissions Halo can ever ask for. The wheel needs none (D-001);
-/// both of these exist solely for the opt-in Finder Return shortcut (D-004).
+/// these exist solely for the opt-in Finder Return shortcut (D-004).
 enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
     case accessibility
+    case inputMonitoring
     case automationFinder
 
     var id: String { rawValue }
@@ -15,6 +16,7 @@ enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
     var title: String {
         switch self {
         case .accessibility: String(localized: "Accessibility")
+        case .inputMonitoring: String(localized: "Input Monitoring")
         case .automationFinder: String(localized: "Automation for Finder")
         }
     }
@@ -24,6 +26,8 @@ enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .accessibility:
             String(localized: "Lets \(Brand.name) catch Return in Finder before Finder starts renaming the file.")
+        case .inputMonitoring:
+            String(localized: "Lets \(Brand.name) notice the Return key while Finder is in front. Every other key is passed through untouched.")
         case .automationFinder:
             String(localized: "Lets \(Brand.name) ask Finder which files are selected. Nothing else is read.")
         }
@@ -32,6 +36,7 @@ enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
     var glyph: String {
         switch self {
         case .accessibility: "accessibility"
+        case .inputMonitoring: "keyboard"
         case .automationFinder: "gearshape.2"
         }
     }
@@ -40,6 +45,7 @@ enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
     var settingsLink: String {
         switch self {
         case .accessibility: SystemSettingsLink.accessibility
+        case .inputMonitoring: SystemSettingsLink.inputMonitoring
         case .automationFinder: SystemSettingsLink.automation
         }
     }
@@ -62,6 +68,8 @@ struct PermissionProbe: Sendable {
     /// User-initiated: shows the system prompt.
     var requestAccessibility: @Sendable () -> Void
     var requestAutomation: @Sendable () -> Void
+    var inputMonitoring: @Sendable () -> Bool = { CGPreflightListenEventAccess() }
+    var requestInputMonitoring: @Sendable () -> Void = { _ = CGRequestListenEventAccess() }
 
     static let live = PermissionProbe(
         accessibility: { AXIsProcessTrusted() },
@@ -148,8 +156,10 @@ final class PermissionsCoach: ObservableObject {
         let ax = probe.accessibility()
         // Apple Events preflight is an IPC to tccd; keep it off the main thread.
         let ae = await Task.detached(priority: .utility) { probe.automation() }.value
+        let im = probe.inputMonitoring()
         let next: [OptionalPermission: PermissionStatus] = [
             .accessibility: ax ? .granted : .notGranted,
+            .inputMonitoring: im ? .granted : .notGranted,
             .automationFinder: ae,
         ]
         if next != status { status = next }
@@ -175,6 +185,12 @@ final class PermissionsCoach: ObservableObject {
         case .accessibility:
             probe.requestAccessibility()
             Task { await refresh() }
+        case .inputMonitoring:
+            probe.requestInputMonitoring()
+            Task {
+                await refresh()
+                if self[.inputMonitoring] != .granted { openSettings(for: .inputMonitoring) }
+            }
         case .automationFinder:
             Task {
                 // The Allow/Don't Allow alert blocks this call until answered.

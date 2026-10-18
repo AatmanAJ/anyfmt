@@ -9,6 +9,9 @@ import HaloCore
 /// focus), when Finder isn't frontmost, and when nothing is selected.
 @MainActor
 final class FinderReturnShortcut {
+    enum Failure { case accessibility, inputMonitoring, unknown }
+    /// Why the last `start()` failed, for a one-line explanation to the user.
+    private(set) var lastFailure: Failure?
     private var tap: CFMachPort?
     private var source: CFRunLoopSource?
     private let onTrigger: @MainActor () -> Void
@@ -23,7 +26,12 @@ final class FinderReturnShortcut {
     @discardableResult
     func start() -> Bool {
         guard tap == nil else { return true }
-        guard AXIsProcessTrusted() else { return false }
+        guard AXIsProcessTrusted() else {
+            lastFailure = .accessibility
+            return false
+        }
+        // A tap that sees key presses also needs Input Monitoring on current macOS.
+        if !CGPreflightListenEventAccess() { _ = CGRequestListenEventAccess() }
         let mask = CGEventMask(1 << CGEventType.keyDown.rawValue)
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         guard let t = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
@@ -42,9 +50,11 @@ final class FinderReturnShortcut {
             DispatchQueue.main.async { MainActor.assumeIsolated { me.onTrigger() } }
             return nil // swallow: Finder doesn't start a rename
         }, userInfo: refcon) else {
-            Log.app.error("finder return tap: tapCreate failed")
+            lastFailure = CGPreflightListenEventAccess() ? .unknown : .inputMonitoring
+            Log.app.error("finder return tap: tapCreate failed (accessibility \(AXIsProcessTrusted(), privacy: .public), input monitoring \(CGPreflightListenEventAccess(), privacy: .public))")
             return false
         }
+        lastFailure = nil
         tap = t
         source = CFMachPortCreateRunLoopSource(nil, t, 0)
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)

@@ -488,11 +488,24 @@ public final class DragSense: ObservableObject {
         emit(.dragBegan(session.info))
         if let pendingTap {
             openOrSwitch(pendingTap.trigger, location: input.mouseLocation, now: now, probeStart: pendingTap.probeStart)
+        } else if config.activation == .press,
+                  let held = taps.freshlyHeld.first(where: { config.trigger(for: $0.key) != nil }),
+                  let trigger = config.trigger(for: held.key) {
+            // The key went down after the mouse button but before the drag was
+            // recognised (a tap right as the drag starts) and is still held.
+            diagnostics.verbose("key \(held.key.rawValue) held since before the drag was recognised")
+            openOrSwitch(trigger, location: input.mouseLocation, now: now, probeStart: held.pressedAt)
         }
     }
 
+    /// Trigger key activity in this sample: key-downs for `.press` activation,
+    /// completed taps for `.tap`.
     private func feedTaps(at now: TimeInterval) -> [TapDetector.Tap] {
         let found = taps.feed(flags: input.modifierFlags, at: now, threshold: config.tapThreshold)
+        if config.activation == .press {
+            for press in taps.newPresses { diagnostics.verbose("key down \(press.key.rawValue)") }
+            return taps.newPresses
+        }
         for tap in found {
             diagnostics.verbose("tap \(tap.key.rawValue) (\(Int(((tap.releasedAt - tap.pressedAt) * 1000).rounded())) ms)")
         }

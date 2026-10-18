@@ -197,14 +197,29 @@ final class AppCoordinator {
         }
     }
 
+    private var explainedShortcutFailure = false
+
     private func applyFinderShortcut() {
         if settings.finderShortcutEnabled {
             if finderShortcut == nil {
                 finderShortcut = FinderReturnShortcut { [weak self] in self?.openWheelForFinderSelection() }
             }
-            finderShortcut?.start()
+            if finderShortcut?.start() == false, !explainedShortcutFailure {
+                explainedShortcutFailure = true
+                let message: String
+                switch finderShortcut?.lastFailure {
+                case .accessibility?:
+                    message = String(localized: "The Return shortcut needs Accessibility. Turn it on in System Settings › Privacy & Security › Accessibility.")
+                case .inputMonitoring?:
+                    message = String(localized: "The Return shortcut also needs Input Monitoring. Turn it on in System Settings › Privacy & Security › Input Monitoring.")
+                default:
+                    message = String(localized: "The Return shortcut couldn’t start. Try turning it off and on in Settings › Keys.")
+                }
+                ToastHUD.show(message, isError: true)
+            }
         } else {
             finderShortcut?.stop()
+            explainedShortcutFailure = false
         }
     }
 
@@ -251,6 +266,7 @@ final class AppCoordinator {
             Trigger(id: WheelKind.actions.rawValue, key: key(s.actionsKey, .control)),
         ]
         c.tapThreshold = s.tapThreshold
+        c.activation = s.opensOnPress ? .press : .tap
         return c
     }
 

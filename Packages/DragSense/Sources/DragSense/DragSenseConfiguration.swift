@@ -11,9 +11,8 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
     /// triggers share a key, or two share an id, the first one wins.
     public var triggers: [Trigger]
 
-    /// Longest press, in seconds, that still counts as a tap. Holding a key
-    /// longer never fires, so Finder's own ⌘ (move) / ⌥ (copy) drag modifiers
-    /// keep working. Default 0.35 s, range ``tapThresholdRange``.
+    /// Longest press, in seconds, that still counts as a tap when
+    /// ``activation`` is `.tap`. Default 0.35 s, range ``tapThresholdRange``.
     public var tapThreshold: TimeInterval
 
     /// Poll interval while no mouse button is down, in seconds. A global
@@ -59,6 +58,10 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
     /// What tapping the open wheel's own trigger does. Default `.ignore`.
     public var retapBehavior: RetapBehavior
 
+    /// Whether the wheel opens when a trigger key goes down (`.press`, so tap
+    /// or hold) or only on a quick tap (`.tap`). Default `.press`.
+    public var activation: TriggerActivation
+
     public static let tapThresholdRange: ClosedRange<TimeInterval> = 0.15...0.8
     public static let idlePollIntervalRange: ClosedRange<TimeInterval> = 0.05...2
     public static let activePollRateRange: ClosedRange<Double> = 30...1000
@@ -82,7 +85,8 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         pasteboardReadTimeout: TimeInterval = 0.25,
         dropResolutionTimeout: TimeInterval = 1,
         dragMovedInterval: TimeInterval = 1.0 / 60.0,
-        retapBehavior: RetapBehavior = .ignore
+        retapBehavior: RetapBehavior = .ignore,
+        activation: TriggerActivation = .press
     ) {
         self.triggers = triggers
         self.tapThreshold = tapThreshold
@@ -95,6 +99,7 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         self.dropResolutionTimeout = dropResolutionTimeout
         self.dragMovedInterval = dragMovedInterval
         self.retapBehavior = retapBehavior
+        self.activation = activation
     }
 
     public static let `default` = DragSenseConfiguration()
@@ -139,7 +144,7 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
     private enum CodingKeys: String, CodingKey {
         case triggers, tapThreshold, idlePollInterval, activePollRate, requireFileTypes
         case topExclusionHeight, minimumDragDistance, pasteboardReadTimeout
-        case dropResolutionTimeout, dragMovedInterval, retapBehavior
+        case dropResolutionTimeout, dragMovedInterval, retapBehavior, activation
     }
 
     public init(from decoder: any Decoder) throws {
@@ -156,7 +161,8 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
             pasteboardReadTimeout: try c.decodeIfPresent(TimeInterval.self, forKey: .pasteboardReadTimeout) ?? d.pasteboardReadTimeout,
             dropResolutionTimeout: try c.decodeIfPresent(TimeInterval.self, forKey: .dropResolutionTimeout) ?? d.dropResolutionTimeout,
             dragMovedInterval: try c.decodeIfPresent(TimeInterval.self, forKey: .dragMovedInterval) ?? d.dragMovedInterval,
-            retapBehavior: try c.decodeIfPresent(RetapBehavior.self, forKey: .retapBehavior) ?? d.retapBehavior
+            retapBehavior: try c.decodeIfPresent(RetapBehavior.self, forKey: .retapBehavior) ?? d.retapBehavior,
+            activation: try c.decodeIfPresent(TriggerActivation.self, forKey: .activation) ?? d.activation
         )
     }
 
@@ -173,5 +179,6 @@ public struct DragSenseConfiguration: Sendable, Equatable, Codable {
         try c.encode(dropResolutionTimeout, forKey: .dropResolutionTimeout)
         try c.encode(dragMovedInterval, forKey: .dragMovedInterval)
         try c.encode(retapBehavior, forKey: .retapBehavior)
+        try c.encode(activation, forKey: .activation)
     }
 }

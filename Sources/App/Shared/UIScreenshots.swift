@@ -192,7 +192,8 @@ struct SampleState {
         settings.namePattern = "{name}"
         settings.hiddenTools = [ToolIDs.readCodes]
         let probe = PermissionProbe(accessibility: { true }, automation: { .notGranted },
-                                    requestAccessibility: {}, requestAutomation: {})
+                                    requestAccessibility: {}, requestAutomation: {},
+                                    inputMonitoring: { false }, requestInputMonitoring: {})
         coach = PermissionsCoach(probe: probe, defaults: d)
         loginItem = LaunchAtLogin(service: .fake(.enabled))
         let hooks = SettingsHooks(packs: { SampleState.packs }, onCheckForUpdates: {})

@@ -29,6 +29,10 @@ final class AppSettings: ObservableObject {
     @Published var toolsKey = "command" { didSet { save(\.toolsKey, Key.toolsKey) } }
     @Published var actionsKey = "control" { didSet { save(\.actionsKey, Key.actionsKey) } }
     @Published var tapThreshold: Double = 0.35 { didSet { save(\.tapThreshold, Key.tapThreshold) } }
+    /// "press": the wheel opens when a trigger key goes down mid-drag (tap or hold).
+    /// "tap": only a quick tap opens it.
+    @Published var triggerActivation = "press" { didSet { save(\.triggerActivation, Key.triggerActivation) } }
+    var opensOnPress: Bool { triggerActivation != "tap" }
     /// Opt-in: Return on a Finder selection opens the wheel (needs Accessibility + Automation, D-004).
     @Published var finderShortcutEnabled = false { didSet { save(\.finderShortcutEnabled, Key.finderShortcut) } }
     /// Global hotkey for the drop ring (Carbon key code + modifier mask). Default ⌃⌥Space.
@@ -92,6 +96,7 @@ final class AppSettings: ObservableObject {
         static let onboardingDone = "general.onboardingCompleted"
         static let convertKey = "keys.convert", toolsKey = "keys.tools", actionsKey = "keys.actions"
         static let tapThreshold = "keys.tapThreshold", finderShortcut = "keys.finderShortcut"
+        static let triggerActivation = "keys.activation"
         static let dropRingKeyCode = "keys.dropRing.keyCode", dropRingModifiers = "keys.dropRing.modifiers", dropRingEnabled = "keys.dropRing.enabled"
         static let outputFolder = "output.folderBookmark", namePattern = "output.namePattern", metadata = "output.metadata"
         static let preserveDates = "output.preserveDates", reveal = "output.reveal"
@@ -99,7 +104,7 @@ final class AppSettings: ObservableObject {
         static let shownFormats = "formats.shown"
         static let formatDefaults = "formats.defaults"
         static let concurrency = "advanced.cpuConcurrency", verbose = "advanced.verboseLogging"
-        static let all = [sounds, haptics, updateChecks, convertKey, toolsKey, actionsKey, tapThreshold, finderShortcut,
+        static let all = [sounds, haptics, updateChecks, convertKey, toolsKey, actionsKey, tapThreshold, triggerActivation, finderShortcut,
                           dropRingKeyCode, dropRingModifiers, dropRingEnabled, outputFolder, namePattern, metadata,
                           preserveDates, reveal, favourites, hiddenFormats, shownFormats, hiddenTools, formatDefaults, concurrency, verbose]
     }
@@ -107,7 +112,7 @@ final class AppSettings: ObservableObject {
     private static let registered: [String: Any] = [
         Key.sounds: true, Key.haptics: true, Key.updateChecks: false,
         Key.convertKey: "shift", Key.toolsKey: "command", Key.actionsKey: "control",
-        Key.tapThreshold: 0.35, Key.finderShortcut: false,
+        Key.tapThreshold: 0.35, Key.triggerActivation: "press", Key.finderShortcut: false,
         Key.dropRingKeyCode: 49, Key.dropRingModifiers: Int(NSEvent.ModifierFlags([.control, .option]).rawValue), Key.dropRingEnabled: true,
         Key.namePattern: "{name}", Key.metadata: MetadataPolicy.keep.rawValue, Key.preserveDates: true, Key.reveal: true,
         Key.concurrency: 0, Key.verbose: false,
@@ -127,6 +132,7 @@ final class AppSettings: ObservableObject {
         toolsKey = d.string(forKey: Key.toolsKey) ?? "command"
         actionsKey = d.string(forKey: Key.actionsKey) ?? "control"
         tapThreshold = d.double(forKey: Key.tapThreshold)
+        triggerActivation = d.string(forKey: Key.triggerActivation) ?? "press"
         finderShortcutEnabled = d.bool(forKey: Key.finderShortcut)
         dropRingKeyCode = d.integer(forKey: Key.dropRingKeyCode)
         dropRingModifiers = d.integer(forKey: Key.dropRingModifiers)

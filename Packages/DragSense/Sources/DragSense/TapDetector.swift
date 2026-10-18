@@ -35,6 +35,9 @@ struct TapDetector: Sendable {
 
     private var held: [ModifierKey: Press] = [:]
     private var lastSampleTime: TimeInterval = 0
+    /// Keys that went down in the latest sample (not keys already held at
+    /// reset). Used by `.press` activation, which opens on key-down.
+    private(set) var newPresses: [Tap] = []
 
     /// Floating-point slack for the threshold comparison.
     static let epsilon: TimeInterval = 1e-6
@@ -42,6 +45,7 @@ struct TapDetector: Sendable {
     /// Forget everything; keys in `flags` count as held with no press time.
     mutating func reset(flags: NSEvent.ModifierFlags, at time: TimeInterval) {
         held = [:]
+        newPresses = []
         for key in ModifierKey.keys(in: flags) {
             held[key] = Press(pressedAt: nil, spoiled: true)
         }
@@ -68,8 +72,10 @@ struct TapDetector: Sendable {
         // A key released and another pressed in the same sample is treated as
         // sequential, not a chord: we can't tell which came first.
         let chord = !stillHeld.isEmpty || pressed.count > 1
-        for key in pressed {
+        newPresses = []
+        for key in ModifierKey.allCases where pressed.contains(key) {
             held[key] = Press(pressedAt: time, spoiled: chord)
+            newPresses.append(Tap(key: key, pressedAt: time, releasedAt: time, earliestRelease: lastSampleTime))
         }
         if chord && !pressed.isEmpty {
             for key in stillHeld { held[key]?.spoiled = true }
@@ -80,4 +86,14 @@ struct TapDetector: Sendable {
 
     /// Keys currently held, for diagnostics.
     var heldKeys: Set<ModifierKey> { Set(held.keys) }
+
+    /// Keys pressed since the last reset and still down, newest first (keys
+    /// already held at reset are excluded). `.press` activation uses this when
+    /// a drag is recognised after the key went down.
+    var freshlyHeld: [Tap] {
+        held.compactMap { key, press in
+            press.pressedAt.map { Tap(key: key, pressedAt: $0, releasedAt: $0, earliestRelease: $0) }
+        }
+        .sorted { $0.pressedAt > $1.pressedAt }
+    }
 }

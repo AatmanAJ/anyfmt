@@ -20,9 +20,26 @@ struct KeysPane: View {
             } header: {
                 Text("Wheels")
             } footer: {
-                FootnoteText(text: String(localized: "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two."))
+                FootnoteText(text: settings.opensOnPress
+                    ? String(localized: "Press a key mid-drag: tap it or hold it. A key you were already holding when the drag started is ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two.")
+                    : String(localized: "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two."))
             }
 
+            Section {
+                Picker(selection: Binding(get: { settings.triggerActivation }, set: { new in
+                    settings.triggerActivation = new
+                    model.hooks.onTriggerKeysChanged?()
+                })) {
+                    Text("When the key goes down (tap or hold)").tag("press")
+                    Text("Only on a quick tap").tag("tap")
+                } label: {
+                    Text("Open the wheel")
+                    Text("Holding works too unless you choose quick taps only.")
+                }
+                .accessibilityIdentifier("keys.activation")
+            }
+
+            if !settings.opensOnPress {
             Section {
                 LabeledContent {
                     HStack(spacing: DesignTokens.Space.s) {
@@ -48,6 +65,7 @@ struct KeysPane: View {
                 TapTestArea(threshold: settings.tapThreshold, triggers: model.triggers)
             } header: {
                 Text("Tap")
+            }
             }
 
             Section {

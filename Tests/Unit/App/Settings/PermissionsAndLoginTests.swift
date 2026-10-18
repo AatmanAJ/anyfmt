@@ -23,20 +23,26 @@ final class PermissionsCoachTests: XCTestCase {
     func testRefreshReadsBothPermissions() async throws {
         let (defaults, cleanup) = try makeDefaults()
         defer { cleanup() }
-        let ax = Flag(), ae = Flag()
+        let ax = Flag(), ae = Flag(), im = Flag()
         let probe = PermissionProbe(accessibility: { ax.value }, automation: { ae.value ? .granted : .notGranted },
-                                    requestAccessibility: {}, requestAutomation: {})
+                                    requestAccessibility: {}, requestAutomation: {},
+                                    inputMonitoring: { im.value }, requestInputMonitoring: {})
         let coach = PermissionsCoach(probe: probe, defaults: defaults)
         XCTAssertEqual(coach[.accessibility], .unknown)
         await coach.refresh()
         XCTAssertEqual(coach[.accessibility], .notGranted)
+        XCTAssertEqual(coach[.inputMonitoring], .notGranted)
         XCTAssertEqual(coach[.automationFinder], .notGranted)
         XCTAssertFalse(coach.allGranted)
 
         ax.value = true
         ae.value = true
         await coach.refresh()
+        XCTAssertFalse(coach.allGranted, "the Return shortcut also needs Input Monitoring")
+        im.value = true
+        await coach.refresh()
         XCTAssertEqual(coach[.accessibility], .granted)
+        XCTAssertEqual(coach[.inputMonitoring], .granted)
         XCTAssertEqual(coach[.automationFinder], .granted)
         XCTAssertTrue(coach.allGranted)
     }

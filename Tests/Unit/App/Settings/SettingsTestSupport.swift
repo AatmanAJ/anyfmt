@@ -16,7 +16,8 @@ func makeDefaults(file: StaticString = #filePath, line: UInt = #line) throws -> 
 
 extension PermissionProbe {
     static let granted = PermissionProbe(accessibility: { true }, automation: { .granted },
-                                         requestAccessibility: {}, requestAutomation: {})
+                                         requestAccessibility: {}, requestAutomation: {},
+                                         inputMonitoring: { true }, requestInputMonitoring: {})
 }
 
 /// Lets SwiftUI/AppKit settle.

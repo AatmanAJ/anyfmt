@@ -15,7 +15,8 @@ final class Harness {
     ]
 
     static func configuration(_ edit: (inout DragSenseConfiguration) -> Void = { _ in }) -> DragSenseConfiguration {
-        var config = DragSenseConfiguration(triggers: triggers, activePollRate: 100)
+        // The tap-mode suites pin `.tap`; PressActivationTests covers `.press` (the default).
+        var config = DragSenseConfiguration(triggers: triggers, activePollRate: 100, activation: .tap)
         edit(&config)
         return config
     }
