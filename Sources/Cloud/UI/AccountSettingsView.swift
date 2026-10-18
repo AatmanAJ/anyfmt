@@ -16,6 +16,7 @@ struct AccountSettingsView: View {
     var body: some View {
         Form {
             accountSection
+            licenceSection
             syncSection
             inboxSection
             serverSection
@@ -24,6 +25,18 @@ struct AccountSettingsView: View {
         .frame(minWidth: 480, idealWidth: 520)
         .onAppear { serverText = session.serverURL.absoluteString }
         .onChange(of: session.serverURL) { serverText = $0.absoluteString }
+    }
+
+    // MARK: Licence
+
+    @StateObject private var licence = LicenceActivationModel()
+
+    @ViewBuilder private var licenceSection: some View {
+        Section {
+            LicenceActivationView(model: licence)
+        } header: {
+            Text("Pro licence key", comment: "Settings › Account section")
+        }
     }
 
     // MARK: Account

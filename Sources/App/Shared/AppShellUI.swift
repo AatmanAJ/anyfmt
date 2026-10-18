@@ -40,6 +40,11 @@ enum AppShellUI {
             }
             return true
         }
+        if args.contains("--unregister-login-item") {
+            // scripts/reset-first-run.sh: SMAppService items can only be removed by the app itself.
+            try? LoginItemService.live.unregister()
+            return true
+        }
         if args.contains("--reset-onboarding") { settings.onboardingCompleted = false }
         if args.contains("--show-onboarding") { OnboardingWindowController.show(settings: settings) }
         return false

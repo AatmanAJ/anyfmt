@@ -359,3 +359,22 @@ Type, localisation and zero extra size. The sampled indigo top band of the
 reference's blue gradient (`#3E28D1`) is kept in the tokens for the record but
 unused, because it reads as the purple the brief bans; `band.cobalt` starts from
 deep cobalt instead.
+
+### D-040 Pro activation is optional, offline-verified, and gates nothing local
+Onboarding ends with "Have a Pro key or account?". The page has a key field and a
+sign-in button, and the primary button is still **Start Using Halo**, so skipping
+is the default. Nothing nags afterwards. Activation also lives in Settings ›
+Account and in the menu bar ("Pro Licence & Account…").
+- Keys are `HALO1-…`: Crockford base32 of a length-prefixed canonical JSON payload
+  (plan, seats, issue and expiry dates, key id) plus an Ed25519 signature. They're
+  verified offline with CryptoKit against a public-key table indexed by key id, so
+  keys can be rotated, and stored in the login Keychain. Details are in
+  `docs/LICENCE_KEYS.md`.
+- An active key only raises the plan reported by the cloud entitlements. Signed out,
+  every cloud feature is still unavailable, because the server enforces cloud
+  access. `scripts/check-entitlements.sh` still proves that no local feature reads
+  entitlements.
+- Business model unchanged: local free forever, paid cloud (Pro/Team), and a
+  pay-per-use API (`docs/API.md`). There's no commercial-use fee for local features.
+  Under AGPL, anyone can build and use the app from source, so such a fee would
+  only tax honest users.

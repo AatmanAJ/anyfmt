@@ -148,6 +148,9 @@
     },
     "Actions for %@" : {},
     "Actions work on any file or folder, even ones with nothing to convert." : {},
+    "Activate" : {
+      "comment" : "Activates a pasted licence key"
+    },
     "Add %@ to Favourites" : {},
     "Add a key to go with the modifiers." : {},
     "Add a split at the playhead (M)" : {},
@@ -281,6 +284,7 @@
     "Convert to %@" : {
       "comment" : "VoiceOver label of a conversion segment"
     },
+    "Convert, edit and share files from the drag you're already doing. Press a key mid-drag and a wheel of options opens around the pointer." : {},
     "Converted copies get the same created and modified dates. Tool results are dated now." : {},
     "Converted files will be saved in this folder." : {},
     "Converted to %@" : {},
@@ -404,6 +408,7 @@
     },
     "Every conversion, tool and action on your Mac stays free, with no account." : {},
     "Every conversion, tool and action runs on your Mac, free, with no account. Sign-in for share links and sync will appear here when it’s available." : {},
+    "Every local feature is free, with no account and no time limit." : {},
     "Every setting goes back to its default. Your files, launch at login and System Settings permissions aren’t touched." : {},
     "Everything here runs on your Mac." : {},
     "Every…" : {},
@@ -423,6 +428,7 @@
     "File names" : {},
     "Files" : {},
     "Files are never overwritten. If the name is taken, a number is added, like Finder does." : {},
+    "Files never leave your Mac unless you choose a cloud feature." : {},
     "Files stay in place." : {},
     "Files you send wait on %@ until this Mac saves them." : {},
     "Fill" : {},
@@ -469,7 +475,11 @@
     "Green" : {},
     "Grid" : {},
     "H" : {},
+    "HALO1-…" : {
+      "comment" : "Placeholder for the licence key field"
+    },
     "Haptic feedback" : {},
+    "Have a Pro key or account?" : {},
     "Height" : {},
     "Held %@ for %@ — not a tap" : {},
     "Hidden formats stay available from the command line." : {},
@@ -487,6 +497,7 @@
     "Hovered segment: %lld" : {
       "comment" : "Gallery control"
     },
+    "Hundreds of conversions, on this Mac, with nothing to install." : {},
     "I Already Have It…" : {},
     "Image" : {},
     "Image %lld: %@" : {},
@@ -527,6 +538,9 @@
     "Keys" : {
       "comment" : "Settings pane"
     },
+    "Keys are checked on this Mac, offline. A key only unlocks cloud features; every local conversion, tool and action is free without one." : {
+      "comment" : "Explains what a licence key does"
+    },
     "Keys, output, formats and every other setting go back to how they were at install." : {},
     "Last synced %@" : {},
     "Last used" : {
@@ -544,6 +558,12 @@
     "Lets %@ notice the Return key while Finder is in front. Every other key is passed through untouched." : {},
     "Letter" : {},
     "Licence" : {},
+    "Licence key" : {
+      "comment" : "VoiceOver label of the licence key field"
+    },
+    "Licence removed from this Mac. Everything local keeps working." : {
+      "comment" : "Shown after removing a Pro licence key"
+    },
     "Licences…" : {},
     "Licence…" : {},
     "Light" : {},
@@ -647,6 +667,7 @@
     "Not granted" : {},
     "Not Now" : {},
     "Not synced yet" : {},
+    "Nothing local ever needs a key. Skipping changes nothing." : {},
     "Nothing to convert" : {},
     "Nothing to set: converting to %@ has no options." : {},
     "Nothing yet" : {},
@@ -680,8 +701,12 @@
       "comment" : "Modifier key name"
     },
     "Optional packs" : {},
+    "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account." : {},
     "Optional: press Return in Finder to open the wheel" : {},
     "Options" : {},
+    "Or sign in to your account" : {
+      "comment" : "Onboarding activation page"
+    },
     "Orange" : {},
     "Order" : {},
     "Original" : {},
@@ -712,6 +737,9 @@
     "Part %lld, %@" : {},
     "Part length" : {},
     "Password" : {},
+    "Paste" : {
+      "comment" : "Pastes a licence key from the clipboard"
+    },
     "Pause" : {},
     "Pause (Space)" : {},
     "PDF" : {},
@@ -762,6 +790,12 @@
     "Pro" : {
       "comment" : "Chip on wheel segments that use the paid cloud service"
     },
+    "Pro Licence & Account…" : {
+      "comment" : "Menu bar item opening Settings › Account"
+    },
+    "Pro licence key" : {
+      "comment" : "Settings › Account section"
+    },
     "Pro, uses %@ Cloud" : {},
     "Pro. Uploads the file to the cloud." : {
       "comment" : "VoiceOver hint for cloud segments"
@@ -809,6 +843,9 @@
     "Remove from Favourites" : {},
     "Remove from join" : {},
     "Remove from Shelf" : {},
+    "Remove Licence…" : {
+      "comment" : "Settings › Account button"
+    },
     "Remove location" : {},
     "Remove nearest split" : {},
     "Remove private details" : {},

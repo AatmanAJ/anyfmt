@@ -14,6 +14,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         var toggleFloat: () -> Void = {}
         var isFloatVisible: () -> Bool = { false }
         var openSettings: () -> Void = {}
+        /// Settings › Account (licence key / sign-in). Optional; never nags.
+        var openActivation: () -> Void = {}
         var checkForUpdates: (() -> Void)?
         var canCheckForUpdates: () -> Bool = { false }
         var openAbout: () -> Void = {}
@@ -72,6 +74,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
         add(String(localized: "Settings…"), #selector(openSettings), key: ",")
+        add(String(localized: "Pro Licence & Account…", comment: "Menu bar item opening Settings › Account"), #selector(openActivation), key: "")
         if actions.checkForUpdates != nil && actions.canCheckForUpdates() {
             add(String(localized: "Check for Updates…"), #selector(checkUpdates), key: "")
         }
@@ -102,6 +105,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     @objc private func openWheel() { actions.openWheelForSelection() }
     @objc private func toggleFloat() { actions.toggleFloat() }
     @objc private func openSettings() { actions.openSettings() }
+    @objc private func openActivation() { actions.openActivation() }
     @objc private func checkUpdates() { actions.checkForUpdates?() }
     @objc private func openAbout() { actions.openAbout() }
     @objc private func openGallery() { actions.openGallery() }

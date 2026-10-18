@@ -26,7 +26,9 @@ struct OnboardingHooks {
 }
 
 enum OnboardingPage: Int, CaseIterable, Identifiable {
-    case demo, permissions, launch, updates
+    /// Order of the flow: welcome → live demo → permissions → launch at login →
+    /// updates → optional Pro activation (skipping is the default, PLAN-PHASE2 §E).
+    case welcome, demo, permissions, launch, updates, activate
 
     var id: Int { rawValue }
     /// 1-based, for screenshots and VoiceOver ("Step 2 of 4").
@@ -45,10 +47,16 @@ final class OnboardingModel: ObservableObject {
     let hooks: OnboardingHooks
     let demo: DemoModel
 
-    @Published var page: OnboardingPage = .demo
+    @Published var page: OnboardingPage = .welcome
     /// Direction of the last page change, for the slide transition.
     @Published private(set) var forward = true
     @Published private(set) var finished = false
+
+    /// The optional licence step. Created on first use (it reads the Keychain).
+    private(set) lazy var licence = LicenceActivationModel()
+
+    /// Sign in from the activation page (opens the browser; nothing happens until the user does).
+    func signIn() { CloudServices.shared.session.signIn() }
 
     /// Closes the window; set by the controller.
     var close: () -> Void = {}

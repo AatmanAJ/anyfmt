@@ -142,6 +142,8 @@ struct OnboardingView: View {
 
     @ViewBuilder private func page(_ p: OnboardingPage) -> some View {
         switch p {
+        case .welcome: OnboardingWelcomePage()
+        case .activate: OnboardingActivatePage(model: model, licence: model.licence)
         case .demo: OnboardingDemoPage(demo: model.demo, settings: model.settings, wheelHook: model.hooks.demoWheel)
         case .permissions: OnboardingPermissionsPage(model: model, settings: model.settings)
         case .launch: OnboardingLaunchPage(model: model)

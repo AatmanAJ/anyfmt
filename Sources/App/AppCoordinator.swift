@@ -340,6 +340,7 @@ final class AppCoordinator {
     /// Lets the app delegate install Settings/About/Onboarding presenters.
     func setMenuPresenters(settings: @escaping () -> Void, about: @escaping () -> Void, onboarding: @escaping () -> Void) {
         statusItem?.actions.openSettings = settings
+        statusItem?.actions.openActivation = { AppShellUI.showSettings(.account) }
         statusItem?.actions.openAbout = about
         statusItem?.actions.openOnboarding = onboarding
     }

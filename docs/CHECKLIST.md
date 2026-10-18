@@ -19,7 +19,7 @@ true points at the BLOCKERS.md entry that explains it.
 | 11 | Batch + multi-file intersection + folder handling | ✅ | `Router.commonTargets`, `BatchConversion`, combine rows for folders/archives |
 | 12 | Never overwrites, Finder-style collision naming | ✅ | `OutputNamer` (`renamex_np(RENAME_EXCL)`), `OutputNamerTests` |
 | 13 | Progress windows, cancel, reveal, human errors | ✅ | `ProgressPresenter`, `JobQueue`; `docs/screens/progress-*.png` |
-| 14 | Onboarding with live demo + permission coach | ✅ | `docs/screens/onboarding-*.png`; tap-detector tests |
+| 14 | Onboarding with live demo + permission coach | ✅ | Welcome → demo → permissions → login → updates → optional Pro activation; `docs/screens/onboarding/`; `OnboardingPermissionPathsTests` (all granted / all denied / granted mid-flow / revoked); `scripts/reset-first-run.sh`; `docs/ONBOARDING_CHECKLIST.md`; full-flow UI test written (`make uitest` → **B-003**) |
 | 15 | Settings complete | ✅ | 7 panes, `docs/screens/settings-*.png`; UI test written (`make uitest` → **B-003**) |
 | 16 | Light/dark/increased contrast/reduce motion/reduce transparency/VoiceOver all checked | 🟡 | Every surface rendered in each appearance (`make gallery`), Reduce Motion paths unit-tested, VoiceOver elements per segment/control. A live VoiceOver pass needs a person → **B-001** |
 | 17 | Perf budgets met and recorded | ✅ | `docs/PERF.md`: launch 147 ms, idle CPU 0.22 %, idle 28 MB, 12 MP HEIC→JPG 88 ms, key → wheel visible 43–45 ms live in Release (n = 3; more samples for a p95 → **B-001**) |

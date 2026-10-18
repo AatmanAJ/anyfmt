@@ -85,7 +85,10 @@ enum UIScreenshots {
 
     // MARK: Onboarding
 
-    static func renderOnboarding(to dir: URL) throws -> [URL] {
+    /// Every onboarding step, light and dark, into `<dir>/onboarding/` (PLAN-PHASE2 §F).
+    static func renderOnboarding(to root: URL) throws -> [URL] {
+        let dir = root.appendingPathComponent("onboarding", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         var out: [URL] = []
         for appearance in Appearance.allCases {
             let suffix = appearance == .light ? "" : "-dark"

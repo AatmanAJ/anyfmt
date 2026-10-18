@@ -6,6 +6,8 @@ import Darwin
 ///   --quit-after-ready       exit once ready (with --perf-report)
 ///   --no-onboarding          skip the welcome window
 ///   --show-onboarding        force the welcome window
+///   --reset-onboarding       mark onboarding as not done (with --show-onboarding: start over)
+///   --unregister-login-item  remove the launch-at-login item and exit (reset-first-run.sh)
 ///   --render-gallery <dir>   render Wheel Gallery PNGs offscreen and exit (make gallery)
 ///   --render-demo-gif <file> render the README wheel GIF and exit
 ///   --render-direction <dir> render the phase 2 art-direction board and exit

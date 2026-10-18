@@ -196,16 +196,21 @@ final class OnboardingModelTests: XCTestCase {
                                     hooks: OnboardingHooks(onFinish: { finished += 1 }, onUpdateChecksChanged: { updates.append($0) }))
         var closed = false
         model.close = { closed = true }
-        XCTAssertEqual(model.page, .demo)
+        XCTAssertEqual(model.page, .welcome)
         model.goBack()
+        XCTAssertEqual(model.page, .welcome)
+        model.goNext()
         XCTAssertEqual(model.page, .demo)
         model.goNext(); model.goNext(); model.goNext()
         XCTAssertEqual(model.page, .updates)
-        XCTAssertTrue(model.page.isLast)
         XCTAssertFalse(settings.updateChecksEnabled, "update checks stay off unless chosen")
         model.setUpdateChecks(true)
         XCTAssertEqual(updates, [true])
-        model.goNext() // "Start Using Halo"
+        model.goNext()
+        XCTAssertEqual(model.page, .activate, "the optional Pro step comes last")
+        XCTAssertTrue(model.page.isLast)
+        XCTAssertFalse(settings.onboardingCompleted)
+        model.goNext() // "Start Using Halo": skipping activation is the default"
         XCTAssertTrue(settings.onboardingCompleted)
         XCTAssertTrue(closed)
         model.finish()

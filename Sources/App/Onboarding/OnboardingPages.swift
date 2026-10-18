@@ -67,6 +67,66 @@ struct OnboardingUpdatesPage: View {
     }
 }
 
+struct OnboardingWelcomePage: View {
+    var body: some View {
+        VStack(spacing: DesignTokens.Space.xl) {
+            PageIcon(symbol: "circle.dashed", tint: .iris)
+            PageHeader(title: String(localized: "Welcome to \(Brand.name)"),
+                       subtitle: String(localized: "Convert, edit and share files from the drag you're already doing. Press a key mid-drag and a wheel of options opens around the pointer."))
+            Card {
+                VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
+                    WelcomeLine(symbol: "arrow.triangle.2.circlepath", text: String(localized: "Hundreds of conversions, on this Mac, with nothing to install."))
+                    WelcomeLine(symbol: "lock.shield", text: String(localized: "Files never leave your Mac unless you choose a cloud feature."))
+                    WelcomeLine(symbol: "gift", text: String(localized: "Every local feature is free, with no account and no time limit."))
+                }
+                .padding(DesignTokens.Space.m)
+            }
+        }
+    }
+}
+
+private struct WelcomeLine: View {
+    let symbol: String
+    let text: String
+    var body: some View {
+        Label {
+            Text(verbatim: text).fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: symbol).foregroundStyle(Color.iris)
+        }
+        .font(.system(size: DesignTokens.TypeRamp.body))
+    }
+}
+
+/// Optional, last, guilt-free: "Start Using Halo" skips it.
+struct OnboardingActivatePage: View {
+    @ObservedObject var model: OnboardingModel
+    @ObservedObject var licence: LicenceActivationModel
+
+    var body: some View {
+        VStack(spacing: DesignTokens.Space.xl) {
+            PageIcon(symbol: "key", tint: .iris)
+            PageHeader(title: String(localized: "Have a Pro key or account?"),
+                       subtitle: String(localized: "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account."))
+            Card {
+                VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
+                    LicenceActivationView(model: licence, compact: true)
+                    Divider()
+                    HStack {
+                        Text("Or sign in to your account", comment: "Onboarding activation page")
+                            .font(.system(size: DesignTokens.TypeRamp.body))
+                        Spacer()
+                        Button(String(localized: "Sign In…", comment: "Onboarding activation page")) { model.signIn() }
+                            .accessibilityIdentifier("onboarding.signIn")
+                    }
+                }
+                .padding(DesignTokens.Space.m)
+            }
+            FootnoteText(text: String(localized: "Nothing local ever needs a key. Skipping changes nothing."), symbol: "checkmark.circle")
+        }
+    }
+}
+
 // MARK: - Pieces
 
 struct PageIcon: View {
