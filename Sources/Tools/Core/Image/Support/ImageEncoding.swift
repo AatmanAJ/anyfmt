@@ -186,6 +186,20 @@ struct PixelToolPipeline {
         guard let input = request.inputs.first else { throw ConversionError.invalidOption("inputs") }
         let decoded = try ImageSupport.decode(input)
         context.progress(0.2)
+        // Animated GIF in, GIF out: run the transform on every frame.
+        if (outputFormat ?? Formats.gif) == Formats.gif, decoded.format == Formats.gif, let animation = AnimatedGIF.read(input) {
+            var frames: [AnimatedGIF.Frame] = []
+            for (i, f) in animation.frames.enumerated() {
+                try Task.checkCancellation()
+                let frame = DecodedImage(image: f.image, format: decoded.format, typeIdentifier: decoded.typeIdentifier,
+                                         properties: decoded.properties, sourceOrientation: .up, fileSize: decoded.fileSize)
+                frames.append(AnimatedGIF.Frame(image: try await transform(frame), delay: f.delay))
+                context.progress(0.2 + 0.7 * Double(i + 1) / Double(animation.frames.count))
+            }
+            let url = try ToolOutput(request: request).write(try AnimatedGIF.encode(.init(frames: frames, loopCount: animation.loopCount)), ext: "gif")
+            context.progress(1)
+            return ConversionOutput(url)
+        }
         let image = try await transform(decoded)
         try Task.checkCancellation()
         context.progress(0.7)

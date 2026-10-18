@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 /// - JPEG: the EXIF/IPTC (and XMP, when the file had one) segments are
 ///   regenerated and spliced around the untouched scan data;
 /// - PNG: metadata chunks are replaced, IDAT is untouched;
+/// - WebP: EXIF and XMP chunks are replaced, the VP8/VP8L data is untouched;
 /// - HEIC/HEIF/AVIF/TIFF/JP2/PSD: ImageIO can't rewrite their metadata
 ///   losslessly (research §C), so the image is re-encoded (lossless for
 ///   TIFF/PSD, quality 0.92 for the lossy ones).
@@ -94,7 +95,7 @@ enum ImageMetadataIO {
 
     static func canWrite(_ format: FormatID?) -> Bool {
         guard let format else { return false }
-        if format == Formats.jpg || format == Formats.png { return true }
+        if format == Formats.jpg || format == Formats.png || format == Formats.webp { return true }
         return [Formats.heic, Formats.heif, Formats.avif, Formats.tiff, Formats.jp2, Formats.psd].contains(format)
             && ImageFormats.destinationType(for: format) != nil
     }
@@ -124,6 +125,17 @@ enum ImageMetadataIO {
             let at = header.firstIndex { !$0.isJFIF } ?? header.count
             header.insert(contentsOf: blocks.exif + (xmp.map { [$0] } ?? []) + blocks.iptc, at: at)
             return try output.write(JPEGSegments.build(JPEGSegments.File(header: header, scan: file.scan, trailer: file.trailer)), ext: "jpg")
+        }
+        if format == Formats.webp {
+            // EXIF chunk = the carrier JPEG's APP1 payload without "Exif\0\0"; title,
+            // keywords and the rest live in XMP (WebP has no IPTC block).
+            let exif = MetadataCarrier.jpegSegments(properties: meta, width: w, height: h).exif.first.map { Data($0.payload.dropFirst(6)) }
+            let xmp = updatedXMP(src, changes: changes)
+            let alpha = props[kCGImagePropertyHasAlpha as String] as? Bool ?? false
+            guard let data = WebPChunks.replacingMetadata(original, exif: exif, xmp: xmp, width: w, height: h, hasAlpha: alpha) else {
+                throw ConversionError.unreadable(input, detail: "WebP container")
+            }
+            return try output.write(data, ext: "webp")
         }
         if format == Formats.png, let chunks = PNGChunks.parse(original) {
             var kept = chunks.filter { !PNGChunks.metadataTypes.contains($0.type) }
@@ -219,7 +231,8 @@ enum ImageMetadataIO {
 
     /// The source's XMP with the same edits applied (JPEGs that had XMP).
     private static func updatedXMP(_ src: CGImageSource, changes: [String: String?]) -> Data? {
-        guard let meta = CGImageSourceCopyMetadataAtIndex(src, 0, nil), let m = CGImageMetadataCreateMutableCopy(meta) else { return nil }
+        let m: CGMutableImageMetadata = CGImageSourceCopyMetadataAtIndex(src, 0, nil).flatMap { CGImageMetadataCreateMutableCopy($0) }
+            ?? CGImageMetadataCreateMutable()
         let mapping: [String: [(CFString, CFString)]] = [
             "title": [(kCGImagePropertyIPTCDictionary, kCGImagePropertyIPTCObjectName)],
             "description": [(kCGImagePropertyTIFFDictionary, kCGImagePropertyTIFFImageDescription)],

@@ -47,6 +47,31 @@ final class ContainerMetadataTests: XCTestCase {
         XCTAssertEqual(Int(riff), data.count - 8)
     }
 
+    func testWebPEditRoundTripsLosslessly() async throws {
+        try XCTSkipUnless(G1.ffmpeg.isAvailable)
+        for (name, alpha, args) in [("lossy", false, ["-quality", "80"]), ("alpha", true, ["-lossless", "1"])] {
+            let png = try G1.write(G1.photo(width: 64, height: 48, alpha: alpha), to: dir.appendingPathComponent("\(name).png"), type: .png)
+            let webp = dir.appendingPathComponent("\(name).webp")
+            try await G1.ffmpeg.run(["-i", png.path, "-c:v", "libwebp"] + args + [webp.path])
+            let out = try await G1.run(ToolIDs.editMetadata, inputs: [webp], options: OptionValues(["fields": .string(MetadataChanges.encode(
+                ["title": "Web title", "artist": "Wen", "gpsLatitude": "12.5", "gpsLongitude": "-3.25", "keywords": "a, b"]))]), in: dir)
+            let snap = try await MetadataReader.read(out[0], locator: G1.locator)
+            XCTAssertEqual(snap.value("title"), "Web title", name)
+            XCTAssertEqual(snap.value("artist"), "Wen", name)
+            XCTAssertEqual(snap.value("gpsLatitude"), "12.500000", name)
+            XCTAssertEqual(snap.value("gpsLongitude"), "-3.250000", name)
+            XCTAssertEqual(snap.value("keywords"), "a, b", name)
+            // Pixels identical to the original WebP.
+            XCTAssertEqual(G1.pixels(try G1.decode(webp)), G1.pixels(try G1.decode(out[0])), name)
+            XCTAssertEqual(G1.properties(out[0])[kCGImagePropertyHasAlpha as String] as? Bool ?? false, alpha, name)
+            // And strip takes it all out again.
+            let clean = try await G1.run(ToolIDs.stripMetadata, inputs: [out[0]], in: dir)
+            let after = try await MetadataReader.read(clean[0], locator: G1.locator)
+            XCTAssertEqual(after.value("title"), "", name)
+            XCTAssertEqual(after.value("gpsLatitude"), "", name)
+        }
+    }
+
     func testAnimatedGIFStripKeepsFrames() async throws {
         let url = dir.appendingPathComponent("anim.gif")
         let dest = try XCTUnwrap(CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, 3, nil))
@@ -61,6 +86,49 @@ final class ContainerMetadataTests: XCTestCase {
         XCTAssertEqual(CGImageSourceGetCount(src), 3)
         let delay = ((CGImageSourceCopyPropertiesAtIndex(src, 1, nil) as? [String: Any])?[kCGImagePropertyGIFDictionary as String] as? [String: Any])?[kCGImagePropertyGIFDelayTime as String] as? Double
         XCTAssertEqual(delay ?? 0, 0.2, accuracy: 0.01)
+    }
+
+    private func makeAnimatedGIF(frames: Int = 4, width: Int = 120, height: Int = 90) throws -> URL {
+        let url = dir.appendingPathComponent("a\(frames).gif")
+        let dest = try XCTUnwrap(CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames, nil))
+        CGImageDestinationSetProperties(dest, [kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFLoopCount as String: 0]] as CFDictionary)
+        for i in 0..<frames {
+            CGImageDestinationAddImage(dest, G1.photo(width: width, height: height, seed: UInt64(i + 1)),
+                                       [kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFDelayTime as String: 0.15]] as CFDictionary)
+        }
+        XCTAssertTrue(CGImageDestinationFinalize(dest))
+        return url
+    }
+
+    private func frameInfo(_ url: URL) throws -> (count: Int, width: Int, delay: Double) {
+        let src = try XCTUnwrap(CGImageSourceCreateWithURL(url as CFURL, nil))
+        let img = try XCTUnwrap(CGImageSourceCreateImageAtIndex(src, 0, nil))
+        let gif = (CGImageSourceCopyPropertiesAtIndex(src, CGImageSourceGetCount(src) - 1, nil) as? [String: Any])?[kCGImagePropertyGIFDictionary as String] as? [String: Any]
+        return (CGImageSourceGetCount(src), img.width, (gif?[kCGImagePropertyGIFDelayTime as String] as? Double) ?? 0)
+    }
+
+    func testAnimatedGIFResizeAndCropKeepAnimation() async throws {
+        let gif = try makeAnimatedGIF()
+        let resized = try await G1.run(ToolIDs.resizeImage, inputs: [gif],
+                                       options: OptionValues(["mode": .string("percent"), OptionKey.percent: .int(50)]), in: dir)
+        let r = try frameInfo(resized[0])
+        XCTAssertEqual(r.count, 4); XCTAssertEqual(r.width, 60); XCTAssertEqual(r.delay, 0.15, accuracy: 0.01)
+        let cropped = try await G1.run(ToolIDs.cropImage, inputs: [gif], options: OptionValues(["rect": .string("0,0,0.5,1")]), in: dir)
+        XCTAssertEqual(try frameInfo(cropped[0]).count, 4)
+        XCTAssertEqual(try frameInfo(cropped[0]).width, 60)
+        // Remove background still writes a single PNG.
+        XCTAssertEqual(AnimatedGIF.read(gif)?.frames.count, 4)
+    }
+
+    func testAnimatedGIFCompressToTarget() async throws {
+        let gif = try makeAnimatedGIF(frames: 5, width: 240, height: 180)
+        let target = G1.fileSize(gif) / 3
+        let out = try await G1.run(ToolIDs.compressImage, inputs: [gif],
+                                   options: OptionValues([OptionKey.sizeMode: .string("size"), OptionKey.targetSize: .int(target)]), in: dir)
+        XCTAssertLessThanOrEqual(G1.fileSize(out[0]), target)
+        let info = try frameInfo(out[0])
+        XCTAssertEqual(info.count, 5, "all frames kept")
+        XCTAssertLessThan(info.width, 240)
     }
 
     private func makeMP4() async throws -> URL {

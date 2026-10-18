@@ -78,31 +78,77 @@ enum PNGChunks {
 // MARK: - WebP (RIFF)
 
 enum WebPChunks {
-    /// Removes EXIF and XMP chunks and clears their VP8X flags. ICC is kept.
-    static func stripped(_ data: Data) -> Data? {
+    struct Chunk {
+        var fourcc: String
+        var payload: Data
+    }
+
+    /// VP8X feature flags.
+    static let iccFlag: UInt8 = 0x20, alphaFlag: UInt8 = 0x10, exifFlag: UInt8 = 0x08, xmpFlag: UInt8 = 0x04
+
+    static func parse(_ data: Data) -> [Chunk]? {
         let b = [UInt8](data)
         guard b.count >= 12, String(bytes: b[0..<4], encoding: .ascii) == "RIFF",
               String(bytes: b[8..<12], encoding: .ascii) == "WEBP" else { return nil }
-        var body = Data()
+        var chunks: [Chunk] = []
         var i = 12
         while i + 8 <= b.count {
             guard let fourcc = String(bytes: b[i..<(i + 4)], encoding: .ascii) else { return nil }
             let size = Int(UInt32(b[i + 4]) | UInt32(b[i + 5]) << 8 | UInt32(b[i + 6]) << 16 | UInt32(b[i + 7]) << 24)
-            let padded = size + (size & 1)
             guard i + 8 + size <= b.count else { return nil }
-            var chunk = Data(b[i..<min(b.count, i + 8 + padded)])
-            if fourcc == "VP8X", chunk.count > 8 {
-                chunk[8] &= ~UInt8(0x08 | 0x04) // EXIF, XMP flags
-            }
-            if fourcc != "EXIF" && fourcc != "XMP " { body.append(chunk) }
-            i += 8 + padded
+            chunks.append(Chunk(fourcc: fourcc, payload: Data(b[(i + 8)..<(i + 8 + size)])))
+            i += 8 + size + (size & 1)
         }
-        var out = Data("RIFF".utf8)
-        var riffSize = UInt32(body.count + 4).littleEndian
-        out.append(Data(bytes: &riffSize, count: 4))
-        out.append(Data("WEBP".utf8))
-        out.append(body)
-        return out
+        return chunks.isEmpty ? nil : chunks
+    }
+
+    static func build(_ chunks: [Chunk]) -> Data {
+        func le32(_ v: Int) -> Data { var x = UInt32(v).littleEndian; return Data(bytes: &x, count: 4) }
+        var body = Data()
+        for c in chunks {
+            body.append(Data(c.fourcc.utf8))
+            body.append(le32(c.payload.count))
+            body.append(c.payload)
+            if c.payload.count & 1 == 1 { body.append(0) }
+        }
+        return Data("RIFF".utf8) + le32(body.count + 4) + Data("WEBP".utf8) + body
+    }
+
+    /// Removes EXIF and XMP chunks and clears their VP8X flags. ICC is kept.
+    static func stripped(_ data: Data) -> Data? {
+        guard var chunks = parse(data) else { return nil }
+        chunks.removeAll { $0.fourcc == "EXIF" || $0.fourcc == "XMP " }
+        if let i = chunks.firstIndex(where: { $0.fourcc == "VP8X" }), !chunks[i].payload.isEmpty {
+            chunks[i].payload[chunks[i].payload.startIndex] &= ~(exifFlag | xmpFlag)
+        }
+        return build(chunks)
+    }
+
+    /// Replaces the EXIF and XMP chunks (nil removes), adding a VP8X header
+    /// to simple files when needed. Image data is untouched.
+    static func replacingMetadata(_ data: Data, exif: Data?, xmp: Data?, width: Int, height: Int, hasAlpha: Bool) -> Data? {
+        guard var chunks = parse(data) else { return nil }
+        chunks.removeAll { $0.fourcc == "EXIF" || $0.fourcc == "XMP " }
+        if !chunks.contains(where: { $0.fourcc == "VP8X" }) {
+            guard exif != nil || xmp != nil else { return build(chunks) }
+            var p = Data(count: 10)
+            p[0] = hasAlpha ? alphaFlag : 0
+            let w = max(0, width - 1), h = max(0, height - 1)
+            p[4] = UInt8(w & 0xFF); p[5] = UInt8((w >> 8) & 0xFF); p[6] = UInt8((w >> 16) & 0xFF)
+            p[7] = UInt8(h & 0xFF); p[8] = UInt8((h >> 8) & 0xFF); p[9] = UInt8((h >> 16) & 0xFF)
+            chunks.insert(Chunk(fourcc: "VP8X", payload: p), at: 0)
+        }
+        if let i = chunks.firstIndex(where: { $0.fourcc == "VP8X" }), !chunks[i].payload.isEmpty {
+            let s = chunks[i].payload.startIndex
+            var flags = chunks[i].payload[s] & ~(exifFlag | xmpFlag)
+            if exif != nil { flags |= exifFlag }
+            if xmp != nil { flags |= xmpFlag }
+            chunks[i].payload[s] = flags
+        }
+        // Spec order: metadata chunks come after the image data.
+        if let exif { chunks.append(Chunk(fourcc: "EXIF", payload: exif)) }
+        if let xmp { chunks.append(Chunk(fourcc: "XMP ", payload: xmp)) }
+        return build(chunks)
     }
 }
 

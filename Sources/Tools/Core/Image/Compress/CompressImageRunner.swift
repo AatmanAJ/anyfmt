@@ -36,6 +36,23 @@ struct CompressImageRunner: ToolRunner {
         let canReuseOriginal = sameFormat && request.metadata == .keep && decoded.sourceOrientation == .up
         let mode = o.string(OptionKey.sizeMode, default: "quality")
         var data: Data
+        if format == Formats.gif, let animation = AnimatedGIF.read(input) {
+            // Animated GIFs: GIF has no quality knob, so re-encode, then shrink every frame until it fits.
+            let target: Int? = switch mode {
+            case "size": max(1, o.int(OptionKey.targetSize, default: 1_000_000))
+            case "percent": max(1, Int(Double(original) * Double(min(100, max(1, o.int(OptionKey.percent, default: 50)))) / 100))
+            default: nil
+            }
+            if let t = target, canReuseOriginal, original > 0, original <= t {
+                data = try Data(contentsOf: input)
+            } else {
+                data = try Self.fitAnimated(animation, target: target, progress: context.progress)
+                if target == nil, canReuseOriginal, original > 0, data.count >= original { data = try Data(contentsOf: input) }
+            }
+            let url = try output.write(data, ext: "gif")
+            context.progress(1)
+            return ConversionOutput(url)
+        }
         switch mode {
         case "size", "percent":
             let target = mode == "size"
@@ -56,6 +73,26 @@ struct CompressImageRunner: ToolRunner {
         let url = try output.write(data, ext: Formats.extension(for: format))
         context.progress(1)
         return ConversionOutput(url)
+    }
+}
+
+extension CompressImageRunner {
+    /// Re-encodes an animation; with a target, scales all frames down together until it fits.
+    static func fitAnimated(_ animation: AnimatedGIF.Animation, target: Int?, progress: ProgressSink) throws -> Data {
+        var data = try AnimatedGIF.encode(animation)
+        guard let target, data.count > target, let first = animation.frames.first?.image else { return data }
+        var scale = 1.0
+        for round in 0..<8 {
+            try Task.checkCancellation()
+            progress(min(0.9, 0.2 + Double(round) * 0.1))
+            scale *= min(0.9, max(0.3, (Double(target) / Double(data.count)).squareRoot() * 0.95))
+            let w = max(1, Int((Double(first.width) * scale).rounded())), h = max(1, Int((Double(first.height) * scale).rounded()))
+            guard w >= 8, h >= 8 else { break }
+            data = try AnimatedGIF.encode(AnimatedGIF.map(animation) { try ImageSupport.resample($0, width: w, height: h) })
+            if data.count <= target { return data }
+        }
+        let want = ByteCountFormatter.string(fromByteCount: Int64(target), countStyle: .file)
+        throw ConversionError.other(L("This animation can’t be made as small as \(want)."), detail: "animated GIF fit failed, last \(data.count)")
     }
 }
 
