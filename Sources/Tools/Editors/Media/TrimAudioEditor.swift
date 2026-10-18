@@ -136,10 +136,9 @@ struct TrimAudioEditor: View {
                                                   set: { model.range = model.range.lowerBound...max($0, model.range.lowerBound + 0.05) }))
             InfoRow(label: String(localized: "Length"), value: MediaTimes.timecode(model.range.upperBound - model.range.lowerBound))
         }
-        Divider()
         SidebarSection(String(localized: "Quality")) {
             if model.copyPossible {
-                Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless).toggleStyle(.switch).controlSize(.small)
+                Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless)
                 Text(model.lossless ? String(localized: "Copies the audio without re-encoding. Cuts land within a few milliseconds of your marks.")
                                     : String(localized: "Re-encodes at the original bitrate for sample-exact cuts."))
                     .font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
@@ -149,7 +148,6 @@ struct TrimAudioEditor: View {
                 Note(systemImage: "waveform", text: String(localized: "Re-encodes in the same format and bitrate, cut exactly at your marks."))
             }
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("Space", String(localized: "Play / pause selection")), ("← →", String(localized: "Back / forward 0.1 s")),
                              ("I  O", String(localized: "Set start / end")), ("⌘= ⌘−", String(localized: "Zoom in / out")),
@@ -174,14 +172,14 @@ struct AudioHeader: View {
     var body: some View {
         HStack(spacing: DesignTokens.Space.m) {
             Image(systemName: "waveform")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(.system(size: DesignTokens.TypeRamp.title, weight: .bold))
+                .foregroundStyle(EditorPalette.onSelected)
                 .frame(width: 36, height: 36)
-                .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).fill(MediaStyle.accent))
+                .background(Circle().fill(MediaStyle.accent))
             VStack(alignment: .leading, spacing: 2) {
                 Text(url.lastPathComponent).font(MediaStyle.body(.semibold)).lineLimit(1).truncationMode(.middle)
                 if let info, let a = info.audio {
-                    Text(Self.describe(a, duration: info.duration)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary)
+                    Text(Self.describe(a, duration: info.duration)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
                 }
             }
             Spacer()

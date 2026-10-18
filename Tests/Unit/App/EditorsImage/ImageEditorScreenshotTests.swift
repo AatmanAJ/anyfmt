@@ -106,6 +106,20 @@ final class ImageEditorScreenshotTests: XCTestCase {
         }
     }
 
+    /// A file that can't be decoded shows the "can't open" state, not an endless spinner,
+    /// and Save copy stays off.
+    func testUnreadableImageState() throws {
+        let broken = dir.appendingPathComponent("Broken.jpg")
+        try Data("not an image".utf8).write(to: broken)
+        let model = ImageCropModel(tool: EditorSamples.spec(ToolIDs.cropImage), inputs: [broken])
+        XCTAssertNil(model.preview)
+        XCTAssertFalse(model.canSave)
+        for dark in [false, true] {
+            try EditorSnapshot.write(ImageCropEditor(model: model, onSave: { _ in }, onClose: {}),
+                                     size: EditorWindow.defaultSize, name: "editor-state-unreadable", dark: dark)
+        }
+    }
+
     func testPopoverAndResultScreenshots() throws {
         var compress = ToolSchemas.compress.defaults
         compress[OptionKey.sizeMode] = .string("size")
@@ -122,7 +136,7 @@ final class ImageEditorScreenshotTests: XCTestCase {
             try EditorSnapshot.write(ImageResizeOptionsView(options: r, sourceSize: CGSize(width: 4032, height: 3024)).background(Color(nsColor: .windowBackgroundColor)),
                                      size: NSSize(width: 300, height: 170), name: "popover-resize", dark: dark)
             try EditorSnapshot.write(CodeResultsView(results: results, source: "menu.jpg", copiedAll: true, onDone: {})
-                .background(Color(nsColor: .windowBackgroundColor)), size: NSSize(width: 420, height: 230), name: "editor-readcodes", dark: dark)
+                .background(Color(nsColor: .windowBackgroundColor)), size: NSSize(width: 420, height: 300), name: "editor-readcodes", dark: dark)
         }
     }
 }

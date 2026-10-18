@@ -107,7 +107,8 @@ struct ImagesPDFPages: View {
         let f = CGRect(x: plan.frame.minX * s, y: (plan.media.height - plan.frame.maxY) * s, width: plan.frame.width * s, height: plan.frame.height * s)
         return VStack(spacing: DesignTokens.Space.s) {
             ZStack(alignment: .topLeading) {
-                Rectangle().fill(Color.white)
+                // The page itself is paper white in both appearances.
+                Rectangle().fill(Color(hex: DesignTokens.Primitive.paper0))
                 if let t = item.thumbnail {
                     Image(decorative: t, scale: 1).resizable().interpolation(.high)
                         .frame(width: f.width, height: f.height)
@@ -116,14 +117,17 @@ struct ImagesPDFPages: View {
             }
             .frame(width: pw, height: ph)
             .clipShape(Rectangle())
-            .shadow(color: .black.opacity(0.2), radius: 5, y: 2)
-            .overlay(Rectangle().strokeBorder(selected ? ImageEditorKit.accent : Color.black.opacity(0.08), lineWidth: selected ? 2.5 : 0.5))
+            .overlay(Rectangle().strokeBorder(selected ? ImageEditorKit.accent : Color.haloHairline, lineWidth: selected ? 3 : DesignTokens.Shape.hairline))
             .frame(width: box, height: box)
             .opacity(dragged == item.id ? 0.4 : 1)
             HStack(spacing: 4) {
                 Text("\(number)").font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold).monospacedDigit())
-                Text(item.name).font(.system(size: DesignTokens.TypeRamp.caption)).lineLimit(1).truncationMode(.middle)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(selected ? EditorPalette.onSelected : Color.haloInk)
+                    .padding(.horizontal, DesignTokens.Space.xs + 1)
+                    .background(Capsule().fill(selected ? EditorPalette.selected : Color.clear))
+                Text(item.name).font(.system(size: DesignTokens.TypeRamp.caption, weight: selected ? .semibold : .regular))
+                    .lineLimit(1).truncationMode(.middle)
+                    .foregroundStyle(selected ? Color.haloInk : Color.haloSecondaryText)
             }
             .frame(maxWidth: box)
         }
@@ -158,21 +162,20 @@ struct ImagesPDFSidebar: View {
 
     var body: some View {
         ImageEditorKit.Section(String(localized: "Page size")) {
-            Picker(String(localized: "Page size"), selection: $model.pageSize) {
-                Text("Fit image").tag("fit")
-                Text("A4").tag("a4")
-                Text("Letter").tag("letter")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Page size"), selection: $model.pageSize, options: [
+                .init("fit", String(localized: "Fit image")),
+                .init("a4", String(localized: "A4")),
+                .init("letter", String(localized: "Letter")),
+            ])
             ImageEditorKit.Hint(model.pageSize == "fit"
                 ? String(localized: "Each page is exactly the size of its image. JPEGs are embedded without recompression.")
                 : String(localized: "Images are centred with a margin and pages turn landscape for landscape photos."))
         }
         ImageEditorKit.Section(String(localized: "Pages")) {
             HStack {
-                Text(model.pageCountText).font(.system(size: DesignTokens.TypeRamp.title, weight: .semibold))
+                Text(model.pageCountText)
+                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayM))
+                    .displayTracking(DesignTokens.Typeface.Size.displayM)
                 Spacer()
                 Menu {
                     Button(String(localized: "Sort by name")) { model.sortByName() }

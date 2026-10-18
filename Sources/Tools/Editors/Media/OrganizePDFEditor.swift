@@ -176,7 +176,16 @@ struct OrganizePDFEditor: View {
     private func preview(_ original: Bool) -> some View {
         VStack(spacing: 0) {
             toolbar(original)
-            Divider()
+            Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline)
+            if !model.failed.isEmpty {
+                failedBanner.padding([.horizontal, .top], DesignTokens.Space.l)
+            }
+            if model.originalPages.isEmpty {
+                EditorStateView(kind: .problem, title: String(localized: "No pages to show"),
+                                message: String(localized: "None of these PDFs could be opened. They may be locked with a password or damaged. Your files haven’t been changed."))
+                    .padding(DesignTokens.Space.xl)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 132, maximum: 170), spacing: DesignTokens.Space.l)],
                           spacing: DesignTokens.Space.l) {
@@ -190,7 +199,22 @@ struct OrganizePDFEditor: View {
             }
             .contentShape(Rectangle())
             .onTapGesture { model.selection = [] }
+            }
         }
+    }
+
+    /// Names the files that couldn't be opened, and why saving is off.
+    private var failedBanner: some View {
+        HStack(alignment: .top, spacing: DesignTokens.Space.s) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.haloDanger)
+                .accessibilityLabel(String(localized: "Problem"))
+            Text(String(localized: "Can’t open \(model.failed.map(\.lastPathComponent).formatted(.list(type: .and))). It may be locked or damaged. Leave it out to save the rest."))
+                .font(MediaStyle.caption()).foregroundStyle(Color.haloInk)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .haloTile(padding: DesignTokens.Space.m)
+        .accessibilityElement(children: .combine)
     }
 
     private func toolbar(_ original: Bool) -> some View {
@@ -203,7 +227,8 @@ struct OrganizePDFEditor: View {
                 .help(String(localized: "Delete selected pages (⌫)"))
             Spacer()
             Text(model.selection.isEmpty ? String(localized: "Drag pages to reorder") : String(localized: "\(model.selection.count) selected"))
-                .font(MediaStyle.caption()).foregroundStyle(.secondary)
+                .font(MediaStyle.caption(model.selection.isEmpty ? .regular : .bold))
+                .foregroundStyle(model.selection.isEmpty ? Color.haloSecondaryText : Color.haloInk)
             Button(String(localized: "Select All")) { model.selectAll() }
         }
         .controlSize(.small)
@@ -223,27 +248,24 @@ struct OrganizePDFEditor: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(url.lastPathComponent).font(MediaStyle.label(.medium)).lineLimit(1).truncationMode(.middle)
                         Text(model.failed.contains(url) ? String(localized: "Can’t open (locked or damaged)") : String(localized: "\(model.pageCounts[i]) pages"))
-                            .font(MediaStyle.caption()).foregroundStyle(model.failed.contains(url) ? MediaStyle.danger : .secondary)
+                            .font(MediaStyle.caption()).foregroundStyle(model.failed.contains(url) ? MediaStyle.danger : Color.haloSecondaryText)
                     }
                 }
                 .accessibilityElement(children: .combine)
             }
         }
-        Divider()
         SidebarSection(String(localized: "Output")) {
             InfoRow(label: String(localized: "Pages"), value: "\(model.pages.count)")
             if model.deletedCount > 0 {
                 InfoRow(label: String(localized: "Deleted"), value: "\(model.deletedCount)")
             }
-            Toggle(String(localized: "Split into single pages"), isOn: $model.split).toggleStyle(.switch).controlSize(.small)
+            Toggle(String(localized: "Split into single pages"), isOn: $model.split)
             Text(model.split ? String(localized: "Saves \(model.pages.count) one-page PDFs together in a folder.")
                              : String(localized: "Saves one PDF with the pages in this order."))
                 .font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            Button(String(localized: "Reset Pages")) { model.reset() }.controlSize(.small).disabled(!model.isChanged)
+            Button(String(localized: "Reset Pages")) { model.reset() }.disabled(!model.isChanged)
+            Note(systemImage: "text.cursor", text: String(localized: "Pages are copied as they are: text stays selectable and nothing is turned into images. Bookmarks are kept for pages you keep."))
         }
-        Divider()
-        Note(systemImage: "text.cursor", text: String(localized: "Pages are copied as they are: text stays selectable and nothing is turned into images. Bookmarks are kept for pages you keep."))
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("⌘A", String(localized: "Select all")), ("⌘L ⌘R", String(localized: "Rotate left / right")),
                              ("⌫", String(localized: "Delete selected")), ("⌘-click", String(localized: "Add to selection"))])
@@ -251,20 +273,27 @@ struct OrganizePDFEditor: View {
     }
 }
 
-/// Coloured letter for an input file.
+/// Lettered tag for an input file (the letter carries the meaning; the colour helps).
 private struct InputTag: View {
     let index: Int
 
-    static func color(_ i: Int) -> Color {
-        [MediaStyle.accent, MediaStyle.mint, MediaStyle.color(DesignTokens.Palette.proGold), MediaStyle.danger][i % 4]
+    /// Fill and the text colour that reads on it (all AA).
+    static func colors(_ i: Int) -> (fill: Color, text: Color) {
+        switch i % 4 {
+        case 0: (MediaStyle.accent, EditorPalette.onSelected)
+        case 1: (EditorPalette.orange, EditorPalette.onWarm)
+        case 2: (Color.haloInk, Color.haloWindow)
+        default: (EditorPalette.flame, EditorPalette.onWarm)
+        }
     }
 
     var body: some View {
+        let c = Self.colors(index)
         Text(OrganizePDFModel.tags[index % OrganizePDFModel.tags.count])
             .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: 18, height: 18)
-            .background(RoundedRectangle(cornerRadius: 4).fill(Self.color(index)))
+            .foregroundStyle(c.text)
+            .frame(width: 20, height: 20)
+            .background(Circle().fill(c.fill))
     }
 }
 
@@ -286,26 +315,26 @@ private struct PageCell: View {
                     Image(nsImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .background(Color.white)
-                        .shadow(color: .black.opacity(0.2), radius: 3, y: 1)
+                        .background(Color(hex: DesignTokens.Primitive.paper0))
+                        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
                         .rotationEffect(.degrees(Double(page.rotation)))
                         .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: page.rotation)
                 } else {
-                    RoundedRectangle(cornerRadius: 3).fill(Color.primary.opacity(0.06)).aspectRatio(0.77, contentMode: .fit)
+                    Rectangle().fill(EditorPalette.chip).aspectRatio(0.77, contentMode: .fit)
                 }
                 if hovering && interactive { hoverButtons }
             }
             .frame(width: 124, height: 124)
             .padding(6)
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(selected ? MediaStyle.accent.opacity(0.14) : Color.clear))
-            .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium)
+            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(selected ? MediaStyle.accent.opacity(0.18) : Color.clear))
+            .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
                 .strokeBorder(selected ? MediaStyle.accent : Color.clear, lineWidth: contrast == .increased ? 3 : 2))
             .opacity(model.dragging == page.id ? 0.35 : 1)
             HStack(spacing: 5) {
-                Text("\(number)").font(MediaStyle.label(.semibold).monospacedDigit())
+                Text("\(number)").font(MediaStyle.label(selected ? .heavy : .semibold).monospacedDigit())
                 InputTagSmall(index: page.input, multiple: model.inputs.count > 1, page: page.page + 1)
                 if page.rotation != 0 {
-                    Image(systemName: "rotate.right").font(.system(size: 9)).foregroundStyle(.secondary)
+                    Image(systemName: "rotate.right").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.haloSecondaryText)
                         .accessibilityLabel(Text("Rotated \(page.rotation) degrees"))
                 }
             }
@@ -337,14 +366,18 @@ private struct PageCell: View {
                 cellButton("trash", String(localized: "Delete page")) { model.delete(only: page) }
             }
             .padding(4)
-            .background(.regularMaterial, in: Capsule())
+            .background(Capsule().fill(EditorPalette.overlayHalo.opacity(EditorTokens.Overlay.badgeOpacity)))
+            .foregroundStyle(EditorPalette.overlayRim)
             .padding(.bottom, 4)
         }
     }
 
     private func cellButton(_ symbol: String, _ label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Image(systemName: symbol).font(.system(size: 11, weight: .medium)).frame(width: 22, height: 20) }
-            .buttonStyle(.borderless)
+        Button(action: action) {
+            Image(systemName: symbol).font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold)).frame(width: 22, height: 20)
+                .contentShape(Rectangle())
+        }
+            .buttonStyle(.plain)
             .help(label)
             .accessibilityLabel(Text(label))
     }
@@ -359,11 +392,11 @@ private struct InputTagSmall: View {
         if multiple {
             Text("\(OrganizePDFModel.tags[index % OrganizePDFModel.tags.count])\(page)")
                 .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold).monospacedDigit())
-                .foregroundStyle(.white)
-                .padding(.horizontal, 4).padding(.vertical, 1)
-                .background(RoundedRectangle(cornerRadius: 3).fill(InputTag.color(index)))
+                .foregroundStyle(InputTag.colors(index).text)
+                .padding(.horizontal, 5).padding(.vertical, 1)
+                .background(Capsule().fill(InputTag.colors(index).fill))
         } else {
-            Text("p.\(page)").font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary)
+            Text("p.\(page)").font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
         }
     }
 }

@@ -7,19 +7,16 @@ import HaloCore
 enum ImageEditorKit {
     // MARK: Colour
 
-    static func dynamic(_ pair: (light: Int, dark: Int)) -> Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            let dark = appearance.bestMatch(from: [.aqua, .darkAqua, .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua])
-            let hex = (dark == .darkAqua || dark == .accessibilityHighContrastDarkAqua) ? pair.dark : pair.light
-            return NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
-                           blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
-        })
-    }
+    static func dynamic(_ pair: (light: Int, dark: Int)) -> Color { Color.token(pair) }
 
-    static var accent: Color { dynamic(DesignTokens.Palette.iris) }
-    static var mint: Color { dynamic(DesignTokens.Palette.mint) }
-    static var danger: Color { dynamic(DesignTokens.Palette.danger) }
+    /// Cobalt fill (selection, slider fill).
+    static var accent: Color { Color.iris }
+    /// Cobalt as text or a small glyph (AA on both appearances).
+    static var accentText: Color { Color.accentText }
+    static var mint: Color { Color.mint }
+    static var danger: Color { Color.haloDanger }
 
+    /// A user-chosen colour ("#RRGGBB"): content, not chrome.
     static func color(hex: String) -> Color {
         guard let c = OptionColor.components(hex) else { return .black }
         return Color(.sRGB, red: c.r, green: c.g, blue: c.b, opacity: c.a)
@@ -68,7 +65,7 @@ enum ImageEditorKit {
 // MARK: - Views
 
 extension ImageEditorKit {
-    /// Sidebar section: small caps-style title above its content.
+    /// Sidebar section: a charcoal tile with a small uppercase title.
     struct Section<Content: View>: View {
         let title: String
         @ViewBuilder var content: Content
@@ -79,57 +76,56 @@ extension ImageEditorKit {
         }
 
         var body: some View {
-            VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-                Text(title)
-                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                    .accessibilityAddTraits(.isHeader)
-                content
-            }
+            EditorSection(title) { content }
         }
     }
 
     /// The image, aspect-fitted with breathing room, plus an overlay that
-    /// receives the image's on-screen rect.
+    /// receives the image's on-screen rect. A missing image shows the
+    /// "can't open" state instead of a spinner that never ends.
     struct FittedImage<Overlay: View>: View {
         let image: CGImage?
         var size: CGSize? = nil
         var padding: CGFloat = DesignTokens.Space.xl
         var checkerboard = false
+        /// Named in the error state when `image` is nil.
+        var source: URL? = nil
         @ViewBuilder var overlay: (CGRect) -> Overlay
 
         var body: some View {
             GeometryReader { geo in
                 let imageSize = size ?? image.map { CGSize(width: $0.width, height: $0.height) } ?? CGSize(width: 4, height: 3)
                 let rect = ImageEditorKit.fit(imageSize, in: CGRect(origin: .zero, size: geo.size).insetBy(dx: padding, dy: padding))
-                ZStack(alignment: .topLeading) {
-                    Group {
-                        if checkerboard { Checkerboard().frame(width: rect.width, height: rect.height) }
-                        if let image {
+                if let image {
+                    ZStack(alignment: .topLeading) {
+                        Group {
+                            if checkerboard { Checkerboard().frame(width: rect.width, height: rect.height) }
                             Image(decorative: image, scale: 1)
                                 .resizable()
                                 .interpolation(.high)
                                 .frame(width: rect.width, height: rect.height)
-                        } else {
-                            ProgressView().controlSize(.small).frame(width: rect.width, height: rect.height)
                         }
+                        // A hairline instead of a drop shadow keeps white images on white edged.
+                        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                        .offset(x: rect.minX, y: rect.minY)
+                        overlay(rect)
                     }
-                    .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
-                    .offset(x: rect.minX, y: rect.minY)
-                    overlay(rect)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+                } else {
+                    EditorStateView.unreadableImage(source)
+                        .padding(DesignTokens.Space.xl)
+                        .frame(width: geo.size.width, height: geo.size.height)
                 }
-                .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             }
         }
     }
 
-    /// Transparency backdrop.
+    /// Transparency backdrop (drawn content, the same in both appearances).
     struct Checkerboard: View {
         var cell: CGFloat = 8
         var body: some View {
             Canvas { ctx, size in
-                ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(white: 0.96)))
+                ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: EditorTokens.checkerLight)))
                 var path = Path()
                 var y: CGFloat = 0, row = 0
                 while y < size.height {
@@ -137,7 +133,7 @@ extension ImageEditorKit {
                     while x < size.width { path.addRect(CGRect(x: x, y: y, width: cell, height: cell)); x += cell * 2 }
                     y += cell; row += 1
                 }
-                ctx.fill(path, with: .color(Color(white: 0.86)))
+                ctx.fill(path, with: .color(Color(hex: EditorTokens.checkerDark)))
             }
             .accessibilityHidden(true)
         }
@@ -158,32 +154,35 @@ extension ImageEditorKit {
         @Environment(\.colorSchemeContrast) private var contrast
 
         var body: some View {
+            let knob = EditorTokens.Overlay.handle + 5
             VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
-                HStack {
-                    Text(label).font(.system(size: DesignTokens.TypeRamp.body))
+                HStack(alignment: .firstTextBaseline) {
+                    Text(label).font(.system(size: DesignTokens.TypeRamp.body)).foregroundStyle(Color.haloInk)
                     Spacer()
                     Text(format(value))
-                        .font(.system(size: DesignTokens.TypeRamp.caption).monospacedDigit())
-                        .foregroundStyle(value == neutral ? .secondary : .primary)
+                        .font(.system(size: DesignTokens.TypeRamp.label, weight: value == neutral ? .regular : .bold).monospacedDigit())
+                        .foregroundStyle(value == neutral ? Color.haloSecondaryText : Color.haloInk)
                 }
                 GeometryReader { geo in
                     let w = geo.size.width
                     let x = position(value, w)
                     let n = position(neutral, w)
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color.primary.opacity(contrast == .increased ? 0.3 : 0.12)).frame(height: 4)
+                        Capsule().fill(EditorPalette.chip).frame(height: 4)
+                            .overlay(Capsule().strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline,
+                                                            lineWidth: DesignTokens.Shape.hairline))
                         Capsule().fill(ImageEditorKit.accent)
                             .frame(width: abs(x - n), height: 4)
                             .offset(x: min(x, n))
                         if neutral != range.lowerBound {
-                            Rectangle().fill(Color.primary.opacity(0.35)).frame(width: 1, height: 8).offset(x: n - 0.5)
+                            Rectangle().fill(Color.haloSecondaryText).frame(width: 1, height: 8).offset(x: n - 0.5)
                         }
                         Circle()
-                            .fill(Color.white)
-                            .overlay(Circle().strokeBorder(Color.black.opacity(contrast == .increased ? 0.6 : 0.18), lineWidth: 0.5))
-                            .shadow(color: .black.opacity(0.25), radius: dragging ? 3 : 1.5, y: 1)
-                            .frame(width: 16, height: 16)
-                            .offset(x: x - 8)
+                            .fill(Color(hex: DesignTokens.Primitive.paper0))
+                            .overlay(Circle().strokeBorder(dragging ? ImageEditorKit.accent : (contrast == .increased ? Color.haloInk : Color.haloHairline),
+                                                           lineWidth: dragging ? 2 : DesignTokens.Shape.hairline))
+                            .frame(width: knob, height: knob)
+                            .offset(x: x - knob / 2)
                     }
                     .frame(height: 18)
                     .contentShape(Rectangle())
@@ -228,21 +227,24 @@ extension ImageEditorKit {
         }
     }
 
-    /// Row of colour swatches plus the system colour picker.
+    /// Row of colour swatches plus the system colour picker. The swatches are
+    /// colours the user paints with (content), so they stay literal.
     struct SwatchPicker: View {
         @Binding var hex: String
-        var swatches: [String] = ["#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#0A84FF", "#6E56F8", "#1C1B22", "#FFFFFF"]
+        var swatches: [String] = ["#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#0A84FF", "#6E56F8", "#1C1B22", "#FFFFFF"] // token-ok: user paint colours
 
         var body: some View {
-            HStack(spacing: 6) {
+            let d = EditorTokens.swatch
+            HStack(spacing: DesignTokens.Space.s) {
                 ForEach(swatches, id: \.self) { s in
                     let selected = s.uppercased() == hex.uppercased()
                     Button { hex = s } label: {
                         Circle()
                             .fill(ImageEditorKit.color(hex: s))
-                            .overlay(Circle().strokeBorder(Color.primary.opacity(0.25), lineWidth: 0.5))
-                            .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: selected ? 2 : 0).padding(-3))
-                            .frame(width: 18, height: 18)
+                            .overlay(Circle().strokeBorder(Color.haloSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
+                            .padding(selected ? 3 : 0)
+                            .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: selected ? 2 : 0))
+                            .frame(width: d, height: d)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(Self.name(s))
@@ -251,10 +253,11 @@ extension ImageEditorKit {
                 let custom = !swatches.contains { $0.uppercased() == hex.uppercased() }
                 Button { ImageColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
                     Circle()
-                        .fill(AngularGradient(colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red], center: .center))
+                        .fill(AngularGradient(colors: [.red, .yellow, .green, .cyan, .blue, .red], center: .center))
                         .overlay(Circle().fill(custom ? ImageEditorKit.color(hex: hex) : .clear).padding(4))
-                        .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: custom ? 2 : 0).padding(-3))
-                        .frame(width: 18, height: 18)
+                        .padding(custom ? 3 : 0)
+                        .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: custom ? 2 : 0))
+                        .frame(width: d, height: d)
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "Custom colour…"))
@@ -265,20 +268,20 @@ extension ImageEditorKit {
 
         static func name(_ hex: String) -> String {
             switch hex.uppercased() {
-            case "#FF3B30": String(localized: "Red")
-            case "#FF9500": String(localized: "Orange")
-            case "#FFCC00": String(localized: "Yellow")
-            case "#34C759": String(localized: "Green")
-            case "#0A84FF": String(localized: "Blue")
-            case "#6E56F8": String(localized: "Violet")
-            case "#1C1B22", "#000000": String(localized: "Black")
-            case "#FFFFFF": String(localized: "White")
+            case "#FF3B30": String(localized: "Red") // token-ok: swatch name
+            case "#FF9500": String(localized: "Orange") // token-ok: swatch name
+            case "#FFCC00": String(localized: "Yellow") // token-ok: swatch name
+            case "#34C759": String(localized: "Green") // token-ok: swatch name
+            case "#0A84FF": String(localized: "Blue") // token-ok: swatch name
+            case "#6E56F8": String(localized: "Violet") // token-ok: swatch name
+            case "#1C1B22", "#000000": String(localized: "Black") // token-ok: swatch name
+            case "#FFFFFF": String(localized: "White") // token-ok: swatch name
             default: hex
             }
         }
     }
 
-    /// A round well showing a colour; click opens the system colour panel.
+    /// A pill well showing a colour; click opens the system colour panel.
     struct ColorWell: View {
         let label: String
         @Binding var hex: String
@@ -287,10 +290,10 @@ extension ImageEditorKit {
             HStack(spacing: DesignTokens.Space.s) {
                 Text(label).font(.system(size: DesignTokens.TypeRamp.body))
                 Button { ImageColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+                    Capsule()
                         .fill(ImageEditorKit.color(hex: hex))
-                        .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).strokeBorder(Color.primary.opacity(0.2), lineWidth: 0.5))
-                        .frame(width: 34, height: 20)
+                        .overlay(Capsule().strokeBorder(Color.haloSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
+                        .frame(width: EditorTokens.swatch * 1.8, height: EditorTokens.swatch)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(label)
@@ -306,7 +309,7 @@ extension ImageEditorKit {
         var body: some View {
             Text(text)
                 .font(.system(size: DesignTokens.TypeRamp.caption))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.haloSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -383,7 +386,7 @@ final class ImageColorPanelBridge: NSObject {
         let panel = NSColorPanel.shared
         panel.showsAlpha = false
         if let c = OptionColor.components(hex) {
-            panel.color = NSColor(srgbRed: c.r, green: c.g, blue: c.b, alpha: 1)
+            panel.color = NSColor(srgbRed: c.r, green: c.g, blue: c.b, alpha: 1) // token-ok: the user's colour
         }
         self.onChange = onChange
         panel.setTarget(self)

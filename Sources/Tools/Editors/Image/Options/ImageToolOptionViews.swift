@@ -18,14 +18,11 @@ public struct ImageCompressOptionsView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
-            Picker(String(localized: "Mode"), selection: mode) {
-                Text("Quality").tag("quality")
-                Text("Target size").tag("size")
-                Text("Percentage").tag("percent")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Mode"), selection: mode, options: [
+                .init("quality", String(localized: "Quality")),
+                .init("size", String(localized: "Target size")),
+                .init("percent", String(localized: "Percentage")),
+            ])
 
             switch mode.wrappedValue {
             case "size":
@@ -117,14 +114,11 @@ public struct ImageResizeOptionsView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
-            Picker(String(localized: "Mode"), selection: string("mode", "percent")) {
-                Text("Preset").tag("preset")
-                Text("Exact size").tag("pixels")
-                Text("Percentage").tag("percent")
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Mode"), selection: string("mode", "percent"), options: [
+                .init("preset", String(localized: "Preset")),
+                .init("pixels", String(localized: "Exact size")),
+                .init("percent", String(localized: "Percentage")),
+            ])
 
             switch options.string("mode", default: "percent") {
             case "preset":
@@ -135,9 +129,9 @@ public struct ImageResizeOptionsView: View {
             case "pixels":
                 HStack(spacing: DesignTokens.Space.s) {
                     numberField(String(localized: "Width"), key: "width", fallback: 1920)
-                    Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
+                    Image(systemName: "xmark").font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold)).foregroundStyle(Color.haloSecondaryText)
                     numberField(String(localized: "Height"), key: "height", fallback: 0)
-                    Text("px").foregroundStyle(.secondary)
+                    Text("px").foregroundStyle(Color.haloSecondaryText)
                 }
                 ImageEditorKit.Hint(String(localized: "Leave height at 0 to keep the aspect ratio."))
             default:
@@ -148,8 +142,8 @@ public struct ImageResizeOptionsView: View {
             if let sourceSize {
                 let target = ResizePlan.targetSize(for: sourceSize, options: options)
                 HStack {
-                    Text(ImageEditorKit.pixelText(sourceSize)).foregroundStyle(.secondary)
-                    Image(systemName: "arrow.right").foregroundStyle(.tertiary)
+                    Text(ImageEditorKit.pixelText(sourceSize)).foregroundStyle(Color.haloSecondaryText)
+                    Image(systemName: "arrow.right").foregroundStyle(Color.haloSecondaryText)
                     Text(ImageEditorKit.pixelText(target)).fontWeight(.semibold)
                 }
                 .font(.system(size: DesignTokens.TypeRamp.caption).monospacedDigit())

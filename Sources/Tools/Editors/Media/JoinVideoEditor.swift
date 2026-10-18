@@ -111,9 +111,9 @@ struct JoinVideoEditor: View {
     private func preview(_ original: Bool) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
             HStack {
-                Text(original ? "Drag order" : "Join order").font(MediaStyle.label(.semibold))
+                EditorCaption(original ? String(localized: "Drag order") : String(localized: "Join order"))
                 Spacer()
-                Text("Drag clips to reorder").font(MediaStyle.caption()).foregroundStyle(.secondary)
+                Text("Drag clips to reorder").font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
             }
             .padding(.horizontal, DesignTokens.Space.xs)
             List {
@@ -130,7 +130,7 @@ struct JoinVideoEditor: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             if !original, model.isLoaded {
-                Text("Result · \(MediaTimes.timecode(model.totalDuration))").font(MediaStyle.caption(.semibold)).foregroundStyle(.secondary)
+                EditorCaption(String(localized: "Result · \(MediaTimes.timecode(model.totalDuration))"))
                     .padding(.horizontal, DesignTokens.Space.xs)
                 resultBar
             }
@@ -153,11 +153,11 @@ struct JoinVideoEditor: View {
                         if let t = c.thumbnail {
                             Image(nsImage: t).resizable().aspectRatio(contentMode: .fill)
                         }
-                        Rectangle().fill(Color.black.opacity(0.35))
-                        Text("\(i + 1)").font(MediaStyle.label(.bold)).foregroundStyle(.white)
+                        Rectangle().fill(EditorPalette.overlayHalo.opacity(0.45))
+                        Text("\(i + 1)").font(MediaStyle.label(.bold)).foregroundStyle(EditorPalette.overlayRim)
                     }
                     .frame(width: max(8, geo.size.width * CGFloat(d / max(model.totalDuration, 0.001)) - 2), height: 30)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .clipped()
                 }
             }
         }
@@ -181,7 +181,7 @@ struct JoinVideoEditor: View {
                     InfoRow(label: String(localized: "Size"), value: "\(v.width) × \(v.height)")
                     Note(systemImage: "exclamationmark.circle.fill",
                          text: String(localized: "These clips don’t match, so they’ll be re-encoded to one MP4. Smaller clips are letterboxed, never stretched."),
-                         tint: .orange)
+                         tint: MediaStyle.warning)
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(v.reasons, id: \.self) { r in
                             Label(r, systemImage: "circle.fill").labelStyle(BulletLabelStyle())
@@ -195,7 +195,6 @@ struct JoinVideoEditor: View {
                 }
             }
         }
-        Divider()
         SidebarSection(String(localized: "Order")) {
             Text("Clips play in list order. Drag a row, or use the arrows, to move it.")
                 .font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
@@ -206,8 +205,8 @@ struct JoinVideoEditor: View {
 private struct BulletLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            configuration.icon.font(.system(size: 4)).foregroundStyle(.secondary)
-            configuration.title.font(MediaStyle.caption()).foregroundStyle(.secondary)
+            configuration.icon.font(.system(size: DesignTokens.Space.xs)).foregroundStyle(Color.haloSecondaryText)
+            configuration.title.font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
         }
     }
 }
@@ -224,31 +223,33 @@ private struct ClipRow: View {
 
     var body: some View {
         HStack(spacing: DesignTokens.Space.m) {
-            Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
+            Image(systemName: "line.3.horizontal").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
             Text("\(index + 1)")
                 .font(MediaStyle.label(.bold).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(EditorPalette.onSelected)
                 .frame(width: 22, height: 22)
                 .background(Circle().fill(MediaStyle.accent))
             ZStack {
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.small).fill(Color.black.opacity(0.85))
+                Rectangle().fill(EditorPalette.overlayHalo)
                 if let t = clip.thumbnail {
                     Image(nsImage: t).resizable().aspectRatio(contentMode: .fit)
                 } else {
-                    Image(systemName: clip.failed ? "exclamationmark.triangle" : "film").foregroundStyle(.secondary)
+                    Image(systemName: clip.failed ? "exclamationmark.triangle.fill" : "film")
+                        .foregroundStyle(clip.failed ? Color.haloDanger : Color.haloSecondaryText)
                 }
             }
             .frame(width: 112, height: 63)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.small))
+            .clipped()
             VStack(alignment: .leading, spacing: 3) {
                 Text(clip.url.lastPathComponent).font(MediaStyle.body(.medium)).lineLimit(1).truncationMode(.middle)
-                Text(details).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
+                Text(details).font(MediaStyle.caption().monospacedDigit())
+                    .foregroundStyle(clip.failed ? Color.haloDanger : Color.haloSecondaryText).lineLimit(1)
                 if let mismatch {
-                    Text(mismatch)
-                        .font(.system(size: DesignTokens.TypeRamp.micro, weight: .semibold))
+                    Label(mismatch, systemImage: "exclamationmark.circle.fill")
+                        .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold))
                         .padding(.horizontal, 6).padding(.vertical, 2)
-                        .foregroundStyle(.orange)
-                        .background(Capsule().fill(Color.orange.opacity(0.15)))
+                        .foregroundStyle(EditorPalette.onWarm)
+                        .background(Capsule().fill(EditorPalette.orange))
                 }
             }
             Spacer()
@@ -262,10 +263,10 @@ private struct ClipRow: View {
                     .help(String(localized: "Leave this clip out"))
             }
             .buttonStyle(.borderless)
+            .foregroundStyle(Color.haloInk)
         }
         .padding(DesignTokens.Space.s)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(Color.primary.opacity(0.04)))
-        .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).strokeBorder(Color.primary.opacity(0.08)))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Clip \(index + 1), \(clip.url.lastPathComponent), \(details)"))
         .accessibilityAction(named: Text("Move up")) { if canMoveUp { move(-1) } }

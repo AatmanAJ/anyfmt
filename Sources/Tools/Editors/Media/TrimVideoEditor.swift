@@ -152,16 +152,12 @@ struct TrimVideoEditor: View {
                 InfoRow(label: String(localized: "Video"), value: "\(v.displayWidth) × \(v.displayHeight) · \(String(format: "%.2f", v.frameRate)) fps")
             }
         }
-        Divider()
         SidebarSection(String(localized: "Quality")) {
             Toggle(String(localized: "Lossless when possible"), isOn: $model.lossless)
-                .toggleStyle(.switch)
-                .controlSize(.small)
             Text("Lossless cuts copy the video as-is: instant, with no quality loss, but they can only start on a keyframe. Turn it off for cuts exact to the frame (re-encodes).")
                 .font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             planNote
         }
-        Divider()
         SidebarSection(String(localized: "Keyboard")) {
             KeyHints(hints: [("Space", String(localized: "Play / pause selection")), ("← →", String(localized: "Previous / next frame")),
                              ("⇧← ⇧→", String(localized: "Back / forward 1 second")), ("I  O", String(localized: "Set in / out at playhead")),
@@ -196,7 +192,7 @@ struct TrimVideoEditor: View {
                 case .noKeyframeNearStart, .noKeyframeNearEnd:
                     Note(systemImage: "exclamationmark.circle.fill",
                          text: String(localized: "No keyframe within 1 second of a cut, so this trim re-encodes to stay frame-exact."),
-                         tint: .orange)
+                         tint: MediaStyle.warning)
                 }
             }
         }

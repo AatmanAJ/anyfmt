@@ -17,6 +17,9 @@ public enum CodeResultPresenter {
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 420, height: 200),
                             styleMask: [.titled, .closable, .fullSizeContentView, .utilityWindow], backing: .buffered, defer: false)
         panel.title = results.count == 1 ? String(localized: "1 code found") : String(localized: "\(results.count) codes found")
+        panel.titleVisibility = .hidden
+        panel.titlebarAppearsTransparent = true
+        panel.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.isReleasedWhenClosed = false
@@ -78,9 +81,20 @@ struct CodeResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
+                DisplayText(results.count == 1 ? String(localized: "1 code") : String(localized: "\(results.count) codes"),
+                            size: DesignTokens.Typeface.Size.displayM)
+                    .foregroundStyle(Color.haloInk)
+                    .accessibilityAddTraits(.isHeader)
+                if let source {
+                    Text(source).font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
+                        .foregroundStyle(Color.haloSecondaryText).lineLimit(1).truncationMode(.middle)
+                }
+            }
             if results.isEmpty {
-                Label(String(localized: "No codes found"), systemImage: "qrcode.viewfinder")
-                    .foregroundStyle(.secondary)
+                EditorStateView(kind: .empty, title: String(localized: "No codes found"),
+                                message: String(localized: "Nothing readable in this picture. A closer, sharper shot of the code usually works."),
+                                systemImage: "qrcode.viewfinder")
             }
             ScrollView {
                 VStack(spacing: DesignTokens.Space.s) {
@@ -89,11 +103,11 @@ struct CodeResultsView: View {
             }
             .frame(maxHeight: 360)
             .fixedSize(horizontal: false, vertical: results.count <= 4)
-            HStack {
+            HStack(spacing: DesignTokens.Space.s) {
                 if copiedAll && !results.isEmpty {
                     Label(String(localized: "Copied to the clipboard"), systemImage: "checkmark.circle.fill")
-                        .font(.system(size: DesignTokens.TypeRamp.caption))
-                        .foregroundStyle(ImageEditorKit.mint)
+                        .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
+                        .foregroundStyle(Color.haloSuccess)
                 }
                 Spacer()
                 if results.count > 1 {
@@ -101,52 +115,61 @@ struct CodeResultsView: View {
                         CodeResultPresenter.copy(results.map(\.payload).joined(separator: "\n"))
                         flash("*")
                     }
+                    .buttonStyle(.haloQuiet)
                 }
                 Button(String(localized: "Done"), action: onDone)
+                    .buttonStyle(.haloPrimary)
                     .keyboardShortcut(.defaultAction)
                 Button("", action: onDone).keyboardShortcut(.cancelAction).frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
             }
         }
         .padding(DesignTokens.Space.l)
         .frame(width: 420)
+        .buttonStyle(.editorChip)
+        .foregroundStyle(Color.haloInk, Color.haloSecondaryText)
+        .background(Color.haloWindow.ignoresSafeArea())
     }
 
     private func row(_ r: CodeReadResult) -> some View {
         HStack(alignment: .top, spacing: DesignTokens.Space.m) {
             Image(systemName: r.symbology.contains("QR") || r.symbology == "Aztec" || r.symbology == "DataMatrix" ? "qrcode" : "barcode")
-                .font(.system(size: 18))
-                .foregroundStyle(ImageEditorKit.accent)
+                .font(.system(size: DesignTokens.TypeRamp.headline - 2))
+                .foregroundStyle(ImageEditorKit.accentText)
                 .frame(width: 22)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(r.label)
-                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                EditorCaption(r.label)
                 Text(r.payload)
                     .font(.system(size: DesignTokens.TypeRamp.body, design: r.link == nil && r.payload.allSatisfy(\.isNumber) ? .monospaced : .default))
+                    .foregroundStyle(Color.haloInk)
                     .textSelection(.enabled)
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
-            VStack(alignment: .trailing, spacing: 4) {
-                Button(copied == r.id ? String(localized: "Copied") : String(localized: "Copy")) {
+            VStack(alignment: .trailing, spacing: DesignTokens.Space.xs) {
+                Button {
                     CodeResultPresenter.copy(r.payload)
                     flash(r.id)
+                } label: {
+                    if copied == r.id {
+                        Label(String(localized: "Copied"), systemImage: "checkmark")
+                    } else {
+                        Text(String(localized: "Copy"))
+                    }
                 }
-                .controlSize(.small)
+                .buttonStyle(.editorChip(selected: copied == r.id))
                 .accessibilityLabel(String(localized: "Copy \(r.label)"))
                 if let link = r.link {
                     Button(String(localized: "Open link…")) {
                         CodeResultPresenter.confirmOpen(link, attachedTo: NSApp.keyWindow)
                     }
-                    .controlSize(.small)
                     .help(link.absoluteString)
                 }
             }
         }
-        .padding(DesignTokens.Space.m)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(Color.primary.opacity(0.05)))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .haloTile(padding: DesignTokens.Space.m)
         .accessibilityElement(children: .contain)
     }
 

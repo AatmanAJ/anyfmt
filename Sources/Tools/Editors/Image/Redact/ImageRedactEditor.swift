@@ -104,20 +104,17 @@ struct ImageRedactCanvas: View {
     @State private var keys = ImageEditorKeyCatcher.Handle()
 
     var body: some View {
-        ImageEditorKit.FittedImage(image: showOriginal ? model.preview : model.rendered, size: model.pixelSize) { rect in
+        ImageEditorKit.FittedImage(image: showOriginal ? model.preview : model.rendered, size: model.pixelSize, source: model.inputs.first) { rect in
             if !showOriginal {
                 ForEach(model.regions) { r in
                     let v = ImageEditorKit.denormalized(r.rect, in: rect)
                     let selected = r.id == model.selection
-                    Rectangle().path(in: v)
-                        .stroke(selected ? ImageEditorKit.accent : Color.white.opacity(0.85),
-                                style: StrokeStyle(lineWidth: selected ? 2 : 1, dash: selected ? [] : [5, 3]))
-                        .shadow(color: .black.opacity(0.4), radius: 1)
-                        .allowsHitTesting(false)
+                    // Selected: cobalt with a white rim and dark halo. Others: dashed white.
+                    OverlayStroke(path: Rectangle().path(in: v), dash: selected ? [] : [5, 3],
+                                  width: selected ? nil : DesignTokens.Shape.hairline, quiet: !selected)
                     if selected {
                         // Resize handle (bottom-right); drag inside to move.
-                        Circle().fill(Color.white).overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: 1.5))
-                            .frame(width: 11, height: 11).position(x: v.maxX, y: v.maxY).allowsHitTesting(false)
+                        OverlayHandle().position(x: v.maxX, y: v.maxY).allowsHitTesting(false)
                     }
                 }
                 Rectangle().fill(Color.white.opacity(0.001))
@@ -197,14 +194,11 @@ struct ImageRedactSidebar: View {
 
     var body: some View {
         ImageEditorKit.Section(String(localized: "Style")) {
-            Picker(String(localized: "Style"), selection: $model.style) {
-                Text("Pixelate").tag(Redactor.Style.pixelate)
-                Text("Blur").tag(Redactor.Style.blur)
-                Text("Solid").tag(Redactor.Style.solid)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Style"), selection: $model.style, options: [
+                .init(.pixelate, String(localized: "Pixelate")),
+                .init(.blur, String(localized: "Blur")),
+                .init(.solid, String(localized: "Solid")),
+            ])
             if model.style == .solid {
                 ImageEditorKit.SwatchPicker(hex: $model.color, swatches: ["#000000", "#FFFFFF", "#6E56F8", "#FF3B30"])
             }
@@ -223,11 +217,11 @@ struct ImageRedactSidebar: View {
             ImageEditorKit.Hint(String(localized: "Drag on the image to cover an area. Drag an area to move it, or its corner to resize."))
         }
         HStack(alignment: .top, spacing: DesignTokens.Space.s) {
-            Image(systemName: "lock.fill").foregroundStyle(ImageEditorKit.accent).font(.system(size: 12))
+            Image(systemName: "lock.fill").foregroundStyle(ImageEditorKit.accentText).font(.system(size: DesignTokens.TypeRamp.label, weight: .bold))
             ImageEditorKit.Hint(String(localized: "The saved copy is redacted for good: covered pixels are replaced, not hidden, and no thumbnail of the original is kept. Your original file isn’t touched."))
         }
-        .padding(DesignTokens.Space.m)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(ImageEditorKit.accent.opacity(0.08)))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .haloTile(padding: EditorTokens.sectionPadding)
         .accessibilityElement(children: .combine)
     }
 }

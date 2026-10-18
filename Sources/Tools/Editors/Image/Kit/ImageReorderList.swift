@@ -35,8 +35,8 @@ extension ImageEditorKit {
             List {
                 ForEach(Array(order.enumerated()), id: \.element) { position, id in
                     if let item = items.first(where: { $0.id == id }) {
-                        row(item, position: position)
-                            .listRowBackground(selection?.wrappedValue == id ? ImageEditorKit.accent.opacity(0.14) : Color.clear)
+                        row(item, position: position, selected: selection?.wrappedValue == id)
+                            .listRowBackground(selection?.wrappedValue == id ? ImageEditorKit.accent.opacity(0.22) : Color.clear)
                             .contentShape(Rectangle())
                             .onTapGesture { selection?.wrappedValue = id }
                     }
@@ -46,34 +46,37 @@ extension ImageEditorKit {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .frame(height: min(CGFloat(order.count) * 44 + 4, 264))
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium).fill(Color.primary.opacity(0.04)))
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.medium))
+            .background(EditorPalette.chip)
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
+                .strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
         }
 
-        private func row(_ item: ImageEditorItem, position: Int) -> some View {
+        private func row(_ item: ImageEditorItem, position: Int, selected: Bool) -> some View {
             HStack(spacing: DesignTokens.Space.s) {
                 Text("\(position + 1)")
                     .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.haloSecondaryText)
                     .frame(width: 16, alignment: .trailing)
                 Group {
                     if let t = item.thumbnail {
                         Image(decorative: t, scale: 1).resizable().aspectRatio(contentMode: .fill)
                     } else {
-                        Color.primary.opacity(0.08)
+                        EditorPalette.canvas
                     }
                 }
-                .frame(width: 34, height: 34)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .frame(width: EditorTokens.rowThumbnail, height: EditorTokens.rowThumbnail)
+                .clipped()
                 Text(item.name)
-                    .font(.system(size: DesignTokens.TypeRamp.body))
+                    .font(.system(size: DesignTokens.TypeRamp.body, weight: selected ? .bold : .regular))
                     .lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: 0)
-                Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
+                Image(systemName: "line.3.horizontal").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
             }
             .padding(.vertical, 2)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(String(localized: "\(position + 1): \(item.name)"))
+            .accessibilityAddTraits(selected ? .isSelected : [])
             .accessibilityAction(named: String(localized: "Move up")) { move(item.id, by: -1) }
             .accessibilityAction(named: String(localized: "Move down")) { move(item.id, by: 1) }
         }

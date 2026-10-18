@@ -62,7 +62,7 @@ struct MediaOptionsPanel: View {
     private var speed: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
             ChipGrid(choices: choices("factor"), selection: string("factor"), columns: 4)
-            Toggle(String(localized: "Keep audio pitch"), isOn: bool("keepPitch")).toggleStyle(.switch).controlSize(.small)
+            Toggle(String(localized: "Keep audio pitch"), isOn: bool("keepPitch")).toggleStyle(.editorSwitch)
             let f = options.double("factor", default: 2)
             Text(f > 1 ? String(localized: "Plays \(Self.factorText(f)) faster: a 1-minute clip becomes \(MediaTimes.timecode(60 / f, fraction: 0)).")
                        : String(localized: "Plays \(Self.factorText(f)) as fast: a 1-minute clip becomes \(MediaTimes.timecode(60 / f, fraction: 0))."))
@@ -79,10 +79,8 @@ struct MediaOptionsPanel: View {
 
     private var compressVideo: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-            Picker(String(localized: "Mode"), selection: string(OptionKey.sizeMode)) {
-                ForEach(choices(OptionKey.sizeMode)) { Text($0.label).tag($0.id) }
-            }
-            .pickerStyle(.segmented).labelsHidden()
+            EditorChoiceChips(String(localized: "Mode"), selection: string(OptionKey.sizeMode),
+                              options: choices(OptionKey.sizeMode).map { .init($0.id, $0.label) })
             if options.string(OptionKey.sizeMode, default: "quality") == "size" {
                 SizeField(bytes: int(OptionKey.targetSize), presets: [(8_000_000, String(localized: "8 MB")), (25_000_000, String(localized: "25 MB")),
                                                                       (50_000_000, String(localized: "50 MB")), (100_000_000, String(localized: "100 MB"))])
@@ -128,10 +126,8 @@ struct MediaOptionsPanel: View {
 
     private var compressPDF: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-            Picker(String(localized: "Mode"), selection: string(OptionKey.sizeMode)) {
-                ForEach(choices(OptionKey.sizeMode)) { Text($0.label).tag($0.id) }
-            }
-            .pickerStyle(.segmented).labelsHidden()
+            EditorChoiceChips(String(localized: "Mode"), selection: string(OptionKey.sizeMode),
+                              options: choices(OptionKey.sizeMode).map { .init($0.id, $0.label) })
             if options.string(OptionKey.sizeMode, default: "quality") == "size" {
                 SizeField(bytes: int(OptionKey.targetSize), presets: [(1_000_000, String(localized: "1 MB")), (2_000_000, String(localized: "2 MB")),
                                                                       (5_000_000, String(localized: "5 MB")), (10_000_000, String(localized: "10 MB"))])
@@ -174,13 +170,9 @@ private struct ChipGrid: View {
                 let on = selection == c.id
                 Button { selection = c.id } label: {
                     Text(c.label)
-                        .font(MediaStyle.label(on ? .semibold : .regular).monospacedDigit())
-                        .frame(maxWidth: .infinity, minHeight: 26)
-                        .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).fill(on ? MediaStyle.accent : Color.primary.opacity(0.06)))
-                        .foregroundStyle(on ? Color.white : Color.primary)
-                        .contentShape(Rectangle())
+                        .monospacedDigit()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.editorChip(selected: on, fill: true))
                 .accessibilityAddTraits(on ? .isSelected : [])
             }
         }
@@ -199,16 +191,17 @@ private struct RadioRows: View {
                 Button { selection = row.id } label: {
                     HStack(alignment: .top, spacing: DesignTokens.Space.s) {
                         Image(systemName: on ? "largecircle.fill.circle" : "circle")
-                            .foregroundStyle(on ? MediaStyle.accent : Color.secondary)
-                            .font(.system(size: 13))
+                            .foregroundStyle(on ? Color.accentText : Color.haloSecondaryText)
+                            .font(.system(size: DesignTokens.TypeRamp.body))
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(row.title).font(MediaStyle.label(.medium))
-                            Text(row.detail).font(MediaStyle.caption()).foregroundStyle(.secondary)
+                            Text(row.title).font(MediaStyle.label(on ? .bold : .medium)).foregroundStyle(Color.haloInk)
+                            Text(row.detail).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
                         }
                         Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, 8).padding(.vertical, 6)
-                    .background(RoundedRectangle(cornerRadius: DesignTokens.Radius.small).fill(on ? MediaStyle.accent.opacity(0.1) : Color.clear))
+                    .padding(.horizontal, DesignTokens.Space.s).padding(.vertical, DesignTokens.Space.xs + 2)
+                    .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
+                        .fill(on ? MediaStyle.accent.opacity(0.14) : Color.clear))
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -239,9 +232,8 @@ private struct SizeField: View {
             HStack(spacing: 4) {
                 ForEach(presets, id: \.0) { p in
                     Button(p.1) { bytes = p.0 }
-                        .controlSize(.small)
-                        .buttonStyle(.bordered)
-                        .tint(bytes == p.0 ? MediaStyle.accent : nil)
+                        .buttonStyle(.editorChip(selected: bytes == p.0))
+                        .accessibilityAddTraits(bytes == p.0 ? .isSelected : [])
                 }
             }
         }

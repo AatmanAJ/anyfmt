@@ -74,10 +74,11 @@ struct ImageBackgroundEditor: View {
     var body: some View {
         EditorShell(model: model, preview: { original in
             if original {
-                ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize, checkerboard: true) { _ in EmptyView() }
+                ImageEditorKit.FittedImage(image: model.preview, size: model.pixelSize, checkerboard: true, source: model.inputs.first) { _ in EmptyView() }
                     .accessibilityLabel(String(localized: "Original image"))
             } else {
-                ImageEditorKit.FittedImage(image: model.rendered, size: model.outputSize) { _ in EmptyView() }
+                ImageEditorKit.FittedImage(image: model.preview == nil ? nil : (model.rendered ?? model.preview), size: model.outputSize,
+                                           source: model.inputs.first) { _ in EmptyView() }
                     .accessibilityLabel(String(localized: "Image on its new background"))
             }
         }, sidebar: {
@@ -91,14 +92,11 @@ struct ImageBackgroundSidebar: View {
 
     var body: some View {
         ImageEditorKit.Section(String(localized: "Fill")) {
-            Picker(String(localized: "Fill"), selection: $model.style.fill) {
-                Text("Solid").tag(BackdropStyle.Fill.solid)
-                Text("Gradient").tag(BackdropStyle.Fill.gradient)
-                Text("Image").tag(BackdropStyle.Fill.image)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Fill"), selection: $model.style.fill, options: [
+                .init(.solid, String(localized: "Solid")),
+                .init(.gradient, String(localized: "Gradient")),
+                .init(.image, String(localized: "Image")),
+            ])
 
             switch model.style.fill {
             case .solid:
@@ -109,12 +107,13 @@ struct ImageBackgroundSidebar: View {
                     ForEach(Array(ImageBackgroundModel.presets.enumerated()), id: \.offset) { _, p in
                         let selected = model.style.color1 == p.0 && model.style.color2 == p.1
                         Button { model.applyPreset(p) } label: {
-                            RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+                            Capsule()
                                 .fill(LinearGradient(colors: [ImageEditorKit.color(hex: p.0), ImageEditorKit.color(hex: p.1)],
                                                      startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(height: 30)
-                                .overlay(RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
-                                    .strokeBorder(selected ? ImageEditorKit.accent : Color.primary.opacity(0.12), lineWidth: selected ? 2 : 0.5))
+                                .padding(selected ? 3 : 0)
+                                .frame(height: EditorTokens.chipHeight + 4)
+                                .overlay(Capsule()
+                                    .strokeBorder(selected ? ImageEditorKit.accent : Color.haloHairline, lineWidth: selected ? 2 : DesignTokens.Shape.hairline))
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(String(localized: "Gradient preset"))
@@ -139,7 +138,7 @@ struct ImageBackgroundSidebar: View {
                                            format: { "\(Int($0))°" })
             case .image:
                 HStack {
-                    Image(systemName: "photo").foregroundStyle(.secondary)
+                    Image(systemName: "photo").foregroundStyle(Color.haloSecondaryText)
                     Text(model.style.imagePath.isEmpty ? String(localized: "No image chosen") : URL(fileURLWithPath: model.style.imagePath).lastPathComponent)
                         .lineLimit(1).truncationMode(.middle)
                         .font(.system(size: DesignTokens.TypeRamp.body))
@@ -154,8 +153,6 @@ struct ImageBackgroundSidebar: View {
             ImageEditorKit.ValueSlider(label: String(localized: "Corner radius"), value: $model.style.cornerRadius, range: 0...20, step: 1, neutral: 4,
                                        format: { "\(Int($0)) %" })
             Toggle(String(localized: "Soft shadow"), isOn: $model.style.shadow)
-                .toggleStyle(.checkbox)
-                .font(.system(size: DesignTokens.TypeRamp.body))
         }
     }
 }

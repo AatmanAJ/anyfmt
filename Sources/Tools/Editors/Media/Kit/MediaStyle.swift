@@ -6,32 +6,20 @@ import HaloCore
 /// comes from `DesignTokens`; colours resolve per appearance (light, dark,
 /// increased contrast).
 enum MediaStyle {
-    static func color(_ pair: (light: Int, dark: Int)) -> Color {
-        let light = pair.light, dark = pair.dark
-        return Color(nsColor: NSColor(name: nil) { appearance in
-            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua, .accessibilityHighContrastAqua,
-                                                     .accessibilityHighContrastDarkAqua])
-                .map { $0 == .darkAqua || $0 == .accessibilityHighContrastDarkAqua } ?? false
-            return nsColor(hex: isDark ? dark : light)
-        })
-    }
+    static func color(_ pair: (light: Int, dark: Int)) -> Color { Color.token(pair) }
 
-    static func nsColor(hex: Int) -> NSColor {
-        NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
-                blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
-    }
-
-    static let accent = color(DesignTokens.Palette.iris)
-    static let mint = color(DesignTokens.Palette.mint)
-    static let danger = color(DesignTokens.Palette.danger)
-    static let success = color(DesignTokens.Palette.success)
-    static let ink = color(DesignTokens.Palette.ink)
+    static let accent = Color.iris
+    static let mint = Color.mint
+    static let danger = Color.haloDanger
+    static let success = Color.haloSuccess
+    static let ink = Color.haloInk
+    static let warning = EditorPalette.warning
 
     /// Timeline geometry.
-    static let stripHeight: CGFloat = 56
-    static let handleWidth: CGFloat = 14
-    static let rulerHeight: CGFloat = 18
-    static let playheadWidth: CGFloat = 2
+    static let stripHeight = EditorTokens.Timeline.stripHeight
+    static let handleWidth = EditorTokens.Timeline.handleWidth
+    static let rulerHeight = EditorTokens.Timeline.rulerHeight
+    static let playheadWidth = EditorTokens.Timeline.playheadWidth
 
     static func caption(_ weight: Font.Weight = .regular) -> Font { .system(size: DesignTokens.TypeRamp.caption, weight: weight) }
     static func label(_ weight: Font.Weight = .regular) -> Font { .system(size: DesignTokens.TypeRamp.label, weight: weight) }
@@ -66,7 +54,7 @@ enum MediaStyle {
     }
 }
 
-/// A titled group in an editor sidebar.
+/// A titled group in an editor sidebar (a charcoal tile).
 struct SidebarSection<Content: View>: View {
     let title: String
     @ViewBuilder var content: Content
@@ -77,14 +65,7 @@ struct SidebarSection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Space.s) {
-            Text(title)
-                .font(MediaStyle.caption(.semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .accessibilityAddTraits(.isHeader)
-            content
-        }
+        EditorSection(title) { content }
     }
 }
 
@@ -95,9 +76,9 @@ struct InfoRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label).foregroundStyle(.secondary)
+            Text(label).foregroundStyle(Color.haloSecondaryText)
             Spacer(minLength: DesignTokens.Space.s)
-            Text(value).monospacedDigit().multilineTextAlignment(.trailing)
+            Text(value).fontWeight(.semibold).monospacedDigit().multilineTextAlignment(.trailing)
         }
         .font(MediaStyle.label())
         .accessibilityElement(children: .combine)
@@ -107,18 +88,21 @@ struct InfoRow: View {
 /// Keyboard shortcut legend.
 struct KeyHints: View {
     let hints: [(key: String, action: String)]
+    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
+        VStack(alignment: .leading, spacing: DesignTokens.Space.xs + DesignTokens.Space.xxs) {
             ForEach(Array(hints.enumerated()), id: \.offset) { _, h in
                 HStack(spacing: DesignTokens.Space.s) {
                     Text(h.key)
-                        .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold, design: .rounded))
-                        .padding(.horizontal, 6).padding(.vertical, 2)
-                        .frame(minWidth: 40)
-                        .background(RoundedRectangle(cornerRadius: 4).fill(Color.primary.opacity(0.07)))
-                        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.primary.opacity(0.15)))
-                    Text(h.action).font(MediaStyle.caption()).foregroundStyle(.secondary)
+                        .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.haloInk)
+                        .padding(.horizontal, DesignTokens.Space.s).padding(.vertical, DesignTokens.Space.xxs)
+                        .frame(minWidth: EditorTokens.keyCapMinWidth)
+                        .background(Capsule().fill(EditorPalette.chip))
+                        .overlay(Capsule().strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline,
+                                                        lineWidth: DesignTokens.Shape.hairline))
+                    Text(h.action).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -126,42 +110,45 @@ struct KeyHints: View {
     }
 }
 
-/// A short explanatory note with an icon.
+/// A short explanatory note with an icon. The icon carries the meaning
+/// (check, warning, info) along with the words, never the tint alone.
 struct Note: View {
     let systemImage: String
     let text: String
-    var tint: Color = .secondary
+    var tint: Color = Color.haloSecondaryText
 
     var body: some View {
         HStack(alignment: .top, spacing: DesignTokens.Space.s) {
             Image(systemName: systemImage).foregroundStyle(tint).frame(width: 16)
-            Text(text).font(MediaStyle.caption()).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Text(text).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText).fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
     }
 }
 
-/// Spinner + message while media loads, or the failure message.
+/// The loading state while media opens, or why it couldn't be opened.
 struct LoadingOverlay: View {
     let state: MediaLoadState
 
     var body: some View {
         switch state {
         case .loading(let message):
-            VStack(spacing: DesignTokens.Space.m) {
-                ProgressView().controlSize(.small)
-                Text(message).font(MediaStyle.caption()).foregroundStyle(.secondary)
-            }
-            .padding(DesignTokens.Space.l)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.medium))
+            EditorStateView(kind: .loading, title: message)
+                .padding(DesignTokens.Space.xl)
         case .failed(let message):
-            Label(message, systemImage: "exclamationmark.triangle")
-                .font(MediaStyle.label())
-                .padding(DesignTokens.Space.l)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.medium))
+            EditorStateView(kind: .problem, title: String(localized: "Can’t open this file"),
+                            message: String(localized: "\(Self.sentence(message)) Your file hasn’t been changed."))
+                .padding(DesignTokens.Space.xl)
         case .ready:
             EmptyView()
         }
+    }
+
+    /// Engine messages usually end in a full stop; make sure they do.
+    static func sentence(_ s: String) -> String {
+        let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let last = t.last else { return t }
+        return ".!?…".contains(last) ? t : t + "."
     }
 }
 

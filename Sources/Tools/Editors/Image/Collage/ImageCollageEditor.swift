@@ -94,7 +94,7 @@ struct ImageCollageCanvas: View {
                     if let t = item.thumbnail {
                         Image(decorative: t, scale: 1).resizable().aspectRatio(contentMode: .fit)
                             .frame(maxHeight: 160)
-                            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                            .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
                     }
                 }
             }
@@ -122,8 +122,8 @@ struct ImageCollageCanvas: View {
         return ZStack(alignment: .topLeading) {
             Rectangle().fill(ImageEditorKit.color(hex: model.background))
                 .frame(width: shownCanvas.width, height: shownCanvas.height)
+                .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
                 .offset(x: shownCanvas.minX, y: shownCanvas.minY)
-                .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
             ForEach(Array(shownOrder.enumerated()), id: \.element) { position, id in
                 let f = shown.frames[position]
                 let r = CGRect(x: shownCanvas.minX + f.minX * shownScale, y: shownCanvas.minY + f.minY * shownScale,
@@ -147,10 +147,12 @@ struct ImageCollageCanvas: View {
             if let d = dragging, let id = draggedID, let pos = model.order.firstIndex(of: id) {
                 let f = committed.frames[pos]
                 let w = f.width * scale, h = f.height * scale
-                tile(model.items[id], frame: CGRect(x: d.location.x - w / 2, y: d.location.y - h / 2, width: w, height: h), placeholder: false)
-                    .shadow(color: .black.opacity(0.35), radius: 12, y: 6)
-                    .scaleEffect(1.04)
+                let lifted = CGRect(x: d.location.x - w / 2, y: d.location.y - h / 2, width: w, height: h)
+                // The lifted photo is outlined in cobalt (halo + rim) rather than floated on a shadow.
+                tile(model.items[id], frame: lifted, placeholder: false)
+                    .scaleEffect(reduceMotion ? 1 : 1.04)
                     .allowsHitTesting(false)
+                OverlayStroke(path: Path(lifted.insetBy(dx: reduceMotion ? 0 : -w * 0.02, dy: reduceMotion ? 0 : -h * 0.02)))
             }
         }
         .coordinateSpace(name: "collage")
@@ -162,12 +164,12 @@ struct ImageCollageCanvas: View {
             if let t = item.thumbnail {
                 Image(decorative: t, scale: 1).resizable().interpolation(.high)
             } else {
-                Color.gray.opacity(0.3)
+                EditorPalette.chip
             }
         }
         .frame(width: max(1, r.width), height: max(1, r.height))
         .opacity(placeholder ? 0.25 : 1)
-        .overlay(placeholder ? RoundedRectangle(cornerRadius: 3).strokeBorder(ImageEditorKit.accent, style: StrokeStyle(lineWidth: 2, dash: [5, 3])) : nil)
+        .overlay(placeholder ? Rectangle().strokeBorder(ImageEditorKit.accent, style: StrokeStyle(lineWidth: 2, dash: [5, 3])) : nil)
         .contentShape(Rectangle())
         .offset(x: r.minX, y: r.minY)
         .onHover { inside in (inside ? NSCursor.openHand : NSCursor.arrow).set() }
@@ -188,14 +190,11 @@ struct ImageCollageSidebar: View {
 
     var body: some View {
         ImageEditorKit.Section(String(localized: "Layout")) {
-            Picker(String(localized: "Layout"), selection: $model.layoutKind) {
-                Label(String(localized: "Grid"), systemImage: "square.grid.2x2").tag(CollageStyle.Layout.grid)
-                Label(String(localized: "Row"), systemImage: "rectangle.split.3x1").tag(CollageStyle.Layout.row)
-                Label(String(localized: "Column"), systemImage: "rectangle.split.1x2").tag(CollageStyle.Layout.column)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: .infinity)
+            EditorChoiceChips(String(localized: "Layout"), selection: $model.layoutKind, options: [
+                .init(.grid, String(localized: "Grid"), systemImage: "square.grid.2x2"),
+                .init(.row, String(localized: "Row"), systemImage: "rectangle.split.3x1"),
+                .init(.column, String(localized: "Column"), systemImage: "rectangle.split.1x2"),
+            ])
             ImageEditorKit.Hint(String(localized: "Images are never cropped: rows are sized to fit each photo whole."))
         }
         ImageEditorKit.Section(String(localized: "Spacing")) {
@@ -205,11 +204,10 @@ struct ImageCollageSidebar: View {
             ImageEditorKit.SwatchPicker(hex: $model.background, swatches: ["#FFFFFF", "#F2F2F7", "#1C1B22", "#000000", "#6E56F8", "#22C3A6"])
         }
         ImageEditorKit.Section(String(localized: "Output width")) {
-            Picker(String(localized: "Output width"), selection: $model.width) {
-                ForEach(ImageCollageModel.widthPresets, id: \.self) { w in Text("\(w) px").tag(w) }
-                if !ImageCollageModel.widthPresets.contains(model.width) { Text("\(model.width) px").tag(model.width) }
-            }
-            .labelsHidden()
+            let widths = ImageCollageModel.widthPresets + (ImageCollageModel.widthPresets.contains(model.width) ? [] : [model.width])
+            EditorChoiceChips(String(localized: "Output width"), selection: $model.width,
+                              options: widths.map { .init($0, String($0)) })
+            ImageEditorKit.Hint(String(localized: "Pixels wide. The height follows the layout."))
         }
         ImageEditorKit.Section(String(localized: "Order")) {
             ImageEditorKit.ReorderList(items: model.items, order: $model.order)

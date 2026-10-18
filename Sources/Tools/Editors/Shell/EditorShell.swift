@@ -3,7 +3,7 @@ import SwiftUI
 import HaloCore
 
 // Shared shell for every tool editor (BUILD.md §7): live preview, before/after
-// toggle, options sidebar, "Save copy" primary button, Esc closes.
+// toggle, options sidebar, "Save copy" primary pill, Esc closes.
 // Contract between lanes G1 (image + metadata tools) and G2 (video, audio, PDF
 // tools). Editors supply `preview(showOriginal:)` and `sidebar`; the shell owns
 // layout, keyboard, window chrome and the save flow.
@@ -38,7 +38,16 @@ public extension ToolEditorModel {
     var statusLine: String? { nil }
 }
 
-/// The standard editor layout.
+extension ToolEditorModel {
+    /// The line under the editor's title: the file name, or how many files.
+    var editorSubject: String {
+        inputs.count == 1 ? inputs[0].lastPathComponent : String(localized: "\(inputs.count) files")
+    }
+}
+
+/// The standard editor layout: the canvas in a black well on the left with the
+/// compare toggle and status under it; on the right the editor's name in heavy
+/// display type, its options as charcoal tiles, then Cancel and Save copy.
 public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>: View {
     @ObservedObject var model: Model
     let preview: (_ showOriginal: Bool) -> Preview
@@ -60,63 +69,70 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
     }
 
     public var body: some View {
-        HStack(spacing: 0) {
-            VStack(spacing: 0) {
+        HStack(alignment: .top, spacing: EditorTokens.gutter) {
+            VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
                 ZStack(alignment: .topLeading) {
                     preview(showOriginal)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(nsColor: .underPageBackgroundColor))
                     if showOriginal {
-                        Text("Original", bundle: .main)
-                            .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                            .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(.thinMaterial, in: Capsule())
+                        OverlayBadge(text: String(localized: "Original"))
                             .padding(DesignTokens.Space.m)
                             .accessibilityHidden(true)
                     }
                 }
-                Divider()
+                .background(EditorPalette.canvas)
+                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
                 HStack(spacing: DesignTokens.Space.m) {
-                    Toggle(isOn: $showOriginal) {
-                        Label(String(localized: "Before / After"), systemImage: "square.split.2x1")
-                    }
-                    .toggleStyle(.button)
-                    .help(String(localized: "Compare with the original (B)"))
-                    .keyboardShortcut("b", modifiers: [])
+                    BeforeAfterToggle(showOriginal: $showOriginal)
                     if let s = model.statusLine {
-                        Text(s).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(.secondary)
+                        Text(s)
+                            .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium).monospacedDigit())
+                            .foregroundStyle(Color.haloSecondaryText)
                             .lineLimit(1).truncationMode(.middle)
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
-                .padding(.horizontal, DesignTokens.Space.l)
-                .padding(.vertical, DesignTokens.Space.s)
             }
-            Divider()
             VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
+                    DisplayText(EditorTitle.display(model.tool), size: EditorTokens.titleSize)
+                        .lineLimit(1)
+                        .foregroundStyle(Color.haloInk)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(model.editorSubject)
+                        .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
+                        .foregroundStyle(Color.haloSecondaryText)
+                        .lineLimit(1).truncationMode(.middle)
+                }
+                .padding(.bottom, DesignTokens.Space.l)
                 ScrollView {
-                    VStack(alignment: .leading, spacing: DesignTokens.Space.l) {
+                    VStack(alignment: .leading, spacing: EditorTokens.sectionSpacing) {
                         sidebar()
                     }
-                    .padding(DesignTokens.Space.l)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                Divider()
-                HStack {
+                HStack(spacing: DesignTokens.Space.s) {
                     Button(String(localized: "Cancel"), action: onClose)
+                        .buttonStyle(.haloQuiet)
                         .keyboardShortcut(.cancelAction)
-                    Spacer()
+                    Spacer(minLength: 0)
                     Button(String(localized: "Save copy")) {
                         onSave(EditorResult(tool: model.tool.id, inputs: model.inputs, options: model.options))
                     }
+                    .buttonStyle(HaloPillButtonStyle(kind: .primary, large: true))
                     .keyboardShortcut(.defaultAction)
                     .disabled(!model.canSave)
                 }
-                .padding(DesignTokens.Space.l)
+                .padding(.top, DesignTokens.Space.l)
             }
             .frame(width: EditorWindow.sidebarWidth)
-            .background(Color(nsColor: .windowBackgroundColor))
         }
+        .buttonStyle(.editorChip)
+        .toggleStyle(.editorSwitch)
+        .padding(EditorTokens.gutter)
+        .foregroundStyle(Color.haloInk, Color.haloSecondaryText)
+        .tint(Color.iris)
+        .background(Color.haloWindow.ignoresSafeArea())
     }
 }
 
@@ -124,8 +140,8 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
 /// `.cancelAction` shortcut). Windows cascade and remember nothing between runs.
 @MainActor
 public final class EditorWindow: NSWindowController, NSWindowDelegate {
-    public static let sidebarWidth: CGFloat = 280
-    public static let defaultSize = NSSize(width: 980, height: 640)
+    public static let sidebarWidth: CGFloat = EditorTokens.sidebarWidth
+    public static let defaultSize = NSSize(width: 1000, height: 660)
     private static var open: [EditorWindow] = []
 
     private var onCloseHandler: (() -> Void)?
@@ -137,9 +153,11 @@ public final class EditorWindow: NSWindowController, NSWindowDelegate {
         let window = NSWindow(contentViewController: hosting)
         window.title = title
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView]
-        window.titlebarAppearsTransparent = false
+        // The chrome is the window: near-black (dark) or white (light), up into the title bar.
+        window.titlebarAppearsTransparent = true
+        window.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
         window.setContentSize(size)
-        window.contentMinSize = NSSize(width: 720, height: 460)
+        window.contentMinSize = NSSize(width: 760, height: 480)
         window.isReleasedWhenClosed = false
         window.center()
         if let last = open.last?.window {
