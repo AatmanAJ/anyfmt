@@ -108,8 +108,43 @@ public enum PDFTableExtractor {
         return out
     }
 
-    /// Column bands = maximal x-intervals covered by segments of the block's multi-cell lines.
+    /// Table regions on a page for document reconstruction: ≥ 3 rows and ≥ 2
+    /// columns of short cells (prose in two columns has long segments and is rejected).
+    public static func tables(_ page: PDFPage) -> [(rect: CGRect, table: DocTable)] {
+        let ls = lines(words(page))
+        var out: [(CGRect, DocTable)] = []
+        var i = 0
+        while i < ls.count {
+            guard ls[i].segments.count >= 2 else { i += 1; continue }
+            var j = i
+            while j < ls.count, ls[j].segments.count >= 2 { j += 1 }
+            let block = Array(ls[i..<j])
+            let segs = block.flatMap(\.segments)
+            let avg = Double(segs.map(\.text.count).reduce(0, +)) / Double(max(segs.count, 1))
+            if block.count >= 3, avg <= 32 {
+                let grid = gridText(block)
+                let cols = grid.map(\.count).max() ?? 0
+                if cols >= 2 {
+                    let rows = grid.enumerated().map { k, r in
+                        DocTableRow(r.map { DocTableCell(inlines: $0.isEmpty ? [] : [.text($0)]) },
+                                    isHeader: k == 0 && r.allSatisfy { !$0.isEmpty && Cell.number($0.replacingOccurrences(of: ",", with: ""), decimalComma: false) == nil })
+                    }
+                    let rect = block.map(\.rect).reduce(CGRect.null) { $0.union($1) }
+                    out.append((rect, DocTable(rows: rows)))
+                }
+            }
+            i = j
+        }
+        return out
+    }
+
+    /// Typed grid for spreadsheets.
     static func grid(_ block: [Line]) -> [[Cell]] {
+        gridText(block).map { $0.map { $0.isEmpty ? Cell.empty : cell($0) } }
+    }
+
+    /// Column bands = maximal x-intervals covered by segments of the block's multi-cell lines.
+    static func gridText(_ block: [Line]) -> [[String]] {
         let h = block.map(\.height).sorted()[block.count / 2]
         var intervals: [(CGFloat, CGFloat)] = []
         for l in block where l.segments.count >= 2 { for s in l.segments { intervals.append((s.rect.minX, s.rect.maxX)) } }
@@ -118,9 +153,9 @@ public enum PDFTableExtractor {
         for iv in intervals {
             if let last = bands.last, iv.0 <= last.1 + h * 0.3 { bands[bands.count - 1].1 = max(last.1, iv.1) } else { bands.append(iv) }
         }
-        guard bands.count >= 2 else { return block.map { [cell($0.segments.map(\.text).joined(separator: " "))] } }
+        guard bands.count >= 2 else { return block.map { [$0.segments.map(\.text).joined(separator: " ")] } }
         return block.map { l in
-            var row = [Cell](repeating: .empty, count: bands.count)
+            var row = [String](repeating: "", count: bands.count)
             for s in l.segments {
                 // Band with the largest overlap (nearest centre as a tiebreak).
                 var best = 0
@@ -130,7 +165,7 @@ public enum PDFTableExtractor {
                     let score = overlap > 0 ? overlap : -abs((b.0 + b.1) / 2 - s.rect.midX)
                     if score > bestScore { bestScore = score; best = k }
                 }
-                if case .empty = row[best] { row[best] = cell(s.text) } else { row[best] = cell(row[best].text + " " + s.text) }
+                row[best] = row[best].isEmpty ? s.text : row[best] + " " + s.text
             }
             return row
         }

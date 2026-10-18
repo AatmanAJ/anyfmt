@@ -105,5 +105,15 @@ final class PDFRouteTests: XCTestCase {
         XCTAssertEqual(grid[1], [.string("North"), .number(1200), .number(1350), .number(2550)])
         XCTAssertEqual(grid[4][3], .number(1520))
         XCTAssertEqual(wb.sheets[0].rows.first?.first?.text, "Sales", "text outside the table is kept as rows")
+        // PDF → document reconstruction gets a real table too (cells keep their original text).
+        let model = try PDFDocReader.read(pdf)
+        XCTAssertEqual(model.headings().first?.1, "Sales")
+        let t = try XCTUnwrap(model.firstTable(), "\(model.blocks)")
+        XCTAssertEqual(t.rows.count, 5)
+        XCTAssertEqual(t.columnCount, 4)
+        XCTAssertTrue(t.rows[0].isHeader)
+        XCTAssertEqual(t.rows[1].cells.map { $0.blocks.map(\.plainText).joined() }, ["North", "1,200", "1,350", "2,550"])
+        XCTAssertFalse(model.text.contains("Region North"), "cell text isn't duplicated as paragraphs")
+        XCTAssertTrue(model.blocks.contains(.paragraph([.text("Figures by region.")])))
     }
 }

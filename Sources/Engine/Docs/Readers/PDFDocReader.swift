@@ -28,6 +28,7 @@ public enum PDFDocReader {
     enum Element {
         case line(Line)
         case image(DocImage, y: CGFloat)
+        case table(DocTable, y: CGFloat)
     }
 
     public static func read(_ url: URL, options: Options = Options()) throws -> DocModel {
@@ -42,6 +43,23 @@ public enum PDFDocReader {
         for i in 0..<doc.pageCount {
             guard let page = doc.page(at: i) else { continue }
             var elements = lines(page, index: i).map(Element.line)
+            // Tables: geometry-based grid detection replaces the cells' text lines.
+            let tables = PDFTableExtractor.tables(page)
+            if !tables.isEmpty {
+                elements.removeAll { e in
+                    guard case .line(let l) = e else { return false }
+                    return tables.contains { $0.rect.insetBy(dx: -2, dy: -2).contains(CGPoint(x: l.rect.midX, y: l.rect.midY)) }
+                }
+                for t in tables.sorted(by: { $0.rect.midY > $1.rect.midY }) {
+                    let idx = elements.firstIndex { e in
+                        switch e {
+                        case .line(let l): return l.rect.midY < t.rect.midY
+                        case .image(_, let y), .table(_, let y): return y < t.rect.midY
+                        }
+                    } ?? elements.count
+                    elements.insert(.table(t.table, y: t.rect.midY), at: idx)
+                }
+            }
             if options.images {
                 let imgs = PDFImageExtractor.images(page)
                 elements = merge(elements, images: imgs, pageHeight: page.bounds(for: .mediaBox).height)
@@ -127,9 +145,10 @@ public enum PDFDocReader {
         // Top of page first: insert each image before the first line that sits below its middle.
         for (im, rect) in images.sorted(by: { $0.1.midY > $1.1.midY }) {
             let idx = out.firstIndex { e in
-                if case .line(let l) = e { return l.rect.midY < rect.midY }
-                if case .image(_, let y) = e { return y < rect.midY }
-                return false
+                switch e {
+                case .line(let l): return l.rect.midY < rect.midY
+                case .image(_, let y), .table(_, let y): return y < rect.midY
+                }
             } ?? out.count
             out.insert(.image(im, y: rect.midY), at: idx)
         }
@@ -187,6 +206,7 @@ public enum PDFDocReader {
         var bold: Bool
         var page: Int
         var image: DocImage?
+        var table: DocTable?
         var text: String { inlines.plainText }
     }
 
@@ -198,6 +218,7 @@ public enum PDFDocReader {
         // Body size: most common size by characters.
         var weight: [Double: Int] = [:]
         for p in pages { for case .line(let l) in p { weight[l.size, default: 0] += l.text.count } }
+        if weight.isEmpty { weight[11] = 1 }
         let body = weight.max { $0.value < $1.value }?.key ?? 11
         // Left edge of body text for list indentation.
         var lefts: [CGFloat] = []
@@ -215,6 +236,9 @@ public enum PDFDocReader {
                 case .image(let im, _):
                     flush(); prev = nil
                     out.append(Para(lines: [], inlines: [], size: body, bold: false, page: -1, image: im))
+                case .table(let t, _):
+                    flush(); prev = nil
+                    out.append(Para(lines: [], inlines: [], size: body, bold: false, page: -1, image: nil, table: t))
                 case .line(let l):
                     if let pl = prev, var c = cur, !startsNewParagraph(pl, l, body: body) {
                         c.inlines = join(c.inlines, l.runs)
@@ -252,6 +276,7 @@ public enum PDFDocReader {
         for (pi, page) in paras.enumerated() {
             for (k, p) in page.enumerated() {
                 if let im = p.image { flushList(); blocks.append(.image(im)); continue }
+                if let t = p.table { flushList(); blocks.append(.table(t)); continue }
                 let text = p.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !text.isEmpty else { continue }
                 // Rejoin a paragraph split across a page break.
@@ -287,8 +312,8 @@ public enum PDFDocReader {
             }
             if pageBreaks, pi < paras.count - 1 {
                 // Page break only if the next page doesn't continue this paragraph.
-                let nextFirst = paras[pi + 1].first(where: { $0.image != nil || !$0.text.trimmingCharacters(in: .whitespaces).isEmpty })
-                if case .paragraph(let inl)? = blocks.last, let nf = nextFirst, nf.image == nil, nf.size == body,
+                let nextFirst = paras[pi + 1].first(where: { $0.image != nil || $0.table != nil || !$0.text.trimmingCharacters(in: .whitespaces).isEmpty })
+                if case .paragraph(let inl)? = blocks.last, let nf = nextFirst, nf.image == nil, nf.table == nil, nf.size == body,
                    continues(inl.plainText, nf.text.trimmingCharacters(in: .whitespaces)) {
                     continue
                 }
@@ -302,7 +327,7 @@ public enum PDFDocReader {
     }
 
     static func isHeadingCandidate(_ p: Para, body: Double) -> Bool {
-        guard p.image == nil, p.size >= body * 1.18, p.lines.count <= 3 else { return false }
+        guard p.image == nil, p.table == nil, p.size >= body * 1.18, p.lines.count <= 3 else { return false }
         let t = p.text.trimmingCharacters(in: .whitespacesAndNewlines)
         return !t.isEmpty && t.count <= 200
     }
