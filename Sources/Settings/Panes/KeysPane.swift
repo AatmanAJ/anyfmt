@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct KeysPane: View {
     @ObservedObject var model: SettingsModel
@@ -43,7 +43,7 @@ struct KeysPane: View {
             Section {
                 LabeledContent {
                     HStack(spacing: DesignTokens.Space.s) {
-                        Text("Quick").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
+                        Text("Quick").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.anyfmtSecondaryText)
                         Slider(value: Binding(get: { settings.tapThreshold }, set: { new in
                             settings.tapThreshold = OptionsFormLogic.snap(new, min: 0.15, max: 0.8, step: 0.05)
                             model.hooks.onTriggerKeysChanged?()
@@ -54,7 +54,7 @@ struct KeysPane: View {
                         .accessibilityLabel(Text("Tap speed"))
                         .accessibilityValue(Text(verbatim: OptionsFormLogic.display(settings.tapThreshold, decimals: 2, unit: "s")))
                         .accessibilityIdentifier("keys.tapThreshold")
-                        Text("Relaxed").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
+                        Text("Relaxed").font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.anyfmtSecondaryText)
                         Text(verbatim: OptionsFormLogic.display(settings.tapThreshold, decimals: 2, unit: "s"))
                             .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold).monospacedDigit())
                             .frame(width: DesignTokens.Component.Settings.readoutWidth, alignment: .trailing)
@@ -140,7 +140,7 @@ private struct TriggerRow: View {
                     Text(verbatim: role.title)
                     Text(verbatim: role.summary)
                         .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                 }
             }
         }
@@ -157,7 +157,7 @@ private struct ServicesNote: View {
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                 Text("Right-click files › Services › Open in \(Brand.name) Wheel. Give it a shortcut in Keyboard Shortcuts › Services › Files and Folders.")
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: DesignTokens.Space.s)
@@ -253,13 +253,13 @@ private struct TapTestArea: View {
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                 Text(verbatim: subtitle)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
             Spacer()
         }
         .padding(DesignTokens.Space.m)
-        .background(shape.fill(Color.haloTile))
-        .haloBorder(shape, tester.result == .idle ? Color.haloHairline : tint,
+        .background(shape.fill(Color.anyfmtTile))
+        .anyfmtBorder(shape, tester.result == .idle ? Color.anyfmtHairline : tint,
                     width: tester.result == .idle ? DesignTokens.Shape.hairline : DesignTokens.Component.Focus.ringWidth)
         .animation(reduceMotion ? nil : .easeOut(duration: DesignTokens.Motion.crossfade), value: tester.result)
         .onAppear { tester.threshold = threshold; tester.start() }
@@ -314,7 +314,7 @@ private struct TapTestArea: View {
     private var tint: Color {
         switch tester.result {
         case .idle, .pressing: .accentText
-        case .tap: .haloSuccess
+        case .tap: .anyfmtSuccess
         case .held, .chord: Color.token(DesignTokens.Component.StatusBadge.waiting)
         }
     }

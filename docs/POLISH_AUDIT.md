@@ -18,11 +18,11 @@ the reason · 👁 needs hands on real hardware (BLOCKERS B-001)
 | Palette: cobalt / orange / flame on near-black. No purple, no green, no gold. Errors always carry an icon and a label | 🔧 |
 | Type: Inter Display for format names, headlines and numerals (OFL, D-039); SF Pro everywhere else | 🔧 |
 | Two radii (tile, pill) plus the wheel's segment corner. One elevation shadow. No glow, no glass on the wheel | 🔧 |
-| Motion: named curves (`DesignTokens.Curve`: snap, glide, settle, exit) through `HaloMotion`. Reduce Motion becomes a ≤ 120 ms crossfade on every surface | 🔧 |
+| Motion: named curves (`DesignTokens.Curve`: snap, glide, settle, exit) through `AnyfmtMotion`. Reduce Motion becomes a ≤ 120 ms crossfade on every surface | 🔧 |
 | Increased Contrast / Reduce Transparency: bands become flat fills and outlines appear, on the wheel, cards, onboarding and cloud screens | 🔧 |
 | Contrast: every semantic text pair is AA. White on orange (2.2:1, as in the reference) is never used; orange takes black text | 🔧 |
 | App icon, menu bar glyph and DMG background in the new palette, with small icon sizes redrawn rather than scaled | 🔧 |
-| Strokes on rounded shapes notch in offscreen renders on this macOS, so borders that matter are drawn as fills (`haloBorder`, `PillBorder`). Live rendering is unaffected | ⚖️ |
+| Strokes on rounded shapes notch in offscreen renders on this macOS, so borders that matter are drawn as fills (`anyfmtBorder`, `PillBorder`). Live rendering is unaffected | ⚖️ |
 | Focus rings on custom pills use SwiftUI's ring in the system accent. Visible, but not cobalt; matching the user's accent is also what Mac apps do | ⚖️ |
 | Settings screenshots render light and dark only; cloud screens also render Increased Contrast | ⚖️ |
 
@@ -88,13 +88,13 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 
 ## The wheel
 
-| Moment | Reference | Halo | Verdict |
+| Moment | Reference | anyfmt | Verdict |
 |---|---|---|---|
 | Open | ≈ 100–130 ms, whole wheel scales up from ≈ 0.5 + fade | ≤ 150 ms, segments stagger out from the hub (8 ms apart), first segment at once; Reduce Motion → 120 ms crossfade | ✅ Reads as fanning out, not a blob growing. Within budget. |
 | Key tap → visible | not measurable | ≈ 30 ms p95 (D-001, lane B) | ✅ |
 | Segment count | 5–8, single ring | 1–8 on one ring; 9–20 add an outer arc; > 20 pages with dots + "More" | ✅ Images have 11 targets; the reference shows ≤ 8 |
 | Hover | instant orange fill, no visible lift | spring lift (1.06 scale, 5 pt outward) + iris fill; hysteresis prevents flicker | ✅ |
-| Hover haptics | n/a | called on segment change; macOS ignores it while Halo isn't the active app, which is always the case mid-drag | ⚖️ Platform limit; the only workaround is private API. Works in selection/drop-ring modes. |
+| Hover haptics | n/a | called on segment change; macOS ignores it while anyfmt isn't the active app, which is always the case mid-drag | ⚖️ Platform limit; the only workaround is private API. Works in selection/drop-ring modes. |
 | Wheel switch (⇧ → ⌘ → ⌃) | ≈ 100 ms crossfade in place | 160 ms morph: wedges interpolate angles, labels crossfade | ✅ |
 | Hub | thumbnail + label pill (hovered name / file size) | QuickLook thumbnail, stacked badge for multi-file, pill shows hovered target / size / "No conversions" | ✅ |
 | Multi-hop targets | not shown | subtle "via PNG" subtitle | ✅ |
@@ -108,7 +108,7 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 
 ## Progress windows
 
-| Moment | Reference | Halo | Verdict |
+| Moment | Reference | anyfmt | Verdict |
 |---|---|---|---|
 | Card | ≈ 260 × 70: ✕, title, file name + %, bar | 288 × 70: icon/thumbnail, title, bar, "42% · About 12 s left", ✕ | ✅ adds ETA + thumbnail |
 | Placement | top-centre or near the file | just below the drop point, kept on that display | ✅ |
@@ -120,7 +120,7 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 
 ## Editors
 
-| Moment | Reference | Halo | Verdict |
+| Moment | Reference | anyfmt | Verdict |
 |---|---|---|---|
 | Shell | compact floating card (≈ 290 × 390), Apply | standard window, live preview, options sidebar, **Before / After** (B), "Save copy", Esc | ✅ "Save copy" says out loud that nothing is overwritten |
 | Crop video | aspect popup, size readout, W/H sliders, scrubber | rect overlay on the real frame, aspect presets, W/H readout, scrubber; 4:3 really is 4:3 | ✅ |
@@ -132,7 +132,7 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 
 ## Actions and Float
 
-| Moment | Reference | Halo | Verdict |
+| Moment | Reference | anyfmt | Verdict |
 |---|---|---|---|
 | Control wheel | 6 actions | 6 actions + Pro share link (chip) | ✅ |
 | Float shelf | "Float" | pile with count, hover grid, drag-out (⌥ keeps), drop-in, menus, physics, VoiceOver | ✅ |
@@ -141,7 +141,7 @@ we accept, with the reason · 👁 needs the real-hardware look (BLOCKERS B-001)
 
 ## App shell
 
-| Moment | Reference | Halo | Verdict |
+| Moment | Reference | anyfmt | Verdict |
 |---|---|---|---|
 | Menu bar | menu | our template ring glyph; recents (10), Float toggle, Settings, updates (opt-in), About; ⌥ shows Wheel Gallery | ✅ |
 | Onboarding | not shown | 4 screens; live demo where you drag a sample and tap the real keys; permissions coach with live grant detection; login item; update opt-in | ✅ |

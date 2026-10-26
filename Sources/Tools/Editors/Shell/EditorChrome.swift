@@ -1,10 +1,10 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 // Building blocks for every editor window in the phase 2 language (PLAN-PHASE2 §2):
 // near-black chrome, charcoal tiles in the sidebar, heavy uppercase titles, cobalt
-// for selection, and canvas marks drawn with a dark halo + white rim + cobalt core
+// for selection, and canvas marks drawn with a dark anyfmt + white rim + cobalt core
 // so they read on any picture. Shared by the image and media editors.
 
 typealias EditorTokens = DesignTokens.Component.Editor
@@ -18,7 +18,7 @@ enum EditorPalette {
     static let warning = Color.token(EditorTokens.warning)
     static let overlayCore = Color(hex: EditorTokens.Overlay.core)
     static let overlayRim = Color(hex: EditorTokens.Overlay.rim)
-    static let overlayHalo = Color(hex: EditorTokens.Overlay.halo)
+    static let overlayHalo = Color(hex: EditorTokens.Overlay.anyfmt)
     /// Text that sits on an orange or flame fill (black, 6.3:1 or better).
     static let onWarm = Color(hex: DesignTokens.Semantic.onAccentSecondary)
     static let orange = Color(hex: DesignTokens.Primitive.orange500)
@@ -69,10 +69,10 @@ struct EditorSection<Content: View>: View {
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .haloTile(padding: EditorTokens.sectionPadding)
+        .anyfmtTile(padding: EditorTokens.sectionPadding)
         .overlay {
             if contrast == .increased {
-                RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).strokeBorder(Color.haloSecondaryText)
+                RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).strokeBorder(Color.anyfmtSecondaryText)
             }
         }
     }
@@ -88,7 +88,7 @@ struct EditorCaption: View {
             .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
             .tracking(0.6)
             .textCase(.uppercase)
-            .foregroundStyle(Color.haloSecondaryText)
+            .foregroundStyle(Color.anyfmtSecondaryText)
             .accessibilityAddTraits(.isHeader)
     }
 }
@@ -115,8 +115,8 @@ struct EditorChipButtonStyle: ButtonStyle {
             .background {
                 Capsule().fill(selected ? EditorPalette.selected : EditorPalette.chip)
                     // Light needs an edge (white on light grey); dark reads by fill alone.
-                    .overlay(Capsule().stroke(contrast == .increased ? Color.haloSecondaryText
-                                              : (selected || scheme == .dark ? Color.clear : Color.haloHairline),
+                    .overlay(Capsule().stroke(contrast == .increased ? Color.anyfmtSecondaryText
+                                              : (selected || scheme == .dark ? Color.clear : Color.anyfmtHairline),
                                               lineWidth: DesignTokens.Shape.hairline))
             }
             .contentShape(Capsule())
@@ -125,7 +125,7 @@ struct EditorChipButtonStyle: ButtonStyle {
 
     private func foreground(_ role: ButtonRole?) -> Color {
         if selected { return EditorPalette.onSelected }
-        return role == .destructive ? Color.haloDanger : Color.haloInk
+        return role == .destructive ? Color.anyfmtDanger : Color.anyfmtInk
     }
 }
 
@@ -188,14 +188,14 @@ struct EditorCellButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: DesignTokens.TypeRamp.caption, weight: selected ? .bold : .medium))
-            .foregroundStyle(selected ? EditorPalette.onSelected : Color.haloInk)
+            .foregroundStyle(selected ? EditorPalette.onSelected : Color.anyfmtInk)
             .frame(maxWidth: .infinity, minHeight: EditorTokens.cellHeight)
             .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
                 .fill(selected ? EditorPalette.selected : EditorPalette.chip))
             .overlay {
                 if !selected || contrast == .increased {
                     RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
-                        .strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline, lineWidth: DesignTokens.Shape.hairline)
+                        .strokeBorder(contrast == .increased ? Color.anyfmtSecondaryText : Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline)
                 }
             }
             .contentShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
@@ -224,14 +224,14 @@ private struct EditorSwitchBody: View {
             HStack(spacing: DesignTokens.Space.s) {
                 configuration.label
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(Color.haloInk)
+                    .foregroundStyle(Color.anyfmtInk)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ZStack(alignment: on ? .trailing : .leading) {
                     Capsule().fill(on ? EditorPalette.selected : EditorPalette.chip)
-                        .overlay(Capsule().strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline,
+                        .overlay(Capsule().strokeBorder(contrast == .increased ? Color.anyfmtSecondaryText : Color.anyfmtHairline,
                                                         lineWidth: DesignTokens.Shape.hairline))
                     Circle().fill(Color(hex: DesignTokens.Primitive.paper0))
-                        .overlay(Circle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                        .overlay(Circle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                         .padding(DesignTokens.Space.xxs)
                 }
                 .frame(width: size.width, height: size.height)
@@ -267,17 +267,17 @@ struct EditorStateView: View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.m) {
             glyph
             DisplayText(title, size: EditorTokens.stateTitleSize)
-                .foregroundStyle(Color.haloInk)
+                .foregroundStyle(Color.anyfmtInk)
                 .fixedSize(horizontal: false, vertical: true)
             if let message {
                 Text(verbatim: message)
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: EditorTokens.stateMaxWidth, alignment: .leading)
-        .haloTile(padding: DesignTokens.Space.xl)
+        .anyfmtTile(padding: DesignTokens.Space.xl)
         .accessibilityElement(children: .combine)
     }
 
@@ -289,7 +289,7 @@ struct EditorStateView: View {
         case .problem:
             Image(systemName: systemImage ?? "exclamationmark.triangle.fill")
                 .font(.system(size: EditorTokens.stateGlyphSize, weight: .semibold))
-                .foregroundStyle(Color.haloDanger)
+                .foregroundStyle(Color.anyfmtDanger)
                 .accessibilityLabel(String(localized: "Problem"))
         case .empty:
             Image(systemName: systemImage ?? "photo")
@@ -311,7 +311,7 @@ extension EditorStateView {
 
 // MARK: - Canvas marks
 
-/// A path stroked as dark halo + white rim + cobalt core, legible on any pixels.
+/// A path stroked as dark anyfmt + white rim + cobalt core, legible on any pixels.
 struct OverlayStroke: View {
     let path: Path
     var dash: [CGFloat] = []
@@ -323,9 +323,9 @@ struct OverlayStroke: View {
     var body: some View {
         let o = EditorTokens.Overlay.self
         let core = width ?? (contrast == .increased ? o.lineWidthIncreased : o.lineWidth)
-        let rim = core + o.rimWidth * 2, halo = quiet ? core + o.haloWidth : rim + o.haloWidth * 2
+        let rim = core + o.rimWidth * 2, anyfmt = quiet ? core + o.haloWidth : rim + o.haloWidth * 2
         ZStack {
-            path.stroke(EditorPalette.overlayHalo.opacity(contrast == .increased ? o.haloOpacityIncreased : o.haloOpacity), style: style(halo))
+            path.stroke(EditorPalette.overlayHalo.opacity(contrast == .increased ? o.haloOpacityIncreased : o.haloOpacity), style: style(anyfmt))
             path.stroke(EditorPalette.overlayRim, style: style(quiet ? core : rim))
             if !quiet { path.stroke(EditorPalette.overlayCore, style: style(core)) }
         }
@@ -338,7 +338,7 @@ struct OverlayStroke: View {
     }
 }
 
-/// A drag handle: cobalt with a white rim and a dark halo. Square for resize
+/// A drag handle: cobalt with a white rim and a dark anyfmt. Square for resize
 /// handles, round for points.
 struct OverlayHandle: View {
     var round = false
@@ -347,9 +347,9 @@ struct OverlayHandle: View {
 
     var body: some View {
         let o = EditorTokens.Overlay.self
-        let halo = EditorPalette.overlayHalo.opacity(contrast == .increased ? o.haloOpacityIncreased : o.haloOpacity)
+        let anyfmt = EditorPalette.overlayHalo.opacity(contrast == .increased ? o.haloOpacityIncreased : o.haloOpacity)
         ZStack {
-            shape.fill(halo).frame(width: size + o.haloWidth * 2, height: size + o.haloWidth * 2)
+            shape.fill(anyfmt).frame(width: size + o.haloWidth * 2, height: size + o.haloWidth * 2)
             shape.fill(EditorPalette.overlayRim).frame(width: size, height: size)
             shape.fill(EditorPalette.overlayCore).frame(width: size - o.rimWidth * 3, height: size - o.rimWidth * 3)
         }
@@ -359,7 +359,7 @@ struct OverlayHandle: View {
     private var shape: AnyShape { round ? AnyShape(Circle()) : AnyShape(Rectangle()) }
 }
 
-/// A short readout pinned on the canvas ("882 × 662", "Original"): white on the dark halo colour.
+/// A short readout pinned on the canvas ("882 × 662", "Original"): white on the dark anyfmt colour.
 struct OverlayBadge: View {
     let text: String
     var accent = false

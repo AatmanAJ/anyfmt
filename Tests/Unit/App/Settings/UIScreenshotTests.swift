@@ -1,6 +1,6 @@
 import XCTest
 import AppKit
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Renders every Settings pane, onboarding screen and About offscreen (D-025).
 /// By default into a temp folder (checks nothing crashes and every image has
@@ -10,14 +10,14 @@ import AppKit
 @MainActor
 final class UIScreenshotTests: XCTestCase {
     private var outputDirectory: URL {
-        if ProcessInfo.processInfo.environment["HALO_WRITE_SCREENS"] == "1" {
+        if ProcessInfo.processInfo.environment["ANYFMT_WRITE_SCREENS"] == "1" {
             // Tests/Unit/App/Settings/<this file> → repo root
             return URL(fileURLWithPath: #filePath)
                 .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
                 .deletingLastPathComponent().deletingLastPathComponent()
                 .appendingPathComponent("docs/screens", isDirectory: true)
         }
-        return FileManager.default.temporaryDirectory.appendingPathComponent("halo-screens-\(UUID().uuidString)", isDirectory: true)
+        return FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-screens-\(UUID().uuidString)", isDirectory: true)
     }
 
     func testRendersEveryScreen() throws {

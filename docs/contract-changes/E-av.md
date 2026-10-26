@@ -83,8 +83,8 @@ and `.cpu` otherwise.
 
 ## E-5 Docs and repo nits found while working
 
-- LANE_RULES.md says `-only-testing:HaloCoreTests/<Class>`, but the test
-  *target* is `CoreTests` (its product is HaloCoreTests). The working form is
+- LANE_RULES.md says `-only-testing:AnyfmtCoreTests/<Class>`, but the test
+  *target* is `CoreTests` (its product is AnyfmtCoreTests). The working form is
   `-only-testing:CoreTests/<Class>`.
 - A fresh worktree has no `Sources/{Wheel,Cloud,Actions,Settings,Jobs/UI}`
   (git doesn't track empty directories), so `xcodegen generate` fails.
@@ -97,8 +97,8 @@ and `.cpu` otherwise.
   source filters inside `-filter_complex` (as `Tests/Fixtures/lanes/av.sh`
   does), not use `-f lavfi -i …`.
 - **`make matrix` will fail to launch as configured.** A Release
-  `halo-matrix` (and the Release CLI) is ad-hoc signed with hardened
-  runtime, so library validation refuses the ad-hoc `HaloCore.framework`:
+  `anyfmt-matrix` (and the Release CLI) is ad-hoc signed with hardened
+  runtime, so library validation refuses the ad-hoc `AnyfmtCore.framework`:
   `dyld: … not valid for use in process: mapping process and mapped file
   (non-platform) have different Team IDs`. Debug builds run. Possible fixes
   (Config/Makefile, not lane E): set `ENABLE_HARDENED_RUNTIME = NO` for the

@@ -147,7 +147,7 @@ animated with timing and loop. → AVIF: animated from GIF only. TIFF pages: fir
 ## Contract change requests
 
 See `docs/contract-changes/D-image.md`: add `StandardSchemas.imageOpaqueLossless`; reserve `EngineIDs.pdfKit`
-for lane D; let tests see `HALO_ENGINES_DIR`; matrix note for animated AVIF; new localisable strings.
+for lane D; let tests see `ANYFMT_ENGINES_DIR`; matrix note for animated AVIF; new localisable strings.
 
 ## Tests (Tests/Unit/Core/Image, target CoreTests)
 
@@ -185,7 +185,7 @@ for lane D; let tests see `HALO_ENGINES_DIR`; matrix note for animated AVIF; new
   (rotated by the thumbnail decoder)**, Debug build, M5 Max. Budget 400 ms.
 
 Run: `xcodebuild … test -only-testing:CoreTests/ImageIOEngineTests` (and the other class names). Tests find the
-bundled engines through `HALO_ENGINES_DIR` or by walking up from the test file to `Engines/dist`.
+bundled engines through `ANYFMT_ENGINES_DIR` or by walking up from the test file to `Engines/dist`.
 
 ## Fixtures
 

@@ -15,7 +15,7 @@ export interface paths {
          * Liveness + identity check
          * @description Unauthenticated. The app calls this only when the user presses
          *     "Validate" next to the Server URL field, to confirm the URL points
-         *     at a Halo-compatible server before they sign in.
+         *     at an anyfmt-compatible server before they sign in.
          */
         get: operations["getHealth"];
         put?: never;
@@ -42,7 +42,7 @@ export interface paths {
          *
          *     When the user opens the magic link, the server redirects the browser
          *     to `redirect_uri?code=…&state=…`, which macOS hands to the app via its
-         *     registered URL scheme (`halo://auth/callback`, scheme derived from
+         *     registered URL scheme (`anyfmt://auth/callback`, scheme derived from
          *     the brand). If the user opens the link on another device, the page
          *     instead shows the `code` so they can type it into the app; the PKCE
          *     verifier (kept in the app) is still required to redeem it.
@@ -618,7 +618,7 @@ export interface paths {
         put?: never;
         /**
          * Start a conversion
-         * @description `options` keys are Halo option keys from the target's option
+         * @description `options` keys are anyfmt option keys from the target's option
          *     schema (`GET /v1/schema`, `optionSchemas[].id` named by the
          *     route's `optionsSchema`). Unknown keys, wrong types and values out
          *     of range are `422 validation_failed` with `error.details.fields`.
@@ -691,7 +691,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The whole registry (formats, routes, option schemas, tools, presets) in the shape `halo schema --json` prints */
+        /** The whole registry (formats, routes, option schemas, tools, presets) in the shape `anyfmt schema --json` prints */
         get: operations["getSchema"];
         put?: never;
         post?: never;
@@ -714,7 +714,7 @@ export interface paths {
         /**
          * Register a webhook endpoint; its signing secret is returned once
          * @description Deliveries are `POST`s with a JSON `WebhookEvent` body and a
-         *     `Halo-Signature` header (see the `conversionSucceeded` webhook and
+         *     `Anyfmt-Signature` header (see the `conversionSucceeded` webhook and
          *     docs/API.md). URLs must be `https` (the mock also accepts
          *     `http://127.0.0.1` / `localhost`). A server must refuse URLs that
          *     resolve to private, loopback or link-local addresses.
@@ -817,13 +817,13 @@ export interface webhooks {
         put?: never;
         /**
          * `conversion.succeeded`, sent to subscribed endpoints
-         * @description Verify `Halo-Signature` before trusting the body:
+         * @description Verify `Anyfmt-Signature` before trusting the body:
          *     `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>`.
          *     Reject when `|now - t| > 300` (5 minutes). There may be more than
          *     one `v1=` during a secret rotation; accept if any matches. Answer
          *     any `2xx` within 10 s. Anything else (or a timeout) is retried with
          *     exponential backoff (about 1 min, 5 min, 30 min, 2 h, 6 h, 12 h,
-         *     24 h: 8 attempts over roughly 2 days); `Halo-Delivery-Attempt`
+         *     24 h: 8 attempts over roughly 2 days); `Anyfmt-Delivery-Attempt`
          *     counts from 1. Deliveries can repeat and arrive out of order:
          *     dedupe on `WebhookEvent.id` and trust `data.conversion.status`.
          */
@@ -902,7 +902,7 @@ export interface components {
              * @constant
              */
             api: "1";
-            /** @description Display name, e.g. "Halo Cloud" or "Acme self-hosted". */
+            /** @description Display name, e.g. "anyfmt Cloud" or "Acme self-hosted". */
             name?: string;
             /** @description Server build version. */
             version?: string;
@@ -1085,9 +1085,9 @@ export interface components {
         JobOperation: {
             /** @constant */
             type: "convert";
-            /** @description Halo FormatID of the output, e.g. `mp4`, `webm`, `mov`. */
+            /** @description anyfmt FormatID of the output, e.g. `mp4`, `webm`, `mov`. */
             target: string;
-            /** @description Halo `OptionValues` for the target's options schema (string/number/bool values). */
+            /** @description anyfmt `OptionValues` for the target's options schema (string/number/bool values). */
             options?: {
                 [key: string]: string | number | boolean;
             };
@@ -1095,7 +1095,7 @@ export interface components {
             /** @constant */
             type: "tool";
             /**
-             * @description Halo ToolID.
+             * @description anyfmt ToolID.
              * @enum {string}
              */
             tool: "cloud.transcribe" | "cloud.upscale" | "cloud.removeBackgroundHQ";
@@ -1213,8 +1213,8 @@ export interface components {
             name: string;
             scopes: components["schemas"]["ApiKeyScope"][];
             /**
-             * @description First 12 characters of the secret, for recognising it (`halo_sk_AbCd`).
-             * @example halo_sk_AbCd
+             * @description First 12 characters of the secret, for recognising it (`anyfmt_sk_AbCd`).
+             * @example anyfmt_sk_AbCd
              */
             prefix: string;
             /** Format: date-time */
@@ -1238,7 +1238,7 @@ export interface components {
             size: number;
             sha256: components["schemas"]["Sha256"];
             contentType?: string;
-            /** @description Detected Halo format id, e.g. `png`, or `null` when unknown. */
+            /** @description Detected anyfmt format id, e.g. `png`, or `null` when unknown. */
             format?: string | null;
             /** Format: date-time */
             createdAt: string;
@@ -1260,17 +1260,17 @@ export interface components {
             url: string;
             format?: string;
         };
-        /** @description A Halo `OptionValue`. `choice` options take the choice id as a string. */
+        /** @description An anyfmt `OptionValue`. `choice` options take the choice id as a string. */
         OptionValue: string | number | boolean;
         ConversionCreate: {
             input: components["schemas"]["ConversionInput"];
             /**
-             * @description Halo format id of the output (`GET /v1/formats`).
+             * @description anyfmt format id of the output (`GET /v1/formats`).
              * @example webp
              */
             target: string;
             /**
-             * @description Keys are Halo option keys of the route's option schema; validated by schema id.
+             * @description Keys are anyfmt option keys of the route's option schema; validated by schema id.
              * @example {
              *       "quality": 80,
              *       "maxDimension": 2048
@@ -1395,7 +1395,7 @@ export interface components {
          */
         OptionKindName: "slider" | "integer" | "decimal" | "toggle" | "choice" | "fileSize" | "pageRange" | "timeRange" | "color" | "rect" | "text";
         OptionSpec: {
-            /** @description Halo option key (`OptionKey`), e.g. `quality`. */
+            /** @description anyfmt option key (`OptionKey`), e.g. `quality`. */
             id: string;
             label: string;
             kind: components["schemas"]["OptionKindName"];
@@ -1441,15 +1441,15 @@ export interface components {
             };
         };
         /**
-         * @description The registry document. `halo schema --json` (CLI, phase G) prints
+         * @description The registry document. `anyfmt schema --json` (CLI, phase G) prints
          *     exactly this shape; servers serve their own copy, which may be a
          *     subset of what the app can do locally. `schemaVersion` increments
          *     on any breaking change to this shape; additions don't bump it.
          */
-        HaloSchema: {
+        AnyfmtSchema: {
             /** @example 1 */
             schemaVersion: number;
-            /** @description Who produced it, e.g. `halo 1.0.0` or `halo-cloud 2026.10`. */
+            /** @description Who produced it, e.g. `anyfmt 1.0.0` or `anyfmt-cloud 2026.10`. */
             generator?: string;
             formats: components["schemas"]["FormatInfo"][];
             optionSchemas: components["schemas"]["OptionSchema"][];
@@ -1474,7 +1474,7 @@ export interface components {
             createdAt: string;
         };
         WebhookEndpointCreated: components["schemas"]["WebhookEndpoint"] & {
-            /** @description HMAC key for `Halo-Signature`. Shown once. */
+            /** @description HMAC key for `Anyfmt-Signature`. Shown once. */
             secret: string;
         };
         WebhookEvent: {
@@ -1522,7 +1522,7 @@ export interface components {
             };
         };
         LicenceActivate: {
-            /** @example HALO-MOCK-PRO0-0001 */
+            /** @example ANYFMT-MOCK-PRO0-0001 */
             key: string;
             /** @description Stable, random per-install id the app generates (not a hardware serial). */
             deviceId: string;
@@ -1666,11 +1666,11 @@ export interface components {
     };
     parameters: {
         /** @description `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>` (more than one `v1` during a secret rotation). */
-        HaloSignature: string;
+        AnyfmtSignature: string;
         /** @description The endpoint id this delivery is for. */
-        HaloWebhookId: string;
+        AnyfmtWebhookId: string;
         /** @description 1 for the first delivery, then 2, 3, … on retries. */
-        HaloDeliveryAttempt: number;
+        AnyfmtDeliveryAttempt: number;
         /** @description Opaque cursor from a previous page's `nextCursor`. */
         Cursor: string;
         Limit: number;
@@ -3103,7 +3103,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HaloSchema"];
+                    "application/json": components["schemas"]["AnyfmtSchema"];
                 };
             };
             429: components["responses"]["RateLimited"];
@@ -3319,11 +3319,11 @@ export interface operations {
             query?: never;
             header: {
                 /** @description `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>` (more than one `v1` during a secret rotation). */
-                "Halo-Signature": components["parameters"]["HaloSignature"];
+                "Anyfmt-Signature": components["parameters"]["AnyfmtSignature"];
                 /** @description The endpoint id this delivery is for. */
-                "Halo-Webhook-Id": components["parameters"]["HaloWebhookId"];
+                "Anyfmt-Webhook-Id": components["parameters"]["AnyfmtWebhookId"];
                 /** @description 1 for the first delivery, then 2, 3, … on retries. */
-                "Halo-Delivery-Attempt": components["parameters"]["HaloDeliveryAttempt"];
+                "Anyfmt-Delivery-Attempt": components["parameters"]["AnyfmtDeliveryAttempt"];
             };
             path?: never;
             cookie?: never;
@@ -3355,11 +3355,11 @@ export interface operations {
             query?: never;
             header: {
                 /** @description `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>` (more than one `v1` during a secret rotation). */
-                "Halo-Signature": components["parameters"]["HaloSignature"];
+                "Anyfmt-Signature": components["parameters"]["AnyfmtSignature"];
                 /** @description The endpoint id this delivery is for. */
-                "Halo-Webhook-Id": components["parameters"]["HaloWebhookId"];
+                "Anyfmt-Webhook-Id": components["parameters"]["AnyfmtWebhookId"];
                 /** @description 1 for the first delivery, then 2, 3, … on retries. */
-                "Halo-Delivery-Attempt": components["parameters"]["HaloDeliveryAttempt"];
+                "Anyfmt-Delivery-Attempt": components["parameters"]["AnyfmtDeliveryAttempt"];
             };
             path?: never;
             cookie?: never;

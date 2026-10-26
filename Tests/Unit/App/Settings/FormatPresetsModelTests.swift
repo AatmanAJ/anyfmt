@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 @MainActor
 final class FormatPresetsModelTests: XCTestCase {

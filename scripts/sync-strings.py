@@ -16,14 +16,14 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGETS = {
     # build intermediates folder → catalog
-    "HaloCore.build": "Sources/Shared/Localizable.xcstrings",
+    "AnyfmtCore.build": "Sources/Shared/Localizable.xcstrings",
     "App.build": "Sources/App/Resources/Localizable.xcstrings",
 }
 
 
 def extracted(derived, folder):
     keys = {}
-    pattern = os.path.join(derived, "Build/Intermediates.noindex/Halo.build/*", folder, "**/*.stringsdata")
+    pattern = os.path.join(derived, "Build/Intermediates.noindex/anyfmt.build/*", folder, "**/*.stringsdata")
     for path in glob.glob(pattern, recursive=True):
         try:
             data = json.load(open(path, encoding="utf-8"))

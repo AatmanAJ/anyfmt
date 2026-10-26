@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 // Shared scaffolding for the cloud tests: the Node mock server, request
 // recorders, and in-memory stand-ins for the Keychain, browser, pasteboard
@@ -258,7 +258,7 @@ struct CloudFixture {
         let suite = "\(Brand.bundleID).tests.cloud.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suite) else { throw XCTSkip("no defaults suite") }
         if let server { defaults.set(server.absoluteString, forKey: "cloud.serverURL") }
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-cloud-tests-\(UUID().uuidString)", isDirectory: true)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-cloud-tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let store = secrets ?? MemorySecretStore()
         let browser = CapturingBrowser()

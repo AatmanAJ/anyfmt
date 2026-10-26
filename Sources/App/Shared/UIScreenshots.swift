@@ -1,14 +1,14 @@
 import AppKit
 import ServiceManagement
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Offscreen screenshots of Settings, onboarding and About for docs/screens
 /// (D-025: no Automation Mode needed). Windows are ordered in fully
 /// transparent so nothing flashes on screen, then drawn with `cacheDisplay`.
 /// Vibrancy doesn't render offscreen; everything else does.
 ///
-/// Used by `UIScreenshotTests` and, once wired, `Halo --render-ui-screens <dir>`.
+/// Used by `UIScreenshotTests` and, once wired, `anyfmt --render-ui-screens <dir>`.
 @MainActor
 enum UIScreenshots {
     enum Appearance: String, CaseIterable {
@@ -35,7 +35,7 @@ enum UIScreenshots {
     static func renderOptionsGallery(to dir: URL) throws -> [URL] {
         var out: [URL] = []
         for appearance in Appearance.allCases {
-            let window = HaloWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 700),
+            let window = AnyfmtWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 700),
                                     styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = String(localized: "Options")
             window.isReleasedWhenClosed = false

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class ImagesPDFModel: ToolEditorModel {
@@ -117,17 +117,17 @@ struct ImagesPDFPages: View {
             }
             .frame(width: pw, height: ph)
             .clipShape(Rectangle())
-            .overlay(Rectangle().strokeBorder(selected ? ImageEditorKit.accent : Color.haloHairline, lineWidth: selected ? 3 : DesignTokens.Shape.hairline))
+            .overlay(Rectangle().strokeBorder(selected ? ImageEditorKit.accent : Color.anyfmtHairline, lineWidth: selected ? 3 : DesignTokens.Shape.hairline))
             .frame(width: box, height: box)
             .opacity(dragged == item.id ? 0.4 : 1)
             HStack(spacing: 4) {
                 Text("\(number)").font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold).monospacedDigit())
-                    .foregroundStyle(selected ? EditorPalette.onSelected : Color.haloInk)
+                    .foregroundStyle(selected ? EditorPalette.onSelected : Color.anyfmtInk)
                     .padding(.horizontal, DesignTokens.Space.xs + 1)
                     .background(Capsule().fill(selected ? EditorPalette.selected : Color.clear))
                 Text(item.name).font(.system(size: DesignTokens.TypeRamp.caption, weight: selected ? .semibold : .regular))
                     .lineLimit(1).truncationMode(.middle)
-                    .foregroundStyle(selected ? Color.haloInk : Color.haloSecondaryText)
+                    .foregroundStyle(selected ? Color.anyfmtInk : Color.anyfmtSecondaryText)
             }
             .frame(maxWidth: box)
         }
@@ -174,7 +174,7 @@ struct ImagesPDFSidebar: View {
         ImageEditorKit.Section(String(localized: "Pages")) {
             HStack {
                 Text(model.pageCountText)
-                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayM))
+                    .font(.anyfmtDisplay(DesignTokens.Typeface.Size.displayM))
                     .displayTracking(DesignTokens.Typeface.Size.displayM)
                 Spacer()
                 Menu {

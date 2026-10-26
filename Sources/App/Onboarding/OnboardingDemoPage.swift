@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Screen 2: drag Sample.heic around a small stage and press the real trigger keys.
 /// Editorial split: the headline, instructions and key legend on the left; the
@@ -92,7 +92,7 @@ private struct DemoStage: View {
             }
         }
         .frame(width: size.width, height: size.height)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
         .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
         .coordinateSpace(name: "stage")
         .gesture(
@@ -139,11 +139,11 @@ private struct FileTile: View {
                 .frame(width: T.fileIcon, height: T.fileIcon)
                 .padding(T.fileBorder)
                 .background(Color(hex: DesignTokens.Primitive.paper0))
-                .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                 .overlay(alignment: .bottomTrailing) {
                     if let badge {
                         Text(verbatim: badge.localizedUppercase)
-                            .font(.haloDisplay(DesignTokens.Typeface.Size.label))
+                            .font(.anyfmtDisplay(DesignTokens.Typeface.Size.label))
                             .foregroundStyle(Color(hex: DesignTokens.Semantic.onAccentPrimary))
                             .padding(.horizontal, DesignTokens.Space.s)
                             .padding(.vertical, DesignTokens.Space.xxs)
@@ -163,7 +163,7 @@ private struct FileTile: View {
                 }
             Text(verbatim: name)
                 .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-                .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+                .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
                 .padding(.horizontal, DesignTokens.Space.s - DesignTokens.Space.xxs)
                 .padding(.vertical, DesignTokens.Space.xxs)
                 .background(Capsule().fill(selected ? Color.iris : Color.clear))
@@ -185,24 +185,24 @@ private struct ResultCard: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: result.title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
-                    .foregroundStyle(Color.haloInk)
+                    .foregroundStyle(Color.anyfmtInk)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(verbatim: result.detail)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: DesignTokens.Space.xs)
             Button(String(localized: "Try Another"), action: again)
-                .buttonStyle(.haloQuiet)
+                .buttonStyle(.anyfmtQuiet)
                 .accessibilityIdentifier("onboarding.tryAgain")
         }
         .padding(.leading, DesignTokens.Space.l)
         .padding(.trailing, DesignTokens.Space.s)
         .padding(.vertical, DesignTokens.Space.m)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloRaised))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtRaised))
         .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
-            .strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+            .strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("onboarding.result")
     }
@@ -224,9 +224,9 @@ private struct KeyLegend: View {
                 HStack(spacing: DesignTokens.Space.m) {
                     DemoKeyCap(text: key.displayName, prominent: on)
                     Text(verbatim: role.title.localizedUppercase)
-                        .font(.haloDisplay(T.tagSize, black: false))
+                        .font(.anyfmtDisplay(T.tagSize, black: false))
                         .displayTracking(T.tagSize)
-                        .foregroundStyle(active == role ? Color.haloInk : Color.haloSecondaryText)
+                        .foregroundStyle(active == role ? Color.anyfmtInk : Color.anyfmtSecondaryText)
                 }
                 .animation(.easeOut(duration: DesignTokens.Curve.reducedCrossfade), value: on)
                 .accessibilityElement(children: .combine)
@@ -246,13 +246,13 @@ private struct DemoKeyCap: View {
     var body: some View {
         Text(verbatim: text)
             .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .lineLimit(1)
             .padding(.horizontal, DesignTokens.Space.m)
             .frame(minWidth: DesignTokens.Component.Onboarding.keyCapWidth, alignment: .leading)
             .frame(height: DesignTokens.Component.Onboarding.keyCapHeight)
-            .background(PillBorder(fill: prominent ? Color.iris : Color.haloTile,
-                                   border: prominent ? Color.iris : Color.haloHairline))
+            .background(PillBorder(fill: prominent ? Color.iris : Color.anyfmtTile,
+                                   border: prominent ? Color.iris : Color.anyfmtHairline))
     }
 }
 
@@ -265,7 +265,7 @@ private struct HintLine: View {
     var body: some View {
         Text(verbatim: text)
             .font(.system(size: DesignTokens.TypeRamp.body))
-            .foregroundStyle(Color.haloSecondaryText)
+            .foregroundStyle(Color.anyfmtSecondaryText)
             .fixedSize(horizontal: false, vertical: true)
             .id(text)
             .transition(.opacity)

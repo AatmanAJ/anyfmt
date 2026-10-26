@@ -1,6 +1,6 @@
 import XCTest
 import ImageIO
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class ResvgEngineTests: XCTestCase {
     typealias S = ImageTestSupport

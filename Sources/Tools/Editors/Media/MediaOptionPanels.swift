@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Compact option views for lane G2's instant tools (change speed, compress
 /// video, normalize, change channels, compress PDF), sized for the wheel's
@@ -191,11 +191,11 @@ private struct RadioRows: View {
                 Button { selection = row.id } label: {
                     HStack(alignment: .top, spacing: DesignTokens.Space.s) {
                         Image(systemName: on ? "largecircle.fill.circle" : "circle")
-                            .foregroundStyle(on ? Color.accentText : Color.haloSecondaryText)
+                            .foregroundStyle(on ? Color.accentText : Color.anyfmtSecondaryText)
                             .font(.system(size: DesignTokens.TypeRamp.body))
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(row.title).font(MediaStyle.label(on ? .bold : .medium)).foregroundStyle(Color.haloInk)
-                            Text(row.detail).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
+                            Text(row.title).font(MediaStyle.label(on ? .bold : .medium)).foregroundStyle(Color.anyfmtInk)
+                            Text(row.detail).font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText)
                         }
                         Spacer(minLength: 0)
                     }

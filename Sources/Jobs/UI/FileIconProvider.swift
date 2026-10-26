@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import QuickLookThumbnailing
 
 /// File icons for progress cards: the Finder icon immediately, then a Quick

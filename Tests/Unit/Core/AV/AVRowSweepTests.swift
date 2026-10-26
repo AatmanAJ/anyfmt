@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Every lane E row (187), run by its own engine on its `sample.*` fixture,
 /// output probed: streams present, duration within 0.15 s. About 12 s on an

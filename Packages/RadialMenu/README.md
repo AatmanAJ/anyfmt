@@ -4,7 +4,7 @@ A radial (pie) menu for macOS 13+, drawn entirely with Core Animation. It's
 built to appear **in the middle of another app's drag** and take the drop,
 but it works just as well in any window with the mouse or keyboard.
 
-MIT licensed. No dependencies. Part of [Halo](../../README.md), usable on its own.
+MIT licensed. No dependencies. Part of [anyfmt](../../README.md), usable on its own.
 
 | | | |
 |---|---|---|

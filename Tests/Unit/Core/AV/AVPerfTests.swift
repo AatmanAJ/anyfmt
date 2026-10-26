@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// BUILD.md §10: "1 minute 1080p MOV → MP4: report time, must use hardware
 /// encode where faster". Slow, so opt-in:
@@ -10,7 +10,7 @@ import XCTest
 final class AVPerfTests: XCTestCase {
     override func setUpWithError() throws {
         let env = ProcessInfo.processInfo.environment
-        guard env["HALO_PERF"] == "1" || env["TEST_RUNNER_HALO_PERF"] == "1" else { throw XCTSkip("set HALO_PERF=1 to run") }
+        guard env["ANYFMT_PERF"] == "1" || env["TEST_RUNNER_HALO_PERF"] == "1" else { throw XCTSkip("set ANYFMT_PERF=1 to run") }
     }
 
     private struct Result {
@@ -82,7 +82,7 @@ final class AVPerfTests: XCTestCase {
         }
         let report = lines.joined(separator: "\n")
         print(report)
-        try report.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("halo-laneE-perf.txt"), atomically: true, encoding: .utf8)
+        try report.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-laneE-perf.txt"), atomically: true, encoding: .utf8)
 
         // The default (hardware on) must be the faster encoder at the balanced preset.
         let vt = results.first { $0.label == "balanced h264_videotoolbox" }

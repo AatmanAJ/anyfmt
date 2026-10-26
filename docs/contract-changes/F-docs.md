@@ -36,7 +36,7 @@ Not a signature change, a requirement. `WebKitPDFEngine`, `SheetsEngine` (→ PD
 and `QuickLookEngine` render through an offscreen `WKWebView` on the **main
 actor**. Swift's async top-level code runs the main run loop (`CFRunLoopRun`),
 so `await RouteExecutor().execute(…)` works from a command-line process
-(verified with a CLI harness linked against HaloCore: md→pdf 0.25 s,
+(verified with a CLI harness linked against AnyfmtCore: md→pdf 0.25 s,
 pptx→png 3 pages). A synchronous `main` that blocks the main thread on a
 semaphore while waiting for a job would deadlock these engines.
 `Tests/Matrix/main.swift` must therefore stay top-level `await`-based (Phase 4).

@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import DragSense
-import HaloCore
+import AnyfmtCore
 import UniformTypeIdentifiers
 
 /// Wires the pieces together: drag sensing → wheel → jobs / editors / actions /

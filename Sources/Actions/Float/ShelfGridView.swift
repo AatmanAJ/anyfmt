@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// The expanded shelf: every item as a cell (thumbnail + name), in the order
 /// they arrived. Drag a cell to drag that one item; hover shows its ✕.

@@ -1,7 +1,7 @@
 import XCTest
 import CryptoKit
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Share links end to end: per-server upload notice, resumable chunked
 /// upload with an injected mid-chunk failure, SHA-256 verify, link options,

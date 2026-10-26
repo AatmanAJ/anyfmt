@@ -2,7 +2,7 @@ import XCTest
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Metadata edge cases per container: WebP chunks, animated GIF, MP4 location,
 /// AVIF, grey images, and the strip-private policy.

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class ImageBackgroundModel: ToolEditorModel {
@@ -113,7 +113,7 @@ struct ImageBackgroundSidebar: View {
                                 .padding(selected ? 3 : 0)
                                 .frame(height: EditorTokens.chipHeight + 4)
                                 .overlay(Capsule()
-                                    .strokeBorder(selected ? ImageEditorKit.accent : Color.haloHairline, lineWidth: selected ? 2 : DesignTokens.Shape.hairline))
+                                    .strokeBorder(selected ? ImageEditorKit.accent : Color.anyfmtHairline, lineWidth: selected ? 2 : DesignTokens.Shape.hairline))
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(String(localized: "Gradient preset"))
@@ -138,7 +138,7 @@ struct ImageBackgroundSidebar: View {
                                            format: { "\(Int($0))°" })
             case .image:
                 HStack {
-                    Image(systemName: "photo").foregroundStyle(Color.haloSecondaryText)
+                    Image(systemName: "photo").foregroundStyle(Color.anyfmtSecondaryText)
                     Text(model.style.imagePath.isEmpty ? String(localized: "No image chosen") : URL(fileURLWithPath: model.style.imagePath).lastPathComponent)
                         .lineLimit(1).truncationMode(.middle)
                         .font(.system(size: DesignTokens.TypeRamp.body))

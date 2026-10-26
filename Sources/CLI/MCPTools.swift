@@ -1,7 +1,7 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
-/// The MCP tools `halo mcp` exposes. Each one is a thin wrapper over the same
+/// The MCP tools `anyfmt mcp` exposes. Each one is a thin wrapper over the same
 /// code path as the CLI command of the same name (Catalog / Runner), so the
 /// two never disagree.
 @MainActor
@@ -65,7 +65,7 @@ enum MCPTools {
         [
             "name": "formats",
             "title": "List formats",
-            "description": "Every format Halo reads or writes, with kind and extensions. With `from`, the formats that one input format converts to and the number of hops.",
+            "description": "Every format anyfmt reads or writes, with kind and extensions. With `from`, the formats that one input format converts to and the number of hops.",
             "inputSchema": [
                 "type": "object",
                 "properties": ["from": ["type": "string", "description": "Optional input format id."]],
@@ -88,7 +88,7 @@ enum MCPTools {
         [
             "name": "presets",
             "title": "List presets",
-            "description": "Saved option sets (the user's and the built-ins), shared with the Halo app. Pass a preset's id or title as `preset` to `convert`.",
+            "description": "Saved option sets (the user's and the built-ins), shared with the anyfmt app. Pass a preset's id or title as `preset` to `convert`.",
             "inputSchema": [
                 "type": "object",
                 "properties": ["format": ["type": "string", "description": "Only presets for this target format."]],
@@ -99,7 +99,7 @@ enum MCPTools {
         [
             "name": "run_tool",
             "title": "Run a tool",
-            "description": "Run a Halo tool (compress, resize, trim, normalise, strip metadata, …) on local files. Tool ids are the `tool` enum below; each tool's options are listed by `halo tools --json` (also in `halo schema --json`). Outputs never overwrite (name-compressed.jpg, …).",
+            "description": "Run an anyfmt tool (compress, resize, trim, normalise, strip metadata, …) on local files. Tool ids are the `tool` enum below; each tool's options are listed by `anyfmt tools --json` (also in `anyfmt schema --json`). Outputs never overwrite (name-compressed.jpg, …).",
             "inputSchema": [
                 "type": "object",
                 "properties": [

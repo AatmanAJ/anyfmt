@@ -4,8 +4,8 @@ import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
-@testable import HaloApp
-@testable import HaloCore
+@testable import AnyfmtApp
+@testable import AnyfmtCore
 
 /// Sample media for editor tests and screenshots, drawn from scratch.
 @MainActor
@@ -13,7 +13,7 @@ enum EditorSamples {
     static let srgb = CGColorSpace(name: CGColorSpace.sRGB)!
 
     static func dir(_ name: String) throws -> URL {
-        let u = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g1-app-\(name)-\(UUID().uuidString.prefix(6))", isDirectory: true)
+        let u = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-g1-app-\(name)-\(UUID().uuidString.prefix(6))", isDirectory: true)
         try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
         return u
     }
@@ -188,7 +188,7 @@ enum EditorSnapshot {
     /// Writing (and palette-compacting) the PNGs takes ~1 min in Debug, so it is
     /// opt-in: `TEST_RUNNER_HALO_SCREENSHOTS=1 xcodebuild test …`. Without it the
     /// views are still rendered and checked, nothing is written.
-    static var writesFiles: Bool { ProcessInfo.processInfo.environment["HALO_SCREENSHOTS"] == "1" }
+    static var writesFiles: Bool { ProcessInfo.processInfo.environment["ANYFMT_SCREENSHOTS"] == "1" }
 
     /// Renders `view`; returns the PNG written to docs/screens, or nil when writing is off.
     @discardableResult

@@ -1,7 +1,7 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
-/// Offers the bundled `halo` command-line tool on the user's PATH by
+/// Offers the bundled `anyfmt` command-line tool on the user's PATH by
 /// symlinking it (BUILD.md §9). Never needs admin rights: it uses the first
 /// writable directory that's already on PATH, preferring Homebrew's and the
 /// user's own bin folders, and otherwise reports the exact command to run.

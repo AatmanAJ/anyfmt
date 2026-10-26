@@ -2,7 +2,7 @@ import AppKit
 import PDFKit
 import SwiftUI
 import UniformTypeIdentifiers
-import HaloCore
+import AnyfmtCore
 
 /// Merge / split / reorder / rotate / delete PDF pages on a thumbnail grid.
 @MainActor
@@ -176,7 +176,7 @@ struct OrganizePDFEditor: View {
     private func preview(_ original: Bool) -> some View {
         VStack(spacing: 0) {
             toolbar(original)
-            Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline)
+            Rectangle().fill(Color.anyfmtHairline).frame(height: DesignTokens.Shape.hairline)
             if !model.failed.isEmpty {
                 failedBanner.padding([.horizontal, .top], DesignTokens.Space.l)
             }
@@ -206,14 +206,14 @@ struct OrganizePDFEditor: View {
     /// Names the files that couldn't be opened, and why saving is off.
     private var failedBanner: some View {
         HStack(alignment: .top, spacing: DesignTokens.Space.s) {
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.haloDanger)
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.anyfmtDanger)
                 .accessibilityLabel(String(localized: "Problem"))
             Text(String(localized: "Can’t open \(model.failed.map(\.lastPathComponent).formatted(.list(type: .and))). It may be locked or damaged. Leave it out to save the rest."))
-                .font(MediaStyle.caption()).foregroundStyle(Color.haloInk)
+                .font(MediaStyle.caption()).foregroundStyle(Color.anyfmtInk)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
-        .haloTile(padding: DesignTokens.Space.m)
+        .anyfmtTile(padding: DesignTokens.Space.m)
         .accessibilityElement(children: .combine)
     }
 
@@ -228,7 +228,7 @@ struct OrganizePDFEditor: View {
             Spacer()
             Text(model.selection.isEmpty ? String(localized: "Drag pages to reorder") : String(localized: "\(model.selection.count) selected"))
                 .font(MediaStyle.caption(model.selection.isEmpty ? .regular : .bold))
-                .foregroundStyle(model.selection.isEmpty ? Color.haloSecondaryText : Color.haloInk)
+                .foregroundStyle(model.selection.isEmpty ? Color.anyfmtSecondaryText : Color.anyfmtInk)
             Button(String(localized: "Select All")) { model.selectAll() }
         }
         .controlSize(.small)
@@ -248,7 +248,7 @@ struct OrganizePDFEditor: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(url.lastPathComponent).font(MediaStyle.label(.medium)).lineLimit(1).truncationMode(.middle)
                         Text(model.failed.contains(url) ? String(localized: "Can’t open (locked or damaged)") : String(localized: "\(model.pageCounts[i]) pages"))
-                            .font(MediaStyle.caption()).foregroundStyle(model.failed.contains(url) ? MediaStyle.danger : Color.haloSecondaryText)
+                            .font(MediaStyle.caption()).foregroundStyle(model.failed.contains(url) ? MediaStyle.danger : Color.anyfmtSecondaryText)
                     }
                 }
                 .accessibilityElement(children: .combine)
@@ -282,7 +282,7 @@ private struct InputTag: View {
         switch i % 4 {
         case 0: (MediaStyle.accent, EditorPalette.onSelected)
         case 1: (EditorPalette.orange, EditorPalette.onWarm)
-        case 2: (Color.haloInk, Color.haloWindow)
+        case 2: (Color.anyfmtInk, Color.anyfmtWindow)
         default: (EditorPalette.flame, EditorPalette.onWarm)
         }
     }
@@ -316,7 +316,7 @@ private struct PageCell: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .background(Color(hex: DesignTokens.Primitive.paper0))
-                        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                        .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                         .rotationEffect(.degrees(Double(page.rotation)))
                         .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: page.rotation)
                 } else {
@@ -334,7 +334,7 @@ private struct PageCell: View {
                 Text("\(number)").font(MediaStyle.label(selected ? .heavy : .semibold).monospacedDigit())
                 InputTagSmall(index: page.input, multiple: model.inputs.count > 1, page: page.page + 1)
                 if page.rotation != 0 {
-                    Image(systemName: "rotate.right").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.haloSecondaryText)
+                    Image(systemName: "rotate.right").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.anyfmtSecondaryText)
                         .accessibilityLabel(Text("Rotated \(page.rotation) degrees"))
                 }
             }
@@ -396,7 +396,7 @@ private struct InputTagSmall: View {
                 .padding(.horizontal, 5).padding(.vertical, 1)
                 .background(Capsule().fill(InputTag.colors(index).fill))
         } else {
-            Text("p.\(page)").font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
+            Text("p.\(page)").font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.anyfmtSecondaryText)
         }
     }
 }

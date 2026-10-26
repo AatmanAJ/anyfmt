@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Options popover for a conversion target, built from `RouteTarget.schema`

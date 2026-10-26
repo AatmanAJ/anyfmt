@@ -1,7 +1,7 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
-// Plans and runs conversions and tools for both `halo convert` / `halo tool`
+// Plans and runs conversions and tools for both `anyfmt convert` / `anyfmt tool`
 // and the MCP `convert` / `run_tool` tools. Events go to a callback; the CLI
 // prints them as NDJSON or human lines, MCP turns progress into notifications.
 

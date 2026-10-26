@@ -4,7 +4,7 @@ Branch: this worktree. Four commits; each builds and passes its tests.
 
 ## What I built
 
-### HaloCore (`Sources/Jobs/Core`, no AppKit)
+### AnyfmtCore (`Sources/Jobs/Core`, no AppKit)
 
 | File | Public API |
 |---|---|
@@ -104,7 +104,7 @@ None. Everything was built on the frozen contracts. The only additions are inter
   - **RouterMemoTests:** memo equals the uncached search for every start; the cached router is reused until rows change (added rows, vanished engine); `live()` is warm; thread safety under 64 concurrent tasks; perf measurement; executor deletes intermediate steps as it goes; pass-through outputs are kept.
 - `Tests/Unit/App/JobsUI/` (18 tests): the presenter creates a floating non-activating panel below the drop point; stacking with newest on top, consistent spacing and z-order; 5 visible plus summary, with folded cards coming back; clamping at the bottom-right corner; success reveals once and auto-closes; no reveal when the policy is off; hover pauses auto-close; failure stays, the panel grows, Copy details reaches a private pasteboard and Retry works; cancel from the card; one card per batch with one reveal of all outputs; JobsController wiring to recents; pure layout clamping on every edge; the newest card wins on short screens; multi-display selection; ETA and percent text; card states from records; batch counts, notes and failure message. Plus `ProgressGalleryTests` (renders and checks all screens).
 
-Results: full `-scheme Halo test` gives `CoreTests` 61 / 61 and `AppTests` 19 / 19 (18 new plus the smoke test). Core passed on three consecutive runs. `scripts/check-entitlements.sh` passes. My files produce no compiler warnings under Swift 6 strict concurrency.
+Results: full `-scheme anyfmt test` gives `CoreTests` 61 / 61 and `AppTests` 19 / 19 (18 new plus the smoke test). Core passed on three consecutive runs. `scripts/check-entitlements.sh` passes. My files produce no compiler warnings under Swift 6 strict concurrency.
 
 ```bash
 xcodebuild … test -only-testing:CoreTests      # 61 tests, ~3–5 s

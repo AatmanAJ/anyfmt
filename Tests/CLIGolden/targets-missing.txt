@@ -1,4 +1,4 @@
-$ halo targets <tmp>/gone.png
+$ anyfmt targets <tmp>/gone.png
 exit: 4
 --- stdout
 --- stderr

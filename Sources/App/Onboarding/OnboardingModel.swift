@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Pieces of onboarding other lanes own. Wired by the app delegate.
 @MainActor

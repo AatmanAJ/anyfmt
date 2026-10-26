@@ -2,8 +2,8 @@ import Foundation
 import os
 
 // Named option sets per target format. The wheel's preset arc, the pinned
-// options panel, Settings › Formats, the CLI (`halo presets`) and sync all read
-// the same `PresetStore`. HaloCore only: no AppKit here (the CLI links it).
+// options panel, Settings › Formats, the CLI (`anyfmt presets`) and sync all read
+// the same `PresetStore`. AnyfmtCore only: no AppKit here (the CLI links it).
 
 /// A named set of option values for converting to one format.
 public struct ConversionPreset: Codable, Hashable, Identifiable, Sendable {
@@ -38,7 +38,7 @@ public final class PresetStore: @unchecked Sendable {
     private let lock = NSLock()
     private var state: State?
     /// Modification date + size of the file `state` came from. The app and the
-    /// `halo` CLI share the file, so a change made by the other process is picked
+    /// `anyfmt` CLI share the file, so a change made by the other process is picked
     /// up on the next read instead of being overwritten.
     private var loadedStamp: FileStamp?
     private var changeHandler: (@Sendable () -> Void)?

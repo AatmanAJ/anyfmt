@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 // Some engines (HTML → PDF via WebKit, NSAttributedString document import)
 // need AppKit and a live main run loop, so the CLI runs inside a faceless

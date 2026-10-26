@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 @MainActor
 final class ImageEditorsTests: XCTestCase {
@@ -252,7 +252,7 @@ final class ImageEditorsTests: XCTestCase {
     func testPresentResultOnlyForReadCodes() throws {
         let txt = dir.appendingPathComponent("menu-codes.txt")
         try CodeReader.text(for: [CodeReadResult(payload: "hello", symbology: "QR")]).write(to: txt, atomically: true, encoding: .utf8)
-        CodeResultPresenter.pasteboard = NSPasteboard(name: NSPasteboard.Name("halo-test-\(UUID().uuidString)"))
+        CodeResultPresenter.pasteboard = NSPasteboard(name: NSPasteboard.Name("anyfmt-test-\(UUID().uuidString)"))
         defer { CodeResultPresenter.pasteboard = .general }
         XCTAssertFalse(ImageEditors.presentResult(EditorSamples.spec(ToolIDs.compressImage), outputs: [photo]))
         XCTAssertTrue(ImageEditors.presentResult(EditorSamples.spec(ToolIDs.readCodes), outputs: [txt]))

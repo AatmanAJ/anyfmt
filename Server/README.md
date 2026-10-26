@@ -1,4 +1,4 @@
-# Halo Cloud server
+# anyfmt Cloud server
 
 **Not built in this repo yet.** This folder holds the contract the Mac app
 already speaks ([`openapi.yaml`](openapi.yaml)) and the plan for the server
@@ -13,7 +13,7 @@ server exists only for features that cost servers (BUILD.md §9b):
 
 | Feature | Endpoints | Notes |
 |---|---|---|
-| Sign-in | `/v1/auth/*`, `/v1/me`, `/v1/devices` | Browser magic link + OAuth 2.0 code flow with PKCE back to `halo://auth/callback` |
+| Sign-in | `/v1/auth/*`, `/v1/me`, `/v1/devices` | Browser magic link + OAuth 2.0 code flow with PKCE back to `anyfmt://auth/callback` |
 | Share links | `/v1/uploads/*`, `/v1/links/*`, `/s/{slug}` page | Resumable uploads, expiry, password, download cap, custom domains (Team) |
 | Cloud jobs | `/v1/jobs/*`, `/v1/files/*` | Heavy video conversions, transcription → SRT/VTT, upscale, HQ background removal |
 | Sync | `/v1/sync/documents/*` | Opaque JSON documents with versions and conditional PUT |
@@ -49,7 +49,7 @@ The app also links to two **web pages** (not API): the sign-in page
 - Result and inbox downloads may be pre-signed object-storage URLs on another
   host. The client sends its bearer token **only** to the server's own origin.
 - Two credentials, never interchangeable: the app's OAuth token
-  (`bearerAuth`) and public API keys (`apiKeyAuth`, `Bearer halo_sk_…`,
+  (`bearerAuth`) and public API keys (`apiKeyAuth`, `Bearer anyfmt_sk_…`,
   scopes `read`/`convert`). Keys are managed only with the app token; the
   public API rejects app tokens (`401 invalid_api_key`). Exceptions:
   `/v1/usage` takes either, and the resumable `/v1/uploads` flow takes
@@ -57,7 +57,7 @@ The app also links to two **web pages** (not API): the sign-in page
 - Public API conversions take `Idempotency-Key` (24 h, per account; same
   body → `200` + `Idempotent-Replayed: true`, different body →
   `409 idempotency_conflict`). Webhooks are signed
-  `Halo-Signature: t=<unix>,v1=<hex HMAC-SHA256(secret, t.body)>` with a
+  `Anyfmt-Signature: t=<unix>,v1=<hex HMAC-SHA256(secret, t.body)>` with a
   5-minute tolerance and retried with backoff for about two days.
 
 ## Stack options
@@ -104,15 +104,15 @@ server unlocks every feature for its own users.
 # docker-compose.yml (sketch)
 services:
   api:
-    image: ghcr.io/aiwithaj/halo-server:latest
+    image: ghcr.io/aiwithaj/anyfmt-server:latest
     env_file: .env
     ports: ["8080:8080"]
     depends_on: [db, storage]
   worker-media:
-    image: ghcr.io/aiwithaj/halo-worker-media:latest
+    image: ghcr.io/aiwithaj/anyfmt-worker-media:latest
     env_file: .env
   worker-gpu:            # optional
-    image: ghcr.io/aiwithaj/halo-worker-gpu:latest
+    image: ghcr.io/aiwithaj/anyfmt-worker-gpu:latest
     env_file: .env
     deploy: { resources: { reservations: { devices: [{ capabilities: [gpu] }] } } }
   db:
@@ -130,7 +130,7 @@ Environment:
 
 | Variable | Example | Purpose |
 |---|---|---|
-| `PUBLIC_URL` | `https://halo.example.com` | What users type into the app's Server URL field (must be https) |
+| `PUBLIC_URL` | `https://anyfmt.example.com` | What users type into the app's Server URL field (must be https) |
 | `SHARE_URL` | `https://dl.example.com` | Separate origin for share-link pages and downloads |
 | `DATABASE_URL` | `postgres://…` | Postgres |
 | `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | | Object storage |
@@ -145,7 +145,7 @@ Environment:
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | | Hosted service only |
 
 Pointing the app at it: **Settings › Account › Server URL** →
-`https://halo.example.com` → **Validate** (calls `GET /v1/health`, the only
+`https://anyfmt.example.com` → **Validate** (calls `GET /v1/health`, the only
 request the app makes before sign-in, and only when the button is pressed) →
 **Use This Server** → **Sign In…**. Each server keeps its own sign-in
 (Keychain item per host). `http://` is accepted only for `localhost`/`127.0.0.1`
@@ -155,7 +155,7 @@ development servers.
 
 - **TLS everywhere.** The app refuses plain-http servers that aren't on the Mac itself.
 - **Auth:** PKCE `S256` only; exact `redirect_uri` match per `client_id`
-  (`halo-mac` → `halo://auth/callback`; both follow the brand, see BUILD.md);
+  (`anyfmt-mac` → `anyfmt://auth/callback`; both follow the brand, see BUILD.md);
   `state` echoed untouched; authorization codes single-use, 10-minute TTL,
   bound to the challenge. Magic-link tokens single-use, 15-minute TTL, and the
   link page shows the code for the "opened on another device" case.

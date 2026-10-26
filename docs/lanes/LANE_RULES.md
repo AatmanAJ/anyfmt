@@ -22,21 +22,21 @@ this whole file first.
 
 ## Build and test
 ```bash
-export HALO_ENGINES_DIR=/Users/lives/Documents/Projects/Codename_Halo/Engines/dist   # bundled ffmpeg/ffprobe/resvg
+export ANYFMT_ENGINES_DIR=/Users/lives/Documents/Projects/Codename_Halo/Engines/dist   # bundled ffmpeg/ffprobe/resvg
 xcodegen generate --quiet
-xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug build -quiet 2>&1 | scripts/xcfilter.sh
-xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug test -only-testing:CoreTests/<YourTestClass> 2>&1 | scripts/xcfilter.sh
+xcodebuild -project anyfmt.xcodeproj -derivedDataPath build/DerivedData -scheme anyfmt -configuration Debug build -quiet 2>&1 | scripts/xcfilter.sh
+xcodebuild -project anyfmt.xcodeproj -derivedDataPath build/DerivedData -scheme anyfmt -configuration Debug test -only-testing:CoreTests/<YourTestClass> 2>&1 | scripts/xcfilter.sh
 # packages:
 cd Packages/<Name> && swift test
 ```
-Core tests live in `Tests/Unit/Core/<Lane>/` (target `CoreTests`, `@testable import HaloCore`).
-App-hosted tests live in `Tests/Unit/App/<Lane>/` (target `AppTests`, `@testable import HaloApp`).
+Core tests live in `Tests/Unit/Core/<Lane>/` (target `CoreTests`, `@testable import AnyfmtCore`).
+App-hosted tests live in `Tests/Unit/App/<Lane>/` (target `AppTests`, `@testable import AnyfmtApp`).
 Other lanes are building at the same time, so use `-quiet` and `-only-testing:` and don't loop full suites.
 
 ## Code rules (non-negotiable)
 - Swift 6 language mode, strict concurrency complete. Deployment target **macOS 13**: guard newer APIs with `#available` and a graceful fallback. arm64 only.
 - No force unwraps (`!`), `try!` or `as!` outside tests. No `print` in shipping code: use `Log.<module>` (`os.Logger`).
-- Every user-facing string is localisable: `L("…")` inside HaloCore, `String(localized:)` / SwiftUI `Text("…")` in the app.
+- Every user-facing string is localisable: `L("…")` inside AnyfmtCore, `String(localized:)` / SwiftUI `Text("…")` in the app.
 - Use `DesignTokens` for sizes, type, colour and motion in UI.
 - **No private APIs. No code copied from any other project** (Daisy, convt, StackOverflow-sized snippets included). Write everything fresh.
 - Engines and tools write only inside the `outputDirectory` they're given. **Never overwrite or modify user files.**

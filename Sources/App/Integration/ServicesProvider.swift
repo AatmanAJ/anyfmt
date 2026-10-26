@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Zero-permission way to open the wheel for a Finder selection: the
 /// "Open in <name> Wheel" item in Finder's Services menu (D-004). Users can

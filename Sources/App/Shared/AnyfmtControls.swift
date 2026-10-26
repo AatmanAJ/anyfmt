@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
-// Small shared controls for Halo's SwiftUI windows (settings, onboarding,
+// Small shared controls for anyfmt's SwiftUI windows (settings, onboarding,
 // about, the wheel's options popover). Phase 2 language: ink tiles, cobalt
 // for "on", one tile radius or a pill, icons beside every coloured state.
 
@@ -45,13 +45,13 @@ extension View {
 }
 
 /// The standard switch tinted cobalt, except in snapshot renders (see `isSnapshot`).
-struct HaloSwitchStyle: ToggleStyle {
+struct AnyfmtSwitchStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
-        HaloSwitchBody(configuration: configuration)
+        AnyfmtSwitchBody(configuration: configuration)
     }
 }
 
-private struct HaloSwitchBody: View {
+private struct AnyfmtSwitchBody: View {
     let configuration: ToggleStyleConfiguration
     @Environment(\.isSnapshot) private var isSnapshot
     @Environment(\.controlSize) private var controlSize
@@ -103,13 +103,13 @@ struct CardToggle: View {
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                 Text(verbatim: subtitle)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
             Toggle(isOn: $isOn) { Text(verbatim: title) }
                 .labelsHidden()
-                .toggleStyle(HaloSwitchStyle())
+                .toggleStyle(AnyfmtSwitchStyle())
                 .accessibilityIdentifier(identifier ?? "")
                 .accessibilityHint(Text(verbatim: subtitle))
         }
@@ -123,7 +123,7 @@ extension View {
     /// inset shape) instead of a stroked path. Stroked rounded paths pick up
     /// notches where arcs meet edges in offscreen captures (docs/screens);
     /// fills don't, and look identical on screen.
-    func haloBorder<S: InsettableShape>(_ shape: S, _ color: Color,
+    func anyfmtBorder<S: InsettableShape>(_ shape: S, _ color: Color,
                                         width: CGFloat = DesignTokens.Shape.hairline) -> some View {
         overlay {
             BorderRing(shape: shape, width: width)
@@ -164,18 +164,18 @@ struct KeyCap: View {
             .font(.system(size: compact ? T.compactFontSize : T.fontSize, weight: .semibold))
             .lineLimit(1)
             .fixedSize()
-            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .padding(.horizontal, compact ? T.compactHorizontalPadding : T.horizontalPadding)
             .frame(minWidth: compact ? T.compactMinWidth : T.minWidth,
                    minHeight: compact ? T.compactHeight : T.height)
             .background(shape.fill(prominent ? Color.iris : Color.token(T.fill)))
-            .haloBorder(shape, prominent ? Color.clear : strokeColor)
+            .anyfmtBorder(shape, prominent ? Color.clear : strokeColor)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: KeyCap.spoken(text)))
     }
 
     private var strokeColor: Color {
-        contrast == .increased ? Color.haloInk : Color.token(T.stroke)
+        contrast == .increased ? Color.anyfmtInk : Color.token(T.stroke)
     }
 
     /// VoiceOver reads modifier symbols as words; it would otherwise skip "⌃".
@@ -209,7 +209,7 @@ struct StatusBadge: View {
                 .foregroundStyle(color)
                 .accessibilityHidden(true)
             Text(verbatim: text)
-                .foregroundStyle(tone == .off ? Color.haloSecondaryText : Color.haloInk)
+                .foregroundStyle(tone == .off ? Color.anyfmtSecondaryText : Color.anyfmtInk)
         }
         .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
         .accessibilityElement(children: .combine)
@@ -227,10 +227,10 @@ struct StatusBadge: View {
 
     private var color: Color {
         switch tone {
-        case .good: .haloSuccess
+        case .good: .anyfmtSuccess
         case .waiting: Color.token(T.waiting)
-        case .off: .haloSecondaryText
-        case .warning: .haloDanger
+        case .off: .anyfmtSecondaryText
+        case .warning: .anyfmtDanger
         }
     }
 }
@@ -244,12 +244,12 @@ struct FootnoteText: View {
         HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.xs + DesignTokens.Space.xxs) {
             if let symbol {
                 Image(systemName: symbol)
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .imageScale(.small)
                     .accessibilityHidden(true)
             }
             Text(verbatim: text)
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: DesignTokens.TypeRamp.label))

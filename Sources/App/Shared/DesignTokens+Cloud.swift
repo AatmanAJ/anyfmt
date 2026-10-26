@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for the cloud screens (Pro explainer, share-link options,
 // upload notice, account, licence, plan badges). Colours come only from

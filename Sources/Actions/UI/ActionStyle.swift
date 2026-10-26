@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Colours, type, metrics and accessibility state shared by the shelf and the
 /// Move chooser. Everything comes from `DesignTokens` (component tokens in
@@ -11,12 +11,12 @@ enum ActionStyle {
 
     /// A dynamic colour from a token pair, resolved per appearance.
     static func color(_ pair: (light: Int, dark: Int), alpha: CGFloat = 1) -> NSColor {
-        let c = NSColor.halo(pair)
+        let c = NSColor.anyfmt(pair)
         return alpha < 1 ? c.withAlphaComponent(alpha) : c
     }
 
     /// One value in both appearances.
-    static func fixed(_ hex: Int) -> NSColor { .halo((light: hex, dark: hex)) }
+    static func fixed(_ hex: Int) -> NSColor { .anyfmt((light: hex, dark: hex)) }
 
     /// Cobalt as a fill (behind white text: 5.0:1).
     static let iris = fixed(DesignTokens.Primitive.cobalt500)
@@ -78,7 +78,7 @@ enum ActionStyle {
     }
 
     /// The display face (Inter Display Black) for counts.
-    static func display(_ size: CGFloat) -> NSFont { HaloFonts.display(size) }
+    static func display(_ size: CGFloat) -> NSFont { AnyfmtFonts.display(size) }
 
     /// "5 items": the count in the display face, the noun in the system face.
     static func countTitle(_ count: Int, noun: String, color: NSColor) -> NSAttributedString {

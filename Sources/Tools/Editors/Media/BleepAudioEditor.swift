@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Bleep: drag across the waveform to mark ranges; each becomes a 1 kHz tone
 /// or silence. Playback previews the result live.
@@ -132,7 +132,7 @@ struct BleepAudioEditor: View {
             HStack {
                 ZoomControls(wave: model.audio.wave)
                 Spacer()
-                Text("Drag across the waveform to mark a bleep").font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
+                Text("Drag across the waveform to mark a bleep").font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText)
             }
             Spacer(minLength: 0)
             TransportBar(player: model.player, duration: model.duration, showsFrameSteps: false, leading: AnyView(
@@ -172,10 +172,10 @@ struct BleepAudioEditor: View {
                             Text("\(MediaTimes.timecode(r.range.lowerBound)) – \(MediaTimes.timecode(r.range.upperBound))")
                                 .font(MediaStyle.timecode)
                             Text(String(format: "%.2f s", r.range.upperBound - r.range.lowerBound))
-                                .font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
+                                .font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.anyfmtSecondaryText)
                         }
                         Spacer()
-                        Button { model.remove(r.id) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
+                        Button { model.remove(r.id) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.anyfmtSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove bleep \(i + 1)"))
                     }

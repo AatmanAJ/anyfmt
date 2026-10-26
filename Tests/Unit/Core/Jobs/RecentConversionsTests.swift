@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class RecentConversionsTests: JobsTestCase {
     private var dir: URL { root.appendingPathComponent("support", isDirectory: true) }

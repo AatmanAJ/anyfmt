@@ -1,10 +1,10 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 
 /// Renders the README's wheel GIF from the real wheel renderer: the convert
 /// wheel for a photo with the pointer sweeping its segments, then the tools and
-/// actions wheels, each with a caption. `Halo --render-demo-gif <file.gif>`.
+/// actions wheels, each with a caption. `anyfmt --render-demo-gif <file.gif>`.
 @MainActor
 public enum WheelDemoGIF {
     public static func render(to output: URL, scale: CGFloat = 1) async throws {
@@ -77,7 +77,7 @@ public enum WheelDemoGIF {
         let para = NSMutableParagraphStyle()
         para.alignment = .center
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: HaloFonts.display(DesignTokens.Typeface.Size.displayM),
+            .font: AnyfmtFonts.display(DesignTokens.Typeface.Size.displayM),
             .foregroundColor: NSColor(hex: DesignTokens.Primitive.paper0),
             .kern: DesignTokens.Typeface.Size.displayM * DesignTokens.Typeface.displayTracking,
             .paragraphStyle: para,

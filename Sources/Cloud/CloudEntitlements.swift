@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Sendable snapshot implementing the `Entitlements` contract.
 ///

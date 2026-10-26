@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Schema-driven options editor shared by Settings › Formats, the wheel's
 /// options popover and the tool editors.
@@ -67,13 +67,13 @@ private struct OptionRow: View {
                 Spacer(minLength: DesignTokens.Space.s)
                 Toggle(isOn: boolBinding) { Text(verbatim: spec.label) }
                     .labelsHidden()
-                    .toggleStyle(HaloSwitchStyle())
+                    .toggleStyle(AnyfmtSwitchStyle())
                     .controlSize(.mini)
             }
             .accessibilityIdentifier("option.\(spec.id)")
         case .toggle:
             Toggle(isOn: boolBinding) { labelTexts }
-                .toggleStyle(HaloSwitchStyle())
+                .toggleStyle(AnyfmtSwitchStyle())
                 .accessibilityIdentifier("option.\(spec.id)")
         default:
             labeled { control }
@@ -91,12 +91,12 @@ private struct OptionRow: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
                 Text(verbatim: spec.label)
                     .font(.system(size: DesignTokens.TypeRamp.label - 1, weight: .medium))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                 content()
                 if let help = spec.help {
                     Text(verbatim: help)
                         .font(.system(size: DesignTokens.TypeRamp.caption))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -181,7 +181,7 @@ private struct NumberSlider: View {
                 .frame(minWidth: compact ? 120 : 150, maxWidth: compact ? .infinity : 240)
             Text(verbatim: readout)
                 .font(.system(size: compact ? DesignTokens.TypeRamp.label - 1 : DesignTokens.TypeRamp.body).monospacedDigit())
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .frame(minWidth: compact ? 38 : 48, alignment: .trailing)
         }
         .accessibilityElement(children: .combine)
@@ -208,7 +208,7 @@ private struct IntegerField: View {
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 72)
             if let unit, !unit.isEmpty {
-                Text(verbatim: unit).foregroundStyle(Color.haloSecondaryText)
+                Text(verbatim: unit).foregroundStyle(Color.anyfmtSecondaryText)
             }
             Stepper("", value: $value, in: range)
                 .labelsHidden()
@@ -354,7 +354,7 @@ private struct RectFields: View {
                             .frame(width: 54)
                         Text(verbatim: names[i])
                             .font(.system(size: DesignTokens.TypeRamp.caption))
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                     }
                 }
             }
@@ -379,7 +379,7 @@ private struct OptionIssue: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: DesignTokens.TypeRamp.caption, weight: .medium))
-        .foregroundStyle(Color.haloDanger)
+        .foregroundStyle(Color.anyfmtDanger)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Problem: \(text)", comment: "VoiceOver prefix for an invalid option value"))
     }

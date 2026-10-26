@@ -1,7 +1,7 @@
 import AppKit
 import AVKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// AVKit's player view without its own controls (the editors draw theirs).
 struct PlayerView: NSViewRepresentable {
@@ -37,7 +37,7 @@ struct VideoSurface: View {
         }
         .aspectRatio(aspect, contentMode: .fit)
         .background(EditorPalette.overlayHalo)
-        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+        .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
         .accessibilityElement()
         .accessibilityLabel(Text("Video preview"))
         .accessibilityValue(Text(MediaTimes.timecode(player.currentTime)))
@@ -76,7 +76,7 @@ struct TransportBar: View {
             Spacer(minLength: 0)
             Text("\(MediaTimes.timecode(player.currentTime)) / \(MediaTimes.timecode(duration))")
                 .font(MediaStyle.timecode)
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .accessibilityLabel(Text("Time \(MediaTimes.timecode(player.currentTime)) of \(MediaTimes.timecode(duration))"))
             if let trailing { trailing }
         }
@@ -85,7 +85,7 @@ struct TransportBar: View {
     private func transportButton(_ symbol: String, _ help: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol).font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
-                .foregroundStyle(Color.haloInk)
+                .foregroundStyle(Color.anyfmtInk)
                 .frame(width: EditorTokens.chipHeight + 4, height: EditorTokens.chipHeight)
                 .contentShape(Rectangle())
         }

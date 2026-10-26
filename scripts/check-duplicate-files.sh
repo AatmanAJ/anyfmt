@@ -9,7 +9,7 @@ check() { # <label> <dirs...>
   local dups; dups="$(find "$@" -name '*.swift' 2>/dev/null | xargs -n1 basename | sort | uniq -d)"
   if [[ -n "$dups" ]]; then echo "✗ duplicate file names in $label: $dups"; status=1; fi
 }
-check HaloCore Sources/Shared Sources/Engine Sources/Jobs/Core Sources/Tools/Core
+check AnyfmtCore Sources/Shared Sources/Engine Sources/Jobs/Core Sources/Tools/Core
 check App Sources/App Sources/Wheel Sources/Cloud Sources/Tools/Editors Sources/Actions Sources/Jobs/UI Sources/Settings
 check CoreTests Tests/Unit/Core
 check AppTests Tests/Unit/App

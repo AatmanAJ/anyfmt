@@ -23,7 +23,7 @@ with `.tint(Color.iris)` and keeps secondary buttons neutral.
 
 ## P-2 Bundle the LICENSES folder
 
-**What:** copy the repo's `LICENSES/` into `Halo.app/Contents/Resources/LICENSES`
+**What:** copy the repo's `LICENSES/` into `anyfmt.app/Contents/Resources/LICENSES`
 (folder reference or a build phase).
 
 **Why:** Settings › Engines › "Licence…" / "All Licences…" and About › "Licences…"
@@ -53,7 +53,7 @@ OnboardingWindowController.hooks = OnboardingHooks(
     onUpdateChecksChanged: { updater.setAutomaticChecks($0) },
     onFinderShortcutChanged: { finderShortcut.setEnabled($0) })
 AppShellUI.showOnboardingIfNeeded()
-// Menu: "Settings…" → AppShellUI.showSettings()   "About Halo" → AppShellUI.showAbout()
+// Menu: "Settings…" → AppShellUI.showSettings()   "About anyfmt" → AppShellUI.showAbout()
 ```
 
 `--reset-onboarding` / `--show-onboarding` (used by `Tests/UI/OnboardingUITests`)
@@ -63,7 +63,7 @@ are handled by `AppShellUI.handleLaunchArguments()` too.
 
 ```make
 screens: build
-	$(PRODUCTS)/Halo.app/Contents/MacOS/Halo --render-ui-screens $(CURDIR)/docs/screens
+	$(PRODUCTS)/anyfmt.app/Contents/MacOS/anyfmt --render-ui-screens $(CURDIR)/docs/screens
 ```
 
 Until then: `TEST_RUNNER_HALO_WRITE_SCREENS=1 xcodebuild … test -only-testing:AppTests/UIScreenshotTests`.
@@ -82,5 +82,5 @@ correctly leaves them alone:
 
 `project.yml` ships `https://updates.example.invalid/appcast.xml`. The update
 opt-in one-liner shows the feed's host ("Checks <host> daily. Nothing else is
-sent."); for a `.invalid` host it says "the Halo update server" instead.
+sent."); for a `.invalid` host it says "the anyfmt update server" instead.
 Set the real feed URL before release and the line names it automatically.

@@ -1,11 +1,11 @@
 # Notices and source offer
 
-Halo is free software, licensed under the **GNU Affero General Public License
+anyfmt is free software, licensed under the **GNU Affero General Public License
 v3.0 only** (`LICENSE` at the repository root). The reusable packages
 `Packages/DragSense` and `Packages/RadialMenu` are **MIT** (each has its own
 `LICENSE`).
 
-Halo bundles the third-party engines below so it works with nothing else
+anyfmt bundles the third-party engines below so it works with nothing else
 installed. Each runs as a separate program inside the app bundle
 (`Contents/Helpers`) or as a dynamic library it loads (`Contents/Frameworks`).
 Each keeps its own licence. The full texts are in the folders next to this file.
@@ -39,17 +39,17 @@ redistributed.
 
 ## Written offer of source code
 
-Every release of Halo links the exact source tag it was built from. That source
+Every release of anyfmt links the exact source tag it was built from. That source
 contains:
 
-1. **All of Halo's own code** (AGPL-3.0 / MIT) at that tag.
+1. **All of anyfmt's own code** (AGPL-3.0 / MIT) at that tag.
 2. **The complete corresponding source of every bundled GPL/LGPL engine**:
    the pinned upstream tarballs listed in `Engines/versions.env` (URL + SHA-256),
    the one-line build patch, and the build scripts `Engines/build-ffmpeg.sh` and
    `Engines/build-resvg.sh` with their exact configure flags (`Engines/VERSIONS.md`).
    Running `make engines` reproduces the shipped binaries.
 
-The release workflow also attaches a `halo-<version>-engine-sources.tar.gz`
+The release workflow also attaches a `anyfmt-<version>-engine-sources.tar.gz`
 containing those exact upstream tarballs, so the sources stay available even
 if an upstream URL disappears.
 
@@ -59,6 +59,6 @@ medium customarily used for software interchange, for no more than the cost of
 physically performing the distribution. Ask through the project's issue tracker
 or the maintainer contact listed in the README.
 
-**AGPL §13 (network use):** Halo's optional cloud features talk to a server
+**AGPL §13 (network use):** anyfmt's optional cloud features talk to a server
 that is a separate program and isn't covered by this offer. The desktop client
 that talks to it is covered, and it's all in this repository.

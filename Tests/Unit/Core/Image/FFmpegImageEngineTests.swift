@@ -1,13 +1,13 @@
 import XCTest
 import ImageIO
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class FFmpegImageEngineTests: XCTestCase {
     typealias S = ImageTestSupport
     let engine = FFmpegImageEngine()
 
     override func setUpWithError() throws {
-        guard S.hasFFmpeg else { throw XCTSkip("bundled ffmpeg not found (set HALO_ENGINES_DIR)") }
+        guard S.hasFFmpeg else { throw XCTSkip("bundled ffmpeg not found (set ANYFMT_ENGINES_DIR)") }
     }
 
     func testStillWebPKeepsSizeAlphaAndProfile() async throws {
@@ -56,7 +56,7 @@ final class FFmpegImageEngineTests: XCTestCase {
         let dir = try S.tempDir()
         let src = S.write(S.noise(32, 32), to: dir.appendingPathComponent("gps.jpg"), uti: "public.jpeg", properties: [
             kCGImagePropertyGPSDictionary: [kCGImagePropertyGPSLatitude: 48.85, kCGImagePropertyGPSLatitudeRef: "N"],
-            kCGImagePropertyTIFFDictionary: [kCGImagePropertyTIFFMake: "Halo"],
+            kCGImagePropertyTIFFDictionary: [kCGImagePropertyTIFFMake: "anyfmt"],
             kCGImagePropertyExifDictionary: [kCGImagePropertyExifDateTimeOriginal: "2026:10:18 09:00:00"],
         ])
         let keep = try await S.convert(engine, src, from: Formats.jpg, to: Formats.webp, metadata: .keep, in: dir.appendingPathComponent("keep"))
@@ -64,7 +64,7 @@ final class FFmpegImageEngineTests: XCTestCase {
         let none = try await S.convert(engine, src, from: Formats.jpg, to: Formats.webp, metadata: .stripAll, in: dir.appendingPathComponent("none"))
         let pk = S.properties(keep[0]), pp = S.properties(priv[0]), pn = S.properties(none[0])
         XCTAssertNotNil(pk["{GPS}"], "keep: GPS in EXIF chunk")
-        XCTAssertEqual((pk["{TIFF}"] as? [String: Any])?["Make"] as? String, "Halo")
+        XCTAssertEqual((pk["{TIFF}"] as? [String: Any])?["Make"] as? String, "anyfmt")
         XCTAssertNil(pp["{GPS}"], "stripPrivate: no GPS")
         XCTAssertNil((pp["{TIFF}"] as? [String: Any])?["Make"])
         XCTAssertEqual((pp["{Exif}"] as? [String: Any])?["DateTimeOriginal"] as? String, "2026:10:18 09:00:00")

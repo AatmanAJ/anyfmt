@@ -9,10 +9,10 @@ Code: `Sources/Cloud/Licence/` (`LicenceKey`, `LicenceBase32`, `LicenceVerifier`
 ## Format
 
 ```
-HALO1-01GQP-8K5F1-R24EK-…-H58HG-2
+ANYFMT1-01GQP-8K5F1-R24EK-…-H58HG-2
 ```
 
-- `HALO1` = format version 1.
+- `ANYFMT1` = format version 1. Keys issued before the rename start with `HALO1`; the app and the tool still accept them.
 - The rest is **Crockford base32** (alphabet `0-9 A-Z` without `I L O U`, no padding), in groups of five for readability, of:
 
   ```
@@ -58,7 +58,7 @@ In order, all offline:
 
 ## Storage (`LicenceStore`)
 
-- Login Keychain, service `dev.aiwithaj.halo.licence`, account `licence-key`, through the existing `KeychainStore` (not synced to iCloud).
+- Login Keychain, service `app.anyfmt.licence`, account `licence-key`, through the existing `KeychainStore` (not synced to iCloud).
 - `activate(_ key) throws -> Licence`: only a key that is **valid now** is stored; anything else throws `LicenceActivationError` (with the verification and a message) and the previously stored key stays.
 - `deactivate()`: local removal. A best-effort server revoke when signed in is the caller's job (Phase E).
 - `status`, `current` (signed, even if out of date), `active` (valid now), `entitlements`.
@@ -101,21 +101,21 @@ When the licence expires, the merge drops it (checked at read time against the w
 `kid-2026-1` is a real key pair made for development and test keys.
 
 - **Public key:** committed in `LicenceTrustedKeys.all`.
-- **Private key:** never committed. It's in the login Keychain of the machine that made it, as a generic password, service `dev.aiwithaj.halo.licence-signing`, account `kid-2026-1`, value = base64 of the raw 32-byte key.
+- **Private key:** never committed. It's in the login Keychain of the machine that made it, as a generic password, service `app.anyfmt.licence-signing`, account `kid-2026-1`, value = base64 of the raw 32-byte key.
 - Export it (to move it to another Mac or a password manager):
 
   ```sh
-  security find-generic-password -s dev.aiwithaj.halo.licence-signing -a kid-2026-1 -w
+  security find-generic-password -s app.anyfmt.licence-signing -a kid-2026-1 -w
   ```
 
 - Import it on another Mac:
 
   ```sh
-  security add-generic-password -s dev.aiwithaj.halo.licence-signing -a kid-2026-1 \
-    -l "Halo licence signing key (kid-2026-1)" -w '<base64>'
+  security add-generic-password -s app.anyfmt.licence-signing -a kid-2026-1 \
+    -l "anyfmt licence signing key (kid-2026-1)" -w '<base64>'
   ```
 
-- Or skip the Keychain: `HALO_LICENCE_SIGNING_KEY='<base64>' swift scripts/licence-tool.swift issue …`.
+- Or skip the Keychain: `ANYFMT_LICENCE_SIGNING_KEY='<base64>' swift scripts/licence-tool.swift issue …`.
 - Before selling real licences, make a production key on a machine you trust (`keygen --kid kid-2027-1`), keep its private half offline, and drop `kid-2026-1` from the table in the release build.
 
 ## Issuing keys
@@ -125,14 +125,14 @@ swift scripts/licence-tool.swift issue --plan pro --seats 1 --days 365
 swift scripts/licence-tool.swift issue --plan team --seats 10 --days 365 --email buyer@example.com
 swift scripts/licence-tool.swift issue --plan pro --perpetual
 swift scripts/licence-tool.swift issue --plan pro --days 30 --issued-at 1790000000 --lid L-SUPPORT-1   # fixed test key
-swift scripts/licence-tool.swift verify 'HALO1-…'     # prints valid / expired / … and the payload; exit 0 only when valid
+swift scripts/licence-tool.swift verify 'ANYFMT1-…'     # prints valid / expired / … and the payload; exit 0 only when valid
 ```
 
 `--kid` defaults to `kid-2026-1`. The tool reads the private key through `/usr/bin/security` (the item's creator, so there's no Keychain prompt) and reads public keys from `LicenceVerifier.swift`, so there is one table. Its encoder mirrors `LicenceKey`; the golden key in `LicenceKeyTests` (made by the tool) keeps them in step.
 
 ## Threat model, honestly
 
-- **A cracked binary can bypass this.** Anyone can patch the verifier, or (it's AGPL) build Halo from source with their own public key in the table. That's acceptable by design:
+- **A cracked binary can bypass this.** Anyone can patch the verifier, or (it's AGPL) build anyfmt from source with their own public key in the table. That's acceptable by design:
   - Nothing local is gated, so there is nothing local to steal.
   - Every cloud feature is enforced **server-side** on every request. A forged or patched licence changes a badge on the forger's own Mac and nothing else.
 - What the signature does protect: an honest user can't be handed a fake key that looks real in an unmodified build, and keys can't be edited (seats, plan, expiry) without failing verification.

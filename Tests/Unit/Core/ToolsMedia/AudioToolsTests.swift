@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Tools 19–22 end to end with the bundled ffmpeg.
 final class AudioToolsTests: XCTestCase {

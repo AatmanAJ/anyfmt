@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Progress-card metrics, type, colour and motion, all from `DesignTokens`

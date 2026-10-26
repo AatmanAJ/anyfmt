@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to png --json
+$ anyfmt convert <tmp>/photo.png --to png --json
 exit: 0
 --- stdout
 {"event":"start","jobs":0}

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Lane G1 editors: crop, adjust, annotate, redact, add background, collage,
 /// images → PDF and metadata. Each is a `ToolEditorModel` + views inside the

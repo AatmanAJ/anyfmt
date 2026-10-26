@@ -1,6 +1,6 @@
 # Architecture
 
-Halo is a menu-bar agent (`LSUIElement`). There's no Dock icon and no main window.
+anyfmt is a menu-bar agent (`LSUIElement`). There's no Dock icon and no main window.
 Everything starts from a drag.
 
 ```mermaid
@@ -23,7 +23,7 @@ flowchart LR
         C --> R --> O
     end
 
-    subgraph Core["HaloCore.framework (no UI)"]
+    subgraph Core["AnyfmtCore.framework (no UI)"]
         F[Formats + FileKind]
         T[(CapabilityTable: lane route files)]
         RT[Router: ≤3 hops, cost model, multi-file intersection]
@@ -55,9 +55,9 @@ flowchart LR
     O -- "Pro segment" --> CL --> J
     J --> PW
     N -- "result beside the original" --> Finder
-    CLI["halo CLI"] --> RT
+    CLI["anyfmt CLI"] --> RT
     CLI --> J
-    MX["halo-matrix"] --> EX
+    MX["anyfmt-matrix"] --> EX
 ```
 
 ## Layers
@@ -66,9 +66,9 @@ flowchart LR
 |---|---|---|---|
 | DragSense | `Packages/DragSense` (MIT) | AppKit | Only as URLs on the drag pasteboard |
 | RadialMenu | `Packages/RadialMenu` (MIT) | AppKit, QuartzCore | No: generic items |
-| HaloCore | `Sources/{Shared,Engine,Jobs/Core,Tools/Core}` | Foundation, ImageIO, PDFKit, AVFoundation, Vision, WebKit (for HTML→PDF) | Yes |
-| App | `Sources/{App,Wheel,Jobs/UI,Tools/Editors,Actions,Cloud,Settings}` | HaloCore, DragSense, RadialMenu, Sparkle | Yes |
-| CLI / matrix | `Sources/CLI`, `Tests/Matrix` | HaloCore | Yes |
+| AnyfmtCore | `Sources/{Shared,Engine,Jobs/Core,Tools/Core}` | Foundation, ImageIO, PDFKit, AVFoundation, Vision, WebKit (for HTML→PDF) | Yes |
+| App | `Sources/{App,Wheel,Jobs/UI,Tools/Editors,Actions,Cloud,Settings}` | AnyfmtCore, DragSense, RadialMenu, Sparkle | Yes |
+| CLI / matrix | `Sources/CLI`, `Tests/Matrix` | AnyfmtCore | Yes |
 
 ## The single table
 
@@ -111,7 +111,7 @@ engine method.
 
 ## Privacy boundary
 
-- Nothing in HaloCore opens a network connection. The bundled ffmpeg is built
+- Nothing in AnyfmtCore opens a network connection. The bundled ffmpeg is built
   with `--disable-network`.
 - `Sources/Cloud` is the only code that talks to a server, and only after
   sign-in plus an explicit cloud action. Sparkle runs only if the user opted in.

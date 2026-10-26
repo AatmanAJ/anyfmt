@@ -1,5 +1,5 @@
-$ halo tool nope.nope /tmp/x.png
+$ anyfmt tool nope.nope /tmp/x.png
 exit: 2
 --- stdout
 --- stderr
-error: unknown tool “nope.nope”. Try `halo tools`.
+error: unknown tool “nope.nope”. Try `anyfmt tools`.

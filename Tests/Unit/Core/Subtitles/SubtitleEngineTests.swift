@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class SubtitleEngineTests: XCTestCase {
     private func convert(_ input: URL, to: FormatID, options: [String: OptionValue] = [:]) async throws -> URL {

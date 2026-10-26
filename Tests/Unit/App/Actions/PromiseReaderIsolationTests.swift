@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Crash on real hardware (2026-10-18): the promise reader inherited @MainActor
 /// isolation from `PromiseIntake.begin`, and Swift 6's runtime check trapped when

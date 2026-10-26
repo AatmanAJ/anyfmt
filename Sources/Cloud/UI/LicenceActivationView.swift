@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Paste a Pro licence key, see what's active, or remove it. Used by onboarding's
@@ -78,14 +78,14 @@ struct LicenceActivationView: View {
                     Spacer()
                     if !compact {
                         Button(String(localized: "Remove Licence…", comment: "Settings › Account button")) { model.deactivate() }
-                            .buttonStyle(.haloQuiet)
+                            .buttonStyle(.anyfmtQuiet)
                     }
                 }
             }
             HStack(spacing: DesignTokens.Space.s) {
                 // Prompt, not title: in a grouped Form a title becomes a stray row label.
                 TextField("", text: $model.keyText,
-                          prompt: Text(String(localized: "HALO1-…", comment: "Placeholder for the licence key field")))
+                          prompt: Text(String(localized: "ANYFMT1-…", comment: "Placeholder for the licence key field")))
                     .labelsHidden()
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))
@@ -94,7 +94,7 @@ struct LicenceActivationView: View {
                 Button(String(localized: "Paste", comment: "Pastes a licence key from the clipboard")) { model.pasteFromClipboard() }
                     .accessibilityHint(Text("Pastes a key from the clipboard"))
                 Button(String(localized: "Activate", comment: "Activates a pasted licence key")) { model.activate() }
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .disabled(!model.canActivate)
             }
             if let message = model.message {

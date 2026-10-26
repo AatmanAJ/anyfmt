@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to jpg --opt quality=loud --json
+$ anyfmt convert <tmp>/photo.png --to jpg --opt quality=loud --json
 exit: 2
 --- stdout
 {

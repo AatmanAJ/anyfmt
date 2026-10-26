@@ -23,7 +23,7 @@ ALLOW=(
   'Sources/Shared/Options.swift'               # option defaults
   'Sources/App/Onboarding/SampleArtwork.swift' # the sample photo's pixels
   'Sources/App/Redesign/DirectionBoard.swift'  # the approval mock-ups (historical)
-  'Sources/App/Shared/HaloColors.swift'        # hex → NSColor helper itself
+  'Sources/App/Shared/AnyfmtColors.swift'        # hex → NSColor helper itself
   'Sources/CLI/'
 )
 

@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// What a licence key says, once its signature checks out.
 ///
@@ -121,11 +121,13 @@ enum LicenceFormatError: Error, Equatable, Sendable {
     case badPayload(String)
 }
 
-/// The pasted form: `HALO1-` + Crockford base32 of
+/// The pasted form: `ANYFMT1-` + Crockford base32 of
 /// `UInt16 big-endian payload length || payload JSON || 64-byte Ed25519 signature`,
 /// in groups of five. Parsing ignores dashes, whitespace and case.
 enum LicenceKey {
-    static let prefix = "HALO1"
+    static let prefix = "ANYFMT1"
+    /// Keys issued before the rename to anyfmt. Same payload and signature, older prefix.
+    static let legacyPrefixes = ["HALO1"]
     static let signatureLength = 64
     static let groupSize = 5
     /// Generous; real payloads are ~150 bytes.
@@ -156,8 +158,8 @@ enum LicenceKey {
         let compact = String(string.unicodeScalars.filter {
             !CharacterSet.whitespacesAndNewlines.contains($0) && $0 != "-"
         }).uppercased()
-        guard compact.hasPrefix(prefix) else { throw .missingPrefix }
-        guard let blob = LicenceBase32.decode(compact.dropFirst(prefix.count)) else { throw .badSymbols }
+        guard let used = ([prefix] + legacyPrefixes).first(where: { compact.hasPrefix($0) }) else { throw .missingPrefix }
+        guard let blob = LicenceBase32.decode(compact.dropFirst(used.count)) else { throw .badSymbols }
         guard blob.count >= 2 else { throw .badLength }
         let bytes = [UInt8](blob)
         let length = Int(bytes[0]) << 8 | Int(bytes[1])

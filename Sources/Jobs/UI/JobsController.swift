@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// The one object the app wires up for jobs: queue + progress windows + recents.
 ///

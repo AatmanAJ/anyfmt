@@ -1,7 +1,7 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
-/// `halo mcp`: a Model Context Protocol server over stdio. JSON-RPC 2.0,
+/// `anyfmt mcp`: a Model Context Protocol server over stdio. JSON-RPC 2.0,
 /// one message per line on stdin/stdout, logs on stderr. No dependencies,
 /// no sockets, no ports.
 ///

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// One input image as the multi-file editors show it.
 struct ImageEditorItem: Identifiable {
@@ -49,14 +49,14 @@ extension ImageEditorKit {
             .background(EditorPalette.chip)
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
-                .strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                .strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
         }
 
         private func row(_ item: ImageEditorItem, position: Int, selected: Bool) -> some View {
             HStack(spacing: DesignTokens.Space.s) {
                 Text("\(position + 1)")
                     .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .frame(width: 16, alignment: .trailing)
                 Group {
                     if let t = item.thumbnail {
@@ -71,7 +71,7 @@ extension ImageEditorKit {
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: selected ? .bold : .regular))
                     .lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: 0)
-                Image(systemName: "line.3.horizontal").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
+                Image(systemName: "line.3.horizontal").foregroundStyle(Color.anyfmtSecondaryText).accessibilityHidden(true)
             }
             .padding(.vertical, 2)
             .accessibilityElement(children: .combine)

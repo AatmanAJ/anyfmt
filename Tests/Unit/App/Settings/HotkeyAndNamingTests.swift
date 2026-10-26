@@ -1,8 +1,8 @@
 import XCTest
 import AppKit
 import Carbon.HIToolbox
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 final class HotkeyTests: XCTestCase {
     func testDefaultIsControlOptionSpaceAndValid() {

@@ -1,7 +1,7 @@
 import XCTest
 import PDFKit
 import CoreText
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class PDFKitEngineTests: XCTestCase {
     typealias S = ImageTestSupport

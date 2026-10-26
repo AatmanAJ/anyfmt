@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to jpg --opt bogus=1
+$ anyfmt convert <tmp>/photo.png --to jpg --opt bogus=1
 exit: 2
 --- stdout
 --- stderr

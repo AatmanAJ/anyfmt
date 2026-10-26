@@ -20,7 +20,7 @@ mkdir -p "$OUT"
 
 sign_args=(CODE_SIGN_IDENTITY=- OTHER_CODE_SIGN_FLAGS=--timestamp=none)
 if [[ -n "${DEVELOPER_ID:-}" ]]; then
-  sign_args=(CODE_SIGN_IDENTITY="$DEVELOPER_ID" DEVELOPMENT_TEAM="${TEAM_ID:-}" OTHER_CODE_SIGN_FLAGS=--timestamp HALO_HARDENED_RUNTIME=YES)
+  sign_args=(CODE_SIGN_IDENTITY="$DEVELOPER_ID" DEVELOPMENT_TEAM="${TEAM_ID:-}" OTHER_CODE_SIGN_FLAGS=--timestamp ANYFMT_HARDENED_RUNTIME=YES)
   echo "▸ signing with $DEVELOPER_ID"
 else
   echo "▸ no DEVELOPER_ID: building ad-hoc signed (not notarizable)"
@@ -28,7 +28,7 @@ fi
 
 echo "▸ build Release"
 xcodegen generate --quiet
-xcodebuild -project Halo.xcodeproj -derivedDataPath "$DERIVED" -scheme Halo -configuration Release \
+xcodebuild -project anyfmt.xcodeproj -derivedDataPath "$DERIVED" -scheme anyfmt -configuration Release \
   "${sign_args[@]}" build -quiet
 
 echo "▸ verify signatures"

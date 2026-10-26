@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// The documents the Mac syncs. Raw values are the server namespaces.
 enum SyncNamespace: String, CaseIterable, Sendable, Codable {

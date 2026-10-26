@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// "Copy details" must be able to reproduce a failure: the command line comes first.
 final class ProcessRunnerDetailsTests: XCTestCase {

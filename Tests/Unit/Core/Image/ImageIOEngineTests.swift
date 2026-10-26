@@ -1,7 +1,7 @@
 import XCTest
 import ImageIO
 import CoreText
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class ImageIOEngineTests: XCTestCase {
     typealias S = ImageTestSupport
@@ -12,7 +12,7 @@ final class ImageIOEngineTests: XCTestCase {
         S.write(image, to: dir.appendingPathComponent("camera.jpg"), uti: "public.jpeg", properties: [
             kCGImagePropertyOrientation: 6,
             kCGImagePropertyDPIWidth: 144, kCGImagePropertyDPIHeight: 144,
-            kCGImagePropertyTIFFDictionary: [kCGImagePropertyTIFFOrientation: 6, kCGImagePropertyTIFFMake: "Halo",
+            kCGImagePropertyTIFFDictionary: [kCGImagePropertyTIFFOrientation: 6, kCGImagePropertyTIFFMake: "anyfmt",
                                              kCGImagePropertyTIFFModel: "Cam 1", kCGImagePropertyTIFFArtist: "Jane Doe"],
             kCGImagePropertyExifDictionary: [kCGImagePropertyExifBodySerialNumber: "SN-42", kCGImagePropertyExifLensModel: "Lens X",
                                              kCGImagePropertyExifDateTimeOriginal: "2026:10:18 10:00:00", kCGImagePropertyExifISOSpeedRatings: [200]],
@@ -113,7 +113,7 @@ final class ImageIOEngineTests: XCTestCase {
         let out = try await S.convert(engine, cameraJPEG(dir), from: Formats.jpg, to: Formats.jpg, metadata: .keep)
         let p = S.properties(out[0])
         XCTAssertNotNil(p["{GPS}"], "GPS kept")
-        XCTAssertEqual((p["{TIFF}"] as? [String: Any])?["Make"] as? String, "Halo")
+        XCTAssertEqual((p["{TIFF}"] as? [String: Any])?["Make"] as? String, "anyfmt")
         XCTAssertEqual((p["{Exif}"] as? [String: Any])?["BodySerialNumber"] as? String, "SN-42")
         XCTAssertEqual((p["{IPTC}"] as? [String: Any])?["City"] as? String, "London")
         XCTAssertEqual(p["DPIWidth"] as? Int, 144)

@@ -15,11 +15,11 @@ SWIFT_EMIT_LOC_STRINGS = YES
 
 // Developer ID distribution, not the Mac App Store. Not sandboxed.
 // Hardened runtime is ON for every Developer ID build (make dmg / release
-// set HALO_HARDENED_RUNTIME=YES; notarization requires it). Local ad-hoc
+// set ANYFMT_HARDENED_RUNTIME=YES; notarization requires it). Local ad-hoc
 // builds leave it off: library validation rejects ad-hoc-signed frameworks
 // and dylibs ("different Team IDs"), so nothing would launch (D-031).
-HALO_HARDENED_RUNTIME = NO
-ENABLE_HARDENED_RUNTIME = $(HALO_HARDENED_RUNTIME)
+ANYFMT_HARDENED_RUNTIME = NO
+ENABLE_HARDENED_RUNTIME = $(ANYFMT_HARDENED_RUNTIME)
 ENABLE_APP_SANDBOX = NO
 CODE_SIGN_STYLE = Manual
 // Ad-hoc by default. `make dmg` overrides with DEVELOPER_ID when present.

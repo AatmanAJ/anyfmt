@@ -1,11 +1,11 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
-// halo-matrix: runs every shipped route on its fixture, validates each output by
+// anyfmt-matrix: runs every shipped route on its fixture, validates each output by
 // opening it (ImageIO decode, ffprobe probe + duration, PDFKit pages, archive
 // listing, re-parse for text formats), and writes docs/MATRIX.md.
 //
-//   halo-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
+//   anyfmt-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
 //               [--only <from-format>] [--jobs N] [--json path]
 
 MainActor.assumeIsolated {

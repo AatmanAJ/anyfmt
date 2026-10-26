@@ -3,7 +3,7 @@
 Scope: the Settings window (every pane, the hotkey recorder), the cloud screens
 (account, Pro explainer, share-link options, upload notice, plan badges,
 licence activation) and the small shared controls (`KeyCap`, `StatusBadge`,
-`FootnoteText`, `FormatChip`, `CardToggle`, `HaloSwitchStyle`, and
+`FootnoteText`, `FormatChip`, `CardToggle`, `AnyfmtSwitchStyle`, and
 `OptionsForm` styling). Direction: PLAN-PHASE2 §2 and
 `docs/screens/after/direction/` (board 3 and 4, the options panel).
 
@@ -34,7 +34,7 @@ and `docs/screens/cloud-*.png`.
 **Window.** The window and toolbar sit on the token surface: near-black
 (`ink.950`) in dark, the hero; white in light. Grouped sections read as charcoal
 tiles on black. Menus, focus rings and list selection keep the person's own
-system accent, as every Mac Settings window does. Halo's own controls carry the
+system accent, as every Mac Settings window does. anyfmt's own controls carry the
 cobalt: switches, sliders, pills, glyph tiles.
 
 **Display type, in three places only.** The format name at the top of
@@ -59,7 +59,7 @@ bordered button.
   data), grey (archives, other). The old violet, pink and green chips are gone.
 - `OptionsForm`: invalid values show a warning glyph and text, not red text
   alone. Help text uses the secondary token (AA) instead of `.tertiary`.
-- `haloBorder(_:_:)`: borders drawn as an even-odd ring of fill. Stroked
+- `anyfmtBorder(_:_:)`: borders drawn as an even-odd ring of fill. Stroked
   rounded paths render with notches at the arc joins in offscreen captures on
   current macOS; fills don't.
 

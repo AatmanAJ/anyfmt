@@ -1,14 +1,14 @@
 import AppKit
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Renders the actions' screens offscreen. Writes to a temp folder by
-/// default; set `HALO_SCREENS_DIR` (via `TEST_RUNNER_HALO_SCREENS_DIR=…` on
+/// default; set `ANYFMT_SCREENS_DIR` (via `TEST_RUNNER_HALO_SCREENS_DIR=…` on
 /// the xcodebuild command line) to write into docs/screens.
 @MainActor
 final class ActionScreensTests: XCTestCase {
     func testRendersShelfAndMoveChooser() throws {
-        let env = ProcessInfo.processInfo.environment["HALO_SCREENS_DIR"]
+        let env = ProcessInfo.processInfo.environment["ANYFMT_SCREENS_DIR"]
         let tmp = try TempFolder("screens")
         let dir = env.map { URL(fileURLWithPath: $0, isDirectory: true) } ?? tmp.url
 
@@ -54,7 +54,7 @@ final class ActionScreensTests: XCTestCase {
     func testMoveDestinationLocations() {
         let home = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
         XCTAssertEqual(MoveDestination.location(of: home.appendingPathComponent("Desktop")), "Home")
-        XCTAssertEqual(MoveDestination.location(of: home.appendingPathComponent("Code/halo")), "~/Code")
+        XCTAssertEqual(MoveDestination.location(of: home.appendingPathComponent("Code/anyfmt")), "~/Code")
         XCTAssertEqual(MoveDestination.location(of: URL(fileURLWithPath: "/Volumes/Backup/Photos")), "Backup")
         XCTAssertEqual(MoveDestination.location(of: URL(fileURLWithPath: "/opt/stuff")), "/opt")
     }

@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Opens the editor for a tool, or returns false if the tool has no editor in
 /// this build. Lane G1 implements `ImageEditors.open`, lane G2 `MediaEditors.open`.

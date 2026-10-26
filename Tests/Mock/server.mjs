@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Halo Cloud mock server.
+// anyfmt Cloud mock server.
 //
 // An in-memory implementation of Server/openapi.yaml for the app's cloud
 // tests. Node built-ins only (http, crypto, util): no npm install, ever.
@@ -61,7 +61,7 @@ const DEFAULT_CONFIG = Object.freeze({
 });
 
 // Seeded licence for POST /v1/licences/activate (more via POST /__mock/licences).
-const MOCK_LICENCE = Object.freeze({ id: 'lic_mockpro0001', key: 'HALO-MOCK-PRO0-0001', plan: 'pro', status: 'active', maxDevices: 2, expiresAt: null });
+const MOCK_LICENCE = Object.freeze({ id: 'lic_mockpro0001', key: 'ANYFMT-MOCK-PRO0-0001', plan: 'pro', status: 'active', maxDevices: 2, expiresAt: null });
 
 const PLANS = {
   free: {
@@ -335,7 +335,7 @@ function stem(name) {
 
 const CANNED_SRT = `1
 00:00:00,000 --> 00:00:02,500
-Hello from the Halo mock server.
+Hello from the anyfmt mock server.
 
 2
 00:00:02,500 --> 00:00:05,000
@@ -345,7 +345,7 @@ This transcript is canned.
 const CANNED_VTT = `WEBVTT
 
 00:00:00.000 --> 00:00:02.500
-Hello from the Halo mock server.
+Hello from the anyfmt mock server.
 
 00:00:02.500 --> 00:00:05.000
 This transcript is canned.
@@ -421,7 +421,7 @@ const route = (method, pattern, handler) => {
 
 // meta
 route('GET', '/v1/health', (req, res) => send(res, 200, {
-  status: 'ok', api: '1', name: 'Halo Mock', version: 'mock-1', selfHosted: true,
+  status: 'ok', api: '1', name: 'anyfmt Mock', version: 'mock-1', selfHosted: true,
   capabilities: ['shareLink', 'shareLinkCustomDomain', 'cloudJobs', 'sync', 'inbox', 'transcription', 'upscale', 'backgroundRemovalHQ'],
 }));
 
@@ -876,7 +876,7 @@ route('DELETE', '/v1/inbox/:itemId', (req, res, { params }) => {
 // Conversions are fake: they finish after `config.conversionMs` and the
 // output is the input bytes under the target's extension.
 
-const API_KEY_PREFIX = 'halo_sk_';
+const API_KEY_PREFIX = 'anyfmt_sk_';
 const SCOPES = ['convert', 'read'];
 const EVENT_TYPES = ['conversion.succeeded', 'conversion.failed'];
 const TERMINAL = ['succeeded', 'failed', 'cancelled'];
@@ -891,12 +891,12 @@ function bearer(req) {
 function authenticateKey(req, res, scope) {
   const token = bearer(req);
   if (!token || !token.startsWith(API_KEY_PREFIX)) {
-    sendError(res, 401, 'invalid_api_key', 'This endpoint needs an API key: Authorization: Bearer halo_sk_…', null, {}, { 'WWW-Authenticate': 'Bearer realm="halo-api"' });
+    sendError(res, 401, 'invalid_api_key', 'This endpoint needs an API key: Authorization: Bearer anyfmt_sk_…', null, {}, { 'WWW-Authenticate': 'Bearer realm="anyfmt-api"' });
     return null;
   }
   const k = state.apiKeys.get(token);
   if (!k || k.revokedAt || (k.expiresAt && Date.parse(k.expiresAt) <= Date.now())) {
-    sendError(res, 401, 'invalid_api_key', 'That API key is unknown, revoked or expired.', null, {}, { 'WWW-Authenticate': 'Bearer realm="halo-api", error="invalid_token"' });
+    sendError(res, 401, 'invalid_api_key', 'That API key is unknown, revoked or expired.', null, {}, { 'WWW-Authenticate': 'Bearer realm="anyfmt-api", error="invalid_token"' });
     return null;
   }
   if (scope && !k.scopes.includes(scope)) {
@@ -927,7 +927,7 @@ function createApiKey(email, { name = 'Mock key', scopes = SCOPES, expiresAt = n
 
 // ------------------------------------------------ registry (formats + schemas)
 // A server-side copy of the app's registry: a subset of Sources/Shared/Options.swift
-// (StandardSchemas) and the capability routes, in the `halo schema --json` shape.
+// (StandardSchemas) and the capability routes, in the `anyfmt schema --json` shape.
 
 const slider = (id, label, min, max, def, unit = null) => ({ id, label, kind: 'slider', default: def, min, max, step: 1, unit, help: null });
 const integer = (id, label, min, max, def, unit = null, help = null) => ({ id, label, kind: 'integer', default: def, min, max, unit, help });
@@ -1035,7 +1035,7 @@ function registry() {
   const media = FORMATS.filter((f) => f.kind === 'video' || f.kind === 'audio').map((f) => f.id);
   return {
     schemaVersion: SCHEMA_VERSION,
-    generator: 'halo-mock 1',
+    generator: 'anyfmt-mock 1',
     formats: FORMATS.map(formatInfo),
     optionSchemas: OPTION_SCHEMAS,
     tools: [
@@ -1285,9 +1285,9 @@ route('POST', '/v1/conversions', async (req, res) => {
     src = { ...got, fileId: null, url: input.url };
   }
   const inputFormat = typeof input.format === 'string' ? input.format : detectFormat(src.name, src.contentType);
-  if (!inputFormat || !FORMAT_BY_ID.has(inputFormat)) return sendError(res, 422, 'unsupported_route', 'Halo can’t tell what format the input is. Pass input.format.', { fields: ['input.format'] });
+  if (!inputFormat || !FORMAT_BY_ID.has(inputFormat)) return sendError(res, 422, 'unsupported_route', 'anyfmt can’t tell what format the input is. Pass input.format.', { fields: ['input.format'] });
   const route_ = targetsFor(inputFormat).find((t) => t.id === body.target);
-  if (!route_) return sendError(res, 422, 'unsupported_route', `Halo can’t convert ${inputFormat} to ${body.target}.`, { input: inputFormat, target: body.target, targets: targetsFor(inputFormat).map((t) => t.id) });
+  if (!route_) return sendError(res, 422, 'unsupported_route', `anyfmt can’t convert ${inputFormat} to ${body.target}.`, { input: inputFormat, target: body.target, targets: targetsFor(inputFormat).map((t) => t.id) });
   const { values, problems } = validateOptions(route_.optionsSchema, body.options);
   if (problems.length) return sendError(res, 422, 'validation_failed', 'Some options aren’t valid for this conversion.', { fields: problems.map((p) => p.field), problems, optionsSchema: route_.optionsSchema });
 
@@ -1362,7 +1362,7 @@ route('GET', '/v1/formats', (req, res, { query }) => {
   const input = query.get('input');
   if (input) {
     const f = FORMAT_BY_ID.get(input);
-    if (!f) return sendError(res, 404, 'not_found', `Halo doesn’t know the format “${input}”.`);
+    if (!f) return sendError(res, 404, 'not_found', `anyfmt doesn’t know the format “${input}”.`);
     return send(res, 200, { schemaVersion: SCHEMA_VERSION, items: [formatInfo(f)] });
   }
   send(res, 200, { schemaVersion: SCHEMA_VERSION, items: FORMATS.map(formatInfo) });
@@ -1436,7 +1436,7 @@ async function deliver(webhookId, event, attempt) {
   try {
     const r = await fetch(w.url, {
       method: 'POST', body, signal: AbortSignal.timeout(state.config.webhookTimeoutMs),
-      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Halo-Webhooks/1 (mock)', 'Halo-Signature': signatureHeader(w.secret, body), 'Halo-Webhook-Id': w.id, 'Halo-Delivery-Attempt': String(attempt) },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Anyfmt-Webhooks/1 (mock)', 'Anyfmt-Signature': signatureHeader(w.secret, body), 'Anyfmt-Webhook-Id': w.id, 'Anyfmt-Delivery-Attempt': String(attempt) },
     });
     record.status = r.status;
     await r.arrayBuffer().catch(() => null);
@@ -1603,7 +1603,7 @@ ctl('POST', '/webhooks/sign', async (req, res) => {
 });
 ctl('POST', '/licences', async (req, res) => {
   const body = await readJSON(req, res); if (!body) return;
-  const key = String(body.key ?? `HALO-${crypto.randomBytes(6).toString('hex').toUpperCase()}`).toUpperCase();
+  const key = String(body.key ?? `ANYFMT-${crypto.randomBytes(6).toString('hex').toUpperCase()}`).toUpperCase();
   const l = { id: body.id ?? id('lic'), key, plan: body.plan ?? 'pro', status: body.status ?? 'active', maxDevices: body.maxDevices ?? 2, expiresAt: body.expiresAt ?? null, devices: [] };
   state.licences.set(key, l);
   send(res, 201, { key, ...licenceState(l) });
@@ -1675,4 +1675,4 @@ if (argv['watch-stdin']) {
   process.stdin.on('end', () => process.exit(0));
   process.stdin.resume();
 }
-if (!argv.quiet) process.stderr.write('halo mock server ready\n');
+if (!argv.quiet) process.stderr.write('anyfmt mock server ready\n');

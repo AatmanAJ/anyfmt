@@ -5,7 +5,7 @@ import XCTest
 ///
 /// Walks the whole first run: welcome → demo → permissions → launch at login →
 /// updates → optional activation → finish. A screenshot of every step is attached
-/// to the result bundle, and written to $HALO_UI_SHOTS (e.g. docs/screens/onboarding/ui)
+/// to the result bundle, and written to $ANYFMT_UI_SHOTS (e.g. docs/screens/onboarding/ui)
 /// when that's set.
 @MainActor
 final class OnboardingUITests: XCTestCase {
@@ -51,7 +51,7 @@ final class OnboardingUITests: XCTestCase {
         attachment.name = "onboarding-\(name)"
         attachment.lifetime = .keepAlways
         add(attachment)
-        if let dir = ProcessInfo.processInfo.environment["HALO_UI_SHOTS"] {
+        if let dir = ProcessInfo.processInfo.environment["ANYFMT_UI_SHOTS"] {
             let url = URL(fileURLWithPath: dir, isDirectory: true)
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             try? shot.pngRepresentation.write(to: url.appendingPathComponent("onboarding-\(name).png"))

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// The panes of the Settings window, in toolbar order.
 enum SettingsPane: String, CaseIterable, Identifiable {

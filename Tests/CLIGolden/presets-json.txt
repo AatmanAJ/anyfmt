@@ -1,4 +1,4 @@
-$ halo presets --json
+$ anyfmt presets --json
 exit: 0
 --- stdout
 {

@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Constants for the cloud client (BUILD.md §9b).
 ///
@@ -63,7 +63,7 @@ enum CloudServerAddress {
     }
 
     /// Normalises user input: adds https:// when no scheme is given, drops a
-    /// trailing slash, keeps a path prefix (reverse proxies like /halo).
+    /// trailing slash, keeps a path prefix (reverse proxies like /anyfmt).
     static func parse(_ text: String) -> Result<URL, Problem> {
         var s = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !s.isEmpty else { return .failure(.empty) }

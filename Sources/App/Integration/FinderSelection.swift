@@ -1,6 +1,6 @@
 import AppKit
 import ApplicationServices
-import HaloCore
+import AnyfmtCore
 
 /// Reads the current Finder selection via Apple Events (needs the user's
 /// Automation consent for Finder; D-004). Never prompts unless `ask` is true.

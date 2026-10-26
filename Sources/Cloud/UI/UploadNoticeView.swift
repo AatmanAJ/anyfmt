@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// The one-time "This uploads to {server}" note, shown the first time a
 /// cloud action runs against a server (BUILD.md §2). A display headline,
@@ -44,10 +44,10 @@ struct UploadNoticeView: View {
             HStack(spacing: Space.s) {
                 Spacer()
                 Button(String(localized: "Cancel"), action: onCancel)
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(String(localized: "Continue"), action: onContinue)
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .keyboardShortcut(.defaultAction)
             }
         }

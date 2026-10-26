@@ -1,6 +1,6 @@
 import AppKit
 import Sparkle
-import HaloCore
+import AnyfmtCore
 
 /// Sparkle 2, strictly opt-in (D-024): the updater isn't even started until the
 /// user turns on update checks. No system profiling, no checks on first launch.

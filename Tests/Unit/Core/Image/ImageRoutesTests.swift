@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class ImageRoutesTests: XCTestCase {
     let rows = ImageRoutes.rows

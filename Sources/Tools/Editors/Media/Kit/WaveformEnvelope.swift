@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Min/max peak envelope of an audio file: one (min, max) pair per bin of
 /// `samplesPerBin` frames, channels folded together. Built in one streaming

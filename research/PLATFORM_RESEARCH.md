@@ -1,4 +1,4 @@
-# Platform research for Halo (macOS 13+, arm64, LSUIElement)
+# Platform research for anyfmt (macOS 13+, arm64, LSUIElement)
 
 Researched 2026-10-18. Every item gives the answer, the minimum macOS, sources and a confidence level. Where I ran something, it ran on **macOS 27.0.1 (26A434), Xcode 27.1 (27A9275), MacOSX27.0.sdk, Apple M5 Max**. The throwaway programs are in the session scratchpad (`.../scratchpad/platform/`) and are not part of the repo.
 
@@ -8,7 +8,7 @@ Confidence: **high** means documented by Apple or verified here, **medium** mean
 
 ---
 
-## Implications for Halo (read this first)
+## Implications for anyfmt (read this first)
 
 1. **Mid-drag detection looks possible with no TCC permission, using public API.**
    - A global `leftMouseDown/Dragged/Up` monitor (no permission) detects the drag.
@@ -51,12 +51,12 @@ Confidence: **high** means documented by Apple or verified here, **medium** mean
     - VideoToolbox has hardware H.264, HEVC (also with alpha) and ProRes encoders. There is **no AV1 or VP9 encoder**.
     - **AV1 hardware decode exists only on M3 and later.** Bundle dav1d for M1/M2.
     - AVFoundation export writes only mov, mp4, m4v and m4a(-ish), so everything else goes through ffmpeg.
-    - ffmpeg's `*_videotoolbox` encoders require hardware by default. `-q:v` works only on arm64 macOS, which suits Halo. (G)
+    - ffmpeg's `*_videotoolbox` encoders require hardware by default. `-q:v` works only on arm64 macOS, which suits anyfmt. (G)
 11. **UTTypes.**
     - **`.srt` has no system UTI**, so declare an imported type; `.ass` and `.ssa` don't either.
     - `UTType(filenameExtension:)` returns the *single-file* iWork types and a *dynamic* type for `.rtfd`. Use `URL.resourceValues(.contentTypeKey)` and treat both iWork variants as one format. (H)
 12. **Small things.**
-    - Expect **no trackpad haptics** while Halo isn't active, which is the case during a Finder drag. The only workaround found is private.
+    - Expect **no trackpad haptics** while anyfmt isn't active, which is the case during a Finder drag. The only workaround found is private.
     - AirDrop from an LSUIElement app needs an anchor window and activation; multi-file `canPerform` is true.
     - Open terminals with `NSWorkspace.open([folder], withApplicationAt:)`. Use `warp://action/new_window?path=` for Warp. Ghostty opens a *tab* by default.
     - With `SMAppService.mainApp`, always re-read `status`. (H)
@@ -155,8 +155,8 @@ Notes:
   - Confidence: high for the read, medium-high for the bump.
 - **Pasteboard privacy (15.4+):** it does **not** apply. The SDK header for `NSPasteboard.AccessBehavior` says: "The default behavior for the General pasteboard is to ask upon programmatic access. **All other pasteboards default to always allow access.**" Locally, `accessBehavior` was `.alwaysAllow` (2) for the drag pasteboard. Sources: [AccessBehavior](https://developer.apple.com/documentation/appkit/nspasteboard/accessbehavior-swift.enum), [mjtsai](https://mjtsai.com/blog/2025/05/12/pasteboard-privacy-preview-in-macos-15-4). **Confidence:** high.
 - **Reading file URLs mid-drag:** works in practice for **Finder drags**, which carry `public.file-url` items. It isn't documented.
-  - Halo needs it **before** the drop, because the wheel shows only formats valid for the dragged files.
-  - Halo isn't sandboxed, so the sandbox-extension pitfall (peeking at URLs before the drop can stop a sandboxed app getting its extension; [Wade Tregaskis](https://wadetregaskis.com/mac-app-sandboxing-interferes-with-drag-drop/)) doesn't apply. Still, read only `fileURL` items: lazily provided types call back into the source app.
+  - anyfmt needs it **before** the drop, because the wheel shows only formats valid for the dragged files.
+  - anyfmt isn't sandboxed, so the sandbox-extension pitfall (peeking at URLs before the drop can stop a sandboxed app getting its extension; [Wade Tregaskis](https://wadetregaskis.com/mac-app-sandboxing-interferes-with-drag-drop/)) doesn't apply. Still, read only `fileURL` items: lazily provided types call back into the source app.
   - **Confidence:** medium. DragProbe must confirm `readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true])` mid-drag for Desktop, list view, Spotlight and Stage Manager sources.
 - **File promises** come from Mail attachments, Photos, Safari/Chrome image drags, the Screenshot thumbnail and many Electron apps.
   - Modern types (SDK `HIServices/Pasteboard.h`): `com.apple.pasteboard.promised-file-url` (`kPasteboardTypeFileURLPromise`) and `com.apple.pasteboard.promised-file-content-type` (`kPasteboardTypeFilePromiseContent`). The legacy `NSFilesPromisePboardType` is deprecated (10.0–10.14).
@@ -180,12 +180,12 @@ Notes:
   - **Confidence:** medium-high.
 - **Gotchas found in Perch's source:**
   1. **Fully transparent pixels are click-through and "never receive draggingEntered".** Fill the wheel's background, including the centre "cancel" disc, with at least alpha ≈ 0.005.
-  2. With SwiftUI content, `Color.clear` needs `.contentShape`, or `NSHostingView.hitTest` returns nil and the drag never routes to it. Halo's wheel is AppKit, so make `hitTest` return the view across the whole ring.
+  2. With SwiftUI content, `Color.clear` needs `.contentShape`, or `NSHostingView.hitTest` returns nil and the drag never routes to it. anyfmt's wheel is AppKit, so make `hitTest` return the view across the whole ring.
   3. Don't set `ignoresMouseEvents = true` on the drop window.
   4. Call `registerForDraggedTypes` *before* ordering the panel in.
 - **Appearing under a stationary cursor: undocumented, with no reports either way.**
   - The window server picks the destination as the drag moves. Once you *are* the destination, `draggingUpdated` is periodic by default (`wantsPeriodicDraggingUpdates`) and is re-sent "when the mouse moves or a modifier flag changes".
-  - For Halo this barely matters: the wheel opens centred on the pointer (the cancel zone), and choosing a segment requires a move, which fires `draggingEntered`.
+  - For anyfmt this barely matters: the wheel opens centred on the pointer (the cancel zone), and choosing a segment requires a move, which fires `draggingEntered`.
   - DragProbe should still log whether `draggingEntered` arrives without a move, so that "drop immediately on the centre = cancel" works.
   - **Confidence:** low.
 - **Use the destination callbacks once inside.** Use `draggingUpdated(_:)` location for segment hit-testing, and `draggingSourceOperationMask` / `NSEvent.modifierFlags` for modifier changes while hovering. Return `.copy` (never `.move`) so Finder leaves the original alone.
@@ -242,11 +242,11 @@ The `flagsChanged` monitor is a bonus if it turns out to work.
 
 | Route | Permission | Works for | Min macOS | Confidence |
 |---|---|---|---|---|
-| **Apple Events:** `tell application "Finder" to get selection` (NSAppleScript, or `NSAppleEventDescriptor` / `AESendMessage`) | **Automation consent** for Finder (TCC `kTCCServiceAppleEvents`), prompted on first send. Needs `NSAppleEventsUsageDescription` in Info.plist (10.14+); without it, sends fail. Under the hardened runtime it also needs the **`com.apple.security.automation.apple-events`** entitlement (failures surface as -1744 then -1743). Not needed for events to yourself or same-team apps. Halo isn't sandboxed, so `scripting-targets` doesn't matter: Finder's sdef only publishes the `com.apple.finder.trash` access group, so a sandboxed app couldn't use it for `selection` anyway. | Every Finder view and the Desktop. Finder's notion of selection is authoritative. Returns `«class docf»`/alias items; ask for `POSIX path of (item as alias)`, or use `selection as alias list`. | 10.14 for the consent model | high |
+| **Apple Events:** `tell application "Finder" to get selection` (NSAppleScript, or `NSAppleEventDescriptor` / `AESendMessage`) | **Automation consent** for Finder (TCC `kTCCServiceAppleEvents`), prompted on first send. Needs `NSAppleEventsUsageDescription` in Info.plist (10.14+); without it, sends fail. Under the hardened runtime it also needs the **`com.apple.security.automation.apple-events`** entitlement (failures surface as -1744 then -1743). Not needed for events to yourself or same-team apps. anyfmt isn't sandboxed, so `scripting-targets` doesn't matter: Finder's sdef only publishes the `com.apple.finder.trash` access group, so a sandboxed app couldn't use it for `selection` anyway. | Every Finder view and the Desktop. Finder's notion of selection is authoritative. Returns `«class docf»`/alias items; ask for `POSIX path of (item as alias)`, or use `selection as alias list`. | 10.14 for the consent model | high |
 | Preflight: `AEDeterminePermissionToAutomateTarget(target, typeWildCard, typeWildCard, askUserIfNeeded)` | — | Returns `noErr`, `errAEEventNotPermitted` (-1743), `errAEEventWouldRequireUserConsent` (-1744, with `false`) or `procNotFound`. Even after the user denies, `false` keeps returning -1744, so it **can't silently detect "denied"**. The header says don't call it on the main thread. | 10.14 | high |
 | **Accessibility API:** `AXUIElementCreateApplication(finderPID)` → focused window → `AXSelectedChildren` / `AXSelectedRows` → `AXURL` / `AXFilename` | **Accessibility** (`AXIsProcessTrusted`) | Undocumented per view. One report says icon-view items and list-view rows expose selection. In file dialogs `AXURL` showed up as `file:///.file/id=…` reference URLs, which need resolving. The Desktop is a separate AX element tree. Column and gallery views are unverified. Couldn't test locally (not trusted). | — | low |
 | **Services menu** (`NSServices` with `NSSendFileTypes` such as `public.item`/`public.folder`, plus `NSMessage`, `NSPortName`, `NSRequiredContext`) | **None.** Finder puts the selected file URLs on a private pasteboard and calls your provider (`NSApp.servicesProvider`). | Every Finder view and the Desktop, via the right-click **Services/Quick Actions** submenu, the Finder > Services menu, or a **keyboard shortcut the user assigns** in System Settings > Keyboard > Keyboard Shortcuts > Services > Files and Folders. Terminal ships exactly this ("New Terminal at Folder", `NSSendFileTypes` `public.directory`), and on macOS 27 `pbs -dump_pboard` still lists it. | 10.0 (`NSRequiredContext` 10.6) | high |
-| Finder Sync extension (`FIFinderSyncController.default().selectedItemURLs()`) | None, but the user must enable the extension in System Settings > Extensions. It's an app extension, so it's sandboxed. | **Only valid inside `menu(for:)` or its actions.** It returns nil outside the extension's monitored directories, for example from a toolbar click. That's good for a "Convert with Halo" context menu, but **not** for a keyboard trigger. ([doc](https://developer.apple.com/documentation/findersync/fifindersynccontroller/selecteditemurls())) | 10.10 | high |
+| Finder Sync extension (`FIFinderSyncController.default().selectedItemURLs()`) | None, but the user must enable the extension in System Settings > Extensions. It's an app extension, so it's sandboxed. | **Only valid inside `menu(for:)` or its actions.** It returns nil outside the extension's monitored directories, for example from a toolbar click. That's good for a "Convert with anyfmt" context menu, but **not** for a keyboard trigger. ([doc](https://developer.apple.com/documentation/findersync/fifindersynccontroller/selecteditemurls())) | 10.10 | high |
 | **Intercepting Return in Finder** | **Accessibility.** Swallowing Return before Finder sees it needs an active `.defaultTap` CGEventTap; posting needs PostEvent, which lives in the Accessibility pane. A listen-only tap (Input Monitoring) can *see* Return but not stop it, so Finder would still start a rename. A global `keyDown` NSEvent monitor needs a grant and can't swallow either. | Confirmed: `tapCreate` doc; Quinn [707680](https://developer.apple.com/forums/thread/707680); [735204](https://developer.apple.com/forums/thread/735204) (revoking Accessibility under a live tap can block input). | 10.15 (TCC split) | high |
 
 **Services details** (Apple's Services Implementation Guide, SysServices "properties", "providing" and "overview" articles):
@@ -265,7 +265,7 @@ The `flagsChanged` monitor is a bonus if it turns out to work.
 
 The zero-permission default is:
 
-- a **Services entry** "Open Halo Wheel" (`NSSendFileTypes` = `public.item`, `NSRequiredContext` = `{}`), with a suggested ⌘-based shortcut the user can rebind in System Settings;
+- a **Services entry** "Open anyfmt Wheel" (`NSSendFileTypes` = `public.item`, `NSRequiredContext` = `{}`), with a suggested ⌘-based shortcut the user can rebind in System Settings;
 - plus a permission-free Carbon hotkey (A4) that opens the wheel at the pointer for drop-onto-ring.
 
 Both work on 13+ with no TCC grant.
@@ -313,9 +313,9 @@ Notes:
   - AnyDoor's research note records a successful HEIC and AVIF encode with alpha on macOS 26.5.
   
   **Gate it at runtime:** check `CGImageDestinationCopyTypeIdentifiers().contains("public.avif")`. If it's missing, fall back to the bundled ffmpeg (libaom or SVT-AV1) or libavif, and test on a real macOS 13, 14 and 15 machine before calling it native. (Sources: [Nuke supported formats](https://github.com/kean/Nuke/blob/main/Documentation/Nuke.docc/Customization/ImageFormats/supported-image-formats.md), [kompressor format-support](https://github.com/cracknco/kompressor/blob/main/docs/format-support.md), [AnyDoor probe note](https://github.com/ZingerLittleBee/AnyDoor/blob/main/docs/research/2026-07-10-image-target-size-compression-market-research.md), [Safari 16 / AVIF](https://webkit.org/blog/13152/webkit-features-in-safari-16-0/), [Safari 16.1 release notes](https://developer.apple.com/documentation/safari-release-notes/safari-16_1-release-notes))
-- **WebP encode.** ImageIO has never had one; Nuke states that `isSupported(.webp)` is false on every platform. Halo needs libwebp (`cwebp`) or ffmpeg's `libwebp` for WebP output. High confidence.
+- **WebP encode.** ImageIO has never had one; Nuke states that `isSupported(.webp)` is false on every platform. anyfmt needs libwebp (`cwebp`) or ffmpeg's `libwebp` for WebP output. High confidence.
 - **JPEG XL.** Decode only, from macOS 14 (Safari 17 / Sonoma per the [WebKit WWDC23 post](https://webkit.org/blog/14205/news-from-wwdc23-webkit-features-in-safari-17-beta/) and [STP 173 notes](https://webkit.org/blog/14378/release-notes-for-safari-technology-preview-173/)). JPEG XL output would need libjxl. It isn't in BUILD.md's output list, so skip it.
-- **HEIC encode and hardware.** Every Apple silicon Mac has the HEVC hardware encoder: VideoToolbox lists `com.apple.videotoolbox.videoencoder.ave.hevc` with `hw=true`, and there is also a software HEVC encoder (`hevc.vcp`). On arm64-only Halo there's no hardware caveat. The only reported HEIC-encode breakage is the iOS 17.5 Simulator ([forum 755470](https://developer.apple.com/forums/thread/755470)), which doesn't matter for a Mac app. High confidence.
+- **HEIC encode and hardware.** Every Apple silicon Mac has the HEVC hardware encoder: VideoToolbox lists `com.apple.videotoolbox.videoencoder.ave.hevc` with `hw=true`, and there is also a software HEVC encoder (`hevc.vcp`). On arm64-only anyfmt there's no hardware caveat. The only reported HEIC-encode breakage is the iOS 17.5 Simulator ([forum 755470](https://developer.apple.com/forums/thread/755470)), which doesn't matter for a Mac app. High confidence.
 - **Alpha and backgrounds.** For destinations that can't hold alpha (JPEG), ImageIO composites onto `kCGImageDestinationBackgroundColor`, which defaults to white. HEIC and AVIF keep alpha (verified here and in AnyDoor's 26.5 probe).
 - **Metadata.** AnyDoor reports that on 26.5 `CGImageDestinationCopyImageSource` refuses lossless metadata edits for AVIF, and silently fails to strip GPS from HEIC. So "strip metadata" has to re-encode for those two formats. Medium confidence.
 - **SVG input.** ImageIO can't decode SVG (`public.svg-image` is in neither list). Keep resvg, as BUILD.md plans.
@@ -377,7 +377,7 @@ All are in `AppKit/NSAttributedString.h`. `NSOfficeOpenXMLTextDocumentType` (.do
 Conclusions:
 
 - `textutil` and NSAttributedString are fine for text-heavy DOCX↔RTF/TXT/HTML/ODT.
-- They are **not** acceptable as Halo's DOCX writer: it drops tables, lists and images.
+- They are **not** acceptable as anyfmt's DOCX writer: it drops tables, lists and images.
 - DOCX import loses images.
 
 Use pandoc for DOCX/ODT/EPUB/MD output, as BUILD.md already plans. Keep `textutil` and NSAttributedString for RTF, RTFD, TXT and `.textClipping` text, and for quick DOCX→TXT.
@@ -445,7 +445,7 @@ Formats such as MKV, WebM, AVI, MP3, FLAC, OGG and Opus are **not** AVFoundation
 | Export API | `export(to:as:isolation:) async throws` is documented as 10.15, but in the 27 SDK it is `@backDeployed(before: macOS 26.0)`, so it works on 13 when built with the current Xcode. `states(updateInterval:)` for progress is **15.0 only**. On 13–14, poll `progress` instead. `exportAsynchronously` is deprecated in 15. ([export(to:as:)](https://developer.apple.com/documentation/avfoundation/avassetexportsession/export(to:as:isolation:)), [states](https://developer.apple.com/documentation/avfoundation/avassetexportsession/states(updateinterval:))) | 13 with back-deploy | high (local SDK) |
 | VideoToolbox encoders on M5 Max (`VTCopyVideoEncoderList`) | **Hardware:** H.264 (`ave.avc`), HEVC (`ave.hevc`), HEVC+alpha (`muxa`), ProRes 422/HQ/LT/Proxy/4444/4444 XQ (`appleproreshw.*`), JPEG. **Software:** H.264, HEVC, ProRes, JPEG, H.263. There is **no AV1 or VP9 encoder**. ProRes hardware encode exists on M1 Pro/Max/Ultra and on M2 and later, base chips included; on a base M1 it falls back to the software ProRes encoder, which still works. | — | high (local) |
 | AVAssetWriter + HEVC/H.264 | It uses VideoToolbox. Pass `AVVideoEncoderSpecificationKey: [kVTVideoEncoderSpecification_RequireHardwareAcceleratedVideoEncoder: true]` to fail rather than fall back silently. A local 320×240 HEVC write completed. ([AVVideoEncoderSpecificationKey](https://developer.apple.com/documentation/avfoundation/avvideoencoderspecificationkey), [RequireHardwareAcceleratedVideoEncoder](https://developer.apple.com/documentation/videotoolbox/kvtvideoencoderspecification_requirehardwareacceleratedvideoencoder)) | 10.10 / 10.9 | high |
-| ffmpeg VideoToolbox | `h264_videotoolbox`, `hevc_videotoolbox` and `prores_videotoolbox` use Apple's encoder, and by default require hardware (`-allow_sw 0` is the default; `-require_sw 1` forces software). Local Homebrew ffmpeg 9.0.2: 720p30 HEVC ran at 13.2× and H.264 at 14.5× realtime with `-allow_sw 0`. `-q:v` (constant quality via `kVTCompressionPropertyKey_Quality`) works **only on arm64 macOS**, which suits Halo. Other options: `-realtime`, `-prio_speed`, `-spatial_aq`, `-constant_bit_rate` (macOS 13+), `-alpha_quality`. Tag HEVC as `-tag:v hvc1` so QuickTime and Finder play it. ([videotoolboxenc.c](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/videotoolboxenc.c)) | — | high |
+| ffmpeg VideoToolbox | `h264_videotoolbox`, `hevc_videotoolbox` and `prores_videotoolbox` use Apple's encoder, and by default require hardware (`-allow_sw 0` is the default; `-require_sw 1` forces software). Local Homebrew ffmpeg 9.0.2: 720p30 HEVC ran at 13.2× and H.264 at 14.5× realtime with `-allow_sw 0`. `-q:v` (constant quality via `kVTCompressionPropertyKey_Quality`) works **only on arm64 macOS**, which suits anyfmt. Other options: `-realtime`, `-prio_speed`, `-spatial_aq`, `-constant_bit_rate` (macOS 13+), `-alpha_quality`. Tag HEVC as `-tag:v hvc1` so QuickTime and Finder play it. ([videotoolboxenc.c](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/videotoolboxenc.c)) | — | high |
 | VT vs x264/x265 | Hardware is much faster and lower power, but at a given bitrate it is lower quality than x264/x265 slow presets. Use VT for "fast/default" and x264/x265 for a "best quality/smallest" option. | — | medium (general knowledge, not measured here) |
 | AV1 hardware **decode** | **M3 family, M4 family, M5 family** (Apple newsroom and spec pages), and A17 Pro. `VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)` returned **true** on the M5 Max. **M1 and M2 have no AV1 decode**: VT returns `kVTCouldNotFindVideoDecoderErr`, and AVFoundation won't play AV1 there. So bundle **dav1d** in ffmpeg for AV1 input on M1/M2 and on macOS 13. In practice hardware AV1 means macOS 14+ (first OS on M3). ([M3](https://www.apple.com/newsroom/2023/10/apple-unveils-m3-m3-pro-and-m3-max-the-most-advanced-chips-for-a-personal-computer/), [M4](https://www.apple.com/newsroom/2024/05/apple-introduces-m4-chip/), [forum 722933](https://developer.apple.com/forums/thread/722933), [forum 739953](https://developer.apple.com/forums/thread/739953)) | 14 (M3+) | high |
 | AV1 hardware **encode** | None on any Apple silicon (absent from every spec page; [Bitmovin](https://bitmovin.com/blog/apple-av1-support/)). AV1 output means libaom or SVT-AV1 (software). The local Homebrew build has `--enable-libsvtav1`. | — | high |
@@ -478,7 +478,7 @@ Sources: [Apple doc](https://developer.apple.com/documentation/appkit/nssharings
 
 - `NSHapticFeedbackManager.defaultPerformer.perform(_:performanceTime:)` (10.11). It only works on Force Touch trackpads, only while a finger is on the trackpad, and only "in response to user-initiated actions". The `.alignment` pattern is documented for an object being dragged.
 - **Real-world report:** it produced **nothing from an LSUIElement app that is not active**. The glisse project (macOS 27) worked around it with private `MTActuator` APIs (MultitouchSupport). **That is private and off-limits.**
-- During a Finder-owned drag Halo is not active, so plan for **no haptic on segment change**, or treat it as best effort. Mouse users get nothing either way.
+- During a Finder-owned drag anyfmt is not active, so plan for **no haptic on segment change**, or treat it as best effort. Mouse users get nothing either way.
 
 Sources: [perform(_:performanceTime:)](https://developer.apple.com/documentation/appkit/nshapticfeedbackperformer/perform(_:performancetime:)), [FeedbackPattern](https://developer.apple.com/documentation/appkit/nshapticfeedbackmanager/feedbackpattern), [glisse](https://github.com/helgafinn/glisse). **Confidence: medium.**
 
@@ -494,7 +494,7 @@ Local results on 27 with `UTType(filenameExtension:)`, which conforms to `.data`
 
 | Ext | Result | Note |
 |---|---|---|
-| `.srt` | **`dyn.ah62d4rv4ge81g6xy` (dynamic, undeclared)** | The system declares no SubRip UTI. Halo must add a `UTImportedTypeDeclarations` entry (e.g. `org.matroska.srt`-style, conforming to `public.plain-text`; pick one and keep it stable) or match by extension. `.ass`, `.ssa`, `.sub` and `.mkv` are dynamic too. |
+| `.srt` | **`dyn.ah62d4rv4ge81g6xy` (dynamic, undeclared)** | The system declares no SubRip UTI. anyfmt must add a `UTImportedTypeDeclarations` entry (e.g. `org.matroska.srt`-style, conforming to `public.plain-text`; pick one and keep it stable) or match by extension. `.ass`, `.ssa`, `.sub` and `.mkv` are dynamic too. |
 | `.vtt` | `org.w3.webvtt` (conforms to `public.text`) | declared |
 | `.epub` | `org.idpf.epub-container` (`UTType.epub`) | declared |
 | `.pages` / `.key` / `.numbers` | **`com.apple.iwork.pages.sffpages` / `keynote.sffkey` / `numbers.sffnumbers`** (single-file variants) | Package variants come back only via `UTType(filenameExtension:conformingTo: .package)`: `com.apple.iwork.pages.pages`, `com.apple.iwork.keynote.key`, `com.apple.iwork.numbers.numbers`. **Always use `URL.resourceValues(forKeys: [.contentTypeKey])` on real files**, and treat both variants as the same format. |

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct OutputPane: View {
     @ObservedObject var model: SettingsModel
@@ -43,7 +43,7 @@ struct OutputPane: View {
                     } else if settings.outputFolderBookmark != nil {
                         // The words carry the problem; the colour only draws the eye.
                         Text("The chosen folder is missing. Files are saved beside the original until you choose another.")
-                            .foregroundStyle(Color.haloDanger)
+                            .foregroundStyle(Color.anyfmtDanger)
                     } else {
                         Text("Right next to the file you dropped, like Finder’s Duplicate.")
                     }
@@ -179,7 +179,7 @@ struct NamingPatternRow: View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
             HStack(spacing: DesignTokens.Space.s) {
                 Image(systemName: "eye")
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .accessibilityHidden(true)
                 Text(verbatim: NamingPreview.line(pattern: pattern, date: date))
                     .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))

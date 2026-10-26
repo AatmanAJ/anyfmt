@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct EnginesPane: View {
     @ObservedObject var model: SettingsModel
@@ -13,17 +13,17 @@ struct EnginesPane: View {
                 // The pane's one key numeral: how many engines ship inside.
                 HStack(alignment: .center, spacing: DesignTokens.Space.l) {
                     Text(verbatim: "\(engines.count)")
-                        .font(.haloDisplay(DesignTokens.Component.Settings.numeralSize))
+                        .font(.anyfmtDisplay(DesignTokens.Component.Settings.numeralSize))
                         .displayTracking(DesignTokens.Component.Settings.numeralSize)
                         .monospacedDigit()
-                        .foregroundStyle(Color.haloInk)
+                        .foregroundStyle(Color.anyfmtInk)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                         Text("Everything here runs on your Mac.")
                             .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                         Text("These ship inside \(Brand.name), so it works with nothing else installed. Your files never leave your Mac.")
                             .font(.system(size: DesignTokens.TypeRamp.label))
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -46,7 +46,7 @@ struct EnginesPane: View {
                         Color.clear.frame(width: 1, height: 1).gridCellUnsizedAxes([.horizontal, .vertical])
                     }
                     .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .textCase(.uppercase)
                     ForEach(engines) { engine in
                         GridRow {
@@ -54,10 +54,10 @@ struct EnginesPane: View {
                                 .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
                             Text(verbatim: engine.version)
                                 .font(.system(size: DesignTokens.TypeRamp.label).monospacedDigit())
-                                .foregroundStyle(Color.haloSecondaryText)
+                                .foregroundStyle(Color.anyfmtSecondaryText)
                             Text(verbatim: engine.licence)
                                 .font(.system(size: DesignTokens.TypeRamp.label))
-                                .foregroundStyle(Color.haloSecondaryText)
+                                .foregroundStyle(Color.anyfmtSecondaryText)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 .help(Text(verbatim: engine.licence))
@@ -135,11 +135,11 @@ private struct PackRow: View {
                 }
                 Text(verbatim: pack.summary)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(verbatim: detail)
                     .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
             Spacer(minLength: DesignTokens.Space.s)
             if let p = pack.progress {
@@ -149,19 +149,19 @@ private struct PackRow: View {
                         .frame(width: DesignTokens.Component.Settings.recorderMinWidth)
                     Text(verbatim: p.formatted(.percent.precision(.fractionLength(0))))
                         .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text("\(pack.name) progress"))
                 .accessibilityValue(Text(verbatim: p.formatted(.percent.precision(.fractionLength(0)))))
             } else if pack.installed {
                 Button("Remove") { pack.remove(); refresh() }
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                     .accessibilityLabel(Text("Remove \(pack.name)"))
                     .accessibilityIdentifier("engines.pack.\(pack.id).remove")
             } else {
                 Button("Install") { pack.install(); refresh() }
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .accessibilityLabel(Text("Install \(pack.name)"))
                     .accessibilityIdentifier("engines.pack.\(pack.id).install")
             }

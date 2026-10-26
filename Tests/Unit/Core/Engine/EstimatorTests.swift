@@ -2,7 +2,7 @@ import Foundation
 import CoreText
 import ImageIO
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Live estimates vs real conversions. Each check runs `Estimator` cold (caches
 /// cleared), then the real route through `Router.live()` + `RouteExecutor`, and
@@ -374,7 +374,7 @@ final class EstimatorTests: XCTestCase {
     }
 
     func testUnreadableInputThrows() async throws {
-        let missing = FileManager.default.temporaryDirectory.appendingPathComponent("halo-missing-\(UUID().uuidString).mp4")
+        let missing = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-missing-\(UUID().uuidString).mp4")
         do {
             _ = try await Estimator.estimate(input: missing, target: Formats.gif, options: OptionValues())
             XCTFail("expected an error")

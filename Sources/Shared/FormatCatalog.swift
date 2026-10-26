@@ -1,7 +1,7 @@
 import Foundation
 import UniformTypeIdentifiers
 
-/// Every format Halo knows about. The capability table refers to these ids.
+/// Every format anyfmt knows about. The capability table refers to these ids.
 /// Adding a format: add one `Format` here, then capability rows in the
 /// owning lane's `*Routes.swift`.
 public enum Formats {

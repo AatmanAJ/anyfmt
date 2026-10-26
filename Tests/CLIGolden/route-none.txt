@@ -1,4 +1,4 @@
-$ halo route foo bar
+$ anyfmt route foo bar
 exit: 3
 --- stdout
 --- stderr

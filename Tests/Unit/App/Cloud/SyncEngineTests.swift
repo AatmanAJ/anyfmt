@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Sync: push on change (debounced), pull, conditional PUT, conflicts with
 /// a surfaced notice and one-click reversal; nothing when sync is off.

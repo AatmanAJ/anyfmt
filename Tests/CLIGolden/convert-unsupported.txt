@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to srt --json
+$ anyfmt convert <tmp>/photo.png --to srt --json
 exit: 3
 --- stdout
 {"event":"start","jobs":1}

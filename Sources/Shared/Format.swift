@@ -36,7 +36,7 @@ public enum FileKind: String, Sendable, Codable, CaseIterable, Hashable {
 }
 
 /// Stable identifier of a file format, e.g. `"jpg"`. Used as the key in the
-/// capability table, settings, the CLI (`halo convert in.heic --to jpg`) and tests.
+/// capability table, settings, the CLI (`anyfmt convert in.heic --to jpg`) and tests.
 public struct FormatID: RawRepresentable, Hashable, Sendable, Codable, Comparable,
                         ExpressibleByStringLiteral, CustomStringConvertible {
     public let rawValue: String

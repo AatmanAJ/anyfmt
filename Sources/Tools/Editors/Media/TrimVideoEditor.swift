@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Trim video: filmstrip with in/out handles, synced player, frame stepping,
 /// lossless-when-possible with a live keyframe verdict.

@@ -1,6 +1,6 @@
 import AppKit
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// A scratch folder that disappears after the test.
 final class TempFolder {
@@ -8,7 +8,7 @@ final class TempFolder {
 
     init(_ label: String = "actions") throws {
         url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("halo-\(label)-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("anyfmt-\(label)-\(UUID().uuidString)", isDirectory: true)
             .resolvingSymlinksInPath()
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
     }
@@ -43,12 +43,12 @@ final class TempFolder {
 /// A private pasteboard per test, so tests never touch the user's clipboard.
 @MainActor
 func makeTestPasteboard() -> NSPasteboard {
-    NSPasteboard(name: NSPasteboard.Name("dev.aiwithaj.halo.tests.\(UUID().uuidString)"))
+    NSPasteboard(name: NSPasteboard.Name("app.anyfmt.tests.\(UUID().uuidString)"))
 }
 
 @MainActor
 func makeTestDefaults() -> UserDefaults {
-    let name = "dev.aiwithaj.halo.tests.\(UUID().uuidString)"
+    let name = "app.anyfmt.tests.\(UUID().uuidString)"
     let d = UserDefaults(suiteName: name) ?? .standard
     d.removePersistentDomain(forName: name)
     return d
@@ -87,7 +87,7 @@ final class FakeShelfPresenter: ShelfPresenting {
 func makeTestShelf(presenter: FakeShelfPresenter, defaults: UserDefaults? = nil, intakeRoot: URL? = nil,
                    locate: @escaping (ShelfItem) -> (url: URL, bookmark: Data?)? = { ($0.url, nil) }) -> FloatShelf {
     let prefs = ActionPreferences(defaults: defaults ?? makeTestDefaults())
-    let root = intakeRoot ?? FileManager.default.temporaryDirectory.appendingPathComponent("halo-received-\(UUID().uuidString)")
+    let root = intakeRoot ?? FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-received-\(UUID().uuidString)")
     return FloatShelf(presenter: presenter, preferences: prefs, intake: PromiseIntake(root: root),
                       locate: locate, makeBookmark: { _ in nil })
 }

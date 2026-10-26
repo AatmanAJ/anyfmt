@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct AdvancedPane: View {
     @ObservedObject var model: SettingsModel
@@ -131,7 +131,7 @@ struct AdvancedPane: View {
     }
 }
 
-/// One click puts `halo` on the PATH (no admin: a writable PATH folder such as
+/// One click puts `anyfmt` on the PATH (no admin: a writable PATH folder such as
 /// /opt/homebrew/bin or ~/.local/bin). Shows where it's installed, or removes it.
 private struct CLIInstallButton: View {
     @State private var status = CLIInstaller.status()

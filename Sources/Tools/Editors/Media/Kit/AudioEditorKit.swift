@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import os
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Shared state for the waveform editors: the session plus its envelope.
 @MainActor
@@ -63,7 +63,7 @@ struct ZoomControls: View {
                 .disabled(wave.zoom <= 1.01)
         }
         .buttonStyle(.borderless)
-        .foregroundStyle(Color.haloInk)
+        .foregroundStyle(Color.anyfmtInk)
     }
 }
 

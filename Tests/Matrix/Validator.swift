@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import ImageIO
 import PDFKit
-import HaloCore
+import AnyfmtCore
 
 /// Opens an output for real and checks it's what the target format promises.
 /// Validation is deliberately independent of the engine that produced it.

@@ -72,7 +72,7 @@ covered with fakes in unit tests, and every screen is rendered offscreen.
   to confirm no permission prompt appears):
 
 ```bash
-make build && open build/DerivedData/Build/Products/Debug/Halo.app
+make build && open build/DerivedData/Build/Products/Debug/anyfmt.app
 ```
 
 1. **Wheels.** Drag a file from a Finder window, tap ⇧ → convert wheel. Tap ⌘,
@@ -88,7 +88,7 @@ make build && open build/DerivedData/Build/Products/Debug/Halo.app
 4. **Tools.** ⌘ wheel on an image → Crop (editor opens) → Save copy. On a video
    → Trim. On a PDF → Merge/split. Read QR on a QR screenshot.
 5. **Options.** Right-click (or hover) a segment → options popover → Convert.
-6. **Other ways in.** Finder › right-click › Services › "Open in Halo Wheel".
+6. **Other ways in.** Finder › right-click › Services › "Open in anyfmt Wheel".
    ⌃⌥Space → drop ring. Menu bar › Open Wheel for Finder Selection (asks for
    Automation once).
 7. **Look.** The wheel's vibrancy over a busy wallpaper, light + dark; stacked
@@ -117,7 +117,7 @@ app-wide redesign: you approve the visual direction first.
 
 They're rendered from the real tokens (`DesignTokens.Primitive/Semantic/Band/Shape/Typeface`)
 and the bundled Inter Display (D-039). Re-render with
-`build/DerivedData/Build/Products/Debug/Halo.app/Contents/MacOS/Halo --render-direction docs/screens/after/direction`.
+`build/DerivedData/Build/Products/Debug/anyfmt.app/Contents/MacOS/anyfmt --render-direction docs/screens/after/direction`.
 
 **What I need.** "Approved", or what to change: colours, type, density, the bands.
 Until then the app keeps its current look. Every phase that doesn't depend on the
@@ -161,9 +161,9 @@ automatically for Developer ID builds (D-031).
 ```bash
 # 1. Install your "Developer ID Application" certificate in the login keychain (Xcode › Settings › Accounts › Manage Certificates).
 # 2. Store notary credentials (App Store Connect API key recommended):
-xcrun notarytool store-credentials halo-notary --key AuthKey_XXXX.p8 --key-id XXXX --issuer <issuer-uuid>
+xcrun notarytool store-credentials anyfmt-notary --key AuthKey_XXXX.p8 --key-id XXXX --issuer <issuer-uuid>
 # 3. Build, sign, notarize, staple:
-DEVELOPER_ID="Developer ID Application: <Name> (<TEAMID>)" TEAM_ID=<TEAMID> NOTARY_PROFILE=halo-notary make dmg
+DEVELOPER_ID="Developer ID Application: <Name> (<TEAMID>)" TEAM_ID=<TEAMID> NOTARY_PROFILE=anyfmt-notary make dmg
 ```
 
 For CI, add repository secrets: `DEVELOPER_ID`, `TEAM_ID`, `DEVELOPER_ID_CERT_P12_BASE64`,
@@ -191,26 +191,26 @@ The CI job's steps (`make build`, `make test`) pass on a **fresh clone** of `mai
 timing-sensitive test.
 
 ```bash
-gh repo create aiwithaj/halo --public --source . --remote origin --push
+gh repo create aiwithaj/anyfmt --public --source . --remote origin --push
 ```
 
 Then check the first CI run. The first engines build takes about 10 minutes and is
 cached afterwards, keyed on `Engines/versions.env`. If the slug differs, update
-`Brand.sourceURL`, `packaging/homebrew/halo.rb` and the README links.
+`Brand.sourceURL`, `packaging/homebrew/anyfmt.rb` and the README links.
 
 ## B-005 Sparkle update feed
 
 **Why blocked.** It needs a hosting decision and a URL.
 
-- The EdDSA key pair **was generated** (`generate_keys --account halo-updates`). The
+- The EdDSA key pair **was generated** (`generate_keys --account anyfmt-updates`). The
   **private key is in this Mac's login Keychain** (item "https://sparkle-project.org",
-  account `halo-updates`) and is in no file or repo. The public key is in `project.yml`
+  account `anyfmt-updates`) and is in no file or repo. The public key is in `project.yml`
   (`SUPublicEDKey`).
 - Back up the private key and add it to CI:
   ```bash
-  build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys --account halo-updates -x halo-updates-private.key
+  build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys --account anyfmt-updates -x anyfmt-updates-private.key
   # store the file in your password manager, then:
-  gh secret set SPARKLE_ED_PRIVATE_KEY < halo-updates-private.key && rm halo-updates-private.key
+  gh secret set SPARKLE_ED_PRIVATE_KEY < anyfmt-updates-private.key && rm anyfmt-updates-private.key
   ```
 - Set the real feed URL. `SUFeedURL` in `project.yml` is the placeholder
   `https://updates.example.invalid/appcast.xml`. A GitHub Pages URL or a release asset URL both work.
@@ -224,7 +224,7 @@ OpenAPI contract (`Server/openapi.yaml`, 31 operations) and a mock server
 
 - Replace `CloudConfig.defaultServer` (`https://cloud.example.invalid`) in
   `Sources/Cloud/CloudConfig.swift` with the hosted URL.
-- Register OAuth client `halo-mac` with redirect `halo://auth/callback`.
+- Register OAuth client `anyfmt-mac` with redirect `anyfmt://auth/callback`.
 - Magic-link email needs a sending provider on the server (see `Server/README.md`).
 
 ## B-007 Older macOS versions (13, 14, 15)
@@ -233,7 +233,7 @@ OpenAPI contract (`Server/openapi.yaml`, 31 operations) and a mock server
 
 **What is verified without one:**
 - The deployment target is macOS 13 everywhere, and Swift makes any unguarded use of a newer API a *compile error*. So a clean build proves every newer call sits behind `#available` with a fallback.
-- Every Mach-O we ship has minimum OS **13.0** (`vtool -show-build`: app, HaloCore, CLI, ffmpeg/ffprobe, all libav* dylibs, resvg). Sparkle's prebuilt binaries are 12.0.
+- Every Mach-O we ship has minimum OS **13.0** (`vtool -show-build`: app, AnyfmtCore, CLI, ffmpeg/ffprobe, all libav* dylibs, resvg). Sparkle's prebuilt binaries are 12.0.
 - Rows that depend on OS features are gated at runtime, not by version guesses: ImageIO AVIF encode via `CGImageDestinationCopyTypeIdentifiers`, Vision requests, decoders.
 
 **Still untested:** actual runtime behaviour on 13–15. Run `make test && make matrix` on a macOS 13 machine or VM. Expect rows to drop out (e.g. ImageIO AVIF → the ffmpeg fallback; remove background → people only), not failures.
@@ -263,7 +263,7 @@ decodes real DNG/CR3/NEF/ARW files.
 
 ```bash
 gh repo create aiwithaj/homebrew-tap --public
-shasum -a 256 dist/Halo-0.1.0.dmg   # into packaging/homebrew/halo.rb, then copy it to Casks/halo.rb in the tap
+shasum -a 256 dist/anyfmt-0.1.0.dmg   # into packaging/homebrew/anyfmt.rb, then copy it to Casks/anyfmt.rb in the tap
 ```
 
 ## B-011 Office pack checksum (LibreOffice)
@@ -298,6 +298,23 @@ in each app and note any "repair" prompt.
 Automation consent prompt. It was never run in tests, because the prompt would block.
 
 ```bash
-defaults write dev.aiwithaj.halo optIn.iWorkAppleEvents -bool YES
-halo convert report.pages --to pdf && halo convert notes.docx --to pages
+defaults write app.anyfmt optIn.iWorkAppleEvents -bool YES
+anyfmt convert report.pages --to pdf && anyfmt convert notes.docx --to pages
 ```
+
+## B-016 `make test-unit` hangs on this Mac: xcodebuild's test host never starts (found 2026-10-26)
+
+**What happens:** `xcodebuild … test` launches the app as the test host, and the host blocks inside dyld
+(`open()` of a linked library) before any of our code runs. xcodebuild gives up after ~7 minutes with
+"The test runner hung before establishing connection." It happened before and after the anyfmt rename,
+so it isn't the code.
+
+**What I tried:** restarting `testmanagerd`; checking for iCloud placeholder files, pipes or sockets
+in the dyld search paths (none); checking for Endpoint Security extensions (none installed). Launching
+the same test host by hand with the same injected libraries works: 351 app tests ran with 0 failures
+before the run stopped at a test that needs an XCTest-managed run loop. Package tests (115), the SDK
+(42), `make check` and the build all pass.
+
+**Needed from a human (2 minutes):** restart the Mac (clears whatever is wedged in launchd/dyld for
+xcodebuild-launched processes), then run `make test`. If it still hangs, open `anyfmt.xcodeproj` in
+Xcode and run the tests once with ⌘U, which also re-registers the test host with LaunchServices.

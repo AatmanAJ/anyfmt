@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Building blocks shared by lane G1's editors. Namespaced so nothing clashes
 /// with other lanes in the app module.
@@ -14,7 +14,7 @@ enum ImageEditorKit {
     /// Cobalt as text or a small glyph (AA on both appearances).
     static var accentText: Color { Color.accentText }
     static var mint: Color { Color.mint }
-    static var danger: Color { Color.haloDanger }
+    static var danger: Color { Color.anyfmtDanger }
 
     /// A user-chosen colour ("#RRGGBB"): content, not chrome.
     static func color(hex: String) -> Color {
@@ -106,7 +106,7 @@ extension ImageEditorKit {
                                 .frame(width: rect.width, height: rect.height)
                         }
                         // A hairline instead of a drop shadow keeps white images on white edged.
-                        .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                        .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                         .offset(x: rect.minX, y: rect.minY)
                         overlay(rect)
                     }
@@ -157,11 +157,11 @@ extension ImageEditorKit {
             let knob = EditorTokens.Overlay.handle + 5
             VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(label).font(.system(size: DesignTokens.TypeRamp.body)).foregroundStyle(Color.haloInk)
+                    Text(label).font(.system(size: DesignTokens.TypeRamp.body)).foregroundStyle(Color.anyfmtInk)
                     Spacer()
                     Text(format(value))
                         .font(.system(size: DesignTokens.TypeRamp.label, weight: value == neutral ? .regular : .bold).monospacedDigit())
-                        .foregroundStyle(value == neutral ? Color.haloSecondaryText : Color.haloInk)
+                        .foregroundStyle(value == neutral ? Color.anyfmtSecondaryText : Color.anyfmtInk)
                 }
                 GeometryReader { geo in
                     let w = geo.size.width
@@ -169,17 +169,17 @@ extension ImageEditorKit {
                     let n = position(neutral, w)
                     ZStack(alignment: .leading) {
                         Capsule().fill(EditorPalette.chip).frame(height: 4)
-                            .overlay(Capsule().strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline,
+                            .overlay(Capsule().strokeBorder(contrast == .increased ? Color.anyfmtSecondaryText : Color.anyfmtHairline,
                                                             lineWidth: DesignTokens.Shape.hairline))
                         Capsule().fill(ImageEditorKit.accent)
                             .frame(width: abs(x - n), height: 4)
                             .offset(x: min(x, n))
                         if neutral != range.lowerBound {
-                            Rectangle().fill(Color.haloSecondaryText).frame(width: 1, height: 8).offset(x: n - 0.5)
+                            Rectangle().fill(Color.anyfmtSecondaryText).frame(width: 1, height: 8).offset(x: n - 0.5)
                         }
                         Circle()
                             .fill(Color(hex: DesignTokens.Primitive.paper0))
-                            .overlay(Circle().strokeBorder(dragging ? ImageEditorKit.accent : (contrast == .increased ? Color.haloInk : Color.haloHairline),
+                            .overlay(Circle().strokeBorder(dragging ? ImageEditorKit.accent : (contrast == .increased ? Color.anyfmtInk : Color.anyfmtHairline),
                                                            lineWidth: dragging ? 2 : DesignTokens.Shape.hairline))
                             .frame(width: knob, height: knob)
                             .offset(x: x - knob / 2)
@@ -241,7 +241,7 @@ extension ImageEditorKit {
                     Button { hex = s } label: {
                         Circle()
                             .fill(ImageEditorKit.color(hex: s))
-                            .overlay(Circle().strokeBorder(Color.haloSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
+                            .overlay(Circle().strokeBorder(Color.anyfmtSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
                             .padding(selected ? 3 : 0)
                             .overlay(Circle().strokeBorder(ImageEditorKit.accent, lineWidth: selected ? 2 : 0))
                             .frame(width: d, height: d)
@@ -292,7 +292,7 @@ extension ImageEditorKit {
                 Button { ImageColorPanelBridge.shared.open(hex: hex) { hex = $0 } } label: {
                     Capsule()
                         .fill(ImageEditorKit.color(hex: hex))
-                        .overlay(Capsule().strokeBorder(Color.haloSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
+                        .overlay(Capsule().strokeBorder(Color.anyfmtSecondaryText.opacity(0.6), lineWidth: DesignTokens.Shape.hairline))
                         .frame(width: EditorTokens.swatch * 1.8, height: EditorTokens.swatch)
                 }
                 .buttonStyle(.plain)
@@ -309,7 +309,7 @@ extension ImageEditorKit {
         var body: some View {
             Text(text)
                 .font(.system(size: DesignTokens.TypeRamp.caption))
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

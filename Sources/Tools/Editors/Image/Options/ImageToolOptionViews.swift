@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Compact options for the instant Compress tool, for the wheel's options
 /// popover. Edits `ToolSchemas.compress` values in place.
@@ -129,9 +129,9 @@ public struct ImageResizeOptionsView: View {
             case "pixels":
                 HStack(spacing: DesignTokens.Space.s) {
                     numberField(String(localized: "Width"), key: "width", fallback: 1920)
-                    Image(systemName: "xmark").font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold)).foregroundStyle(Color.haloSecondaryText)
+                    Image(systemName: "xmark").font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold)).foregroundStyle(Color.anyfmtSecondaryText)
                     numberField(String(localized: "Height"), key: "height", fallback: 0)
-                    Text("px").foregroundStyle(Color.haloSecondaryText)
+                    Text("px").foregroundStyle(Color.anyfmtSecondaryText)
                 }
                 ImageEditorKit.Hint(String(localized: "Leave height at 0 to keep the aspect ratio."))
             default:
@@ -142,8 +142,8 @@ public struct ImageResizeOptionsView: View {
             if let sourceSize {
                 let target = ResizePlan.targetSize(for: sourceSize, options: options)
                 HStack {
-                    Text(ImageEditorKit.pixelText(sourceSize)).foregroundStyle(Color.haloSecondaryText)
-                    Image(systemName: "arrow.right").foregroundStyle(Color.haloSecondaryText)
+                    Text(ImageEditorKit.pixelText(sourceSize)).foregroundStyle(Color.anyfmtSecondaryText)
+                    Image(systemName: "arrow.right").foregroundStyle(Color.anyfmtSecondaryText)
                     Text(ImageEditorKit.pixelText(target)).fontWeight(.semibold)
                 }
                 .font(.system(size: DesignTokens.TypeRamp.caption).monospacedDigit())

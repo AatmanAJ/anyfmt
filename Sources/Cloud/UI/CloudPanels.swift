@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// AppKit glue for the cloud sheets. The app is a menu-bar agent with no
 /// main window, so each sheet is a small titled panel brought to the front.
@@ -51,7 +51,7 @@ enum CloudPanels {
                 if reason == .signedOut {
                     session.signIn()
                 } else {
-                    // Keeps a self-host's path prefix (https://example.com/halo/account/plan).
+                    // Keeps a self-host's path prefix (https://example.com/anyfmt/account/plan).
                     NSWorkspace.shared.open(session.serverURL.appendingPathComponent("account/plan"))
                 }
             },

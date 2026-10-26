@@ -92,7 +92,7 @@ public final class WebPDFRenderer: NSObject, WKNavigationDelegate {
         let json = "[" + rules.joined(separator: ",") + "]"
         guard let store = WKContentRuleListStore.default() else { return nil }
         ruleList = await withCheckedContinuation { (c: CheckedContinuation<WKContentRuleList?, Never>) in
-            store.compileContentRuleList(forIdentifier: "halo.block-remote", encodedContentRuleList: json) { list, _ in
+            store.compileContentRuleList(forIdentifier: "anyfmt.block-remote", encodedContentRuleList: json) { list, _ in
                 c.resume(returning: list)
             }
         }

@@ -1,4 +1,4 @@
-$ halo tool cloud.transcribe <tmp>/photo.png
+$ anyfmt tool cloud.transcribe <tmp>/photo.png
 exit: 8
 --- stdout
 --- stderr

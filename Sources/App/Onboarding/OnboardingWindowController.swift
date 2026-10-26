@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// First-run window: four short screens with progress dots. ← / → move,
 /// Return continues, Skip finishes. Closing the window counts as finishing,
@@ -31,7 +31,7 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
 
     init(model: OnboardingModel) {
         self.model = model
-        let window = HaloWindow(contentRect: NSRect(origin: .zero, size: Self.contentSize),
+        let window = AnyfmtWindow(contentRect: NSRect(origin: .zero, size: Self.contentSize),
                                 styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: true)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
@@ -162,7 +162,7 @@ struct OnboardingView: View {
     var body: some View {
         let spotlight = OnboardingSpotlight(model.page)
         ZStack(alignment: .topLeading) {
-            Color.haloWindow
+            Color.anyfmtWindow
 
             HStack(spacing: 0) {
                 Spacer(minLength: 0)
@@ -190,9 +190,9 @@ struct OnboardingView: View {
             .padding(.trailing, spotlight.width)
         }
         .frame(width: OnboardingWindowController.contentSize.width, height: OnboardingWindowController.contentSize.height)
-        .foregroundStyle(Color.haloInk)
+        .foregroundStyle(Color.anyfmtInk)
         .ignoresSafeArea()
-        .toggleStyle(HaloSwitchStyle())
+        .toggleStyle(AnyfmtSwitchStyle())
         .animation(animation, value: spotlight)
     }
 
@@ -231,7 +231,7 @@ struct OnboardingView: View {
     private var footer: some View {
         HStack(spacing: DesignTokens.Space.l) {
             Button(String(localized: "Skip")) { model.finish() }
-                .buttonStyle(.haloQuiet)
+                .buttonStyle(.anyfmtQuiet)
                 .opacity(model.page.isLast ? 0 : 1)
                 .disabled(model.page.isLast)
                 .accessibilityIdentifier("onboarding.skip")
@@ -246,7 +246,7 @@ struct OnboardingView: View {
             HStack(spacing: DesignTokens.Space.xs) {
                 if model.page.previous != nil {
                     Button(String(localized: "Back")) { withAnimation(animation) { model.goBack() } }
-                        .buttonStyle(HaloPillButtonStyle(kind: .quiet, large: true))
+                        .buttonStyle(AnyfmtPillButtonStyle(kind: .quiet, large: true))
                         .accessibilityIdentifier("onboarding.back")
                 }
                 Button {
@@ -254,7 +254,7 @@ struct OnboardingView: View {
                 } label: {
                     Text(model.page.isLast ? "Start Using \(Brand.name)" : "Continue")
                 }
-                .buttonStyle(HaloPillButtonStyle(kind: .primary, large: true))
+                .buttonStyle(AnyfmtPillButtonStyle(kind: .primary, large: true))
                 .keyboardShortcut(.defaultAction)
                 .accessibilityIdentifier(model.page.isLast ? "onboarding.finish" : "onboarding.continue")
             }

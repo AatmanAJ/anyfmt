@@ -1,4 +1,4 @@
-$ halo presets list --format jpg --json
+$ anyfmt presets list --format jpg --json
 exit: 0
 --- stdout
 {
@@ -27,7 +27,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets add --format jpg --title Tiny --opt quality=40 --json
+$ anyfmt presets add --format jpg --title Tiny --opt quality=40 --json
 exit: 0
 --- stdout
 {
@@ -42,7 +42,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets show <uuid> --json
+$ anyfmt presets show <uuid> --json
 exit: 0
 --- stdout
 {
@@ -57,7 +57,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets list --format jpg
+$ anyfmt presets list --format jpg
 exit: 0
 --- stdout
 jpg	<uuid>	Tiny	quality=40
@@ -65,13 +65,13 @@ jpg	builtin.jpg.web	Web · 80 % [built-in]	quality=80
 jpg	builtin.jpg.best	Best · 95 % [built-in]	quality=95
 --- stderr
 
-$ halo presets add --format jpg --title Bad --opt fps=10
+$ anyfmt presets add --format jpg --title Bad --opt fps=10
 exit: 2
 --- stdout
 --- stderr
 error: unknown option “fps” for JPG. Valid: quality, background, maxDimension, dpi
 
-$ halo convert <tmp>/photo.png --to jpg --preset tiny --dry-run --json
+$ anyfmt convert <tmp>/photo.png --to jpg --preset tiny --dry-run --json
 exit: 0
 --- stdout
 {
@@ -113,7 +113,7 @@ exit: 0
 }
 --- stderr
 
-$ halo convert <tmp>/photo.png --to jpg --preset Tiny --opt quality=90 --dry-run --json
+$ anyfmt convert <tmp>/photo.png --to jpg --preset Tiny --opt quality=90 --dry-run --json
 exit: 0
 --- stdout
 {
@@ -155,7 +155,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets rm <uuid> --json
+$ anyfmt presets rm <uuid> --json
 exit: 0
 --- stdout
 {
@@ -165,7 +165,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets rm builtin.jpg.web --json
+$ anyfmt presets rm builtin.jpg.web --json
 exit: 0
 --- stdout
 {
@@ -175,7 +175,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets list --format jpg --all --json
+$ anyfmt presets list --format jpg --all --json
 exit: 0
 --- stdout
 {
@@ -204,7 +204,7 @@ exit: 0
 }
 --- stderr
 
-$ halo presets show missing
+$ anyfmt presets show missing
 exit: 2
 --- stdout
 --- stderr

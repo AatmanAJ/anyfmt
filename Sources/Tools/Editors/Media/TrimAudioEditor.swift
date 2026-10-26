@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Trim audio: zoomable waveform with in/out handles and playback.
 @MainActor
@@ -179,7 +179,7 @@ struct AudioHeader: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(url.lastPathComponent).font(MediaStyle.body(.semibold)).lineLimit(1).truncationMode(.middle)
                 if let info, let a = info.audio {
-                    Text(Self.describe(a, duration: info.duration)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.haloSecondaryText)
+                    Text(Self.describe(a, duration: info.duration)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(Color.anyfmtSecondaryText)
                 }
             }
             Spacer()

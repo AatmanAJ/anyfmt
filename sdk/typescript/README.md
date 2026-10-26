@@ -1,6 +1,6 @@
-# @halo/sdk
+# @anyfmt/sdk
 
-A TypeScript client for the Halo pay-per-use conversion API
+A TypeScript client for the anyfmt pay-per-use conversion API
 ([docs/API.md](../../docs/API.md), contract in
 [Server/openapi.yaml](../../Server/openapi.yaml)).
 
@@ -8,7 +8,7 @@ A TypeScript client for the Halo pay-per-use conversion API
 - The types are generated from the OpenAPI file, and a thin hand-written client sits on top.
 - It retries `429` and `5xx` responses up to 3 times and respects `Retry-After`.
 
-> **No Halo server exists yet.** The SDK is tested against the in-memory mock
+> **No anyfmt server exists yet.** The SDK is tested against the in-memory mock
 > in `Tests/Mock/server.mjs`. Until a hosted domain is chosen, always pass
 > `baseUrl`.
 
@@ -23,67 +23,67 @@ cd sdk/typescript && npm ci && npm run build   # → dist/
 ## Quick start
 
 ```ts
-import { Halo } from '@halo/sdk';
+import { Anyfmt } from '@anyfmt/sdk';
 
-const halo = new Halo({ apiKey: process.env.HALO_API_KEY!, baseUrl: 'https://halo.example.com' });
+const anyfmt = new Anyfmt({ apiKey: process.env.ANYFMT_API_KEY!, baseUrl: 'https://anyfmt.example.com' });
 
-const file = await halo.files.upload('photo.heic');               // a path, a Blob or a File
-const conversion = await halo.conversions.create({
+const file = await anyfmt.files.upload('photo.heic');               // a path, a Blob or a File
+const conversion = await anyfmt.conversions.create({
   input: { fileId: file.id },
   target: 'webp',
-  options: { quality: 80, maxDimension: 2048 },                    // Halo option keys
+  options: { quality: 80, maxDimension: 2048 },                    // anyfmt option keys
   metadata: { order: 'A-1009' },
 });
-const done = await halo.conversions.wait(conversion.id, { timeoutMs: 60_000 });
-await halo.files.download(done.output!.id, 'photo.webp');
+const done = await anyfmt.conversions.wait(conversion.id, { timeoutMs: 60_000 });
+await anyfmt.files.download(done.output!.id, 'photo.webp');
 ```
 
 ## API
 
 | | |
 |---|---|
-| `new Halo({ apiKey, baseUrl, maxRetries?, retryBaseMs?, maxRetryDelayMs?, headers?, fetch? })` | `apiKey` must be a `halo_sk_…` key. The key is never logged or serialised |
+| `new Anyfmt({ apiKey, baseUrl, maxRetries?, retryBaseMs?, maxRetryDelayMs?, headers?, fetch? })` | `apiKey` must be a `anyfmt_sk_…` key. The key is never logged or serialised |
 | `files.upload(pathOrBlob, { filename?, contentType?, resumable?, chunkSize? })` | Up to 100 MB goes in one `POST /v1/files`. Bigger files, or `resumable: true`, use the chunked `/v1/uploads` flow, which resumes from the server's `Upload-Offset` after a drop. Returns a `StoredFile` |
 | `files.download(id, destPath, { resume? })` | Streams to `dest.part`, then renames it. An existing `.part` is resumed with `Range` |
 | `files.read(id, { start, end? }?)` | Bytes in memory, optionally a byte range |
 | `conversions.create(params, { idempotencyKey? })` | Always sends an `Idempotency-Key` (a random UUID unless you give one), so retries never start a second conversion |
-| `conversions.get(id)` / `conversions.cancel(id)` | `cancel` is idempotent. Cancelling a finished conversion throws `HaloConflictError` (`already_finished`) |
+| `conversions.get(id)` / `conversions.cancel(id)` | `cancel` is idempotent. Cancelling a finished conversion throws `AnyfmtConflictError` (`already_finished`) |
 | `conversions.list({ limit?, cursor?, status? })` / `conversions.iterate({ … })` | One page, or an async iterator over every page |
-| `conversions.wait(idOrConversion, { timeoutMs?, minPollMs?, signal? })` | Polls every `pollAfterMs`. Resolves on `succeeded`. Throws `HaloConversionFailedError` (`.conversion`) on `failed`/`cancelled`, and `HaloTimeoutError` when time runs out |
+| `conversions.wait(idOrConversion, { timeoutMs?, minPollMs?, signal? })` | Polls every `pollAfterMs`. Resolves on `succeeded`. Throws `AnyfmtConversionFailedError` (`.conversion`) on `failed`/`cancelled`, and `AnyfmtTimeoutError` when time runs out |
 | `formats.list({ input? })` | Targets per input, with `hops`, `via` and `optionsSchema` |
-| `schema.get()` | The registry document (`halo schema --json` shape) |
+| `schema.get()` | The registry document (`anyfmt schema --json` shape) |
 | `webhooks.create({ url, events })` / `.list()` / `.delete(id)` | `create` returns the signing `secret` once. It isn't retried after a 5xx, because it isn't idempotent |
-| `webhooks.verify(rawBody, header, secret, { toleranceSec? })` | Also `Webhooks.verify(…)` and `verifyWebhook(…)`. Returns the parsed event or throws `HaloWebhookSignatureError` (`reason`: `malformed`, `expired` or `mismatch`) |
+| `webhooks.verify(rawBody, header, secret, { toleranceSec? })` | Also `Webhooks.verify(…)` and `verifyWebhook(…)`. Returns the parsed event or throws `AnyfmtWebhookSignatureError` (`reason`: `malformed`, `expired` or `mismatch`) |
 | `usage.get({ period? })` | `YYYY-MM`; defaults to the current month |
 
 ### Errors
 
-Every error extends `HaloError` with `status`, `code` (the server's `error.code`), `requestId` and `details`:
+Every error extends `AnyfmtError` with `status`, `code` (the server's `error.code`), `requestId` and `details`:
 
 ```ts
-import { HaloValidationError, HaloRateLimitError, HaloConversionFailedError } from '@halo/sdk';
+import { AnyfmtValidationError, AnyfmtRateLimitError, AnyfmtConversionFailedError } from '@anyfmt/sdk';
 
 try {
-  await halo.conversions.create({ input: { fileId }, target: 'webp', options: { quality: 101 } });
+  await anyfmt.conversions.create({ input: { fileId }, target: 'webp', options: { quality: 101 } });
 } catch (e) {
-  if (e instanceof HaloValidationError) console.error(e.code, e.details?.fields); // validation_failed ['options.quality']
-  else if (e instanceof HaloRateLimitError) console.error('slow down; server asked for', e.retryAfterMs, 'ms');
+  if (e instanceof AnyfmtValidationError) console.error(e.code, e.details?.fields); // validation_failed ['options.quality']
+  else if (e instanceof AnyfmtRateLimitError) console.error('slow down; server asked for', e.retryAfterMs, 'ms');
   else throw e;
 }
 ```
 
 | Class | When |
 |---|---|
-| `HaloAuthenticationError` | 401 (`invalid_api_key`) |
-| `HaloPermissionError` | 403 (`insufficient_scope`) |
-| `HaloNotFoundError` | 404 |
-| `HaloConflictError` | 409 (`idempotency_conflict`, `already_finished`) |
-| `HaloValidationError` | 413, 416, 422 |
-| `HaloRateLimitError` | 429 after retries (`retryAfterMs`) |
-| `HaloServerError` | 5xx after retries |
-| `HaloConnectionError` | No response at all |
-| `HaloTimeoutError`, `HaloConversionFailedError` | From `conversions.wait` |
-| `HaloWebhookSignatureError` | From `webhooks.verify` |
+| `AnyfmtAuthenticationError` | 401 (`invalid_api_key`) |
+| `AnyfmtPermissionError` | 403 (`insufficient_scope`) |
+| `AnyfmtNotFoundError` | 404 |
+| `AnyfmtConflictError` | 409 (`idempotency_conflict`, `already_finished`) |
+| `AnyfmtValidationError` | 413, 416, 422 |
+| `AnyfmtRateLimitError` | 429 after retries (`retryAfterMs`) |
+| `AnyfmtServerError` | 5xx after retries |
+| `AnyfmtConnectionError` | No response at all |
+| `AnyfmtTimeoutError`, `AnyfmtConversionFailedError` | From `conversions.wait` |
+| `AnyfmtWebhookSignatureError` | From `webhooks.verify` |
 
 ### Retries
 
@@ -98,16 +98,16 @@ for idempotent calls: `GET`, `DELETE`, uploads, and `conversions.create`
 
 ```ts
 import express from 'express';
-import { verifyWebhook, HaloWebhookSignatureError } from '@halo/sdk';
+import { verifyWebhook, AnyfmtWebhookSignatureError } from '@anyfmt/sdk';
 
 const app = express();
-app.post('/halo-hook', express.raw({ type: 'application/json' }), (req, res) => {
+app.post('/anyfmt-hook', express.raw({ type: 'application/json' }), (req, res) => {
   try {
-    const event = verifyWebhook(req.body, req.get('Halo-Signature'), process.env.HALO_WEBHOOK_SECRET!);
+    const event = verifyWebhook(req.body, req.get('Anyfmt-Signature'), process.env.ANYFMT_WEBHOOK_SECRET!);
     res.sendStatus(204);                         // acknowledge fast, then work
     if (event.type === 'conversion.succeeded') queue.push(event.data.conversion.id);
   } catch (e) {
-    res.sendStatus(e instanceof HaloWebhookSignatureError ? 400 : 500);
+    res.sendStatus(e instanceof AnyfmtWebhookSignatureError ? 400 : 500);
   }
 });
 ```
@@ -121,7 +121,7 @@ import { createServer } from 'node:http';
 createServer(async (req, res) => {
   const chunks: Buffer[] = [];
   for await (const c of req) chunks.push(c as Buffer);
-  const event = verifyWebhook(Buffer.concat(chunks), req.headers['halo-signature'] as string, secret);
+  const event = verifyWebhook(Buffer.concat(chunks), req.headers['anyfmt-signature'] as string, secret);
   res.writeHead(204).end();
 }).listen(3000);
 ```
@@ -146,4 +146,4 @@ From the repo root, `make sdk-test` runs `npm ci && npm test`, and it's part of 
 | `test/contract.test.mjs` | Raw-HTTP checks of API-key management (app sign-in only), licence activation, credential separation, the error envelope, and every mock error code being in the contract enum |
 | `test/types.ts` | Compile-only: the public surface is typed, and misuse fails to compile |
 
-License: AGPL-3.0-only, like the rest of Halo.
+License: AGPL-3.0-only, like the rest of anyfmt.

@@ -13,7 +13,7 @@ public struct RadialRing: Equatable, Sendable {
     public var mid: CGFloat { (inner + outer) / 2 }
 }
 
-/// Geometry and motion. Defaults are the Halo design tokens (copied here so the
+/// Geometry and motion. Defaults are the anyfmt design tokens (copied here so the
 /// package stays standalone); every value can be overridden by the host.
 public struct RadialMenuConfiguration: Equatable, Sendable {
     // MARK: Geometry (points)

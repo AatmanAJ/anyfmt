@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// One item drawn as a physical object: a content thumbnail becomes a
 /// bordered, square-cornered "print"; a Finder icon is drawn as-is with a

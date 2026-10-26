@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Xcode post-build phase: copies the bundled engines into the app and signs
 # every nested binary with the app's identity and hardened runtime.
-#   Engines/dist/Helpers/*    → Halo.app/Contents/Helpers/
-#   Engines/dist/Frameworks/* → Halo.app/Contents/Frameworks/
+#   Engines/dist/Helpers/*    → anyfmt.app/Contents/Helpers/
+#   Engines/dist/Frameworks/* → anyfmt.app/Contents/Frameworks/
 set -euo pipefail
 
 dist="${ENGINES_DIST:-$SRCROOT/Engines/dist}"

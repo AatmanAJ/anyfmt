@@ -1,4 +1,4 @@
-$ halo options jpg --json
+$ anyfmt options jpg --json
 exit: 0
 --- stdout
 {

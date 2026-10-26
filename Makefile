@@ -7,8 +7,8 @@ CONFIG       ?= Debug
 # Worktrees share the main checkout's built engines.
 GIT_COMMON   := $(shell git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
 ENGINES_DIST ?= $(if $(wildcard $(CURDIR)/Engines/dist/Helpers),$(CURDIR)/Engines/dist,$(dir $(GIT_COMMON))Engines/dist)
-export HALO_ENGINES_DIR := $(ENGINES_DIST)
-XCB          := xcodebuild -project Halo.xcodeproj -derivedDataPath $(DERIVED) ENGINES_DIST=$(ENGINES_DIST)
+export ANYFMT_ENGINES_DIR := $(ENGINES_DIST)
+XCB          := xcodebuild -project anyfmt.xcodeproj -derivedDataPath $(DERIVED) ENGINES_DIST=$(ENGINES_DIST)
 PRODUCTS     := $(DERIVED)/Build/Products/$(CONFIG)
 NAME         := $(shell sed -n 's/^BRAND_NAME = //p' Config/Brand.xcconfig)
 SLUG         := $(shell echo $(NAME) | tr '[:upper:]' '[:lower:]')
@@ -32,7 +32,7 @@ generate:
 	@xcodegen generate --quiet
 
 build: generate
-	$(XCB) -scheme Halo -configuration $(CONFIG) build -quiet
+	$(XCB) -scheme anyfmt -configuration $(CONFIG) build -quiet
 	@python3 scripts/sync-strings.py $(DERIVED)
 
 ## Unit tests: packages + core + app-hosted, plus policy checks.
@@ -43,7 +43,7 @@ test-packages:
 	cd Packages/RadialMenu && swift test
 
 test-unit:
-	$(XCB) -scheme Halo -configuration Debug test -quiet
+	$(XCB) -scheme anyfmt -configuration Debug test -quiet
 
 ## TypeScript SDK (sdk/typescript) + public API contract, run against Tests/Mock/server.mjs.
 ## Lints Server/openapi.yaml, checks the generated types are current, builds, tests.
@@ -63,15 +63,15 @@ check:
 
 ## UI tests need macOS Automation Mode enabled (see BLOCKERS.md).
 uitest: generate
-	$(XCB) -scheme HaloUI -configuration Debug test
+	$(XCB) -scheme AnyfmtUI -configuration Debug test
 
 fixtures:
 	./Tests/Fixtures/make-fixtures.sh
 
 ## Runs every route on its fixture, validates outputs, writes docs/MATRIX.md.
 matrix: generate fixtures
-	$(XCB) -scheme Halo -configuration Release build -quiet
-	$(DERIVED)/Build/Products/Release/halo-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
+	$(XCB) -scheme anyfmt -configuration Release build -quiet
+	$(DERIVED)/Build/Products/Release/anyfmt-matrix --fixtures Tests/Fixtures/generated --out Tests/Matrix/out --report docs/MATRIX.md
 
 ## Wheel Gallery + every screen, offscreen. Full set → docs/screens/gallery (gitignored);
 ## a curated set of key states is copied next to it and committed so regressions show in diffs.
@@ -86,12 +86,12 @@ gallery: build
 	$(PRODUCTS)/$(NAME).app/Contents/MacOS/$(NAME) --render-demo-gif $(CURDIR)/docs/screens/wheel-demo.gif
 
 perf: generate
-	$(XCB) -scheme Halo -configuration Release build -quiet
+	$(XCB) -scheme anyfmt -configuration Release build -quiet
 	./scripts/perf.sh $(DERIVED)/Build/Products/Release
 
 ## Zero network sockets from the app, CLI and engines during a workload.
 netcheck: generate
-	$(XCB) -scheme Halo -configuration Release build -quiet
+	$(XCB) -scheme anyfmt -configuration Release build -quiet
 	./scripts/netcheck.sh $(DERIVED)/Build/Products/Release
 
 ## Regenerates the README format table from the capability registry.
@@ -103,4 +103,4 @@ dmg: generate
 	./packaging/make-dmg.sh
 
 clean:
-	rm -rf build Halo.xcodeproj
+	rm -rf build anyfmt.xcodeproj

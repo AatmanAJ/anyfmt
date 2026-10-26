@@ -47,7 +47,7 @@ struct MediaRun: Sendable {
     /// A private folder inside the output directory for list files, pass logs
     /// and intermediates. Callers remove it with `cleanup(_:)`.
     func makeScratch() throws -> URL {
-        let u = request.outputDirectory.appendingPathComponent(".halo-scratch-\(UUID().uuidString)", isDirectory: true)
+        let u = request.outputDirectory.appendingPathComponent(".anyfmt-scratch-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
         return u
     }

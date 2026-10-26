@@ -271,7 +271,7 @@ extension RadialMenuView {
                 let hot = i == index
                 chip.layer.fillColor = hot ? palette.accent.cgColor : palette.hubFill
                 chip.layer.strokeColor = hot ? palette.accent.cgColor : palette.stroke
-                // White on the accent fill (cobalt in Halo: 5.0:1); the surface's text otherwise.
+                // White on the accent fill (cobalt in anyfmt: 5.0:1); the surface's text otherwise.
                 chip.text.string = NSAttributedString(string: chip.preset.title,
                                                       attributes: [.font: font, .foregroundColor: hot ? NSColor.white : palette.content])
             }

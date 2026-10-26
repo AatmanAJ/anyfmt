@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Split video: split markers on the filmstrip, or every N seconds, with a
 /// live preview of the parts and whether the cut can be lossless.
@@ -222,7 +222,7 @@ struct SplitVideoEditor: View {
                         Button(MediaTimes.timecode(t)) { model.session.player.seek(to: t) }
                             .buttonStyle(.plain).font(MediaStyle.timecode)
                         Spacer()
-                        Button { model.removeMarker(t) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
+                        Button { model.removeMarker(t) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.anyfmtSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove split at \(MediaTimes.timecode(t))"))
                     }

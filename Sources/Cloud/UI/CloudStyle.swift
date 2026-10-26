@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Colours for the cloud UI from `DesignTokens.Component.Cloud`, resolved per
 /// appearance (light / dark / increased contrast). Namespaced so nothing
@@ -74,7 +74,7 @@ struct CloudPlanBadge: View {
             .padding(.vertical, DesignTokens.Space.xxs + 1)
             .foregroundStyle(foreground)
             .background(Capsule().fill(fill))
-            .haloBorder(Capsule(), stroke)
+            .anyfmtBorder(Capsule(), stroke)
             .fixedSize()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("Plan: \(plan.displayName)"))
@@ -121,7 +121,7 @@ struct CloudProChip: View {
         .padding(.vertical, DesignTokens.Space.xxs)
         .foregroundStyle(CloudStyle.onGold)
         .background(Capsule().fill(CloudStyle.proGold))
-        .haloBorder(Capsule(), CloudStyle.isHighContrast(contrast) ? CloudStyle.proOutline : .clear)
+        .anyfmtBorder(Capsule(), CloudStyle.isHighContrast(contrast) ? CloudStyle.proOutline : .clear)
         .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Pro, uses \(Brand.name) Cloud"))

@@ -1,7 +1,7 @@
 import CryptoKit
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Licence key format and verification, with a throwaway key pair made per
 /// test (never the shipped kid), plus one golden key from scripts/licence-tool.swift.
@@ -109,7 +109,7 @@ final class LicenceKeyTests: XCTestCase {
         for cut in [1, 5, 20, key.count / 2, key.count - 7] {
             guard case .malformed = verifier.verify(String(key.dropLast(cut)), now: now) else { return XCTFail("cut \(cut)") }
         }
-        for junk in ["", "HALO1-", "HALO2-ABCDE", "not a key", "HALO1-UUUUU", key + "0", String(key.dropFirst(6))] {
+        for junk in ["", "ANYFMT1-", "HALO2-ABCDE", "not a key", "ANYFMT1-UUUUU", key + "0", String(key.dropFirst(6))] {
             guard case .malformed = verifier.verify(junk, now: now) else { return XCTFail("accepted \(junk)") }
         }
         // Signed, but the payload isn't a licence (plan free, v2, zero seats).
@@ -125,15 +125,15 @@ final class LicenceKeyTests: XCTestCase {
     func testLowercaseDashesSpacesAndAliases() throws {
         let l = licence()
         let key = try issue(l)
-        XCTAssertTrue(key.hasPrefix("HALO1-"))
+        XCTAssertTrue(key.hasPrefix("ANYFMT1-"))
         XCTAssertTrue(key.split(separator: "-").dropFirst().dropLast().allSatisfy { $0.count == 5 }, "groups of five")
         let messy = "  " + key.lowercased().replacingOccurrences(of: "-", with: " - ").replacingOccurrences(of: "q", with: "Q") + "\n"
         XCTAssertEqual(verifier.verify(messy, now: now), .valid(l))
         let noDashes = key.replacingOccurrences(of: "-", with: "")
         XCTAssertEqual(verifier.verify(noDashes, now: now), .valid(l))
         // Crockford aliases: O reads as 0, I/L as 1.
-        let body = key.dropFirst("HALO1-".count).replacingOccurrences(of: "0", with: "O").replacingOccurrences(of: "1", with: "l")
-        let aliased = "halo1-" + body
+        let body = key.dropFirst("ANYFMT1-".count).replacingOccurrences(of: "0", with: "O").replacingOccurrences(of: "1", with: "l")
+        let aliased = "anyfmt1-" + body
         XCTAssertEqual(verifier.verify(aliased, now: now), .valid(l))
     }
 
@@ -181,10 +181,12 @@ final class LicenceKeyTests: XCTestCase {
         XCTAssertEqual(l.issuedAt, Date(timeIntervalSince1970: 1_790_000_000))
         // The tool and the app produce the same canonical bytes.
         XCTAssertEqual(try l.canonicalPayload(), try LicenceKey.decode(Self.goldenShippedKey).payload)
-        // Re-encoding the parts gives back the tool's exact spelling.
+        // The golden key predates the rename (HALO1-), so it also proves old keys still verify.
+        // Re-encoding gives back the tool's exact spelling under the current prefix.
         let parts = try LicenceKey.decode(Self.goldenShippedKey)
+        let spelled = Self.goldenShippedKey.replacingOccurrences(of: "\n", with: "")
         XCTAssertEqual(LicenceKey.encode(payload: parts.payload, signature: parts.signature),
-                       Self.goldenShippedKey.replacingOccurrences(of: "\n", with: ""))
+                       LicenceKey.prefix + spelled.dropFirst("HALO1".count))
     }
 
     @MainActor func testNoPrivateKeyMaterialInSources() throws {

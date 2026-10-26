@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Every `OptionKind` once, regular (grouped Form) and compact (popover),
 /// for screenshots and for eyeballing the renderer.
@@ -48,7 +48,7 @@ struct OptionsGallery: View {
             .padding(DesignTokens.Space.xl)
             .frame(width: 340, alignment: .topLeading)
         }
-        .toggleStyle(HaloSwitchStyle())
+        .toggleStyle(AnyfmtSwitchStyle())
         .fixedSize(horizontal: false, vertical: true)
     }
 

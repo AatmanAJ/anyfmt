@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Everything a progress card shows, derived purely from queue records so it
 /// can be unit-tested and rendered offscreen without a queue.

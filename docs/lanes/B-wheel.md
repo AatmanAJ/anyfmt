@@ -1,6 +1,6 @@
 # Lane B: the wheel
 
-`Packages/RadialMenu` (MIT, standalone) + `Sources/Wheel` (app, module HaloApp).
+`Packages/RadialMenu` (MIT, standalone) + `Sources/Wheel` (app, module AnyfmtApp).
 Branch: this worktree. Every commit builds and passes its tests.
 
 ## What's built
@@ -10,7 +10,7 @@ Branch: this worktree. Every commit builds and passes its tests.
 | File | What |
 |---|---|
 | `RadialItem.swift` | `RadialItem` (id, title, subtitle, image, badge, accessory, isEnabled, prominence `.title`/`.glyph`, a11y label/hint), `RadialHubContent`, `RadialDropZone` |
-| `RadialMenuConfiguration.swift` | Geometry, type and motion (defaults = Halo tokens, copied in), `RadialRing` |
+| `RadialMenuConfiguration.swift` | Geometry, type and motion (defaults = anyfmt tokens, copied in), `RadialRing` |
 | `RadialMenuStyle.swift` | `RadialMenuStyle` (accent, badge colours, material `.popover`/`.hudWindow`, forced appearance), `RadialAppearance` (dark, increase contrast, reduce transparency, reduce motion), internal resolved palette |
 | `RadialLayout.swift` | Pure layout + angular hit testing + keyboard order (no AppKit) |
 | `WedgePath.swift` | Rounded annular sectors with constant-width gaps and a fixed path structure (morphable) |
@@ -63,7 +63,7 @@ wheel closes). 18 pt overshoot past the outer edge still hits. 1.5° angular and
 hysteresis.
 
 **D-B03 Material: per-segment masked vibrancy, `.popover` by default.** One behind-window
-`NSVisualEffectView` (state `.active`, so it stays vibrant while Halo is inactive mid-drag)
+`NSVisualEffectView` (state `.active`, so it stays vibrant while anyfmt is inactive mid-drag)
 whose layer mask holds one shape layer per segment, animated with the same animations as the
 segment. Verified on macOS 27 by capturing our own window: the layer mask clips the
 behind-window material exactly (corners alpha 0). Shadows live in a layer tree *under* the
@@ -122,7 +122,7 @@ wheel, 1–9 select item 1–9 (select only; Return applies), Page Up/Down pages
 preselects the first target so Return-Return converts to the top favourite.
 
 **D-B12 Drop ring.** `showDropRing(at:)` shows an empty dotted ring ("Drop files") and activates
-Halo so Escape works. Drop files on it and it becomes the convert wheel in place (fan-out
+anyfmt so Escape works. Drop files on it and it becomes the convert wheel in place (fan-out
 animation, keys + clicks). It doesn't close when Finder takes focus (the user is about to drag
 from there); it closes on Escape, a click in the hub, `hide()`, or after 12 s with nothing dropped.
 
@@ -136,7 +136,7 @@ Not verifiable unattended (needs a human, like B-001):
   path is unit-tested through the view's own methods; `performDragOperation`/promises need the
   B-001 run.
 - Trackpad haptics mid-drag: called on every segment change, but AppKit ignores haptics while
-  Halo isn't active (PLATFORM_RESEARCH H). Should work in selection/drop-ring modes (Halo is active); unconfirmed.
+  anyfmt isn't active (PLATFORM_RESEARCH H). Should work in selection/drop-ring modes (anyfmt is active); unconfirmed.
 - How `.popover` vs `.hudWindow` vibrancy looks over a real desktop: window captures can't
   include the backdrop without Screen Recording permission. Shapes, masks and animation were
   verified from captures of our own window.
@@ -148,7 +148,7 @@ Not verifiable unattended (needs a human, like B-001):
   Call `wheelController.prewarm()` at launch (first show p95 drops by the window-server setup).
 - DragSense → `WheelController`: drag started + tap → `show(kind:urls:promisedTypes:at: NSEvent.mouseLocation)`;
   further taps → `switchKind(_:)`; drag ended (mouse up anywhere) → `dragDidEnd()` (no-op if the drop landed on us).
-- Services "Open in Halo Wheel" / Finder shortcut → `showForSelection(urls:at:)`; hotkey → `showDropRing(at:)`.
+- Services "Open in anyfmt Wheel" / Finder shortcut → `showForSelection(urls:at:)`; hotkey → `showDropRing(at:)`.
 - `onSelect(selection, urls, promises, dropPoint)` → jobs (convert/tool) or lane H actions; promises must be
   received with `NSFilePromiseReceiver.receivePromisedFiles` (already captured from the drop). Progress window
   near `dropPoint`.
@@ -158,7 +158,7 @@ Not verifiable unattended (needs a human, like B-001):
   images use `renderAll(to:scale: 1)` (≈ ¼ the size) or a subset.
 - New user-facing strings use `String(localized:)` in the app module; the app's string catalog picks them up.
 
-Contract changes requested: none. (Nice-to-have for lane C: a `Formats.format(for: UTType)` in HaloCore;
+Contract changes requested: none. (Nice-to-have for lane C: a `Formats.format(for: UTType)` in AnyfmtCore;
 `WheelInput.format(for:)` does it locally for now.)
 
 ## Tests

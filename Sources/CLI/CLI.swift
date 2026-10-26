@@ -1,7 +1,7 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
-/// `halo`: the command-line face of the same capability table, router,
+/// `anyfmt`: the command-line face of the same capability table, router,
 /// engines, tools and presets the wheel uses. Contract: docs/CLI.md.
 @MainActor
 enum CLI {

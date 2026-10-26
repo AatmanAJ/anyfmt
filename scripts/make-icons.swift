@@ -1,5 +1,5 @@
 #!/usr/bin/env swift
-// Draws Halo's own icons, procedurally (no third-party or generated art):
+// Draws anyfmt's own icons, procedurally (no third-party or generated art):
 //   - AppIcon.appiconset: near-black squircle with a radial wheel of charcoal
 //     wedges; the top wedge is lit with the heat band, the hub is cobalt.
 //   - MenuBarIcon.imageset: template glyph (black + alpha), a ring with one

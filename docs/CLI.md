@@ -1,10 +1,10 @@
-# `halo` command line and MCP server
+# `anyfmt` command line and MCP server
 
-`halo` is the command-line face of the app. It reads the same capability
+`anyfmt` is the command-line face of the app. It reads the same capability
 table, router, engines, tools, option schemas and presets as the wheel, so
-whatever the wheel can do, `halo` can do, and the other way round.
+whatever the wheel can do, `anyfmt` can do, and the other way round.
 
-It runs entirely on this Mac. Neither the CLI nor `halo mcp` opens a socket or a
+It runs entirely on this Mac. Neither the CLI nor `anyfmt mcp` opens a socket or a
 port. `make netcheck` samples the sockets of the app, the CLI and the engines
 during a workload to confirm it.
 
@@ -14,20 +14,20 @@ during a workload to confirm it.
 - [NDJSON events](#ndjson-events)
 - [Exit codes](#exit-codes)
 - [Environment](#environment)
-- [MCP server](#mcp-server-halo-mcp)
+- [MCP server](#mcp-server-anyfmt-mcp)
 - [Tests](#tests)
 
 ## Install
 
 | How | What you get |
 |---|---|
-| Settings › Advanced › Command-line tool | A symlink to `Halo.app/Contents/Helpers/halo` in the first writable folder on your `PATH` (`/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`, `~/bin`) |
-| `brew install --cask halo` ([cask](../packaging/homebrew/halo.rb)) | The app, plus the same `halo` symlink |
-| `brew install halo-cli` ([formula](../packaging/homebrew/halo-cli.rb)) | The CLI, its framework and engines only, no app |
+| Settings › Advanced › Command-line tool | A symlink to `anyfmt.app/Contents/Helpers/anyfmt` in the first writable folder on your `PATH` (`/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`, `~/bin`) |
+| `brew install --cask anyfmt` ([cask](../packaging/homebrew/anyfmt.rb)) | The app, plus the same `anyfmt` symlink |
+| `brew install anyfmt-cli` ([formula](../packaging/homebrew/anyfmt-cli.rb)) | The CLI, its framework and engines only, no app |
 
 The CLI looks for `ffmpeg`, `ffprobe` and `resvg` in its own `Helpers`
 folder, even when you run it through a symlink. Check what it found with
-`halo doctor`.
+`anyfmt doctor`.
 
 ## The contract
 
@@ -48,7 +48,7 @@ fail on any accidental change.
   `photo 2.jpg`. With `--overwrite never`, a taken name fails that file
   (`output_exists`, exit 6). It doesn't overwrite.
 - **Options are typed and checked.** `--opt key=value` is checked against the
-  route's options and `halo options <format>`. An unknown key or a bad value
+  route's options and `anyfmt options <format>`. An unknown key or a bad value
   is a usage error (exit 2), and the message lists the valid keys or choices.
   Nothing is silently dropped.
 - **Stable [exit codes](#exit-codes)** with the same meaning across commands.
@@ -56,21 +56,21 @@ fail on any accidental change.
 ## Commands
 
 ```
-halo convert <file>... --to <format> [--opt key=value]... [--preset <id|title>]
+anyfmt convert <file>... --to <format> [--opt key=value]... [--preset <id|title>]
         [--out-dir <dir>] [--overwrite rename|never] [--metadata keep|private|strip] [--dry-run]
-halo targets <file>...
-halo formats [--from <format>] [--markdown]
-halo options <format>
-halo tool <tool-id> <file>... [--opt key=value]... [--out-dir <dir>] [--metadata keep|private|strip]
-halo tools
-halo presets [list [--format <f>] [--all] | show <id|title> | add --format <f> --title <t> --opt k=v... | rm <id|title>]
-halo jobs
-halo doctor
-halo schema
-halo route <from> <to>
-halo mcp
-halo version
-halo help
+anyfmt targets <file>...
+anyfmt formats [--from <format>] [--markdown]
+anyfmt options <format>
+anyfmt tool <tool-id> <file>... [--opt key=value]... [--out-dir <dir>] [--metadata keep|private|strip]
+anyfmt tools
+anyfmt presets [list [--format <f>] [--all] | show <id|title> | add --format <f> --title <t> --opt k=v... | rm <id|title>]
+anyfmt jobs
+anyfmt doctor
+anyfmt schema
+anyfmt route <from> <to>
+anyfmt mcp
+anyfmt version
+anyfmt help
 ```
 
 All of them accept `--json`. `--out` still works as an alias of `--out-dir`.
@@ -78,10 +78,10 @@ All of them accept `--json`. `--out` still works as an alias of `--out-dir`.
 ### convert
 
 ```sh
-halo convert IMG_0042.heic --to jpg --opt quality=85
-halo convert clip.mov --to gif --preset "Small · 10 fps · 480 w" --out-dir ~/Desktop/gifs
-halo convert *.png --to webp --dry-run --json
-halo convert report.docx --to pdf --overwrite never --json
+anyfmt convert IMG_0042.heic --to jpg --opt quality=85
+anyfmt convert clip.mov --to gif --preset "Small · 10 fps · 480 w" --out-dir ~/Desktop/gifs
+anyfmt convert *.png --to webp --dry-run --json
+anyfmt convert report.docx --to pdf --overwrite never --json
 ```
 
 - Each file is converted on its own, in order. When the target is an archive
@@ -156,8 +156,8 @@ options in the same format as `options`. Cloud tools are listed with
 `"cloud": true`, and running one exits with 8.
 
 ```sh
-halo tool image.compress *.png --opt sizeMode=size --opt targetSize=500000
-halo tool meta.strip IMG_0042.jpg --json
+anyfmt tool image.compress *.png --opt sizeMode=size --opt targetSize=500000
+anyfmt tool meta.strip IMG_0042.jpg --json
 ```
 
 Tool outputs get the tool's suffix (`photo-compressed.png`) and are always
@@ -167,7 +167,7 @@ a tool's output extension isn't known before it runs.
 ### presets
 
 Presets live in the same `presets.json` the app uses
-(`~/Library/Application Support/Halo/presets.json`).
+(`~/Library/Application Support/anyfmt/presets.json`).
 
 - `list` shows the user's presets first (in their order), then the visible
   built-ins, by format. `--format` filters by format, and `--all` also lists
@@ -199,7 +199,7 @@ history, `jobs` prints an empty list.
 - its code signature (`signed`, `ad-hoc` or `unsigned`, plus the authority
   and team, from `/usr/bin/codesign -dv`)
 - each engine (`ffmpeg`, `ffprobe`, `resvg`): found or missing, where it came
-  from (`bundled`, `HALO_ENGINES_DIR`, …), its first `-version` line, and any
+  from (`bundled`, `ANYFMT_ENGINES_DIR`, …), its first `-version` line, and any
   other copy on your `PATH`, which the CLI doesn't use
 - the optional packs (LibreOffice, pandoc)
 - the presets/recents folder, the conversion count, and how many table rows
@@ -208,7 +208,7 @@ history, `jobs` prints an empty list.
 
 The CLI needs **no** macOS permission. Converting files in Desktop,
 Documents or Downloads can trigger a Files and Folders prompt, and macOS asks
-on behalf of the terminal app, not Halo. The opt-in Pages export needs
+on behalf of the terminal app, not anyfmt. The opt-in Pages export needs
 Automation, and only the app ever asks for it. `doctor` runs nothing beyond
 `-version` and `codesign`.
 
@@ -251,7 +251,7 @@ Failures found while planning (a missing file, no route, a taken name with
 `file` is the absolute input path, or `"N items"` for a combined archive.
 
 ```sh
-halo convert a.heic b.heic missing.heic --to jpg --json \
+anyfmt convert a.heic b.heic missing.heic --to jpg --json \
   | jq -c 'select(.event == "output" or .event == "error")'
 ```
 
@@ -288,13 +288,13 @@ missing file exits with 4). When some files succeed, or failures differ, it's
 
 | variable | effect |
 |---|---|
-| `HALO_ENGINES_DIR` | a folder containing `Helpers/` with ffmpeg, ffprobe and resvg (development, tests). Leave it unset in normal use |
-| `HALO_SUPPORT_DIR` | where `presets.json` and `recents.json` are read and written, instead of `~/Library/Application Support/Halo` (tests, sandboxes) |
-| `HALO_TEST_DELAY_MS` | test hook: each conversion or tool job waits this long first, and the wait can be cancelled. The tests use it to hit SIGINT and MCP cancellation deterministically |
+| `ANYFMT_ENGINES_DIR` | a folder containing `Helpers/` with ffmpeg, ffprobe and resvg (development, tests). Leave it unset in normal use |
+| `ANYFMT_SUPPORT_DIR` | where `presets.json` and `recents.json` are read and written, instead of `~/Library/Application Support/anyfmt` (tests, sandboxes) |
+| `ANYFMT_TEST_DELAY_MS` | test hook: each conversion or tool job waits this long first, and the wait can be cancelled. The tests use it to hit SIGINT and MCP cancellation deterministically |
 
-## MCP server (`halo mcp`)
+## MCP server (`anyfmt mcp`)
 
-`halo mcp` is a [Model Context Protocol](https://modelcontextprotocol.io)
+`anyfmt mcp` is a [Model Context Protocol](https://modelcontextprotocol.io)
 server on stdin/stdout. It's a small JSON-RPC 2.0 implementation inside the
 CLI with no dependencies (see `Sources/CLI/MCPServer.swift` and
 `MCPTools.swift`), and it uses the same code paths as the commands above.
@@ -304,7 +304,7 @@ CLI with no dependencies (see `Sources/CLI/MCPServer.swift` and
 Claude Code:
 
 ```sh
-claude mcp add halo -- halo mcp
+claude mcp add anyfmt -- anyfmt mcp
 ```
 
 Or in JSON (`.mcp.json`, Claude Desktop, and most other clients):
@@ -312,13 +312,13 @@ Or in JSON (`.mcp.json`, Claude Desktop, and most other clients):
 ```json
 {
   "mcpServers": {
-    "halo": { "command": "halo", "args": ["mcp"] }
+    "anyfmt": { "command": "anyfmt", "args": ["mcp"] }
   }
 }
 ```
 
-If `halo` isn't on the client's `PATH`, use the full path:
-`/Applications/Halo.app/Contents/Helpers/halo`.
+If `anyfmt` isn't on the client's `PATH`, use the full path:
+`/Applications/anyfmt.app/Contents/Helpers/anyfmt`.
 
 ### Protocol versions
 
@@ -389,20 +389,20 @@ exits with 0.
 
 | tool | arguments | returns |
 |---|---|---|
-| `convert` | `files` [paths], `to`, `options` {id: value}, `preset`, `outDir`, `overwrite` rename/never, `metadata` keep/private/strip, `dryRun` | with `dryRun`: the plan (`halo convert --dry-run --json`). Otherwise `{succeeded, failed, skipped, exitCode, results: [{file, outputs, route} or {file, error}]}` |
+| `convert` | `files` [paths], `to`, `options` {id: value}, `preset`, `outDir`, `overwrite` rename/never, `metadata` keep/private/strip, `dryRun` | with `dryRun`: the plan (`anyfmt convert --dry-run --json`). Otherwise `{succeeded, failed, skipped, exitCode, results: [{file, outputs, route} or {file, error}]}` |
 | `estimate` | `file`, `to`, `options` | `{bytes, inputBytes, duration, frames, width, height, isExact}` from `Estimator` (the same encoder settings, with a short sample for audio/video). Writes nothing |
 | `formats` | `from`? | every format, or the targets of one input format |
-| `options` | `format` | as `halo options <format> --json` |
-| `presets` | `format`? | as `halo presets list --json` |
+| `options` | `format` | as `anyfmt options <format> --json` |
+| `presets` | `format`? | as `anyfmt presets list --json` |
 | `run_tool` | `tool` (enum of local tools), `files`, `options`, `outDir` | as `convert` |
-| `targets` | `files` | as `halo targets --json` |
+| `targets` | `files` | as `anyfmt targets --json` |
 
 `options` values can be strings, numbers or booleans. Each one is checked
 against the option's kind, exactly as `--opt` is.
 
 ### Verified with the official Inspector
 
-`npx @modelcontextprotocol/inspector --cli halo mcp --method tools/list` and
+`npx @modelcontextprotocol/inspector --cli anyfmt mcp --method tools/list` and
 `… --method tools/call --tool-name convert --tool-arg files='["/path/photo.png"]' --tool-arg to=jpg --tool-arg dryRun=true`
 both work with Inspector 2.11.0 (2026-10-18). The Inspector speaks the legacy
 handshake. The modern path is covered by the transcript test below.
@@ -419,7 +419,7 @@ handshake. The modern path is covered by the transcript test below.
   normalised. Progress lines depend on timing, so they're checked by rule
   (increasing, ending at 1) rather than byte for byte. `doctor` is checked by
   shape, because paths and signatures differ per machine.
-- `MCPTranscriptTests.swift` drives `halo mcp` through pipes: version
+- `MCPTranscriptTests.swift` drives `anyfmt mcp` through pipes: version
   negotiation, `ping`, `tools/list`, `targets`, `options`, a `convert` dry run,
   a real `convert` with progress, `estimate`, tool errors, unknown tool and
   method, a parse error, modern `server/discover`, -32022, and a cancelled

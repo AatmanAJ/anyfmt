@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Snapshot frames: scrub to a frame, press F (or Add Frame) to capture it,
 /// pick PNG or JPG. With no captures the middle frame is saved.
@@ -157,7 +157,7 @@ struct SnapshotVideoEditor: View {
                             Text(MediaTimes.timecode(c.time)).font(MediaStyle.caption().monospacedDigit()).foregroundStyle(.secondary)
                         }
                         Spacer()
-                        Button { model.remove(c) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.haloSecondaryText) }
+                        Button { model.remove(c) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.anyfmtSecondaryText) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Remove frame \(i + 1)"))
                     }

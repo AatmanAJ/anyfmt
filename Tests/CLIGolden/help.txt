@@ -1,7 +1,7 @@
-$ halo help
+$ anyfmt help
 exit: 0
 --- stdout
-usage: halo <command> [options]
+usage: anyfmt <command> [options]
 
 convert <file>... --to <format> [--opt key=value]... [--preset <id|title>]
         [--out-dir <dir>] [--overwrite rename|never] [--metadata keep|private|strip] [--dry-run]

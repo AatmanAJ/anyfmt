@@ -1,8 +1,8 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 
-/// Bridges Halo's design tokens into the standalone RadialMenu package.
+/// Bridges anyfmt's design tokens into the standalone RadialMenu package.
 public enum WheelTheme {
     public static var configuration: RadialMenuConfiguration {
         var c = RadialMenuConfiguration()
@@ -65,7 +65,7 @@ public enum WheelTheme {
             highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.ink950), pillText: NSColor(srgbHex: p.paper0))
         style.surface = RadialMenuStyle.SurfaceSet(light: light, dark: dark)
         style.highlightBands = DesignTokens.Band.heat.dropLast(2).map { NSColor(srgbHex: $0) }
-        HaloFonts.registerBundled()
+        AnyfmtFonts.registerBundled()
         style.titleFontName = DesignTokens.Typeface.displayBlack
         return style
     }

@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 struct MatrixResult: Sendable {
     let from: FormatID

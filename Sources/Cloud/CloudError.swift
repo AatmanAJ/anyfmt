@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Everything that can go wrong in a cloud action, with the calm, human
 /// sentence the UI shows (`errorDescription`) and the detail that goes

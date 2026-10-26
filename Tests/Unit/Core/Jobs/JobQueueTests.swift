@@ -1,6 +1,6 @@
 import Combine
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class JobQueueTests: JobsTestCase {
     private let limits = ConcurrencyLimits(cpu: 2, videoToolbox: 1, io: 3, network: 2)

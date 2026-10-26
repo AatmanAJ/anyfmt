@@ -1,7 +1,7 @@
 import AppKit
 import AVFoundation
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Join clips: reorderable list with thumbnails and details, and an upfront
 /// verdict on whether the join is lossless or needs a re-encode (and why).
@@ -113,7 +113,7 @@ struct JoinVideoEditor: View {
             HStack {
                 EditorCaption(original ? String(localized: "Drag order") : String(localized: "Join order"))
                 Spacer()
-                Text("Drag clips to reorder").font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
+                Text("Drag clips to reorder").font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText)
             }
             .padding(.horizontal, DesignTokens.Space.xs)
             List {
@@ -205,8 +205,8 @@ struct JoinVideoEditor: View {
 private struct BulletLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            configuration.icon.font(.system(size: DesignTokens.Space.xs)).foregroundStyle(Color.haloSecondaryText)
-            configuration.title.font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
+            configuration.icon.font(.system(size: DesignTokens.Space.xs)).foregroundStyle(Color.anyfmtSecondaryText)
+            configuration.title.font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText)
         }
     }
 }
@@ -223,7 +223,7 @@ private struct ClipRow: View {
 
     var body: some View {
         HStack(spacing: DesignTokens.Space.m) {
-            Image(systemName: "line.3.horizontal").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
+            Image(systemName: "line.3.horizontal").foregroundStyle(Color.anyfmtSecondaryText).accessibilityHidden(true)
             Text("\(index + 1)")
                 .font(MediaStyle.label(.bold).monospacedDigit())
                 .foregroundStyle(EditorPalette.onSelected)
@@ -235,7 +235,7 @@ private struct ClipRow: View {
                     Image(nsImage: t).resizable().aspectRatio(contentMode: .fit)
                 } else {
                     Image(systemName: clip.failed ? "exclamationmark.triangle.fill" : "film")
-                        .foregroundStyle(clip.failed ? Color.haloDanger : Color.haloSecondaryText)
+                        .foregroundStyle(clip.failed ? Color.anyfmtDanger : Color.anyfmtSecondaryText)
                 }
             }
             .frame(width: 112, height: 63)
@@ -243,7 +243,7 @@ private struct ClipRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(clip.url.lastPathComponent).font(MediaStyle.body(.medium)).lineLimit(1).truncationMode(.middle)
                 Text(details).font(MediaStyle.caption().monospacedDigit())
-                    .foregroundStyle(clip.failed ? Color.haloDanger : Color.haloSecondaryText).lineLimit(1)
+                    .foregroundStyle(clip.failed ? Color.anyfmtDanger : Color.anyfmtSecondaryText).lineLimit(1)
                 if let mismatch {
                     Label(mismatch, systemImage: "exclamationmark.circle.fill")
                         .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold))
@@ -263,10 +263,10 @@ private struct ClipRow: View {
                     .help(String(localized: "Leave this clip out"))
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(Color.haloInk)
+            .foregroundStyle(Color.anyfmtInk)
         }
         .padding(DesignTokens.Space.s)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Clip \(index + 1), \(clip.url.lastPathComponent), \(details)"))
         .accessibilityAction(named: Text("Move up")) { if canMoveUp { move(-1) } }

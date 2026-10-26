@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Independent consumer check: Apple's own Office Quick Look generator (the one
 /// Finder uses) must render what our DOCX / XLSX / PPTX writers produce.

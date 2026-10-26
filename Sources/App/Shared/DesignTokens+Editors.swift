@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for the tool editors (crop, adjust, trim, bleep …), PLAN-PHASE2 §2.
 // Editors read these instead of hard-coding sizes or colours. Everything here is
@@ -55,11 +55,11 @@ extension DesignTokens.Component {
         static let checkerDark = DesignTokens.Primitive.paper100
 
         /// Marks drawn over arbitrary pixels (crop frame, selection, playhead).
-        /// A dark halo, a white rim and a cobalt core, so they read on any image.
+        /// A dark anyfmt, a white rim and a cobalt core, so they read on any image.
         enum Overlay {
             static let core = DesignTokens.Primitive.cobalt500
             static let rim = DesignTokens.Primitive.paper0
-            static let halo = DesignTokens.Primitive.ink1000
+            static let anyfmt = DesignTokens.Primitive.ink1000
             static let haloOpacity: Double = 0.55
             static let haloOpacityIncreased: Double = 0.9
             /// Core line width; the rim and halo add `rimWidth` / `haloWidth` per side.
@@ -77,7 +77,7 @@ extension DesignTokens.Component {
             static let dimIncreased: Double = 0.72
             static let thirds: Double = 0.4
             static let thirdsActive: Double = 0.7
-            /// Size badge text on the dark halo colour.
+            /// Size badge text on the dark anyfmt colour.
             static let badgeOpacity: Double = 0.78
         }
 

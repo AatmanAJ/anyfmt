@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// One place for the app delegate to reach the UI lane's windows.
 ///

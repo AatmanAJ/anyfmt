@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class ArchiveTests: XCTestCase {
     private let engine = ArchiveEngine()
@@ -86,7 +86,7 @@ final class ArchiveTests: XCTestCase {
         let out = try await runEngine(engine, try DocsFixtures.url("edge-zipslip.tar"), from: Formats.tar, to: Formats.folder, baseName: "edge")
         let root = out[0].deletingLastPathComponent()
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("evil.txt").path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: "/tmp/halo-absolute-evil.txt"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: "/tmp/anyfmt-absolute-evil.txt"))
         XCTAssertTrue(files(in: out[0]).contains("safe/ok.txt"))
         let zip = try await runEngine(engine, try DocsFixtures.url("edge-zipslip.zip"), from: Formats.zip, to: Formats.folder, baseName: "edge")
         XCTAssertFalse(FileManager.default.fileExists(atPath: zip[0].deletingLastPathComponent().appendingPathComponent("evil.txt").path))

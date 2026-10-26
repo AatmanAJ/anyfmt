@@ -1,6 +1,6 @@
 import XCTest
 import os
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Every permission path through onboarding (PLAN-PHASE2 §F), with an injected
 /// probe so nothing touches real TCC: all granted, all denied, granted while

@@ -1,8 +1,8 @@
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 import UniformTypeIdentifiers
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Fixed capability table so these tests don't depend on which engine lanes landed.
 enum WheelTestTable {
@@ -19,7 +19,7 @@ enum WheelTestTable {
 
     static var provider: WheelContentProvider { WheelContentProvider(router: Router(table: CapabilityTable(rows))) }
 
-    static func url(_ name: String) -> URL { URL(fileURLWithPath: "/tmp/halo-wheel-tests/\(name)") }
+    static func url(_ name: String) -> URL { URL(fileURLWithPath: "/tmp/anyfmt-wheel-tests/\(name)") }
 }
 
 @MainActor

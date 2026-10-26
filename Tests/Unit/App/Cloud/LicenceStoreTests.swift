@@ -1,7 +1,7 @@
 import CryptoKit
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// LicenceStore with a fake keychain and an injected clock, and how an
 /// active licence shows up in the cloud entitlements (and what it never does).
@@ -78,7 +78,7 @@ final class LicenceStoreTests: XCTestCase {
             guard let e = error as? LicenceActivationError, case .expired = e.verification else { return XCTFail("\(error)") }
             XCTAssertFalse(e.message.isEmpty)
         }
-        XCTAssertThrowsError(try store.activate("HALO1-NOPE"))
+        XCTAssertThrowsError(try store.activate("ANYFMT1-NOPE"))
         let other = try LicenceKey.issue(l, signingKey: Curve25519.Signing.PrivateKey())
         XCTAssertThrowsError(try store.activate(other)) { error in
             XCTAssertEqual((error as? LicenceActivationError)?.verification, .badSignature)

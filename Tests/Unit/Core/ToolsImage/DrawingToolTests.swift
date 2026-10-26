@@ -4,7 +4,7 @@ import CoreImage
 import ImageIO
 import PDFKit
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class DrawingToolTests: XCTestCase {
     private var dir: URL!
@@ -287,7 +287,7 @@ final class DrawingToolTests: XCTestCase {
     // MARK: Codes
 
     func testReadsGeneratedQRCode() async throws {
-        let payload = "https://example.com/halo?x=1"
+        let payload = "https://example.com/anyfmt?x=1"
         let qr = try XCTUnwrap(CIFilter(name: "CIQRCodeGenerator", parameters: ["inputMessage": Data(payload.utf8), "inputCorrectionLevel": "M"])?.outputImage)
         let big = qr.transformed(by: CGAffineTransform(scaleX: 12, y: 12))
         // Quiet zone: composite over white with a margin.

@@ -7,7 +7,7 @@
 set -euo pipefail
 OUT="${OUT:?OUT must be set}"
 mkdir -p "$OUT"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/halo-docs-fixtures.XXXXXX")"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/anyfmt-docs-fixtures.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
 # --- Python builder: PNG, DOCX, EPUB, PPTX, XLSX, ODS, text clipping, RAR, edge archives
@@ -59,7 +59,7 @@ drawing = ('<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><
            '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="1" name="figure.png"/><pic:cNvPicPr/></pic:nvPicPr>'
            '<pic:blipFill><a:blip r:embed="rId10"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1828800" cy="1219200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>')
 body = ''.join([
-    p('Halo Sample Document', 'Heading1'),
+    p('anyfmt Sample Document', 'Heading1'),
     p('', runs=run('This paragraph has ') + run('bold', '<w:b/>') + run(', ') + run('italic', '<w:i/>') + run(', ') + run('underlined', '<w:u w:val="single"/>') + run(' and ') + run('struck', '<w:strike/>') + run(' text, plus a ') +
       '<w:hyperlink r:id="rId11" w:history="1">' + run('link to example.org', '<w:rStyle w:val="Hyperlink"/>') + '</w:hyperlink>' + run('.')),
     p('Lists', 'Heading2'),
@@ -88,7 +88,7 @@ write_zip(os.path.join(OUT, 'sample.docx'), [
     ('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/><Relationship Id="rId10" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image1.png"/><Relationship Id="rId11" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.org/" TargetMode="External"/></Relationships>'),
     ('word/document.xml', document), ('word/styles.xml', styles), ('word/numbering.xml', numbering),
     ('word/media/image1.png', FIG),
-    ('docProps/core.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Halo Sample Document</dc:title><dc:creator>Halo Fixtures</dc:creator></cp:coreProperties>'),
+    ('docProps/core.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>anyfmt Sample Document</dc:title><dc:creator>anyfmt Fixtures</dc:creator></cp:coreProperties>'),
 ])
 
 # --- EPUB 3
@@ -96,7 +96,7 @@ XH = '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http
 ch1 = XH % ('Chapter One', '<h1>Chapter One</h1><p>It was a <em>bright</em> cold day, and the clocks were striking <strong>thirteen</strong>.</p><ul><li>First point</li><li>Second point</li></ul><figure><img src="images/fig.png" alt="Gradient figure"/></figure>')
 ch2 = XH % ('Chapter Two', '<h1>Chapter Two</h1><p>See <a href="https://example.org/">the website</a> for more.</p><table><thead><tr><th>Name</th><th>Score</th></tr></thead><tbody><tr><td>Ada</td><td>10</td></tr><tr><td>Grace</td><td>9</td></tr></tbody></table><blockquote><p>A quoted line.</p></blockquote>')
 nav = XH % ('Contents', '<nav epub:type="toc" id="toc"><h1>Contents</h1><ol><li><a href="ch1.xhtml">Chapter One</a></li><li><a href="ch2.xhtml">Chapter Two</a></li></ol></nav>')
-opf = ('<?xml version="1.0" encoding="UTF-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="id">urn:uuid:7d3d0c38-6a7e-4a3e-9e57-6b1e2f1d0a01</dc:identifier><dc:title>Halo Sample Book</dc:title><dc:creator>Halo Fixtures</dc:creator><dc:language>en</dc:language><meta property="dcterms:modified">2024-01-01T00:00:00Z</meta></metadata>'
+opf = ('<?xml version="1.0" encoding="UTF-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="id">urn:uuid:7d3d0c38-6a7e-4a3e-9e57-6b1e2f1d0a01</dc:identifier><dc:title>anyfmt Sample Book</dc:title><dc:creator>anyfmt Fixtures</dc:creator><dc:language>en</dc:language><meta property="dcterms:modified">2024-01-01T00:00:00Z</meta></metadata>'
        '<manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/><item id="ch2" href="ch2.xhtml" media-type="application/xhtml+xml"/><item id="css" href="style.css" media-type="text/css"/><item id="fig" href="images/fig.png" media-type="image/png"/></manifest>'
        '<spine><itemref idref="nav" linear="no"/><itemref idref="ch1"/><itemref idref="ch2"/></spine></package>')
 write_zip(os.path.join(OUT, 'sample.epub'), [
@@ -115,7 +115,7 @@ def slide(content):
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld %s><p:cSld><p:spTree>%s%s</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>' % (PNS, GRP, content)
 pic = '<p:pic><p:nvPicPr><p:cNvPr id="4" name="Figure" descr="Gradient figure"/><p:cNvPicPr/><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="3048000" y="2286000"/><a:ext cx="6096000" cy="4064000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>'
 slides = [
-    slide(sp(2, 'Title', 914400, 2286000, 10363200, 1371600, ['Halo Sample Deck'], 4400) + sp(3, 'Subtitle', 914400, 3810000, 10363200, 914400, ['Generated fixture'], 2400)),
+    slide(sp(2, 'Title', 914400, 2286000, 10363200, 1371600, ['anyfmt Sample Deck'], 4400) + sp(3, 'Subtitle', 914400, 3810000, 10363200, 914400, ['Generated fixture'], 2400)),
     slide(sp(2, 'Title', 609600, 304800, 10972800, 1143000, ['Agenda'], 3600) + sp(3, 'Body', 609600, 1600200, 10972800, 4572000, ['Introductions', 'Results', 'Next steps'], 2400)),
     slide(sp(2, 'Title', 609600, 304800, 10972800, 1143000, ['A picture'], 3600) + pic),
 ]
@@ -358,7 +358,7 @@ with zipfile.ZipFile(os.path.join(OUT, 'edge-zipslip.zip'), 'w') as z:
     z.writestr('../evil.txt', 'should never be written outside')
     z.writestr('safe/ok.txt', 'fine')
 with tarfile.open(os.path.join(OUT, 'edge-zipslip.tar'), 'w') as t:
-    for name, data in (('../evil.txt', b'outside'), ('/tmp/halo-absolute-evil.txt', b'absolute'), ('safe/ok.txt', b'fine')):
+    for name, data in (('../evil.txt', b'outside'), ('/tmp/anyfmt-absolute-evil.txt', b'absolute'), ('safe/ok.txt', b'fine')):
         info = tarfile.TarInfo(name)
         info.size = len(data)
         info.mtime = 1704067200
@@ -368,14 +368,14 @@ PY
 # --- Markdown with every construct the reader handles
 cat > "$OUT/sample.md" <<'MD'
 ---
-title: Halo Markdown Sample
-author: Halo Fixtures
+title: anyfmt Markdown Sample
+author: anyfmt Fixtures
 ---
 
-# Halo Markdown Sample
+# anyfmt Markdown Sample
 
 A paragraph with **bold**, *italic*, ***both***, ~~strikethrough~~, `inline code`,
-a [link](https://example.org "Example") and an autolink <https://halo.example/>.
+a [link](https://example.org "Example") and an autolink <https://anyfmt.example/>.
 Hard break here\
 next line.
 
@@ -428,9 +428,9 @@ MD
 cat > "$OUT/sample.html" <<'HTML'
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Halo HTML Sample</title><meta name="author" content="Halo Fixtures"></head>
+<head><meta charset="utf-8"><title>anyfmt HTML Sample</title><meta name="author" content="anyfmt Fixtures"></head>
 <body>
-<h1>Halo HTML Sample</h1>
+<h1>anyfmt HTML Sample</h1>
 <p>A paragraph with <b>bold</b>, <i>italic</i>, <u>underline</u> and a <a href="https://example.org/">link</a>. Ünïcødé café.</p>
 <h2>Lists</h2>
 <ul><li>First bullet</li><li>Second bullet<ul><li>Nested bullet</li></ul></li></ul>
@@ -449,7 +449,7 @@ print(x)</code></pre>
 HTML
 
 cat > "$OUT/sample.txt" <<'TXT'
-Halo Plain Text Sample
+anyfmt Plain Text Sample
 
 This is the first paragraph of plain text. It has two sentences.
 A second line in the same paragraph.

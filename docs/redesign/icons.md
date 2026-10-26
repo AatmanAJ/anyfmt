@@ -1,10 +1,10 @@
 # Icons
 
-Halo's app icon, menu bar glyph and DMG background are drawn by script, from the phase 2 palette (`docs/PLAN-PHASE2.md` §2). No downloaded, traced or generated artwork. The output is deterministic: the same script gives the same pixels.
+anyfmt's app icon, menu bar glyph and DMG background are drawn by script, from the phase 2 palette (`docs/PLAN-PHASE2.md` §2). No downloaded, traced or generated artwork. The output is deterministic: the same script gives the same pixels.
 
 ```sh
 swift scripts/make-icons.swift Sources/App/Resources/Assets.xcassets
-swift packaging/dmg/make-background.swift <out-dir> Halo   # run by packaging/make-dmg.sh
+swift packaging/dmg/make-background.swift <out-dir> anyfmt   # run by packaging/make-dmg.sh
 ```
 
 `make-icons.swift` writes:

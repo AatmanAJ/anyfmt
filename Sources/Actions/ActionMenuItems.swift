@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Action settings for the Settings window (the Settings lane embeds this in
 /// a `Form` section): which terminal the Terminal action opens, and the Move

@@ -1,13 +1,13 @@
 import AppKit
 import AVFoundation
-import HaloCore
+import AnyfmtCore
 
 /// A private temp folder for preview proxies, removed when the editor goes away.
 final class PreviewScratch: Sendable {
     let url: URL
 
     init() {
-        url = FileManager.default.temporaryDirectory.appendingPathComponent("HaloPreview-\(UUID().uuidString)", isDirectory: true)
+        url = FileManager.default.temporaryDirectory.appendingPathComponent("AnyfmtPreview-\(UUID().uuidString)", isDirectory: true)
     }
 
     deinit { try? FileManager.default.removeItem(at: url) }

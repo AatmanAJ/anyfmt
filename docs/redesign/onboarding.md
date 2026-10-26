@@ -21,7 +21,7 @@ Renders: `docs/screens/onboarding/onboarding-{1…6}[-dark].png`, `onboarding-2-
   activate carry none. `BandGradient` swaps bands for a flat fill under Reduce Transparency and
   Increased Contrast.
 - **Footer**: Skip as quiet text at the bottom left, progress dots in the middle, Back (quiet pill) and
-  the one blue pill (Continue / Start Using Halo) on the right. Dots: the current step is cobalt *and*
+  the one blue pill (Continue / Start Using anyfmt) on the right. Dots: the current step is cobalt *and*
   20 pt wide, the rest are 6 pt `dotRest` grey, so state never rides on colour alone.
 - **Motion**: page changes slide + fade on `Curve.glide` (0.22 s); under Reduce Motion they crossfade
   in `Curve.reducedCrossfade`. Keyboard paging (← → Return) uses the same animation.
@@ -33,13 +33,13 @@ Renders: `docs/screens/onboarding/onboarding-{1…6}[-dark].png`, `onboarding-2-
 
 | Page | Before | After |
 |---|---|---|
-| 1 Welcome | Centred "Welcome to Halo", iris dashed-circle icon, purple radial glow, three icon bullets in an outlined card | "CONVERT / WHILE YOU / DRAG." at 56 pt top left, subtitle, the heat band column on the right (like the board). The three promises sit in one charcoal tile as display tags (LOCAL / PRIVATE / FREE) with one plain sentence each |
+| 1 Welcome | Centred "Welcome to anyfmt", iris dashed-circle icon, purple radial glow, three icon bullets in an outlined card | "CONVERT / WHILE YOU / DRAG." at 56 pt top left, subtitle, the heat band column on the right (like the board). The three promises sit in one charcoal tile as display tags (LOCAL / PRIVATE / FREE) with one plain sentence each |
 | 2 Demo | Centred title, dot-grid stage 640 × 252, purple wheel with SF Symbols in every wedge, iris selection | Split: "DRAG. / PRESS. / DROP." with the instructions and a vertical key legend (key pills + uppercase role) on the left; the stage as a 420 × 392 charcoal tile on the right with the live hint under it. The wheel matches the new wheel look: black disc, charcoal wedges, uppercase display labels, heat band on the wedge under the pointer, black label on the band. No glyphs, no blur, no shadow. The sample photo was a purple twilight; it is now a sunset in the heat primitives with black hills |
 | 3 Permissions | Green shield in a circle, centred headline, card overflowing the footer | "NO PERMISSIONS / NEEDED." at 40 pt, cobalt band column (cobalt.700 → 500 → bright → 400, never toward violet). The Finder-shortcut toggle and, only while it's on, the three permission rows in one tile; the old 45 %-opacity greyed list (grey on grey) is gone |
 | 4 Launch | Menu-bar icon in a circle, centred | "READY WHEN / YOU DRAG." top left; the launch-at-login tile and footnote sit at the foot of the page, poster style |
 | 5 Updates | Download icon in a circle, centred, heart footnote | "STAY UP / TO DATE." top left; the update-check tile and footnote at the foot |
-| 6 Activate | Key icon, centred, form-style card with system buttons | The quiet page: "GOT A / PRO KEY?", one sentence (skipping changes nothing), a pill key field, Paste (quiet) and Activate, which stays quiet until a key can be activated and then becomes the orange pill. Sign In… is an inline accent-text link. "Start Using Halo" is the blue default, so skipping reads as the default. Uses `LicenceActivationModel` directly with the same strings as Settings › Account |
-| About | Centred big icon with an iris glow, system buttons, tertiary text | A heat strip across the top (pale end on the left so the window buttons stay legible), "HALO" set at 64 pt top left with the icon at the right, version (selectable), the open-source line and link, credits in a charcoal tile with a display "BUILT WITH" header, Licences… as the orange pill, copyright in `text.secondary` |
+| 6 Activate | Key icon, centred, form-style card with system buttons | The quiet page: "GOT A / PRO KEY?", one sentence (skipping changes nothing), a pill key field, Paste (quiet) and Activate, which stays quiet until a key can be activated and then becomes the orange pill. Sign In… is an inline accent-text link. "Start Using anyfmt" is the blue default, so skipping reads as the default. Uses `LicenceActivationModel` directly with the same strings as Settings › Account |
+| About | Centred big icon with an iris glow, system buttons, tertiary text | A heat strip across the top (pale end on the left so the window buttons stay legible), "ANYFMT" set at 64 pt top left with the icon at the right, version (selectable), the open-source line and link, credits in a charcoal tile with a display "BUILT WITH" header, Licences… as the orange pill, copyright in `text.secondary` |
 
 Behaviour is unchanged: every accessibility identifier (`onboarding.continue`, `.finish`, `.skip`,
 `.back`, `.signIn`, `.hint`, `.updateChecks`, `.finderShortcut`, `.progress`, `.demoStage`, `.result`,
@@ -53,7 +53,7 @@ home/result positions moved to fit the new stage.
 |---|---|
 | The app icon (About, Dock) is still the old iris/mint icon, which now clashes with the heat/cobalt palette | Not mine to change (asset owned by branding); flagged |
 | Permission rows (`PermissionsCoachList`) keep their own tinted-circle icons and system "Open System Settings" buttons, so the permissions tile mixes two styles | Shared component in Permissions/, outside this area; it should take pills and drop the circles |
-| `LaunchAtLoginRow` and the snapshot switch (`HaloSwitchStyle`) are system-styled; the off switch reads grey-on-charcoal in renders | Shared controls (HaloControls / Permissions), outside this area |
+| `LaunchAtLoginRow` and the snapshot switch (`AnyfmtSwitchStyle`) are system-styled; the off switch reads grey-on-charcoal in renders | Shared controls (AnyfmtControls / Permissions), outside this area |
 | The demo wheel is a black disc in light mode too (like a record on a light tile). If the real wheel gets a light variant, the demo should follow it | Kept dark on purpose for now; revisit with the wheel area's light look |
 | The real `RadialMenuView` isn't wired through `OnboardingHooks.demoWheel` yet, so the demo draws its own ring (`DemoWheelRing`) | The fallback matches the board; wiring the real wheel removes the duplication |
 | Band colours: each band fades vertically into its neighbour (the `BandGradient` recipe), so the column reads softer than the board's hard stripes | Token recipe is shared; left as is |

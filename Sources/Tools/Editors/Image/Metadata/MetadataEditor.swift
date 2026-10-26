@@ -1,7 +1,7 @@
 import AppKit
 import PDFKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class MetadataEditorModel: ToolEditorModel {
@@ -115,9 +115,9 @@ struct MetadataTable: View {
                     if let reason = snapshot.readOnlyReason {
                         Label(reason, systemImage: "lock.fill")
                             .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
-                            .foregroundStyle(Color.haloInk)
+                            .foregroundStyle(Color.anyfmtInk)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .haloTile(padding: EditorTokens.sectionPadding)
+                            .anyfmtTile(padding: EditorTokens.sectionPadding)
                     }
                     ForEach(snapshot.groups, id: \.name) { group in
                         groupCard(group.name, group.fields)
@@ -147,14 +147,14 @@ struct MetadataTable: View {
                 ForEach(Array(fields.enumerated()), id: \.element.id) { i, field in
                     row(field)
                     if i < fields.count - 1 {
-                        Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline).padding(.leading, 140)
+                        Rectangle().fill(Color.anyfmtHairline).frame(height: DesignTokens.Shape.hairline).padding(.leading, 140)
                     }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
             .overlay {
                 if contrast == .increased {
-                    RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).strokeBorder(Color.haloSecondaryText)
+                    RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).strokeBorder(Color.anyfmtSecondaryText)
                 }
             }
         }
@@ -168,7 +168,7 @@ struct MetadataTable: View {
                     .accessibilityHidden(true)
                 Text(field.label)
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(field.editable ? Color.haloInk : Color.haloSecondaryText)
+                    .foregroundStyle(field.editable ? Color.anyfmtInk : Color.anyfmtSecondaryText)
                     .lineLimit(1)
             }
             .frame(width: 128, alignment: .leading)
@@ -180,7 +180,7 @@ struct MetadataTable: View {
                     .overlay(alignment: .leading) {
                         if removed {
                             HStack(spacing: 4) {
-                                Text(field.value).strikethrough().foregroundStyle(Color.haloSecondaryText).lineLimit(1)
+                                Text(field.value).strikethrough().foregroundStyle(Color.anyfmtSecondaryText).lineLimit(1)
                                 Text("Removed").foregroundStyle(ImageEditorKit.danger)
                             }
                             .font(.system(size: DesignTokens.TypeRamp.body))
@@ -192,12 +192,12 @@ struct MetadataTable: View {
             } else {
                 Text(field.value.isEmpty ? "—" : field.value)
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(field.value.isEmpty || !field.editable ? Color.haloSecondaryText : Color.haloInk)
+                    .foregroundStyle(field.value.isEmpty || !field.editable ? Color.anyfmtSecondaryText : Color.anyfmtInk)
                     .textSelection(.enabled)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !field.editable {
-                    Image(systemName: "lock.fill").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.haloSecondaryText)
+                    Image(systemName: "lock.fill").font(.system(size: DesignTokens.TypeRamp.micro)).foregroundStyle(Color.anyfmtSecondaryText)
                         .help(String(localized: "Read-only technical field"))
                         .accessibilityLabel(String(localized: "Read-only"))
                 }
@@ -224,12 +224,12 @@ struct MetadataSidebar: View {
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
                     .lineLimit(2).truncationMode(.middle)
                 if let size = model.snapshot?.value("file.size") {
-                    Text(size).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.haloSecondaryText)
+                    Text(size).font(.system(size: DesignTokens.TypeRamp.caption)).foregroundStyle(Color.anyfmtSecondaryText)
                 }
             }
             Spacer(minLength: 0)
         }
-        .haloTile(padding: EditorTokens.sectionPadding)
+        .anyfmtTile(padding: EditorTokens.sectionPadding)
 
         ImageEditorKit.Section(String(localized: "Changes")) {
             // In table order.
@@ -244,7 +244,7 @@ struct MetadataSidebar: View {
                         Text(label).font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
                         Text(value.map { "→ \($0)" } ?? String(localized: "Removed"))
                             .font(.system(size: DesignTokens.TypeRamp.caption))
-                            .foregroundStyle(value == nil ? ImageEditorKit.danger : Color.haloSecondaryText)
+                            .foregroundStyle(value == nil ? ImageEditorKit.danger : Color.anyfmtSecondaryText)
                             .lineLimit(1).truncationMode(.tail)
                     }
                 }

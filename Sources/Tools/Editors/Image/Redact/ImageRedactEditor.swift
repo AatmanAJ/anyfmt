@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class ImageRedactModel: ToolEditorModel {
@@ -109,7 +109,7 @@ struct ImageRedactCanvas: View {
                 ForEach(model.regions) { r in
                     let v = ImageEditorKit.denormalized(r.rect, in: rect)
                     let selected = r.id == model.selection
-                    // Selected: cobalt with a white rim and dark halo. Others: dashed white.
+                    // Selected: cobalt with a white rim and dark anyfmt. Others: dashed white.
                     OverlayStroke(path: Rectangle().path(in: v), dash: selected ? [] : [5, 3],
                                   width: selected ? nil : DesignTokens.Shape.hairline, quiet: !selected)
                     if selected {
@@ -221,7 +221,7 @@ struct ImageRedactSidebar: View {
             ImageEditorKit.Hint(String(localized: "The saved copy is redacted for good: covered pixels are replaced, not hidden, and no thumbnail of the original is kept. Your original file isn’t touched."))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .haloTile(padding: EditorTokens.sectionPadding)
+        .anyfmtTile(padding: EditorTokens.sectionPadding)
         .accessibilityElement(children: .combine)
     }
 }

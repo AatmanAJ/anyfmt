@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Envelope + zoom/pan state for a waveform view.
 @MainActor
@@ -158,7 +158,7 @@ struct WaveformTimeline: View {
             let mid = size.height / 2
             let amp = (mid - 6) * gain
             let limit = mid - 2
-            ctx.fill(Path(CGRect(x: 0, y: mid, width: size.width, height: 1)), with: .color(Color.haloSecondaryText.opacity(0.35)))
+            ctx.fill(Path(CGRect(x: 0, y: mid, width: size.width, height: 1)), with: .color(Color.anyfmtSecondaryText.opacity(0.35)))
             var inside = Path(), outside = Path(), bleeped = Path()
             let toneHalf = min(limit, CGFloat(BleepAudioRunner.toneAmplitude) * amp)
             for (i, c) in columns.enumerated() {
@@ -175,7 +175,7 @@ struct WaveformTimeline: View {
                 else if let sel, !sel.contains(t) { outside.addRect(r) }
                 else { inside.addRect(r) }
             }
-            ctx.fill(outside, with: .color(Color.haloSecondaryText.opacity(0.5)))
+            ctx.fill(outside, with: .color(Color.anyfmtSecondaryText.opacity(0.5)))
             ctx.fill(inside, with: .color(MediaStyle.accent))
             ctx.fill(bleeped, with: .color(MediaStyle.danger.opacity(0.85)))
         }

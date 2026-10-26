@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Composition root for the cloud client. The app creates one
 /// (`CloudServices.shared`); tests build their own with an `Environment`

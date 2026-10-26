@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Public halves of the licence signing keys, by key id. Only public keys
 /// live in the repo; private keys stay in the issuer's Keychain
@@ -56,7 +56,7 @@ enum LicenceVerification: Sendable, Equatable {
         case .badSignature:
             return String(localized: "This licence key doesn’t check out. Copy it again from your receipt, the whole thing.")
         case .malformed:
-            return String(localized: "That doesn’t look like a licence key. It starts with HALO1-.")
+            return String(localized: "That doesn’t look like a licence key. It starts with ANYFMT1-.")
         }
     }
 }

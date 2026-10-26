@@ -1,15 +1,15 @@
 # Contributing
 
-Thanks for helping. Halo is a menu-bar app, so most changes touch one of three
+Thanks for helping. anyfmt is a menu-bar app, so most changes touch one of three
 places: the **capability table** (formats), a **tool**, or the **wheel**.
 
 ## Licence of contributions
 
-Halo is AGPL-3.0, and `Packages/DragSense` and `Packages/RadialMenu` are MIT.
+anyfmt is AGPL-3.0, and `Packages/DragSense` and `Packages/RadialMenu` are MIT.
 Before we can merge your first pull request, we ask you to accept the short
-[Halo Contributor Licence Agreement](CLA.md). The CLA Assistant check on your PR
+[anyfmt Contributor Licence Agreement](CLA.md). The CLA Assistant check on your PR
 walks you through it, and you only do it once. You keep ownership of your work.
-The agreement lets the maintainer also offer Halo under other terms, such as a
+The agreement lets the maintainer also offer anyfmt under other terms, such as a
 paid licence or a Mac App Store build, which the AGPL alone doesn't allow. In
 return, it guarantees your contribution always stays available under the AGPL or
 another OSI-approved licence.
@@ -25,12 +25,12 @@ Why a CLA and not a DCO? See `docs/DECISIONS.md` D-026 and
 ```bash
 make bootstrap   # build-machine tools: xcodegen, meson, ninja, nasm… (users never need these)
 make engines     # ffmpeg/ffprobe/resvg from pinned, checksummed sources (~10 min, once)
-make build       # generates Halo.xcodeproj from project.yml and builds
+make build       # generates anyfmt.xcodeproj from project.yml and builds
 make test        # package tests + unit tests + policy checks
 make matrix      # every conversion on a generated fixture, validated → docs/MATRIX.md
 ```
 
-`Halo.xcodeproj` is generated. Edit `project.yml`, never the project file.
+`anyfmt.xcodeproj` is generated. Edit `project.yml`, never the project file.
 
 ## Add a format in one row
 
@@ -52,7 +52,7 @@ Say ImageIO learned to write a new format `foo`.
    ```
 
    The router does the rest: every format that reaches PNG now reaches FOO,
-   within three hops. Multi-file drags, the wheel, the CLI (`halo convert x.heic --to foo`)
+   within three hops. Multi-file drags, the wheel, the CLI (`anyfmt convert x.heic --to foo`)
    and the matrix all pick it up from the same table.
 
 3. **Teach the engine the one method it needs**, if it doesn't already handle

@@ -1,6 +1,6 @@
 import Foundation
 import Security
-import HaloCore
+import AnyfmtCore
 
 /// Where secrets live. The real one is the Keychain; tests may inject a
 /// memory store for flows that don't test the Keychain itself.

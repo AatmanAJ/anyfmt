@@ -5,10 +5,10 @@ import { basename } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import {
-  HaloConnectionError,
-  HaloConversionFailedError,
-  HaloError,
-  HaloTimeoutError,
+  AnyfmtConnectionError,
+  AnyfmtConversionFailedError,
+  AnyfmtError,
+  AnyfmtTimeoutError,
   errorFromResponse,
 } from './errors.js';
 import { verifyWebhook, type VerifyOptions } from './webhooks.js';
@@ -18,7 +18,7 @@ import type {
   ConversionPage,
   ConversionStatus,
   FormatList,
-  HaloSchema,
+  AnyfmtSchema,
   StoredFile,
   Upload,
   Usage,
@@ -33,10 +33,10 @@ export const DEFAULT_BASE_URL = 'https://cloud.example.invalid';
 /** Files above this go through the resumable `/v1/uploads` flow. */
 export const DIRECT_UPLOAD_MAX_BYTES = 100 * 1024 * 1024;
 
-export interface HaloOptions {
-  /** `halo_sk_…` from `POST /v1/api-keys` (Settings › Account › API keys). */
+export interface AnyfmtOptions {
+  /** `anyfmt_sk_…` from `POST /v1/api-keys` (Settings › Account › API keys). */
   apiKey: string;
-  /** Server origin, e.g. `https://halo.example.com` or `http://127.0.0.1:8787`. */
+  /** Server origin, e.g. `https://anyfmt.example.com` or `http://127.0.0.1:8787`. */
   baseUrl?: string;
   /** Retries after 429 / 5xx / connection errors. Default 3. */
   maxRetries?: number;
@@ -80,17 +80,17 @@ export function parseRetryAfter(value: string | null, nowMs = Date.now()): numbe
 const TERMINAL: ConversionStatus[] = ['succeeded', 'failed', 'cancelled'];
 
 /**
- * Client for the Halo pay-per-use conversion API.
+ * Client for the anyfmt pay-per-use conversion API.
  *
  * ```ts
- * const halo = new Halo({ apiKey: process.env.HALO_API_KEY!, baseUrl: 'https://halo.example.com' });
- * const file = await halo.files.upload('photo.heic');
- * const c = await halo.conversions.create({ input: { fileId: file.id }, target: 'webp', options: { quality: 80 } });
- * const done = await halo.conversions.wait(c.id, { timeoutMs: 60_000 });
- * await halo.files.download(done.output!.id, 'photo.webp');
+ * const anyfmt = new Anyfmt({ apiKey: process.env.ANYFMT_API_KEY!, baseUrl: 'https://anyfmt.example.com' });
+ * const file = await anyfmt.files.upload('photo.heic');
+ * const c = await anyfmt.conversions.create({ input: { fileId: file.id }, target: 'webp', options: { quality: 80 } });
+ * const done = await anyfmt.conversions.wait(c.id, { timeoutMs: 60_000 });
+ * await anyfmt.files.download(done.output!.id, 'photo.webp');
  * ```
  */
-export class Halo {
+export class Anyfmt {
   readonly baseUrl: string;
   readonly files: Files;
   readonly conversions: Conversions;
@@ -106,9 +106,9 @@ export class Halo {
   readonly #headers: Record<string, string>;
   readonly #fetch: typeof fetch;
 
-  constructor(options: HaloOptions) {
-    if (!options?.apiKey || !options.apiKey.startsWith('halo_sk_')) {
-      throw new TypeError('Halo: apiKey must be a halo_sk_… key');
+  constructor(options: AnyfmtOptions) {
+    if (!options?.apiKey || !options.apiKey.startsWith('anyfmt_sk_')) {
+      throw new TypeError('Anyfmt: apiKey must be a anyfmt_sk_… key');
     }
     this.#apiKey = options.apiKey;
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
@@ -117,7 +117,7 @@ export class Halo {
     this.#maxRetryDelayMs = options.maxRetryDelayMs ?? 60_000;
     this.#headers = { ...(options.headers ?? {}) };
     const f = options.fetch ?? globalThis.fetch;
-    if (typeof f !== 'function') throw new TypeError('Halo: no fetch available (needs Node 18+)');
+    if (typeof f !== 'function') throw new TypeError('Anyfmt: no fetch available (needs Node 18+)');
     this.#fetch = f;
     this.files = new Files(this);
     this.conversions = new Conversions(this);
@@ -136,7 +136,7 @@ export class Halo {
     for (const [k, v] of Object.entries(options.query ?? {})) if (v != null) url.searchParams.set(k, String(v));
     const headers: Record<string, string> = {
       Accept: 'application/json',
-      'User-Agent': 'halo-sdk-js/0.1.0',
+      'User-Agent': 'anyfmt-sdk-js/0.1.0',
       ...this.#headers,
       ...(options.headers ?? {}),
       Authorization: `Bearer ${this.#apiKey}`,
@@ -157,7 +157,7 @@ export class Halo {
       } catch (cause) {
         if (options.signal?.aborted) throw cause;
         if (canRetry && options.idempotent) { await sleep(this.#backoff(attempt), options.signal); continue; }
-        throw new HaloConnectionError(`Couldn’t reach ${url.origin}: ${(cause as Error)?.message ?? cause}`, { code: 'connection_failed', cause });
+        throw new AnyfmtConnectionError(`Couldn’t reach ${url.origin}: ${(cause as Error)?.message ?? cause}`, { code: 'connection_failed', cause });
       }
       if (res.ok || res.status === 304 || options.allowStatus?.includes(res.status)) return res;
       const retryAfter = parseRetryAfter(res.headers.get('retry-after'));
@@ -224,8 +224,8 @@ async function readSlice(src: Source, start: number, length: number): Promise<Ui
 }
 
 export class Files {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
 
   /**
    * Uploads a file (path or Blob/File) and returns its id for `conversions.create`.
@@ -255,7 +255,7 @@ export class Files {
       return this.#uploadResumable(src, filename, contentType, options);
     }
     const blob = src.kind === 'blob' ? src.blob : new Blob([await readFile(src.path)]);
-    return this.#halo.json<StoredFile>('POST', '/v1/files', {
+    return this.#anyfmt.json<StoredFile>('POST', '/v1/files', {
       query: { filename },
       body: blob,
       headers: { 'Content-Type': contentType ?? 'application/octet-stream' },
@@ -265,9 +265,9 @@ export class Files {
   }
 
   async #uploadResumable(src: Source, filename: string, contentType: string | undefined, options: UploadOptions): Promise<StoredFile> {
-    const halo = this.#halo;
+    const anyfmt = this.#anyfmt;
     const sha256 = await sha256Of(src);
-    const created = await halo.json<Upload>('POST', '/v1/uploads', {
+    const created = await anyfmt.json<Upload>('POST', '/v1/uploads', {
       json: { filename, size: src.size, sha256, contentType: contentType ?? 'application/octet-stream', purpose: 'job' },
       idempotent: false,
       signal: options.signal,
@@ -281,7 +281,7 @@ export class Files {
       const last = offset + bytes.length - 1;
       let next: number | undefined;
       try {
-        const res = await halo.request('PUT', path, {
+        const res = await anyfmt.request('PUT', path, {
           body: bytes,
           headers: { 'Content-Type': 'application/octet-stream', 'Content-Range': `bytes ${offset}-${last}/${src.size}` },
           allowStatus: [409],
@@ -291,24 +291,24 @@ export class Files {
         await res.body?.cancel().catch(() => undefined);
         next = header != null ? Number(header) : undefined;
       } catch (e) {
-        if (options.signal?.aborted || !(e instanceof HaloError) || (e.status !== 0 && e.status < 500)) throw e;
+        if (options.signal?.aborted || !(e instanceof AnyfmtError) || (e.status !== 0 && e.status < 500)) throw e;
         next = undefined;
       }
       if (next === undefined) {
         // Connection dropped or the server hiccuped: ask where it really is.
-        const probe = await halo.request('HEAD', path, { idempotent: true, signal: options.signal });
+        const probe = await anyfmt.request('HEAD', path, { idempotent: true, signal: options.signal });
         next = Number(probe.headers.get('upload-offset') ?? offset);
       }
       if (next <= offset) {
         stalls += 1;
-        if (stalls > 5) throw new HaloError('Upload made no progress after 5 attempts.', { code: 'upload_stalled' });
+        if (stalls > 5) throw new AnyfmtError('Upload made no progress after 5 attempts.', { code: 'upload_stalled' });
       } else {
         stalls = 0;
       }
       offset = next;
     }
-    const done = await halo.json<Upload>('POST', `${path}/complete`, { json: { sha256 }, idempotent: true, signal: options.signal });
-    if (!done.fileId) throw new HaloError('The server completed the upload but returned no fileId.', { code: 'missing_file_id' });
+    const done = await anyfmt.json<Upload>('POST', `${path}/complete`, { json: { sha256 }, idempotent: true, signal: options.signal });
+    if (!done.fileId) throw new AnyfmtError('The server completed the upload but returned no fileId.', { code: 'missing_file_id' });
     return {
       id: done.fileId, name: filename, size: src.size, sha256, contentType: contentType ?? 'application/octet-stream',
       format: null, createdAt: new Date().toISOString(), expiresAt: done.expiresAt,
@@ -325,7 +325,7 @@ export class Files {
     if (options.resume !== false) {
       try { have = (await stat(part)).size; } catch { have = 0; }
     }
-    const res = await this.#halo.request('GET', `/v1/files/${encodeURIComponent(fileId)}/content`, {
+    const res = await this.#anyfmt.request('GET', `/v1/files/${encodeURIComponent(fileId)}/content`, {
       headers: { Accept: '*/*', ...(have > 0 ? { Range: `bytes=${have}-` } : {}) },
       idempotent: true,
       allowStatus: have > 0 ? [416] : [],
@@ -338,7 +338,7 @@ export class Files {
       return this.download(fileId, dest, { ...options, resume: false });
     }
     if (res.status === 206) resumed = true;
-    if (!res.body) throw new HaloError('Empty download body.', { status: res.status, code: 'empty_body' });
+    if (!res.body) throw new AnyfmtError('Empty download body.', { status: res.status, code: 'empty_body' });
     await pipeline(Readable.fromWeb(res.body as never), createWriteStream(part, { flags: resumed ? 'a' : 'w' }));
     await rename(part, dest);
     return { path: dest, bytes: (await stat(dest)).size, resumed };
@@ -348,7 +348,7 @@ export class Files {
   async read(fileId: string, range?: { start: number; end?: number }, options: { signal?: AbortSignal } = {}): Promise<Uint8Array> {
     const headers: Record<string, string> = { Accept: '*/*' };
     if (range) headers.Range = `bytes=${range.start}-${range.end ?? ''}`;
-    const res = await this.#halo.request('GET', `/v1/files/${encodeURIComponent(fileId)}/content`, { headers, idempotent: true, signal: options.signal });
+    const res = await this.#anyfmt.request('GET', `/v1/files/${encodeURIComponent(fileId)}/content`, { headers, idempotent: true, signal: options.signal });
     return new Uint8Array(await res.arrayBuffer());
   }
 }
@@ -365,8 +365,8 @@ export interface WaitOptions {
 }
 
 export class Conversions {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
 
   /**
    * Starts a conversion. An `Idempotency-Key` is always sent (a random UUID
@@ -375,7 +375,7 @@ export class Conversions {
    * restarts safe too.
    */
   create(params: ConversionCreate, options: { idempotencyKey?: string; signal?: AbortSignal } = {}): Promise<Conversion> {
-    return this.#halo.json<Conversion>('POST', '/v1/conversions', {
+    return this.#anyfmt.json<Conversion>('POST', '/v1/conversions', {
       json: params,
       headers: { 'Idempotency-Key': options.idempotencyKey ?? randomUUID() },
       idempotent: true,
@@ -384,12 +384,12 @@ export class Conversions {
   }
 
   get(id: string, options: { signal?: AbortSignal } = {}): Promise<Conversion> {
-    return this.#halo.json<Conversion>('GET', `/v1/conversions/${encodeURIComponent(id)}`, { idempotent: true, signal: options.signal });
+    return this.#anyfmt.json<Conversion>('GET', `/v1/conversions/${encodeURIComponent(id)}`, { idempotent: true, signal: options.signal });
   }
 
   /** One page, newest first. Pass `nextCursor` back as `cursor` for the next. */
   list(params: ListConversionsParams = {}, options: { signal?: AbortSignal } = {}): Promise<ConversionPage> {
-    return this.#halo.json<ConversionPage>('GET', '/v1/conversions', {
+    return this.#anyfmt.json<ConversionPage>('GET', '/v1/conversions', {
       query: { limit: params.limit, cursor: params.cursor, status: params.status },
       idempotent: true,
       signal: options.signal,
@@ -406,15 +406,15 @@ export class Conversions {
     } while (cursor);
   }
 
-  /** Cancels a queued/running conversion (idempotent). A finished one is a `HaloConflictError` (`already_finished`). */
+  /** Cancels a queued/running conversion (idempotent). A finished one is a `AnyfmtConflictError` (`already_finished`). */
   cancel(id: string, options: { signal?: AbortSignal } = {}): Promise<Conversion> {
-    return this.#halo.json<Conversion>('DELETE', `/v1/conversions/${encodeURIComponent(id)}`, { idempotent: true, signal: options.signal });
+    return this.#anyfmt.json<Conversion>('DELETE', `/v1/conversions/${encodeURIComponent(id)}`, { idempotent: true, signal: options.signal });
   }
 
   /**
    * Polls until the conversion is terminal. Resolves with it when it
-   * succeeded; throws `HaloConversionFailedError` when it failed or was
-   * cancelled and `HaloTimeoutError` after `timeoutMs`.
+   * succeeded; throws `AnyfmtConversionFailedError` when it failed or was
+   * cancelled and `AnyfmtTimeoutError` after `timeoutMs`.
    */
   async wait(idOrConversion: string | Conversion, options: WaitOptions = {}): Promise<Conversion> {
     const id = typeof idOrConversion === 'string' ? idOrConversion : idOrConversion.id;
@@ -423,13 +423,13 @@ export class Conversions {
     while (!TERMINAL.includes(c.status)) {
       const left = deadline - Date.now();
       if (left <= 0) {
-        throw new HaloTimeoutError(`Conversion ${id} is still ${c.status} after ${options.timeoutMs ?? 600_000} ms.`, { code: 'wait_timeout', details: { status: c.status, progress: c.progress } });
+        throw new AnyfmtTimeoutError(`Conversion ${id} is still ${c.status} after ${options.timeoutMs ?? 600_000} ms.`, { code: 'wait_timeout', details: { status: c.status, progress: c.progress } });
       }
       await sleep(Math.min(left, Math.max(options.minPollMs ?? 0, c.pollAfterMs ?? 1000)), options.signal);
       if (Date.now() >= deadline) continue;
       c = await this.get(id, options);
     }
-    if (c.status !== 'succeeded') throw new HaloConversionFailedError(c);
+    if (c.status !== 'succeeded') throw new AnyfmtConversionFailedError(c);
     return c;
   }
 }
@@ -437,50 +437,50 @@ export class Conversions {
 // ---------------------------------------------------------------- formats, schema, usage
 
 export class Formats {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
   /** Every input format with its targets and hop counts (or just `input`). */
   list(params: { input?: string } = {}): Promise<FormatList> {
-    return this.#halo.json<FormatList>('GET', '/v1/formats', { query: { input: params.input }, idempotent: true });
+    return this.#anyfmt.json<FormatList>('GET', '/v1/formats', { query: { input: params.input }, idempotent: true });
   }
 }
 
 export class SchemaApi {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
-  /** Formats, routes, option schemas, tools and presets (the `halo schema --json` shape). */
-  get(): Promise<HaloSchema> {
-    return this.#halo.json<HaloSchema>('GET', '/v1/schema', { idempotent: true });
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
+  /** Formats, routes, option schemas, tools and presets (the `anyfmt schema --json` shape). */
+  get(): Promise<AnyfmtSchema> {
+    return this.#anyfmt.json<AnyfmtSchema>('GET', '/v1/schema', { idempotent: true });
   }
 }
 
 export class UsageApi {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
   /** Usage for `period` (`YYYY-MM`, default: this month). */
   get(params: { period?: string } = {}): Promise<Usage> {
-    return this.#halo.json<Usage>('GET', '/v1/usage', { query: { period: params.period }, idempotent: true });
+    return this.#anyfmt.json<Usage>('GET', '/v1/usage', { query: { period: params.period }, idempotent: true });
   }
 }
 
 // ---------------------------------------------------------------- webhooks
 
 export class Webhooks {
-  readonly #halo: Halo;
-  constructor(halo: Halo) { this.#halo = halo; }
+  readonly #anyfmt: Anyfmt;
+  constructor(anyfmt: Anyfmt) { this.#anyfmt = anyfmt; }
 
   /** Registers an endpoint. Store the returned `secret`: it is shown once. Not retried after 5xx (it isn't idempotent). */
   create(params: WebhookCreate): Promise<WebhookEndpointCreated> {
-    return this.#halo.json<WebhookEndpointCreated>('POST', '/v1/webhooks', { json: params, idempotent: false });
+    return this.#anyfmt.json<WebhookEndpointCreated>('POST', '/v1/webhooks', { json: params, idempotent: false });
   }
 
   async list(): Promise<WebhookEndpoint[]> {
-    const r = await this.#halo.json<{ items: WebhookEndpoint[] }>('GET', '/v1/webhooks', { idempotent: true });
+    const r = await this.#anyfmt.json<{ items: WebhookEndpoint[] }>('GET', '/v1/webhooks', { idempotent: true });
     return r.items;
   }
 
   async delete(id: string): Promise<void> {
-    await this.#halo.json<void>('DELETE', `/v1/webhooks/${encodeURIComponent(id)}`, { idempotent: true });
+    await this.#anyfmt.json<void>('DELETE', `/v1/webhooks/${encodeURIComponent(id)}`, { idempotent: true });
   }
 
   /** Same as the standalone `verifyWebhook`. */

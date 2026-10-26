@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// One calm screen shown when someone taps a Pro segment they can't use yet.
 /// Says what it does, that it uploads, and that everything local stays free.
@@ -60,10 +60,10 @@ struct ProExplainerView: View {
             HStack(spacing: Space.s) {
                 Spacer()
                 Button(String(localized: "Not Now"), action: onNotNow)
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(reason == .signedOut ? String(localized: "Sign In…") : String(localized: "See Plans…"), action: onPrimary)
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .keyboardShortcut(.defaultAction)
                     .accessibilityHint(reason == .signedOut
                         ? Text("Opens \(serverName) in your browser")
@@ -114,6 +114,6 @@ extension View {
         let shape = RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
         return padding(DesignTokens.Component.Tile.padding)
             .background(shape.fill(CloudStyle.tile))
-            .haloBorder(shape, highContrast ? CloudStyle.hairline : .clear)
+            .anyfmtBorder(shape, highContrast ? CloudStyle.hairline : .clear)
     }
 }

@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Pure logic: option parsing, cut planning, encoder choice. No engines needed.
 final class MediaPlanningTests: XCTestCase {

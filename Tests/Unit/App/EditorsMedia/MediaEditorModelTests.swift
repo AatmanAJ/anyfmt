@@ -1,7 +1,7 @@
 import AppKit
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 /// Editor models turn user edits into the options the runners expect.
 @MainActor

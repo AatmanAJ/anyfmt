@@ -1,8 +1,8 @@
 import XCTest
 import SwiftUI
 import AppKit
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Renders the cloud screens offscreen in light, dark and increased contrast.
 /// Always checks they render; writes PNGs to docs/screens/cloud-*.png when
@@ -14,10 +14,10 @@ final class CloudScreenshotTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        if ProcessInfo.processInfo.environment["HALO_WRITE_SCREENS"] == "1" {
+        if ProcessInfo.processInfo.environment["ANYFMT_WRITE_SCREENS"] == "1" {
             outputDir = MockCloudServerPaths.repoRoot.appendingPathComponent("docs/screens", isDirectory: true)
         } else {
-            outputDir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-cloud-screens-\(UUID().uuidString)")
+            outputDir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-cloud-screens-\(UUID().uuidString)")
         }
         try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
     }

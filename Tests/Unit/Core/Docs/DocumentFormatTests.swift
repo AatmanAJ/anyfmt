@@ -1,6 +1,6 @@
 import AppKit
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Writers produce valid files that our readers *and* AppKit's importers read back
 /// with structure intact; readers handle the generated fixtures.
@@ -77,8 +77,8 @@ final class DocumentFormatTests: XCTestCase {
 
     func testDOCXFixtureAndTextutilHeuristics() throws {
         let doc = try DOCXReader.read(try DocsFixtures.url("sample.docx"))
-        XCTAssertEqual(doc.metadata.title, "Halo Sample Document")
-        XCTAssertEqual(doc.headings().map(\.1), ["Halo Sample Document", "Lists", "Table", "After the break"])
+        XCTAssertEqual(doc.metadata.title, "anyfmt Sample Document")
+        XCTAssertEqual(doc.headings().map(\.1), ["anyfmt Sample Document", "Lists", "Table", "After the break"])
         XCTAssertEqual(doc.lists().count, 2)
         XCTAssertTrue(doc.lists()[1].ordered)
         XCTAssertEqual(doc.firstTable()?.rows.count, 3)
@@ -87,7 +87,7 @@ final class DocumentFormatTests: XCTestCase {
         XCTAssertTrue(doc.text.contains("struck"))
         // textutil writes headings as big bold runs and bullets as "\t•\t" text: both recovered.
         let tu = try DOCXReader.read(try DocsFixtures.url("edge-textutil.docx"))
-        XCTAssertTrue(tu.headings().contains { $0.1 == "Halo HTML Sample" }, "\(tu.headings())")
+        XCTAssertTrue(tu.headings().contains { $0.1 == "anyfmt HTML Sample" }, "\(tu.headings())")
         XCTAssertFalse(tu.lists().isEmpty, "marker-text bullets become a list")
         XCTAssertFalse(tu.text.contains("•\t"))
     }
@@ -125,8 +125,8 @@ final class DocumentFormatTests: XCTestCase {
 
     func testHTMLReaderMapsSemantics() throws {
         let doc = try DocumentIO.read(try DocsFixtures.url("sample.html"), format: Formats.html)
-        XCTAssertEqual(doc.metadata.title, "Halo HTML Sample")
-        XCTAssertEqual(doc.metadata.author, "Halo Fixtures")
+        XCTAssertEqual(doc.metadata.title, "anyfmt HTML Sample")
+        XCTAssertEqual(doc.metadata.author, "anyfmt Fixtures")
         XCTAssertEqual(doc.metadata.language, "en")
         XCTAssertEqual(doc.headings().map(\.0), [1, 2, 2])
         XCTAssertEqual(doc.lists().count, 2)
@@ -174,7 +174,7 @@ final class DocumentFormatTests: XCTestCase {
         XCTAssertEqual(rtfd.allImages.count, 1)
         XCTAssertFalse(rtfd.lists().isEmpty)
         let web = try WebArchiveReader.read(try DocsFixtures.url("sample.webarchive"))
-        XCTAssertEqual(web.headings().first?.1, "Halo HTML Sample")
+        XCTAssertEqual(web.headings().first?.1, "anyfmt HTML Sample")
         XCTAssertNotNil(web.firstTable())
         let clip = try TextClippingReader.read(try DocsFixtures.url("sample.textclipping"))
         XCTAssertTrue(clip.text.contains("Clipped text with"))
@@ -220,8 +220,8 @@ final class DocumentFormatTests: XCTestCase {
 
     func testEPUBFixtureReadsInSpineOrder() throws {
         let doc = try EPUBReader.read(try DocsFixtures.url("sample.epub"))
-        XCTAssertEqual(doc.metadata.title, "Halo Sample Book")
-        XCTAssertEqual(doc.metadata.author, "Halo Fixtures")
+        XCTAssertEqual(doc.metadata.title, "anyfmt Sample Book")
+        XCTAssertEqual(doc.metadata.author, "anyfmt Fixtures")
         XCTAssertEqual(doc.headings().map(\.1), ["Chapter One", "Chapter Two"], "nav (linear=no) is skipped")
         XCTAssertEqual(doc.allImages.count, 1)
         XCTAssertNotNil(doc.firstTable())

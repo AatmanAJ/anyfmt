@@ -1,4 +1,4 @@
-$ halo formats --from heic --json
+$ anyfmt formats --from heic --json
 exit: 0
 --- stdout
 {

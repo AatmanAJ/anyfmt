@@ -5,10 +5,10 @@ no runner or editor consults `Entitlements` (`scripts/check-entitlements.sh` pas
 
 ## What's built
 
-### Runners (HaloCore, `Sources/Tools/Core/Image/`)
+### Runners (AnyfmtCore, `Sources/Tools/Core/Image/`)
 
 `ImageToolRunners.all` registers 13 runners; all write only into
-`request.outputDirectory` (a hidden `.halo-scratch-*` folder for ffmpeg round
+`request.outputDirectory` (a hidden `.anyfmt-scratch-*` folder for ffmpeg round
 trips is removed before returning) and never overwrite.
 
 | # | Tool | Runner | Output |
@@ -156,7 +156,7 @@ Debug; without it the test still renders every view).
   verbatim (lines starting `[` or `\` escaped with `\`), blank separator;
   `CodeReader.parse` round-trips it exactly. Small images are retried at 2×.
   Links: only http(s), mailto, tel, sms, facetime, never opened automatically.
-- **G1-12 Names are prefixed** (`ImageCropModel`, `ImageEditorKit.*` in the app; `Tool…` for HaloCore helpers such as `ToolImageSupport`, `ToolImageEncoder`; no extensions on system types) so
+- **G1-12 Names are prefixed** (`ImageCropModel`, `ImageEditorKit.*` in the app; `Tool…` for AnyfmtCore helpers such as `ToolImageSupport`, `ToolImageEncoder`; no extensions on system types) so
   lanes D and G2 sharing the same modules can’t collide at merge.
 
 ## Shipped vs not (for PARITY.md)
@@ -200,9 +200,9 @@ job UI shows Read QR results; (3) optional size on `EditorWindow.present`;
   model produces the right options; adjust preview re-render worst case < 50 ms
   (measured 24 ms worst in a Debug build, 1400 px preview); typing "b" in a field isn’t eaten by the shell.
 
-Run: `xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo test -only-testing:CoreTests/CompressImageTests -only-testing:CoreTests/TransformToolTests -only-testing:CoreTests/DrawingToolTests -only-testing:CoreTests/MetadataToolTests -only-testing:CoreTests/ContainerMetadataTests -only-testing:AppTests/ImageEditorsTests -only-testing:AppTests/ImageEditorScreenshotTests`
+Run: `xcodebuild -project anyfmt.xcodeproj -derivedDataPath build/DerivedData -scheme anyfmt test -only-testing:CoreTests/CompressImageTests -only-testing:CoreTests/TransformToolTests -only-testing:CoreTests/DrawingToolTests -only-testing:CoreTests/MetadataToolTests -only-testing:CoreTests/ContainerMetadataTests -only-testing:AppTests/ImageEditorsTests -only-testing:AppTests/ImageEditorScreenshotTests`
 (the scheme's test target names are `CoreTests` / `AppTests`, not the product
-names in LANE_RULES). Tests find ffmpeg via `HALO_ENGINES_DIR` or by walking up
+names in LANE_RULES). Tests find ffmpeg via `ANYFMT_ENGINES_DIR` or by walking up
 from the test file to a checkout's `Engines/dist` (works from worktrees).
 
 ## Performance (Release, M5 Max, 12 MP unless noted)

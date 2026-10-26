@@ -1,4 +1,4 @@
-$ halo route heic jpg --json
+$ anyfmt route heic jpg --json
 exit: 0
 --- stdout
 {

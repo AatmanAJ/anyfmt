@@ -1,4 +1,4 @@
-$ halo options gif --json
+$ anyfmt options gif --json
 exit: 0
 --- stdout
 {

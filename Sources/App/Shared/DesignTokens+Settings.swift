@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for Settings and the small shared controls (KeyCap,
 // StatusBadge, FormatChip, the hotkey recorder). Colours are semantic pairs

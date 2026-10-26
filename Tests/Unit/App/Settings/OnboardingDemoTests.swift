@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 final class DemoHitTestTests: XCTestCase {
     func testAngularSegments() {
@@ -210,7 +210,7 @@ final class OnboardingModelTests: XCTestCase {
         XCTAssertEqual(model.page, .activate, "the optional Pro step comes last")
         XCTAssertTrue(model.page.isLast)
         XCTAssertFalse(settings.onboardingCompleted)
-        model.goNext() // "Start Using Halo": skipping activation is the default"
+        model.goNext() // "Start Using anyfmt": skipping activation is the default"
         XCTAssertTrue(settings.onboardingCompleted)
         XCTAssertTrue(closed)
         model.finish()
@@ -251,7 +251,7 @@ final class OnboardingModelTests: XCTestCase {
         let (settings, cleanup) = try makeSettings()
         defer { cleanup() }
         settings.onboardingCompleted = true
-        XCTAssertFalse(AppShellUI.handleLaunchArguments(["Halo", "--reset-onboarding"], settings: settings))
+        XCTAssertFalse(AppShellUI.handleLaunchArguments(["anyfmt", "--reset-onboarding"], settings: settings))
         XCTAssertFalse(settings.onboardingCompleted)
     }
 }

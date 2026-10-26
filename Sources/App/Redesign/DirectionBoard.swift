@@ -1,18 +1,18 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// The phase 2 art-direction board (PLAN-PHASE2 §2): the wheel, options panel,
 /// progress cards and the first onboarding page drawn with the new tokens, plus
 /// the palette. It exists to approve the direction before the app is migrated,
 /// so the pieces are faithful mock-ups, not the live components.
-/// `Halo --render-direction <dir>` writes the PNGs.
+/// `anyfmt --render-direction <dir>` writes the PNGs.
 @MainActor
 enum DirectionBoard {
     typealias T = DesignTokens
 
     static func render(into dir: URL) throws -> [URL] {
-        HaloFonts.registerBundled()
+        AnyfmtFonts.registerBundled()
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let pieces: [(String, NSAppearance.Name, AnyView)] = [
             ("1-wheel-locked-presets-dark", .darkAqua, AnyView(WheelMock(state: .locked))),
@@ -106,14 +106,14 @@ private struct WheelMock: View {
                     let r = (inner + reach) / 2 + (hot ? 4 : 0)
                     let p = CGPoint(x: c.x + cos(mid) * r, y: c.y + sin(mid) * r)
                     let size: CGFloat = hot ? 30 : 22
-                    ctx.draw(Text(label).font(.haloDisplay(size)).tracking(size * T.Typeface.displayTracking)
+                    ctx.draw(Text(label).font(.anyfmtDisplay(size)).tracking(size * T.Typeface.displayTracking)
                         .foregroundColor(Color(hex: hot ? T.Primitive.ink1000 : T.Primitive.paper0)), at: p)
                 }
                 // Hub
                 ctx.fill(Path(ellipseIn: CGRect(x: c.x - 48, y: c.y - 48, width: 96, height: 96)), with: .color(Color(hex: T.Primitive.ink900)))
                 ctx.draw(Text("clip.mp4").font(.system(size: 11, weight: .semibold)).foregroundColor(Color(hex: T.Primitive.ink400)),
                          at: CGPoint(x: c.x, y: c.y - 10))
-                ctx.draw(Text("34 MB").font(.haloDisplay(18)).foregroundColor(Color(hex: T.Primitive.paper0)),
+                ctx.draw(Text("34 MB").font(.anyfmtDisplay(18)).foregroundColor(Color(hex: T.Primitive.paper0)),
                          at: CGPoint(x: c.x, y: c.y + 10))
             }
             VStack {
@@ -137,7 +137,7 @@ private struct WheelMock: View {
     private func pill(_ text: String, lock: Bool) -> some View {
         HStack(spacing: 6) {
             Image(systemName: lock ? "lock.fill" : "slider.horizontal.3").font(.system(size: 11, weight: .bold))
-            Text(text).font(.haloDisplay(13, black: false)).tracking(0.4)
+            Text(text).font(.anyfmtDisplay(13, black: false)).tracking(0.4)
         }
         .foregroundStyle(Color(hex: T.Semantic.onAccentPrimary))
         .padding(.horizontal, 14).padding(.vertical, 7)
@@ -145,7 +145,7 @@ private struct WheelMock: View {
     }
 
     private func chip(_ text: String, hot: Bool) -> some View {
-        Text(text).font(.haloDisplay(11, black: false)).tracking(0.3)
+        Text(text).font(.anyfmtDisplay(11, black: false)).tracking(0.3)
             .foregroundStyle(Color(hex: hot ? T.Primitive.paper0 : T.Primitive.paper0))
             .padding(.horizontal, 12).padding(.vertical, 7)
             .background(Capsule().fill(Color(hex: hot ? T.Primitive.cobalt500 : T.Primitive.ink800)))
@@ -169,7 +169,7 @@ private struct OptionsPanelMock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             HStack(alignment: .firstTextBaseline) {
-                Text("GIF").font(.haloDisplay(T.Typeface.Size.displayXL)).displayTracking(T.Typeface.Size.displayXL)
+                Text("GIF").font(.anyfmtDisplay(T.Typeface.Size.displayXL)).displayTracking(T.Typeface.Size.displayXL)
                     .foregroundStyle(Color.token(T.Semantic.textPrimary))
                 Spacer()
                 Text("clip.mp4 → GIF").font(.system(size: T.Typeface.Size.body, weight: .medium))
@@ -203,7 +203,7 @@ private struct OptionsPanelMock: View {
 
     private func stat(_ value: String, _ caption: String, hero: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(value).font(.haloDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
+            Text(value).font(.anyfmtDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
                 .foregroundStyle(hero ? Color(hex: T.Primitive.ink1000) : Color.token(T.Semantic.textPrimary))
             Text(caption).font(.system(size: T.Typeface.Size.label, weight: .semibold))
                 .foregroundStyle(hero ? Color(hex: T.Primitive.ink1000) : Color.token(T.Semantic.textSecondary))
@@ -259,7 +259,7 @@ private struct ProgressMock: View {
 
     private func card(big: String, title: String, detail: String, progress: Double, done: Bool) -> some View {
         HStack(alignment: .center, spacing: 16) {
-            Text(big).font(.haloDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
+            Text(big).font(.anyfmtDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
                 .foregroundStyle(Color(hex: T.Primitive.paper0))
                 .frame(width: 128, alignment: .leading)
             VStack(alignment: .leading, spacing: 6) {
@@ -295,7 +295,7 @@ private struct OnboardingMock: View {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: -14) {
                     ForEach(["DRAG.", "PRESS.", "DROP."], id: \.self) { word in
-                        Text(word).font(.haloDisplay(T.Typeface.Size.displayXL)).displayTracking(T.Typeface.Size.displayXL)
+                        Text(word).font(.anyfmtDisplay(T.Typeface.Size.displayXL)).displayTracking(T.Typeface.Size.displayXL)
                             .foregroundStyle(Color(hex: T.Primitive.paper0))
                             .fixedSize()
                     }
@@ -357,7 +357,7 @@ private struct PaletteSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("PALETTE").font(.haloDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
+            Text("PALETTE").font(.anyfmtDisplay(T.Typeface.Size.displayL)).displayTracking(T.Typeface.Size.displayL)
                 .foregroundStyle(Color(hex: T.Primitive.paper0))
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(150), spacing: 10), count: 6), alignment: .leading, spacing: 10) {
                 ForEach(swatches, id: \.0) { name, hex, use in
@@ -380,7 +380,7 @@ private struct PaletteSheet: View {
                     Text("band.cobalt").font(.system(size: 12, weight: .bold)).foregroundStyle(Color(hex: T.Primitive.paper0))
                 }
             }
-            Text("Aa INTER DISPLAY BLACK · body: SF Pro").font(.haloDisplay(T.Typeface.Size.displayM))
+            Text("Aa INTER DISPLAY BLACK · body: SF Pro").font(.anyfmtDisplay(T.Typeface.Size.displayM))
                 .foregroundStyle(Color(hex: T.Primitive.paper0))
         }
         .padding(28)

@@ -1,7 +1,7 @@
 import AVFoundation
 import Foundation
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Carries a non-Sendable value into a `@Sendable` callback (tests only).
 final class UncheckedBox<T>: @unchecked Sendable {
@@ -20,11 +20,11 @@ enum LaneE {
         return u
     }()
 
-    /// `Engines/dist/Helpers` from HALO_ENGINES_DIR, else the nearest checkout that has it
+    /// `Engines/dist/Helpers` from ANYFMT_ENGINES_DIR, else the nearest checkout that has it
     /// (worktrees share the main checkout's built engines).
     static let helpers: URL? = {
         let env = ProcessInfo.processInfo.environment
-        for key in ["HALO_ENGINES_DIR", "TEST_RUNNER_HALO_ENGINES_DIR"] {
+        for key in ["ANYFMT_ENGINES_DIR", "TEST_RUNNER_HALO_ENGINES_DIR"] {
             if let d = env[key], !d.isEmpty {
                 let h = URL(fileURLWithPath: d).appendingPathComponent("Helpers")
                 if FileManager.default.isExecutableFile(atPath: h.appendingPathComponent("ffmpeg").path) { return h }
@@ -43,14 +43,14 @@ enum LaneE {
     static var context: EngineContext { EngineContext(locator: locator) }
 
     static func requireEngines(file: StaticString = #filePath, line: UInt = #line) throws -> EngineLocator {
-        guard helpers != nil else { throw XCTSkip("bundled ffmpeg not found (set HALO_ENGINES_DIR)") }
+        guard helpers != nil else { throw XCTSkip("bundled ffmpeg not found (set ANYFMT_ENGINES_DIR)") }
         return locator
     }
 
     /// Generated once per test run; nil if generation failed (message in `fixtureError`).
     private static let generated: (URL?, String?) = {
         guard let helpers else { return (nil, "no engines") }
-        let out = FileManager.default.temporaryDirectory.appendingPathComponent("halo-laneE-fixtures-\(ProcessInfo.processInfo.processIdentifier)")
+        let out = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-laneE-fixtures-\(ProcessInfo.processInfo.processIdentifier)")
         try? FileManager.default.removeItem(at: out)
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/bash")
@@ -89,7 +89,7 @@ enum LaneE {
     }
 
     static func tempDirectory() throws -> URL {
-        let d = FileManager.default.temporaryDirectory.appendingPathComponent("halo-laneE-\(UUID().uuidString)", isDirectory: true)
+        let d = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-laneE-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
         return d
     }

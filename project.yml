@@ -1,5 +1,5 @@
 # XcodeGen spec. The .xcodeproj is generated (make generate) and gitignored.
-name: Halo
+name: anyfmt
 options:
   bundleIdPrefix: dev.aiwithaj
   deploymentTarget:
@@ -27,7 +27,7 @@ settings:
 targets:
   # Engine, registry, router, jobs core, tool implementations. No UI.
   # Linked by the app, the CLI and the matrix runner.
-  HaloCore:
+  AnyfmtCore:
     type: framework
     platform: macOS
     sources:
@@ -37,7 +37,7 @@ targets:
       - path: Sources/Tools/Core
     settings:
       base:
-        PRODUCT_NAME: HaloCore
+        PRODUCT_NAME: AnyfmtCore
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).core
         GENERATE_INFOPLIST_FILE: YES
         DEFINES_MODULE: YES
@@ -59,7 +59,7 @@ targets:
         type: folder
         buildPhase: resources
     dependencies:
-      - target: HaloCore
+      - target: AnyfmtCore
         embed: true
       - target: CLI
         embed: true
@@ -104,7 +104,7 @@ targets:
       base:
         PRODUCT_NAME: $(BRAND_NAME)
         # Fixed module name so a rename never touches `@testable import`.
-        PRODUCT_MODULE_NAME: HaloApp
+        PRODUCT_MODULE_NAME: AnyfmtApp
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID)
         CODE_SIGN_ENTITLEMENTS: Config/App.entitlements
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
@@ -116,19 +116,19 @@ targets:
         script: "\"$SRCROOT/scripts/embed-engines.sh\""
         basedOnDependencyAnalysis: false
 
-  # `halo` command-line tool, shipped inside the app at Contents/Helpers.
+  # `anyfmt` command-line tool, shipped inside the app at Contents/Helpers.
   CLI:
     type: tool
     platform: macOS
     sources:
       - path: Sources/CLI
     dependencies:
-      - target: HaloCore
+      - target: AnyfmtCore
         embed: false
     settings:
       base:
         PRODUCT_NAME: $(BRAND_SLUG)
-        PRODUCT_MODULE_NAME: HaloCLI
+        PRODUCT_MODULE_NAME: AnyfmtCLI
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).cli
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks @executable_path"
         SKIP_INSTALL: YES
@@ -140,11 +140,11 @@ targets:
     sources:
       - path: Tests/Matrix
     dependencies:
-      - target: HaloCore
+      - target: AnyfmtCore
         embed: false
     settings:
       base:
-        PRODUCT_NAME: halo-matrix
+        PRODUCT_NAME: anyfmt-matrix
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).matrix
         LD_RUNPATH_SEARCH_PATHS: "@executable_path"
         SKIP_INSTALL: YES
@@ -155,10 +155,10 @@ targets:
     sources:
       - path: Tests/Unit/Core
     dependencies:
-      - target: HaloCore
+      - target: AnyfmtCore
     settings:
       base:
-        PRODUCT_NAME: HaloCoreTests
+        PRODUCT_NAME: AnyfmtCoreTests
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).coretests
 
@@ -171,7 +171,7 @@ targets:
       - target: App
     settings:
       base:
-        PRODUCT_NAME: HaloAppTests
+        PRODUCT_NAME: AnyfmtAppTests
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).apptests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/$(BRAND_NAME).app/Contents/MacOS/$(BRAND_NAME)"
@@ -186,13 +186,13 @@ targets:
       - target: App
     settings:
       base:
-        PRODUCT_NAME: HaloUITests
+        PRODUCT_NAME: AnyfmtUITests
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: $(BRAND_BUNDLE_ID).uitests
         TEST_TARGET_NAME: App
 
 schemes:
-  Halo:
+  anyfmt:
     build:
       targets:
         App: all
@@ -207,13 +207,13 @@ schemes:
       config: Debug
       gatherCoverageData: false
       environmentVariables:
-        HALO_ENGINES_DIR: $(ENGINES_DIST)
+        ANYFMT_ENGINES_DIR: $(ENGINES_DIST)
       targets:
         - CoreTests
         - AppTests
     archive:
       config: Release
-  HaloUI:
+  AnyfmtUI:
     build:
       targets:
         App: all

@@ -1,12 +1,12 @@
-$ halo options nope --json
+$ anyfmt options nope --json
 exit: 2
 --- stdout
 {
   "error" : {
     "code" : "usage",
     "exitCode" : 2,
-    "message" : "unknown format “nope”. Try `halo formats`."
+    "message" : "unknown format “nope”. Try `anyfmt formats`."
   }
 }
 --- stderr
-error: unknown format “nope”. Try `halo formats`.
+error: unknown format “nope”. Try `anyfmt formats`.

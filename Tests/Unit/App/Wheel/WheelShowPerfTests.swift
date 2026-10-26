@@ -1,7 +1,7 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Main-thread cost of opening the wheel with the shipping provider, stage by
 /// stage. The key → visible budget is 50 ms and the window server takes

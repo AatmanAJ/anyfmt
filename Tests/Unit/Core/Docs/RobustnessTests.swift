@@ -1,6 +1,6 @@
 import PDFKit
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Hostile and big inputs: readers must throw or degrade, never trap; big files stay fast.
 final class RobustnessTests: XCTestCase {

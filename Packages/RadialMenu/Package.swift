@@ -1,5 +1,5 @@
 // swift-tools-version: 6.0
-// RadialMenu is MIT-licensed and standalone: no dependency on the Halo app.
+// RadialMenu is MIT-licensed and standalone: no dependency on the anyfmt app.
 import PackageDescription
 
 let package = Package(

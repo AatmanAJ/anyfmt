@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-/// Runs the built `halo` binary and compares stdout, stderr and the exit code
+/// Runs the built `anyfmt` binary and compares stdout, stderr and the exit code
 /// with Tests/CLIGolden. Agents parse this output, so it must never change by
 /// accident. Re-record on purpose with `TEST_RUNNER_HALO_RECORD_GOLDEN=1`.
 final class CLIGoldenTests: XCTestCase {
@@ -9,8 +9,8 @@ final class CLIGoldenTests: XCTestCase {
     private var support: URL!
 
     override func setUpWithError() throws {
-        try XCTSkipUnless(HaloCLI.isBuilt, "halo not built next to the tests")
-        scratch = try HaloCLI.scratch("golden")
+        try XCTSkipUnless(AnyfmtCLI.isBuilt, "anyfmt not built next to the tests")
+        scratch = try AnyfmtCLI.scratch("golden")
         support = scratch.appendingPathComponent("support", isDirectory: true)
         try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
     }
@@ -23,26 +23,26 @@ final class CLIGoldenTests: XCTestCase {
 
     /// Runs one command with a private support dir (presets, recents).
     @discardableResult
-    private func run(_ args: [String], env: [String: String] = [:]) throws -> HaloCLI.Result {
-        try HaloCLI.run(args, env: ["HALO_SUPPORT_DIR": support.path].merging(env) { _, n in n })
+    private func run(_ args: [String], env: [String: String] = [:]) throws -> AnyfmtCLI.Result {
+        try AnyfmtCLI.run(args, env: ["ANYFMT_SUPPORT_DIR": support.path].merging(env) { _, n in n })
     }
 
-    private func render(_ args: [String], _ r: HaloCLI.Result, filterOut: (String) -> Bool = { $0.contains(#""event":"progress""#) }) -> String {
-        let shown = args.map { arg in HaloCLI.normalise(arg, paths: tokens) }.joined(separator: " ")
+    private func render(_ args: [String], _ r: AnyfmtCLI.Result, filterOut: (String) -> Bool = { $0.contains(#""event":"progress""#) }) -> String {
+        let shown = args.map { arg in AnyfmtCLI.normalise(arg, paths: tokens) }.joined(separator: " ")
         let stdout = r.out.split(separator: "\n", omittingEmptySubsequences: false).map(String.init).filter { !filterOut($0) }.joined(separator: "\n")
-        return "$ halo \(shown)\nexit: \(r.code)\n--- stdout\n\(HaloCLI.normalise(stdout, paths: tokens))--- stderr\n\(HaloCLI.normalise(r.err, paths: tokens))"
+        return "$ anyfmt \(shown)\nexit: \(r.code)\n--- stdout\n\(AnyfmtCLI.normalise(stdout, paths: tokens))--- stderr\n\(AnyfmtCLI.normalise(r.err, paths: tokens))"
     }
 
     private func check(_ name: String, _ args: [String], env: [String: String] = [:], expect code: Int32? = nil,
                        file: StaticString = #filePath, line: UInt = #line) throws {
         let r = try run(args, env: env)
-        if let code { XCTAssertEqual(r.code, code, "exit code of `halo \(args.joined(separator: " "))`: \(r.err)", file: file, line: line) }
-        try HaloCLI.check(name, render(args, r), file: file, line: line)
+        if let code { XCTAssertEqual(r.code, code, "exit code of `anyfmt \(args.joined(separator: " "))`: \(r.err)", file: file, line: line) }
+        try AnyfmtCLI.check(name, render(args, r), file: file, line: line)
     }
 
     private func png(_ name: String = "photo.png") throws -> URL {
         let u = scratch.appendingPathComponent(name)
-        try HaloCLI.makePNG(at: u)
+        try AnyfmtCLI.makePNG(at: u)
         return u
     }
 
@@ -87,8 +87,8 @@ final class CLIGoldenTests: XCTestCase {
 
     // MARK: convert
 
-    func testMissingTarget() throws { try check("convert-missing-to", ["convert", "/nonexistent/halo.png"], expect: 2) }
-    func testMissingInput() throws { try check("convert-missing-file", ["convert", "/nonexistent/halo.png", "--to", "jpg"], expect: 4) }
+    func testMissingTarget() throws { try check("convert-missing-to", ["convert", "/nonexistent/anyfmt.png"], expect: 2) }
+    func testMissingInput() throws { try check("convert-missing-file", ["convert", "/nonexistent/anyfmt.png", "--to", "jpg"], expect: 4) }
 
     func testDryRunJSON() throws {
         let f = try png()
@@ -124,7 +124,7 @@ final class CLIGoldenTests: XCTestCase {
         XCTAssertGreaterThan(progressCount, 0)
         XCTAssertEqual(last, 1)
         XCTAssertTrue(FileManager.default.fileExists(atPath: scratch.appendingPathComponent("out/photo.jpg").path))
-        try HaloCLI.check("convert-ndjson", render(args, r) { $0.contains(#""event":"progress""#) })
+        try AnyfmtCLI.check("convert-ndjson", render(args, r) { $0.contains(#""event":"progress""#) })
 
         // Same again: Finder-style rename, never overwrite.
         let again = try run(args)
@@ -134,7 +134,7 @@ final class CLIGoldenTests: XCTestCase {
 
     func testOverwriteNever() throws {
         let f = try png()
-        try HaloCLI.makePNG(at: scratch.appendingPathComponent("photo.jpg")) // name taken (content irrelevant)
+        try AnyfmtCLI.makePNG(at: scratch.appendingPathComponent("photo.jpg")) // name taken (content irrelevant)
         try check("convert-overwrite-never", ["convert", f.path, "--to", "jpg", "--overwrite", "never", "--json"], expect: 6)
     }
 
@@ -174,11 +174,11 @@ final class CLIGoldenTests: XCTestCase {
     }
 
     func testEngineFailed() throws {
-        let engines = try XCTUnwrap(try HaloCLI.failingEngines(in: scratch.appendingPathComponent("engines")), "needs HALO_ENGINES_DIR")
+        let engines = try XCTUnwrap(try AnyfmtCLI.failingEngines(in: scratch.appendingPathComponent("engines")), "needs ANYFMT_ENGINES_DIR")
         let wav = scratch.appendingPathComponent("tone.wav")
-        try HaloCLI.makeWAV(at: wav)
+        try AnyfmtCLI.makeWAV(at: wav)
         try check("convert-engine-failed", ["convert", wav.path, "--to", "mp3", "--json"],
-                  env: ["HALO_ENGINES_DIR": engines.path], expect: 5)
+                  env: ["ANYFMT_ENGINES_DIR": engines.path], expect: 5)
     }
 
     func testSkipAlreadyTarget() throws {
@@ -190,9 +190,9 @@ final class CLIGoldenTests: XCTestCase {
     func testCancelledBySIGINT() throws {
         let f = try png()
         let p = Process()
-        p.executableURL = HaloCLI.binary
+        p.executableURL = AnyfmtCLI.binary
         p.arguments = ["convert", f.path, "--to", "tiff", "--json"]
-        p.environment = HaloCLI.environment(["HALO_SUPPORT_DIR": support.path, "HALO_TEST_DELAY_MS": "20000"])
+        p.environment = AnyfmtCLI.environment(["ANYFMT_SUPPORT_DIR": support.path, "ANYFMT_TEST_DELAY_MS": "20000"])
         let out = Pipe()
         p.standardOutput = out
         p.standardError = FileHandle.nullDevice
@@ -210,8 +210,8 @@ final class CLIGoldenTests: XCTestCase {
         buffer += handle.readDataToEndOfFile()
         p.waitUntilExit()
         XCTAssertEqual(p.terminationStatus, 7)
-        let text = HaloCLI.normalise(String(decoding: buffer, as: UTF8.self), paths: tokens)
-        try HaloCLI.check("convert-sigint", "$ halo convert <tmp>/photo.png --to tiff --json   (SIGINT after start)\nexit: \(p.terminationStatus)\n--- stdout\n\(text)")
+        let text = AnyfmtCLI.normalise(String(decoding: buffer, as: UTF8.self), paths: tokens)
+        try AnyfmtCLI.check("convert-sigint", "$ anyfmt convert <tmp>/photo.png --to tiff --json   (SIGINT after start)\nexit: \(p.terminationStatus)\n--- stdout\n\(text)")
         XCTAssertFalse(FileManager.default.fileExists(atPath: scratch.appendingPathComponent("photo.tiff").path))
     }
 
@@ -222,7 +222,7 @@ final class CLIGoldenTests: XCTestCase {
         let args = ["tool", "meta.strip", f.path, "--json"]
         let r = try run(args)
         XCTAssertEqual(r.code, 0, r.err)
-        try HaloCLI.check("tool-strip-ndjson", render(args, r) { $0.contains(#""event":"progress""#) })
+        try AnyfmtCLI.check("tool-strip-ndjson", render(args, r) { $0.contains(#""event":"progress""#) })
     }
 
     func testToolUnknown() throws { try check("tool-unknown", ["tool", "nope.nope", "/tmp/x.png"], expect: 2) }
@@ -251,7 +251,7 @@ final class CLIGoldenTests: XCTestCase {
         _ = try step(["presets", "rm", "builtin.jpg.web", "--json"], 0)
         _ = try step(["presets", "list", "--format", "jpg", "--all", "--json"], 0)
         _ = try step(["presets", "show", "missing"], 2)
-        try HaloCLI.check("presets-lifecycle", transcript)
+        try AnyfmtCLI.check("presets-lifecycle", transcript)
     }
 
     func testPresetsAllJSON() throws { try check("presets-json", ["presets", "--json"], expect: 0) }
@@ -278,10 +278,10 @@ final class CLIGoldenTests: XCTestCase {
         }
         let engines = try XCTUnwrap(obj["engines"] as? [[String: Any]])
         XCTAssertEqual(engines.compactMap { $0["name"] as? String }, ["ffmpeg", "ffprobe", "resvg"])
-        if ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"] != nil {
+        if ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"] != nil {
             for e in engines {
                 XCTAssertEqual(e["found"] as? Bool, true, "\(e)")
-                XCTAssertEqual(e["source"] as? String, "HALO_ENGINES_DIR")
+                XCTAssertEqual(e["source"] as? String, "ANYFMT_ENGINES_DIR")
                 XCTAssertNotNil(e["version"])
             }
         }

@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 
 /// Decides what each wheel offers for a set of dragged files, and turns that

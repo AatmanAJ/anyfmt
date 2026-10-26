@@ -1,7 +1,7 @@
 # Lane H: Actions + Float shelf
 
 The Control wheel's six local actions (BUILD.md §8): AirDrop, Float, Copy,
-Move, Copy Path, Terminal. All in the app target (`HaloApp`), under
+Move, Copy Path, Terminal. All in the app target (`AnyfmtApp`), under
 `Sources/Actions/**`. Tests in `Tests/Unit/App/Actions/`. Screens in
 `docs/screens/float-*.png` and `docs/screens/move-chooser*.png`.
 
@@ -214,7 +214,7 @@ xcodebuild … test -only-testing:AppTests/ClipboardActionTests -only-testing:Ap
   -only-testing:AppTests/ActionPerformerTests -only-testing:AppTests/ActionScreensTests
 ```
 
-(The test target is `AppTests`; its product is `HaloAppTests`.) Coverage: Copy
+(The test target is `AppTests`; its product is `AnyfmtAppTests`.) Coverage: Copy
 Path formatting (single, multi, spaces, Unicode, folders, shell quoting, the ⌥
 variant through the performer); Copy on a private named pasteboard; Move
 collision naming with pre-created collisions (files, folders, tar.gz,

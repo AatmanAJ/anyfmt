@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class ImageCollageModel: ToolEditorModel {
@@ -94,7 +94,7 @@ struct ImageCollageCanvas: View {
                     if let t = item.thumbnail {
                         Image(decorative: t, scale: 1).resizable().aspectRatio(contentMode: .fit)
                             .frame(maxHeight: 160)
-                            .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                            .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                     }
                 }
             }
@@ -122,7 +122,7 @@ struct ImageCollageCanvas: View {
         return ZStack(alignment: .topLeading) {
             Rectangle().fill(ImageEditorKit.color(hex: model.background))
                 .frame(width: shownCanvas.width, height: shownCanvas.height)
-                .overlay(Rectangle().strokeBorder(Color.haloHairline, lineWidth: DesignTokens.Shape.hairline))
+                .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                 .offset(x: shownCanvas.minX, y: shownCanvas.minY)
             ForEach(Array(shownOrder.enumerated()), id: \.element) { position, id in
                 let f = shown.frames[position]
@@ -148,7 +148,7 @@ struct ImageCollageCanvas: View {
                 let f = committed.frames[pos]
                 let w = f.width * scale, h = f.height * scale
                 let lifted = CGRect(x: d.location.x - w / 2, y: d.location.y - h / 2, width: w, height: h)
-                // The lifted photo is outlined in cobalt (halo + rim) rather than floated on a shadow.
+                // The lifted photo is outlined in cobalt (anyfmt + rim) rather than floated on a shadow.
                 tile(model.items[id], frame: lifted, placeholder: false)
                     .scaleEffect(reduceMotion ? 1 : 1.04)
                     .allowsHitTesting(false)

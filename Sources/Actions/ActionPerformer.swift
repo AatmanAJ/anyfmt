@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Runs the Control wheel's actions (BUILD.md §8). The wheel calls
 /// `perform(_:urls:promises:at:)` after a drop on an action segment.

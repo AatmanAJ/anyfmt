@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Pure crop-rectangle math in normalised coordinates (0…1, origin top-left).
 enum VideoCropGeometry {
@@ -269,7 +269,7 @@ struct CropVideoEditor: View {
         SidebarSection(String(localized: "Size")) {
             HStack(spacing: DesignTokens.Space.s) {
                 PixelField(label: String(localized: "Width"), value: model.pixels.width) { model.setPixelSize(width: $0) }
-                Text("×").foregroundStyle(Color.haloSecondaryText)
+                Text("×").foregroundStyle(Color.anyfmtSecondaryText)
                 PixelField(label: String(localized: "Height"), value: model.pixels.height) { model.setPixelSize(height: $0) }
                 Text("px").font(MediaStyle.caption()).foregroundStyle(.secondary)
             }

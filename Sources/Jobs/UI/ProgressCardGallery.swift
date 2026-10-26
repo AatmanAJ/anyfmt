@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Renders progress cards (and toasts) in every state offscreen into PNGs

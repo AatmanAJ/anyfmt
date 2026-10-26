@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class AVProbeTests: XCTestCase {
     func testDecodesRotationCoverDepthAndBitrate() throws {

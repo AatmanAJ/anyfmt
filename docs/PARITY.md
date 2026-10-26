@@ -9,7 +9,7 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 
 ## Interaction
 
-| Reference behaviour | Halo | Notes |
+| Reference behaviour | anyfmt | Notes |
 |---|---|---|
 | Menu bar only, no Dock icon, no main window | ✅ | `LSUIElement`, template glyph, recents, Float toggle, Settings, About |
 | Drag in Finder, tap Shift → radial wheel of output formats | ✅ 👁 | Zero permissions (D-001). Est. ≈ 30 ms p95 key tap → visible |
@@ -30,13 +30,13 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 | ➕ Sticky aim + lock | ✅ | Selection holds against drift (30 %/10° + 60 ms); ⌥ tap locks the segment mid-drag, no permission needed |
 | ➕ Presets | ✅ | Built-in + saved presets per format as chips on the wheel, "Last used", editable in Settings › Formats, shared with the CLI, synced (Pro) |
 | ➕ More than 8 targets | ✅ | Second ring 9–20, paging above |
-| ➕ Command-line tool | ✅ | Agent-ready `halo` CLI: `--json` everywhere, NDJSON progress, dry runs, stable exit codes, `halo schema` (docs/CLI.md) |
-| ➕ MCP server | ✅ | `halo mcp` over stdio, no network, no port: convert, targets, options, estimate, presets, tools (agents/SKILL.md) |
+| ➕ Command-line tool | ✅ | Agent-ready `anyfmt` CLI: `--json` everywhere, NDJSON progress, dry runs, stable exit codes, `anyfmt schema` (docs/CLI.md) |
+| ➕ MCP server | ✅ | `anyfmt mcp` over stdio, no network, no port: convert, targets, options, estimate, presets, tools (agents/SKILL.md) |
 | ➕ Public API (Pro) | 🟡 | Contract, mock and TypeScript SDK done (docs/API.md); the server isn't built (B-006) |
 
 ## Scale
 
-| | Reference | Halo |
+| | Reference | anyfmt |
 |---|---|---|
 | Conversion options | ~275 | **793 shipped and passing `make matrix`**, 516 on the wheel by default |
 | Tools | 26 | **26** local + 3 Pro (cloud) |
@@ -44,7 +44,7 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 
 ## Formats
 
-| Category | Reference | Halo | Gaps |
+| Category | Reference | anyfmt | Gaps |
 |---|---|---|---|
 | Images | JPG PNG WebP HEIC TIFF AVIF BMP GIF SVG → JPG PNG WebP HEIC TIFF AVIF BMP GIF PDF | ✅ all, plus inputs HEIF JP2 PSD ICO ICNS TGA EXR and outputs ICO ICNS (+ HEIF JP2 PSD TGA EXR opt-in) | ❌ JPEG XL in/out (no encoder on a stock Mac; needs libjxl); ❌ camera RAW input (needs a real CC0 DNG fixture, B-009) |
 | Audio | MP3 M4A WAV FLAC OGG Opus AIFF WMA(in) → MP3 M4A WAV FLAC OGG Opus AIFF | ✅ all + CAF | WMA output not offered (input only, as the reference) |
@@ -59,7 +59,7 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 
 ## Tools (26)
 
-| # | Tool | Halo | Notes |
+| # | Tool | anyfmt | Notes |
 |---|---|---|---|
 | 1 | Compress (quality, target size, percentage) | ✅ | JPG/HEIC/AVIF/WebP/PNG (own palette quantiser); never larger than the original |
 | 2 | Resize | ✅ | presets, exact px, % |
@@ -91,7 +91,7 @@ BUILD.md §1). Built from the merged `main`, `docs/MATRIX.md` and the lane notes
 
 ## Actions (6)
 
-| Action | Halo | Notes |
+| Action | anyfmt | Notes |
 |---|---|---|
 | AirDrop | ✅ 👁 | multi-file, anchor window |
 | Float | ✅ 👁 | pile + grid, drag out (⌥ keeps), drop in, physics, VoiceOver; ❌ Quick Look and arrow keys on the shelf (follow-up) |

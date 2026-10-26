@@ -1,7 +1,7 @@
 {
-  "name": "@halo/sdk",
+  "name": "@anyfmt/sdk",
   "version": "0.1.0",
-  "description": "TypeScript client for the Halo pay-per-use conversion API.",
+  "description": "TypeScript client for the anyfmt pay-per-use conversion API.",
   "license": "AGPL-3.0-only",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Expiry, password and download limit for a new share link (custom domain
 /// only when the plan includes it). The quota line is informational, never
@@ -92,7 +92,7 @@ struct ShareLinkOptionsView: View {
             .formStyle(.grouped)
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
-            .toggleStyle(HaloSwitchStyle())
+            .toggleStyle(AnyfmtSwitchStyle())
 
             VStack(alignment: .leading, spacing: Space.xs) {
                 Label(String(localized: "Uploads to \(serverName). The link is copied when it’s ready."), systemImage: "icloud.and.arrow.up")
@@ -107,7 +107,7 @@ struct ShareLinkOptionsView: View {
             HStack(spacing: Space.s) {
                 Spacer()
                 Button(String(localized: "Cancel"), action: onCancel)
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(String(localized: "Create Link")) {
                     var o = options
@@ -115,7 +115,7 @@ struct ShareLinkOptionsView: View {
                     o.maxDownloads = limitDownloads ? downloads : nil
                     onCreate(o.clamped(to: entitlements))
                 }
-                .buttonStyle(.haloPrimary)
+                .buttonStyle(.anyfmtPrimary)
                 .keyboardShortcut(.defaultAction)
                 .disabled(passwordTooShort)
                 .accessibilityHint(passwordTooShort ? Text("Add a password of at least 4 characters first") : Text("Uploads and copies the link"))

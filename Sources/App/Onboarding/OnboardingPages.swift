@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 // Every page: a heavy uppercase headline at the top left, a plain subtitle, then
 // at most one charcoal tile of controls. The page's band column (if any) is drawn
@@ -39,12 +39,12 @@ private struct FactLine: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.m) {
             Text(verbatim: tag.localizedUppercase)
-                .font(.haloDisplay(T.tagSize))
+                .font(.anyfmtDisplay(T.tagSize))
                 .displayTracking(T.tagSize)
                 .frame(width: T.tagWidth, alignment: .leading)
             Text(verbatim: text)
                 .font(.system(size: DesignTokens.TypeRamp.body))
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
@@ -128,7 +128,7 @@ struct OnboardingUpdatesPage: View {
 }
 
 /// Screen 6: optional, last, guilt-free. The quiet page: one sentence, a key
-/// field with an Activate pill, and "Start Using Halo" as the default, which skips.
+/// field with an Activate pill, and "Start Using anyfmt" as the default, which skips.
 struct OnboardingActivatePage: View {
     @ObservedObject var model: OnboardingModel
     @ObservedObject var licence: LicenceActivationModel
@@ -145,14 +145,14 @@ struct OnboardingActivatePage: View {
             HStack(spacing: DesignTokens.Space.xs) {
                 Text("Or sign in to your account", comment: "Onboarding activation page")
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                 Button(String(localized: "Sign In…", comment: "Onboarding activation page")) { model.signIn() }
                     .buttonStyle(AccentTextButtonStyle())
                     .accessibilityIdentifier("onboarding.signIn")
-                Text(verbatim: "·").foregroundStyle(Color.haloSecondaryText).accessibilityHidden(true)
+                Text(verbatim: "·").foregroundStyle(Color.anyfmtSecondaryText).accessibilityHidden(true)
                 Text("You can do this later in Settings › Account.", comment: "Onboarding activation page")
                     .font(.system(size: DesignTokens.TypeRamp.body))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
             .padding(.top, DesignTokens.Space.l)
         }
@@ -172,28 +172,28 @@ private struct KeyEntry: View {
                     Text(verbatim: status.message)
                 } icon: {
                     Image(systemName: status.isValid ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                        .foregroundStyle(status.isValid ? Color.accentText : Color.haloDanger)
+                        .foregroundStyle(status.isValid ? Color.accentText : Color.anyfmtDanger)
                 }
                 .font(.system(size: DesignTokens.TypeRamp.body))
                 .accessibilityElement(children: .combine)
             }
             HStack(spacing: DesignTokens.Space.s) {
-                TextField(String(localized: "HALO1-…", comment: "Placeholder for the licence key field"), text: $licence.keyText)
+                TextField(String(localized: "ANYFMT1-…", comment: "Placeholder for the licence key field"), text: $licence.keyText)
                     .textFieldStyle(.plain)
                     .font(.system(size: DesignTokens.TypeRamp.body, design: .monospaced))
                     .focused($focused)
                     .padding(.horizontal, DesignTokens.Space.l)
                     .frame(height: DesignTokens.Component.Pill.largeHeight)
-                    .background(PillBorder(fill: Color.haloTile,
-                                           border: focused ? Color.token(DesignTokens.Semantic.focusRing) : Color.haloHairline,
+                    .background(PillBorder(fill: Color.anyfmtTile,
+                                           border: focused ? Color.token(DesignTokens.Semantic.focusRing) : Color.anyfmtHairline,
                                            width: focused ? DesignTokens.Component.Focus.ringWidth : DesignTokens.Shape.hairline))
                     .onSubmit { if licence.canActivate { licence.activate() } }
                     .accessibilityLabel(Text("Licence key", comment: "VoiceOver label of the licence key field"))
                 Button(String(localized: "Paste", comment: "Pastes a licence key from the clipboard")) { licence.pasteFromClipboard() }
-                    .buttonStyle(HaloPillButtonStyle(kind: .quiet, large: true))
+                    .buttonStyle(AnyfmtPillButtonStyle(kind: .quiet, large: true))
                 Button(String(localized: "Activate", comment: "Activates a pasted licence key")) { licence.activate() }
                     // Quiet until there's a key to activate, then the orange pill.
-                    .buttonStyle(HaloPillButtonStyle(kind: licence.canActivate ? .secondary : .quiet, large: true))
+                    .buttonStyle(AnyfmtPillButtonStyle(kind: licence.canActivate ? .secondary : .quiet, large: true))
                     .disabled(!licence.canActivate)
                     .accessibilityIdentifier("onboarding.activate")
             }
@@ -204,7 +204,7 @@ private struct KeyEntry: View {
                     Image(systemName: licence.isError ? "exclamationmark.circle" : "checkmark.circle")
                 }
                 .font(.system(size: DesignTokens.TypeRamp.label))
-                .foregroundStyle(licence.isError ? Color.haloDanger : Color.haloSecondaryText)
+                .foregroundStyle(licence.isError ? Color.anyfmtDanger : Color.anyfmtSecondaryText)
             }
             OnboardingFootnote(text: String(localized: "Keys are checked on this Mac, offline. A key only unlocks cloud features; every local conversion, tool and action is free without one.",
                                             comment: "Explains what a licence key does"))
@@ -225,13 +225,13 @@ struct OnboardingHeadline: View {
         VStack(alignment: .leading, spacing: size * DesignTokens.Component.Onboarding.headlineLeading) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                 Text(verbatim: line.localizedUppercase)
-                    .font(.haloDisplay(size))
+                    .font(.anyfmtDisplay(size))
                     .displayTracking(size)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
             }
         }
-        .foregroundStyle(Color.haloInk)
+        .foregroundStyle(Color.anyfmtInk)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: lines.joined(separator: " ")))
         .accessibilityAddTraits(.isHeader)
@@ -245,7 +245,7 @@ struct OnboardingSubtitle: View {
     var body: some View {
         Text(verbatim: text)
             .font(.system(size: DesignTokens.Component.Onboarding.subtitleSize))
-            .foregroundStyle(Color.haloSecondaryText)
+            .foregroundStyle(Color.anyfmtSecondaryText)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: DesignTokens.Component.Onboarding.subtitleWidth, alignment: .leading)
     }
@@ -262,13 +262,13 @@ struct OnboardingTile<Content: View>: View {
         }
         .padding(DesignTokens.Space.l)
         .frame(maxWidth: DesignTokens.Component.Onboarding.tileWidth, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
     }
 }
 
 struct OnboardingDivider: View {
     var body: some View {
-        Rectangle().fill(Color.haloHairline).frame(height: DesignTokens.Shape.hairline)
+        Rectangle().fill(Color.anyfmtHairline).frame(height: DesignTokens.Shape.hairline)
             .accessibilityHidden(true)
     }
 }
@@ -280,7 +280,7 @@ struct OnboardingFootnote: View {
     var body: some View {
         Text(verbatim: text)
             .font(.system(size: DesignTokens.TypeRamp.label))
-            .foregroundStyle(Color.haloSecondaryText)
+            .foregroundStyle(Color.anyfmtSecondaryText)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: DesignTokens.Component.Onboarding.tileWidth, alignment: .leading)
     }
@@ -298,16 +298,16 @@ struct OnboardingToggleRow: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .semibold))
-                    .foregroundStyle(Color.haloInk)
+                    .foregroundStyle(Color.anyfmtInk)
                 Text(verbatim: subtitle)
                     .font(.system(size: DesignTokens.TypeRamp.label))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
             Toggle(isOn: $isOn) { Text(verbatim: title) }
                 .labelsHidden()
-                .toggleStyle(HaloSwitchStyle())
+                .toggleStyle(AnyfmtSwitchStyle())
                 .accessibilityIdentifier(identifier)
                 .accessibilityHint(Text(verbatim: subtitle))
         }

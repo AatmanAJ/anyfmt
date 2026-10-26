@@ -40,7 +40,7 @@ Screens (offscreen, light/dark/increased-contrast): `docs/screens/cloud-*.png`.
 returning via `<scheme>://auth/callback`.** The app opens
 `{server}/v1/auth/authorize?…code_challenge…&state…` in the default browser;
 the server's page emails a magic link; opening it redirects to
-`halo://auth/callback?code&state`, which macOS hands to the app's URL scheme
+`anyfmt://auth/callback?code&state`, which macOS hands to the app's URL scheme
 (already declared). The app checks `state` (constant-time), redeems the code
 with its verifier, stores tokens in the Keychain. Why not the alternatives:
 - *Sign in with Apple* needs the `com.apple.developer.applesignin` entitlement
@@ -60,7 +60,7 @@ with its verifier, stores tokens in the Keychain. Why not the alternatives:
 - If the link is opened on another device, the page shows the code and the
   user types it in (`completeSignIn(code:)`); the verifier still never leaves the Mac.
 This mirrors Cap's desktop flow (browser sign-in, deep link back). Cost: a
-browser round trip and macOS's "Open Halo?" prompt the first time.
+browser round trip and macOS's "Open anyfmt?" prompt the first time.
 
 **D-I2 One network choke point.** `CloudAPIClient.send`/`download` are the
 only places a request can start (a test scans Sources/Cloud to keep it so).
@@ -92,7 +92,7 @@ strings or tokens (tested).
 server's `Upload-Offset` (HEAD) so a drop mid-chunk costs only the lost
 bytes; `409 offset_mismatch` carries the real offset; `complete` verifies
 the hash. 8 MiB clears S3 multipart's 5 MiB part minimum. A ledger in
-Application Support (`Halo/Cloud/uploads.json`, ids only) lets a later
+Application Support (`anyfmt/Cloud/uploads.json`, ids only) lets a later
 attempt or launch resume. A user cancel deletes the server upload (respecting
 intent); a network failure keeps it for resume.
 
@@ -221,7 +221,7 @@ test = 67, all passing in about 13 s:
 | `CloudScreenshotTests` | Renders every screen in light/dark/increased contrast; writes `docs/screens/cloud-*.png` with `TEST_RUNNER_HALO_WRITE_SCREENS=1` |
 
 Run: `xcodebuild … test -only-testing:AppTests` (note: the target is
-`AppTests`; `HaloAppTests` is only its product name).
+`AppTests`; `AnyfmtAppTests` is only its product name).
 `./scripts/check-entitlements.sh` → ✓.
 
 Increased contrast: AppKit resolves `NSAppearance(named: .accessibilityHighContrast*)`
@@ -235,7 +235,7 @@ controls render as normal there. With the real system setting,
 1. **The hosted server and its URL.** `CloudConfig.defaultServer` is
    `https://cloud.example.invalid` (reserved TLD, never resolves). Replace that
    one constant once the server from `Server/README.md` is deployed, and
-   register OAuth client `halo-mac` with redirect `halo://auth/callback`
+   register OAuth client `anyfmt-mac` with redirect `anyfmt://auth/callback`
    (both derive from `Brand`; re-register on rename).
 2. **Magic-link email** needs a sending provider (Postmark/SES/SMTP) on the server side.
 3. **Strings catalog.** Cloud strings use `String(localized:)` in the app
@@ -243,6 +243,6 @@ controls render as normal there. With the real system setting,
    they land in `Sources/App/Resources/Localizable.xcstrings`, which this lane
    doesn't own.
 4. **Dev-build Keychain prompts.** Ad-hoc signatures change on every
-   rebuild, so a rebuilt debug app may ask to use its existing "Halo Cloud"
+   rebuild, so a rebuilt debug app may ask to use its existing "anyfmt Cloud"
    Keychain item. Developer ID builds keep a stable identity, so release users
    won't see this.

@@ -89,7 +89,7 @@ reader (100) when installed.
   preview's `div.slide` size (fallback: `p:sldSz`); orientation is derived from
   the paper, because NSPrintInfo swaps width/height to match it.
 - **D-F08 iWork via `/usr/bin/osascript`**, not `NSAppleScript` on the main
-  thread: off-main, cancellable, the Automation prompt still names Halo.
+  thread: off-main, cancellable, the Automation prompt still names anyfmt.
   Default off (`optIn.iWorkAppleEvents`), requires the app installed. Never run
   in tests (script generation and availability are tested with a fake environment).
 - **D-F09 Archives:** `ditto -c -k --sequesterRsrc [--keepParent]` for ZIP
@@ -140,9 +140,9 @@ reader (100) when installed.
 
 ## Tests
 
-`CoreTests` (HaloCoreTests): 73 tests in the lane F classes, 89 with the two
+`CoreTests` (AnyfmtCoreTests): 73 tests in the lane F classes, 89 with the two
 existing suites, all green in 12.5 s (`xcodebuild … test -only-testing:CoreTests`).
-The Debug `halo-matrix` skeleton prints `routes: 208` in this worktree.
+The Debug `anyfmt-matrix` skeleton prints `routes: 208` in this worktree.
 
 | Class | What it covers |
 |---|---|
@@ -203,8 +203,8 @@ Details in `docs/contract-changes/F-docs.md`:
 
 ## Observation for the orchestrator (not lane F code)
 
-The **Release** `halo-matrix` (hardened runtime, ad-hoc signed) fails to load the
-ad-hoc signed `HaloCore.framework`: dyld reports "mapping process and mapped file
+The **Release** `anyfmt-matrix` (hardened runtime, ad-hoc signed) fails to load the
+ad-hoc signed `AnyfmtCore.framework`: dyld reports "mapping process and mapped file
 (non-platform) have different Team IDs" (library validation). The Debug build
 runs. `make matrix` builds Release, so Phase 4 needs either the same signing
 identity for both, `com.apple.security.cs.disable-library-validation` on the
@@ -222,5 +222,5 @@ matrix/CLI tools, or no hardened runtime for these test tools.
    ODT, XLSX, PPTX (PDF → PPTX), EPUB in Word, Pages, LibreOffice, PowerPoint,
    Excel, Keynote, Numbers and Apple Books; report any "repair" prompt.
 3. **iWork opt-in end to end.** With Pages/Keynote/Numbers installed:
-   `defaults write dev.aiwithaj.halo optIn.iWorkAppleEvents -bool YES`, then run a
+   `defaults write app.anyfmt optIn.iWorkAppleEvents -bool YES`, then run a
    Pages → PDF and DOCX → Pages conversion and accept the Automation prompt once.

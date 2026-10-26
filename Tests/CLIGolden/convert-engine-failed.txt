@@ -1,4 +1,4 @@
-$ halo convert <tmp>/tone.wav --to mp3 --json
+$ anyfmt convert <tmp>/tone.wav --to mp3 --json
 exit: 5
 --- stdout
 {"event":"start","jobs":1}

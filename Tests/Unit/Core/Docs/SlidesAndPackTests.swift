@@ -1,6 +1,6 @@
 import PDFKit
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class SlidesAndPackTests: XCTestCase {
     // MARK: Quick Look slides

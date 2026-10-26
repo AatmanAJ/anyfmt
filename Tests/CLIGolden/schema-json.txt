@@ -1,10 +1,10 @@
-$ halo schema --json
+$ anyfmt schema --json
 exit: 0
 --- stdout
 {
   "cli" : {
     "licence" : "AGPL-3.0-only",
-    "name" : "halo",
+    "name" : "anyfmt",
     "version" : "<version>"
   },
   "events" : [

@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 
-/// Halo's own visual language. Every UI surface (wheel, editors, settings,
+/// anyfmt's own visual language. Every UI surface (wheel, editors, settings,
 /// progress, onboarding) pulls sizes, type, colour and motion from here.
 public enum DesignTokens {
     // MARK: - Phase 2 system: primitives → semantic → component (PLAN-PHASE2 §2)

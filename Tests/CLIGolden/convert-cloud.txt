@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to mp4 --opt cloud=true
+$ anyfmt convert <tmp>/photo.png --to mp4 --opt cloud=true
 exit: 8
 --- stdout
 --- stderr

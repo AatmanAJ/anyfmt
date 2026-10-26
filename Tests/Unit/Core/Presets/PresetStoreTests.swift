@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class PresetStoreTests: XCTestCase {
     private var dir: URL!
@@ -227,7 +227,7 @@ final class PresetStoreTests: XCTestCase {
 
     /// The app and the CLI share presets.json: one process's edit must show up in the other.
     func testAnotherProcessesEditIsPickedUp() throws {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("halo-presets-shared-\(UUID().uuidString).json")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-presets-shared-\(UUID().uuidString).json")
         defer { try? FileManager.default.removeItem(at: url) }
         let app = PresetStore(fileURL: url)
         let cli = PresetStore(fileURL: url)

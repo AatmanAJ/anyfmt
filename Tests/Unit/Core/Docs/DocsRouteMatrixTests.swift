@@ -1,7 +1,7 @@
 import AppKit
 import PDFKit
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Lane-local matrix: every shipped lane F route (direct rows and the multi-hop
 /// routes the router derives from them) runs on its fixture and the output is
@@ -60,7 +60,7 @@ final class DocsRouteMatrixTests: XCTestCase {
         }
         let slow = timings.sorted { $0.1 > $1.1 }.prefix(5).map { "\($0.0) \(String(format: "%.2f", $0.1))s" }
         let summary = "lane F routes: \(count) (\(direct) direct), failures: \(failures.count); slowest: \(slow.joined(separator: ", "))"
-        let report = FileManager.default.temporaryDirectory.appendingPathComponent("halo-laneF-matrix.txt")
+        let report = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-laneF-matrix.txt")
         try? (summary + "\n" + failures.joined(separator: "\n") + "\n--- multi-hop\n" + multiHop.joined(separator: "\n"))
             .write(to: report, atomically: true, encoding: .utf8)
         XCTAssertEqual(failures, [], summary)

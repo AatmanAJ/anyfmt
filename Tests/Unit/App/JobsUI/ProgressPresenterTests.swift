@@ -1,7 +1,7 @@
 import AppKit
 import XCTest
-@testable import HaloApp
-@testable import HaloCore
+@testable import AnyfmtApp
+@testable import AnyfmtCore
 
 /// A queue-level fake job: sleeps cooperatively, can fail the first N attempts.
 private final class StubJob: Job, @unchecked Sendable {
@@ -51,7 +51,7 @@ final class ProgressPresenterTests: XCTestCase {
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         queue = JobQueue(limits: ConcurrencyLimits(cpu: 8), scratch: JobScratch(root: root.appendingPathComponent("scratch")))
         revealed = []
-        pasteboard = NSPasteboard(name: NSPasteboard.Name("halo-tests-\(UUID().uuidString)"))
+        pasteboard = NSPasteboard(name: NSPasteboard.Name("anyfmt-tests-\(UUID().uuidString)"))
     }
 
     override func tearDown() async throws {

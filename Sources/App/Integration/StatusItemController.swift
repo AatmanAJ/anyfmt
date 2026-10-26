@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// The menu bar item: our template glyph and a short, native menu (BUILD.md §9).
 /// Order: the wheel, the shelf and recent conversions first; Settings, the

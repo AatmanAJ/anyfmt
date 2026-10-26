@@ -1,20 +1,20 @@
-# Prior art: lessons for Halo
+# Prior art: lessons for anyfmt
 
 Research date: 2026-10-18.
 
-**Ground rules.** Everything here was read for lessons only. No code from these projects goes into Halo. This file paraphrases behaviour and design ideas; it doesn't reproduce source. The clones live in `research/prior-art-src/`, which is gitignored. Nothing in them was built or run.
+**Ground rules.** Everything here was read for lessons only. No code from these projects goes into anyfmt. This file paraphrases behaviour and design ideas; it doesn't reproduce source. The clones live in `research/prior-art-src/`, which is gitignored. Nothing in them was built or run.
 
 | Repo | Snapshot read | Licence | Our stance |
 |---|---|---|---|
 | `ishanmalu/daisy` | `6c42295` (2026-09-30, v0.10.0, 40 commits) | PolyForm Noncommercial 1.0.0 since `95ff48c` (2026-09-10). Before that it was MIT. | Read only. The early commits were MIT, but BUILD.md says zero code, so we treat the whole history as off limits. |
-| `opencoredev/convt` | `1920b04` (2026-10-15, v0.5.0+1) | AGPL-3.0-only | Read the design ideas only. Every line in Halo is written fresh. |
+| `opencoredev/convt` | `1920b04` (2026-10-15, v0.5.0+1) | AGPL-3.0-only | Read the design ideas only. Every line in anyfmt is written fresh. |
 | `CapSoftware/Cap` | `346561b` (shallow) | AGPL-3.0, with MIT for some crates | Checked for the CLA question only (see `CLA_RESEARCH.md`). |
 
 ---
 
 ## Daisy
 
-Daisy is a Swift/AppKit menu-bar app. You hold Shift, drag a file out of Finder, and a radial "petal" wheel appears; you drop the file on a format. It is the closest prior art to Halo, and it's about five weeks old. The repo has **no GitHub issues or PRs** (1 star), so every caveat below comes from the source, the commit messages and `CHANGELOG.md`.
+Daisy is a Swift/AppKit menu-bar app. You hold Shift, drag a file out of Finder, and a radial "petal" wheel appears; you drop the file on a format. It is the closest prior art to anyfmt, and it's about five weeks old. The repo has **no GitHub issues or PRs** (1 star), so every caveat below comes from the source, the commit messages and `CHANGELOG.md`.
 
 ### 1. How it detects a system-wide Finder drag
 
@@ -30,7 +30,7 @@ Daisy is a Swift/AppKit menu-bar app. You hold Shift, drag a file out of Finder,
   2. `5fee1d1`: the author's `--drag-probe` said mouse events arrive fine, but the drag pasteboard came back empty when read from a background process. So detection was changed to show an empty wheel and read the files only in `draggingEntered`, once the drag is over Daisy's window.
   3. `48e042b`: back to inspecting the drag pasteboard (types plus changeCount), with the fail-open fallback.
 
-  Several other open-source apps *do* read file URLs from the drag pasteboard from the background: converty, Kompakt, Clop and boring.notch (see "Other prior art"). The probe in step 2 only sampled every 15th drag event, and its first sample was the very first event, before the source had written anything. So the empty result may have been a timing artefact. **Halo's DragProbe must log the changeCount, types and URLs on every event, with timestamps, so we know rather than guess.**
+  Several other open-source apps *do* read file URLs from the drag pasteboard from the background: converty, Kompakt, Clop and boring.notch (see "Other prior art"). The probe in step 2 only sampled every 15th drag event, and its first sample was the very first event, before the source had written anything. So the empty result may have been a timing artefact. **anyfmt's DragProbe must log the changeCount, types and URLs on every event, with timestamps, so we know rather than guess.**
 - An earlier commit (`f8a5532`) worried that an ad-hoc-signed app might receive no global mouse events on recent macOS. The next probe (`5fee1d1`) contradicted that: events arrived fine. Treat it as unverified folklore, but test with ad-hoc, Apple Development and Developer ID signatures all the same.
 
 ### 2. How it detects modifier keys
@@ -38,7 +38,7 @@ Daisy is a Swift/AppKit menu-bar app. You hold Shift, drag a file out of Finder,
 - **Shift (the summon trigger):** it reads the class property `NSEvent.modifierFlags` *inside the drag-event handler*. That needs no permission. But it is "Shift **held** while the mouse moves", not a tap. If the user stops moving and presses Shift, nothing happens until the next drag event.
 - **Option (Tools mode):** handled by `flagsChanged` on the wheel view. That fires only when Daisy's panel is key, and a drag-summoned panel is deliberately *not* made key (see §3). From reading the code, toggling Option mid-drag probably does nothing until after the drop. This is inferred and wasn't tested.
 - **Hotkey:** ⌥⇧V through Carbon `RegisterEventHotKey`, which needs no permission. If another app holds the combination, the call fails and Daisy only logs it.
-- **No tap detection anywhere** (press and release within a threshold). Halo's tap-a-modifier interaction has no prior art in Daisy. The code comment saying that keyboard monitors need Accessibility matches Apple's documentation for global key-event monitors, and `flagsChanged` counts as a key event. So the permission-free path for Halo is to **poll `NSEvent.modifierFlags` on a timer during the drag**. FileFlipper does this at 30 Hz. A quick tap may need 60 Hz or faster. That's our inference, to be measured in the spike.
+- **No tap detection anywhere** (press and release within a threshold). anyfmt's tap-a-modifier interaction has no prior art in Daisy. The code comment saying that keyboard monitors need Accessibility matches Apple's documentation for global key-event monitors, and `flagsChanged` counts as a key event. So the permission-free path for anyfmt is to **poll `NSEvent.modifierFlags` on a timer during the drag**. FileFlipper does this at 30 Hz. A quick tap may need 60 Hz or faster. That's our inference, to be measured in the spike.
 
 ### 3. How the overlay accepts the drop while Finder owns the drag
 
@@ -49,7 +49,7 @@ Daisy is a Swift/AppKit menu-bar app. You hold Shift, drag a file out of Finder,
   - `performDragOperation` runs the petal under the cursor. If the drop lands on the disc but not on a petal, the panel stays open, becomes key and works by keyboard.
   - `draggingEnded` hides the panel if nothing was dropped.
 - **File promises** (Photos, Safari, Mail): the promised files are received into a temporary staging folder, with a **30 s guard** in case the source never delivers. The staging folder is cleared at launch. Output for a file that only exists in temp goes to `~/Downloads`.
-- Since commit `f8b5403` the wheel always opens **in the centre of the screen that holds the cursor**, not at the cursor, so there is always one place to look. The cost is that every drag has to travel to the middle of the screen. Halo's brief puts the wheel at the cursor, which is better for speed but needs a guard so the wheel doesn't open under the drop point by accident.
+- Since commit `f8b5403` the wheel always opens **in the centre of the screen that holds the cursor**, not at the cursor, so there is always one place to look. The cost is that every drag has to travel to the middle of the screen. anyfmt's brief puts the wheel at the cursor, which is better for speed but needs a guard so the wheel doesn't open under the drop point by accident.
 
 ### 4. TCC permissions
 
@@ -68,7 +68,7 @@ The permission-free approach is clearly *possible*. The price is that you can't 
 **Drag-summon timing**
 - After mouse-up, Daisy waits **0.1 s** before dismissing a drag-summoned wheel, so that AppKit can deliver `performDragOperation` first. This is a timing hack. converty and Kompakt both use **0.15 s**.
 - An **8 s** backstop timer dismisses the wheel if no mouse-up ever arrives. Before `f8b5403` the backstop was 0.6 s.
-- The `summoning` flag is cleared *only* by a mouse-up event. If one is missed, for example during Mission Control or a Space switch mid-drag, later Shift-drags can't summon until the next click. converty and Kompakt also check `NSEvent.pressedMouseButtons`, which recovers from this. Halo should too.
+- The `summoning` flag is cleared *only* by a mouse-up event. If one is missed, for example during Mission Control or a Space switch mid-drag, later Shift-drags can't summon until the next click. converty and Kompakt also check `NSEvent.pressedMouseButtons`, which recovers from this. anyfmt should too.
 
 **False positives**
 - The fail-open rule ("6 drag events with an unchanged changeCount means summon") makes the wheel flash for Shift-drags that aren't file drags, such as window moves or text selection, until mouse-up.
@@ -78,7 +78,7 @@ The permission-free approach is clearly *possible*. The price is that you can't 
 
 **Files on the clipboard**
 - Up to 0.8.1, summoning loaded file URLs from the general clipboard. That looked like the wheel "keeping" the last file. The fix (`6c0c356`) was that the wheel always opens empty and the user presses ⌘V to paste.
-- Reading the general pasteboard programmatically is also the thing macOS pasteboard privacy now warns about (see "Other prior art"). **Halo shouldn't auto-read the general pasteboard.**
+- Reading the general pasteboard programmatically is also the thing macOS pasteboard privacy now warns about (see "Other prior art"). **anyfmt shouldn't auto-read the general pasteboard.**
 
 **Multiple files**
 - A multi-file drop arrives in Finder's *selection* order. Daisy sorts by natural filename order (img2 before img10) when it combines files into one PDF.
@@ -127,7 +127,7 @@ The permission-free approach is clearly *possible*. The price is that you can't 
 - libvips: LGPL itself, but its Homebrew bottle hard-links fftw (GPL-2) and libimagequant (GPL-3), and removing either stops vips from loading.
 - Dropping these took the engine folder from 350 MB to 20 MB.
 
-**Why GPL-free.** Daisy's own licence isn't GPL-compatible, and the author wanted to avoid any source-offer obligation. Halo's position is different: an AGPL Halo can bundle GPL engines as separate programs, as long as it ships a proper source offer. **But a future Mac App Store or proprietary build has the same constraint Daisy has.** GPL/AGPL code can't go through the App Store's terms, so it would need Daisy's kind of GPL-free engine set. Design Halo's engine registry so the GPL engines can be switched off per build flavour.
+**Why GPL-free.** Daisy's own licence isn't GPL-compatible, and the author wanted to avoid any source-offer obligation. anyfmt's position is different: an AGPL anyfmt can bundle GPL engines as separate programs, as long as it ships a proper source offer. **But a future Mac App Store or proprietary build has the same constraint Daisy has.** GPL/AGPL code can't go through the App Store's terms, so it would need Daisy's kind of GPL-free engine set. Design anyfmt's engine registry so the GPL engines can be switched off per build flavour.
 
 **How it bundles**
 - It copies binaries out of Homebrew bottles.
@@ -137,8 +137,8 @@ The permission-free approach is clearly *possible*. The price is that you can't 
 - **Weak spots:**
   - The source pointer in NOTICE is just `brew fetch --build-from-source <formula>`. That's thin for LGPL-2.1 §6, which wants the source itself or a written offer, and it doesn't pin a version.
   - Copying bottles means versions float with the build machine.
-  - Halo's plan to build from pinned sources (`make engines`) is the right correction.
-- **7-Zip check for Halo:** if Halo ships 7-Zip, confirm whether the build includes the unRAR code. That code has a licence restriction separate from the LGPL. Daisy doesn't address this.
+  - anyfmt's plan to build from pinned sources (`make engines`) is the right correction.
+- **7-Zip check for anyfmt:** if anyfmt ships 7-Zip, confirm whether the build includes the unRAR code. That code has a licence restriction separate from the LGPL. Daisy doesn't address this.
 
 **Architecture**
 - Homebrew no longer publishes x86_64 bottles for pandoc, qpdf or sevenzip, so Daisy's bundled engines are arm64 only.
@@ -147,9 +147,9 @@ The permission-free approach is clearly *possible*. The price is that you can't 
 
 **Bring-your-own LibreOffice.** Daisy uses `/Applications/LibreOffice.app` or a copy in Application Support, and never downloads it. Text documents go to PDF through AppKit's own text and print system, with no LibreOffice needed (`48e042b`).
 
-**Routing is minimal.** The first converter that lists the target wins. There's no graph search, and multi-step conversions are hand-coded inside each converter. Halo's capability registry plus router (below) is a real step up.
+**Routing is minimal.** The first converter that lists the target wins. There's no graph search, and multi-step conversions are hand-coded inside each converter. anyfmt's capability registry plus router (below) is a real step up.
 
-### 7. Lessons for Halo's DragProbe (Phase 0)
+### 7. Lessons for anyfmt's DragProbe (Phase 0)
 
 1. Test **both** of these and compare:
    - (a) event-driven: global and local mouse monitors;
@@ -194,7 +194,7 @@ convt is a Rust engine with a GPUI desktop app, a CLI, a Finder Sync menu and a 
   A test repeats the same plan 50 times and expects the identical route every time.
 - **Same format to same format is "no route".** Same-format operations are tools, not conversions.
 - `targets(from)` runs the planner against every format and keeps the ones that succeed, sorted by category and then name. It's simple; one BFS per target.
-- **Menu targets** are a separate, curated short list per category: the 3–4 "popular" targets, filtered to what's reachable. The user can override them, and the menu falls back to the default list so it is never empty. Everything else stays one click away in Quick convert. That separation, between all reachable targets and the ones worth a wheel slot, is directly useful for Halo's ring.
+- **Menu targets** are a separate, curated short list per category: the 3–4 "popular" targets, filtered to what's reachable. The user can override them, and the menu falls back to the default list so it is never empty. Everything else stays one click away in Quick convert. That separation, between all reachable targets and the ones worth a wheel slot, is directly useful for anyfmt's ring.
 
 ### Hop limits, cost and priority
 
@@ -218,7 +218,7 @@ convt is a Rust engine with a GPUI desktop app, a CLI, a Finder Sync menu and a 
   - Failure or cancel removes everything the job wrote.
   - Tests cover each of these.
 
-### What Halo should take, and what to change
+### What anyfmt should take, and what to change
 
 **Take**
 - The engine/step/priority/availability split.
@@ -256,7 +256,7 @@ BUILD.md's Router spec ("cap hops at 3; a still format can never route into vide
   - It treats codec patents (H.264, HEVC, AAC) as separate from copyright.
   - It prefers macOS system codecs where they cover the format.
 
-  Halo's `LICENSES/` and NOTICE work should follow the same discipline.
+  anyfmt's `LICENSES/` and NOTICE work should follow the same discipline.
 - **Business model.** convt sells signed builds and a 7-day trial under AGPL. It says plainly that builds from source are unrestricted and the AGPL allows removing the licence check. That's allowed under AGPL. A **Mac App Store or proprietary build is a different matter**: it needs relicensing rights (see `CLA_RESEARCH.md`). convt has no CONTRIBUTING file or CLA; 106 of its 114 commits are by the owner.
 
 ---
@@ -265,18 +265,18 @@ BUILD.md's Router spec ("cap hops at 3; a still format can never route into vide
 
 Short notes on other open-source shelf and wheel apps and on drag-detection techniques. We read short excerpts of the drag-detection files (via the GitHub API) for lessons only. GPL-licensed ones are especially off limits for code.
 
-| Project | Licence | What it is | Lesson for Halo |
+| Project | Licence | What it is | Lesson for anyfmt |
 |---|---|---|---|
 | [rirachii/converty](https://github.com/rirachii/converty) | GPL-3.0 | Native Mac converter with a **Shift-drag wheel**, almost the same product idea | While the mouse is down it runs a **40 ms (25 Hz) timer in common run-loop modes**, as well as reacting to drag events. It confirms a drag once changeCount moves and caches the file list per changeCount. It checks `pressedMouseButtons` to catch missed mouse-ups, waits 150 ms after mouse-up before dismissing, and falls back to the legacy filenames pasteboard type when URL reading returns nothing. It reads file URLs from the drag pasteboard from the background. |
 | [edinabazi/Kompakt](https://github.com/edinabazi/Kompakt) | MIT | Image and video compressor with an external drop zone | Combines the mouse-down baseline with a last-seen changeCount, and keeps a **drag-session counter** so a mouse-up queued from an older drag can't dismiss a newer one. Rechecks `pressedMouseButtons` before ending the session; 150 ms grace. |
-| [Aimee51819/FileFlipper](https://github.com/Aimee51819/FileFlipper) | MIT | Shift (formats) and ⌥⇧ (tools) mid-drag picker | **Pure polling at 30 Hz** (`pressedMouseButtons`, drag changeCount, `modifierFlags`), with no event monitors or taps, so **no Accessibility or Input Monitoring**. Keeps the baseline fresh while the button is up, so a late poll still sees the drag start. This is the closest model for Halo's modifier-tap detection. |
+| [Aimee51819/FileFlipper](https://github.com/Aimee51819/FileFlipper) | MIT | Shift (formats) and ⌥⇧ (tools) mid-drag picker | **Pure polling at 30 Hz** (`pressedMouseButtons`, drag changeCount, `modifierFlags`), with no event monitors or taps, so **no Accessibility or Input Monitoring**. Keeps the baseline fresh while the button is up, so a late poll still sees the drag start. This is the closest model for anyfmt's modifier-tap detection. |
 | [FuzzyIdeas/Clop](https://github.com/FuzzyIdeas/Clop) | GPL-3.0 | Clipboard/file optimiser that shows a drop zone during any file drag | **Pasteboard reads are synchronous XPC round-trips.** Doing them on the main thread mid-drag froze the UI for 30 s or more when the pasteboard server was slow (their issue CLOP-273). They now resolve drag contents off the main thread on one serial queue, with an "in flight" flag so 60 events per second don't pile up. They also hit crashes in NSPasteboard's type cache when two threads touched it. Drag state is debounced by 200 ms. |
 | [MuQY1818/OpenYoink](https://github.com/MuQY1818/OpenYoink) | MIT | Open-source Yoink-style shelf | **The drag pasteboard keeps the previous drag's contents after the gesture ends**, so a stale file URL can show up on a later non-file drag. A drag only counts once changeCount advances past the mouse-down value. Its screen-edge trigger fires after a dwell time while dragging, at most once per entry into the edge band. |
 | [TheBoredTeam/boring.notch](https://github.com/TheBoredTeam/boring.notch) | GPL-3.0 | Notch shelf | Uses the same changeCount-plus-type check (file URL, URL or string), then tracks entry to and exit from a screen region during the drag, so the shelf opens only when the drag nears the notch. |
 | [Lakr233/NotchDrop](https://github.com/Lakr233/NotchDrop) | MIT | Notch file shelf and AirDrop | Global monitors for mouse moved, down and dragged, plus `flagsChanged` for Option. Its drop target is a fixed region, so it needs little drag classification. |
-| [MrKai77/Loop](https://github.com/MrKai77/Loop) | GPL-3.0 | **Radial menu** window manager, triggered by holding a key | Radial-menu UX prior art. It needs Accessibility to move windows and uses active (CGEvent tap) and passive monitors. This shows the permission cost of global keyboard triggers that Halo can avoid by polling modifiers. |
+| [MrKai77/Loop](https://github.com/MrKai77/Loop) | GPL-3.0 | **Radial menu** window manager, triggered by holding a key | Radial-menu UX prior art. It needs Accessibility to move windows and uses active (CGEvent tap) and passive monitors. This shows the permission cost of global keyboard triggers that anyfmt can avoid by polling modifiers. |
 | [kando-menu/kando](https://github.com/kando-menu/kando) | MIT (code) | Cross-platform pie menu | Pie/marking-menu interaction ideas (direction-based selection, nested rings). Concept reference only; we didn't review the code. |
-| [Dropover](https://dropoverapp.com), [Yoink](https://eternalstorms.at/yoink/mac/) | Commercial | Drag shelves | Both offer several triggers (gestures during a drag, screen-edge or shelf placement, shortcuts), which suggests users want more than one way in. Halo's hotkey and drop-onto-ring fallback should be a first-class path, not an afterthought. |
+| [Dropover](https://dropoverapp.com), [Yoink](https://eternalstorms.at/yoink/mac/) | Commercial | Drag shelves | Both offer several triggers (gestures during a drag, screen-edge or shelf placement, shortcuts), which suggests users want more than one way in. anyfmt's hotkey and drop-onto-ring fallback should be a first-class path, not an afterthought. |
 
 GitHub code search for `"NSPasteboard(name: .drag)" changeCount` in Swift returns about 270 files. The **mouse-down baseline plus a changeCount delta** is the de facto community technique; nobody uses a private API for this.
 
@@ -284,7 +284,7 @@ GitHub code search for `"NSPasteboard(name: .drag)" changeCount` in Swift return
 
 - **Convention write-up:** Wade Tregaskis, "[Mac app sandboxing interferes with drag & drop](https://wadetregaskis.com/mac-app-sandboxing-interferes-with-drag-drop/)" (Jan 2024). It describes inferring a drag from global drag events plus a changing drag-pasteboard count, with mouse-up as the end.
   - **In a sandboxed app, reading file URLs off the drag pasteboard breaks access to the dropped file.** Listing types is safe. A security-scoped reading option only partly works around it (FB13520048).
-  - This matters for any future **Mac App Store (sandboxed) Halo**: it would have to rely on the drop-onto-ring path and read types only before the drop.
-- **Thread safety:** Michael Tsai, "[NSPasteboard crashes when handling file promises](https://mjtsai.com/blog/2026/08/03/nspasteboard-crashes-when-handling-file-promises/)" (Aug 2026). NSPasteboard's type cache gets mutated from the main thread and the global dispatch pool at once, which corrupts memory. That is in tension with Clop's move off the main thread. **Halo rule: give all NSPasteboard access one owner** (one actor or queue), read only the changeCount and types mid-drag, and read URLs once (`draggingEntered` or `performDragOperation`).
-- **Pasteboard privacy:** "[Pasteboard privacy preview in macOS 15.4](https://mjtsai.com/blog/2025/05/12/pasteboard-privacy-preview-in-macos-15-4/)". macOS now alerts when an app programmatically reads the **general** pasteboard without a paste-related user action. It adds `accessBehavior` and the `detect…` APIs, which inspect types without reading. The drag pasteboard isn't mentioned. **The DragProbe must confirm that reading the drag pasteboard raises no alert on the macOS versions we target.** Halo must never poll the general pasteboard.
+  - This matters for any future **Mac App Store (sandboxed) anyfmt**: it would have to rely on the drop-onto-ring path and read types only before the drop.
+- **Thread safety:** Michael Tsai, "[NSPasteboard crashes when handling file promises](https://mjtsai.com/blog/2026/08/03/nspasteboard-crashes-when-handling-file-promises/)" (Aug 2026). NSPasteboard's type cache gets mutated from the main thread and the global dispatch pool at once, which corrupts memory. That is in tension with Clop's move off the main thread. **anyfmt rule: give all NSPasteboard access one owner** (one actor or queue), read only the changeCount and types mid-drag, and read URLs once (`draggingEntered` or `performDragOperation`).
+- **Pasteboard privacy:** "[Pasteboard privacy preview in macOS 15.4](https://mjtsai.com/blog/2025/05/12/pasteboard-privacy-preview-in-macos-15-4/)". macOS now alerts when an app programmatically reads the **general** pasteboard without a paste-related user action. It adds `accessBehavior` and the `detect…` APIs, which inspect types without reading. The drag pasteboard isn't mentioned. **The DragProbe must confirm that reading the drag pasteboard raises no alert on the macOS versions we target.** anyfmt must never poll the general pasteboard.
 - **Stack Overflow:** "[Global drag and drop detection on macOS for files and promised files](https://stackoverflow.com/questions/70544827/global-drag-and-drop-detection-on-macos-for-files-and-promised-files)". The same monitor-plus-pasteboard approach, with promised files as the hard case.

@@ -3,7 +3,7 @@ import CoreGraphics
 import CoreImage
 import ImageIO
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class TransformToolTests: XCTestCase {
     private var dir: URL!

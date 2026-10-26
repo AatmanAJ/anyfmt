@@ -1,6 +1,6 @@
 import AppKit
 import Combine
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Shows a floating progress card per job or batch and keeps them stacked

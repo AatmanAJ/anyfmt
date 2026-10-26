@@ -1,4 +1,4 @@
-$ halo targets <tmp>/photo.png --json
+$ anyfmt targets <tmp>/photo.png --json
 exit: 0
 --- stdout
 {

@@ -1,6 +1,6 @@
 import AppKit
 import Darwin
-import HaloCore
+import AnyfmtCore
 
 /// Live example for the naming-pattern field.
 enum NamingPreview {

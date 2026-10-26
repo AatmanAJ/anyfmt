@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 // Small pieces the Settings panes share, in the phase 2 language: ink tiles,
 // cobalt for "on", Inter Display only where a word or number leads the pane.
@@ -19,8 +19,8 @@ struct SettingsGlyphTile: View {
             .font(.system(size: T.glyphSize, weight: .semibold))
             .foregroundStyle(quiet ? Color.accentText : Color(hex: DesignTokens.Semantic.onAccentPrimary))
             .frame(width: T.glyphTile, height: T.glyphTile)
-            .background(shape.fill(quiet ? Color.haloRaised : Color.iris))
-            .haloBorder(shape, contrast == .increased ? Color.haloInk : .clear)
+            .background(shape.fill(quiet ? Color.anyfmtRaised : Color.iris))
+            .anyfmtBorder(shape, contrast == .increased ? Color.anyfmtInk : .clear)
             .accessibilityHidden(true)
     }
 }
@@ -39,8 +39,8 @@ struct SettingsStateRow<Action: View>: View {
             Group {
                 switch kind {
                 case .loading: ProgressView().controlSize(.small)
-                case .empty: Image(systemName: "tray").foregroundStyle(Color.haloSecondaryText)
-                case .problem: Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.haloDanger)
+                case .empty: Image(systemName: "tray").foregroundStyle(Color.anyfmtSecondaryText)
+                case .problem: Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.anyfmtDanger)
                 }
             }
             .frame(width: DesignTokens.Component.Settings.rowIconWidth)
@@ -48,11 +48,11 @@ struct SettingsStateRow<Action: View>: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 Text(verbatim: title)
                     .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
-                    .foregroundStyle(kind == .problem ? Color.haloDanger : Color.haloInk)
+                    .foregroundStyle(kind == .problem ? Color.anyfmtDanger : Color.anyfmtInk)
                 if let detail {
                     Text(verbatim: detail)
                         .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }

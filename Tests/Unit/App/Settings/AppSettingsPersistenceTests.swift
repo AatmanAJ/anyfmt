@@ -1,7 +1,7 @@
 import XCTest
 import AppKit
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 @MainActor
 final class AppSettingsPersistenceTests: XCTestCase {

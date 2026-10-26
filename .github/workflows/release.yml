@@ -40,18 +40,18 @@ jobs:
           AC_API_KEY_P8: ${{ secrets.AC_API_KEY_P8 }}
         run: |
           echo "$AC_API_KEY_P8" > "$RUNNER_TEMP/key.p8"
-          xcrun notarytool store-credentials halo-notary --key "$RUNNER_TEMP/key.p8" --key-id "$AC_API_KEY_ID" --issuer "$AC_API_ISSUER"
+          xcrun notarytool store-credentials anyfmt-notary --key "$RUNNER_TEMP/key.p8" --key-id "$AC_API_KEY_ID" --issuer "$AC_API_ISSUER"
 
       - name: Signed + notarized DMG
         env:
           DEVELOPER_ID: ${{ secrets.DEVELOPER_ID }}
           TEAM_ID: ${{ secrets.TEAM_ID }}
-          NOTARY_PROFILE: halo-notary
+          NOTARY_PROFILE: anyfmt-notary
           DMG_LAYOUT: "0"
         run: make dmg
 
       - name: Engine sources archive (GPL source offer)
-        run: tar -czf "dist/halo-${GITHUB_REF_NAME#v}-engine-sources.tar.gz" -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
+        run: tar -czf "dist/anyfmt-${GITHUB_REF_NAME#v}-engine-sources.tar.gz" -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
 
       - name: Appcast
         env:

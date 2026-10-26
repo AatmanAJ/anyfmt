@@ -257,7 +257,7 @@ public struct CompressPDFRunner: ToolRunner {
 
         // Target size: binary search for the gentlest setting that fits.
         let target = Int64(request.options.int(OptionKey.targetSize, default: 2_000_000))
-        let scratch = request.outputDirectory.appendingPathComponent(".halo-scratch-\(UUID().uuidString)", isDirectory: true)
+        let scratch = request.outputDirectory.appendingPathComponent(".anyfmt-scratch-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: scratch) }
         var lo = 0, hi = Self.ladder.count - 1

@@ -1,6 +1,6 @@
 import XCTest
 import ImageIO
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Real conversions on tiny generated media (2 s, 320×240): a representative
 /// subset of every row family. Each output is probed: duration within ±0.1 s
@@ -102,7 +102,7 @@ final class AVConversionTests: XCTestCase {
         XCTAssertNil(ogg.coverArt)
         let tags = try await LaneE.formatTags(try await LaneE.convert(try LaneE.fixture("edge-cover.mp3"), to: Formats.m4a))
         XCTAssertEqual(tags["title"], "Covered")
-        XCTAssertEqual(tags["artist"], "Halo")
+        XCTAssertEqual(tags["artist"], "anyfmt")
     }
 
     private func check(_ name: String, in dir: URL, to: FormatID) async throws -> (URL, AVInputFacts) {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Renders every progress-card state into docs/screens/progress-*.png
 /// (the repo convention: `make test` refreshes screenshots so regressions show in review).

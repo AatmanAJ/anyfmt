@@ -1,7 +1,7 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
-/// The "photo" inside Sample.heic: a sunset over a lake in Halo's heat colours
+/// The "photo" inside Sample.heic: a sunset over a lake in anyfmt's heat colours
 /// with black hills, drawn in code so the app ships no sample image.
 enum SampleArtwork {
     /// Square thumbnail, rendered at 2× for Retina.

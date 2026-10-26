@@ -4,22 +4,22 @@ import ImageIO
 import UniformTypeIdentifiers
 import XCTest
 
-/// Runs the built `halo` binary for the CLI and MCP golden tests, and owns the
+/// Runs the built `anyfmt` binary for the CLI and MCP golden tests, and owns the
 /// golden-file comparison. Agents parse this output, so it must never change
 /// by accident. Re-record on purpose with
 /// `TEST_RUNNER_HALO_RECORD_GOLDEN=1 make test-unit` (xcodebuild strips the prefix).
-enum HaloCLI {
+enum AnyfmtCLI {
     static let goldenDir = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         .appendingPathComponent("CLIGolden")
 
     static var binary: URL {
-        Bundle(for: Marker.self).bundleURL.deletingLastPathComponent().appendingPathComponent("halo")
+        Bundle(for: Marker.self).bundleURL.deletingLastPathComponent().appendingPathComponent("anyfmt")
     }
 
     static var isBuilt: Bool { FileManager.default.isExecutableFile(atPath: binary.path) }
 
-    static var recording: Bool { ProcessInfo.processInfo.environment["HALO_RECORD_GOLDEN"] == "1" }
+    static var recording: Bool { ProcessInfo.processInfo.environment["ANYFMT_RECORD_GOLDEN"] == "1" }
 
     private final class Marker {}
 
@@ -28,7 +28,7 @@ enum HaloCLI {
     static func environment(_ extra: [String: String] = [:]) -> [String: String] {
         let inherited = ProcessInfo.processInfo.environment
         var env = ["NO_COLOR": "1", "PATH": "/usr/bin:/bin", "HOME": NSHomeDirectory()]
-        env["HALO_ENGINES_DIR"] = inherited["HALO_ENGINES_DIR"]
+        env["ANYFMT_ENGINES_DIR"] = inherited["ANYFMT_ENGINES_DIR"]
         env.merge(extra) { _, new in new }
         return env
     }
@@ -81,7 +81,7 @@ enum HaloCLI {
             for variant in pathVariants(url) { t = t.replacingOccurrences(of: variant, with: token) }
         }
         if let v = version {
-            t = t.replacingOccurrences(of: "halo \(v)", with: "halo <version>")
+            t = t.replacingOccurrences(of: "anyfmt \(v)", with: "anyfmt <version>")
             t = t.replacingOccurrences(of: "\"\(v)\"", with: "\"<version>\"")
             t = t.replacingOccurrences(of: #"\"\#(v)\""#, with: #"\"<version>\""#)
         }
@@ -92,7 +92,7 @@ enum HaloCLI {
         return t
     }
 
-    /// The binary's marketing version (from `halo version --json`), cached.
+    /// The binary's marketing version (from `anyfmt version --json`), cached.
     static let version: String? = {
         guard isBuilt, let r = try? run(["version", "--json"]),
               let obj = try? JSONSerialization.jsonObject(with: Data(r.out.utf8)) as? [String: Any] else { return nil }
@@ -116,7 +116,7 @@ enum HaloCLI {
         }
         let expected = try String(contentsOf: url, encoding: .utf8)
         if actual != expected {
-            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("halo-golden-\(name).txt")
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-golden-\(name).txt")
             try? actual.write(to: tmp, atomically: true, encoding: .utf8)
             XCTFail("Output for golden “\(name)” changed. Diff \(url.path) against \(tmp.path), or re-record with TEST_RUNNER_HALO_RECORD_GOLDEN=1.", file: file, line: line)
         }
@@ -126,7 +126,7 @@ enum HaloCLI {
 
     /// A fresh scratch folder (resolved, so paths normalise reliably).
     static func scratch(_ name: String) throws -> URL {
-        let u = FileManager.default.temporaryDirectory.appendingPathComponent("halo-cli-\(name)-\(UUID().uuidString)", isDirectory: true)
+        let u = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-cli-\(name)-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
         return u.resolvingSymlinksInPath()
     }
@@ -167,7 +167,7 @@ enum HaloCLI {
     /// An engines folder whose ffmpeg always fails (exit 1) and whose ffprobe is
     /// the real one, so "engine failed" (exit 5) can be triggered on purpose.
     static func failingEngines(in dir: URL) throws -> URL? {
-        guard let real = ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"], !real.isEmpty else { return nil }
+        guard let real = ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"], !real.isEmpty else { return nil }
         let realProbe = URL(fileURLWithPath: real).appendingPathComponent("Helpers/ffprobe")
         guard FileManager.default.isExecutableFile(atPath: realProbe.path) else { return nil }
         let helpers = dir.appendingPathComponent("Helpers", isDirectory: true)

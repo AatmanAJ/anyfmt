@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Generates lane F fixtures once per test run (Tests/Fixtures/lanes/docs.sh) into a temp folder.
 enum DocsFixtures {
@@ -17,7 +17,7 @@ enum DocsFixtures {
         lock.lock()
         defer { lock.unlock() }
         if let cached { return cached }
-        let out = FileManager.default.temporaryDirectory.appendingPathComponent("halo-docs-fixtures-\(UUID().uuidString)", isDirectory: true)
+        let out = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-docs-fixtures-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/bash")
@@ -42,7 +42,7 @@ enum DocsFixtures {
 }
 
 func tempDir(_ name: String = "t") throws -> URL {
-    let u = FileManager.default.temporaryDirectory.appendingPathComponent("halo-docs-\(name)-\(UUID().uuidString)", isDirectory: true)
+    let u = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-docs-\(name)-\(UUID().uuidString)", isDirectory: true)
     try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
     return u
 }

@@ -1,6 +1,6 @@
 import AppKit
 import UniformTypeIdentifiers
-import HaloCore
+import AnyfmtCore
 
 /// The shelf itself: card chrome plus the pile (collapsed), the grid
 /// (expanded) or a drop hint (empty). Also the drop target, the window-drag

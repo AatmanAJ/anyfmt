@@ -1,6 +1,6 @@
 import AppKit
 import Combine
-import HaloCore
+import AnyfmtCore
 
 /// The app's single doorway into cloud features. Every entitlement check lives
 /// here or elsewhere in Sources/Cloud (scripts/check-entitlements.sh), so the

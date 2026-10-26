@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Codec selection, stream-copy detection, geometry and metadata, with
 /// synthetic inputs (no ffmpeg needed).

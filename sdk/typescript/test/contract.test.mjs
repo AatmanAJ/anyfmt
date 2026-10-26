@@ -33,7 +33,7 @@ test('API keys: create (secret once), list (prefix only), revoke', async () => {
   const created = await call('POST', '/v1/api-keys', { auth: token, body: { name: 'CI', scopes: ['convert', 'read'] } });
   assert.equal(created.status, 201);
   const { apiKey, secret } = created.json;
-  assert.match(secret, /^halo_sk_[A-Za-z0-9_-]{32,}$/);
+  assert.match(secret, /^anyfmt_sk_[A-Za-z0-9_-]{32,}$/);
   assert.equal(apiKey.prefix, secret.slice(0, 12));
   assert.deepEqual(apiKey.scopes, ['convert', 'read']);
 
@@ -91,7 +91,7 @@ test('credentials stay apart: keys can’t manage keys, app tokens can’t call 
 });
 
 test('licences: activate, idempotent per device, device limit, deactivate', async () => {
-  const key = 'HALO-MOCK-PRO0-0001';
+  const key = 'ANYFMT-MOCK-PRO0-0001';
   const a = await call('POST', '/v1/licences/activate', { body: { key, deviceId: 'device-aaaa-0001', deviceName: 'Studio' } });
   assert.equal(a.status, 200);
   assert.equal(a.json.licence.plan, 'pro');
@@ -106,15 +106,15 @@ test('licences: activate, idempotent per device, device limit, deactivate', asyn
   assert.equal(full.json.error.details.devices.length, 2);
 
   const id = a.json.licence.id;
-  assertEnvelope(await call('POST', `/v1/licences/${id}/deactivate`, { body: { key: 'HALO-WRONG-KEY-0000', deviceId: 'device-aaaa-0001' } }), 404, 'licence_invalid');
+  assertEnvelope(await call('POST', `/v1/licences/${id}/deactivate`, { body: { key: 'ANYFMT-WRONG-KEY-0000', deviceId: 'device-aaaa-0001' } }), 404, 'licence_invalid');
   const d = await call('POST', `/v1/licences/${id}/deactivate`, { body: { key, deviceId: 'device-aaaa-0001' } });
   assert.equal(d.status, 200);
   assert.deepEqual(d.json.devices.map((x) => x.deviceId), ['device-bbbb-0002']);
   assert.equal((await call('POST', '/v1/licences/activate', { body: { key, deviceId: 'device-cccc-0003' } })).status, 200);
 
-  assertEnvelope(await call('POST', '/v1/licences/activate', { body: { key: 'HALO-NOPE-NOPE-NOPE', deviceId: 'device-aaaa-0001' } }), 404, 'licence_invalid');
+  assertEnvelope(await call('POST', '/v1/licences/activate', { body: { key: 'ANYFMT-NOPE-NOPE-NOPE', deviceId: 'device-aaaa-0001' } }), 404, 'licence_invalid');
   assertEnvelope(await call('POST', '/v1/licences/activate', { body: { key: 'x', deviceId: 'y' } }), 422, 'validation_failed');
-  const revoked = await mock.ctl('POST', '/licences', { key: 'HALO-REVOKED-0001', status: 'revoked' });
+  const revoked = await mock.ctl('POST', '/licences', { key: 'ANYFMT-REVOKED-0001', status: 'revoked' });
   assertEnvelope(await call('POST', '/v1/licences/activate', { body: { key: revoked.key, deviceId: 'device-aaaa-0001' } }), 409, 'licence_revoked');
 });
 

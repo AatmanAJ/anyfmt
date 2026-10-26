@@ -270,12 +270,12 @@ public enum AnnotationRenderer {
         ctx.saveGState()
         // y-down user space: flip glyphs back upright.
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
-        // A soft halo keeps text legible on any background.
+        // A soft anyfmt keeps text legible on any background.
         let luminance = (color.components ?? [0, 0, 0]).prefix(3).enumerated().reduce(0.0) { acc, e in
             acc + Double(e.element) * [0.2126, 0.7152, 0.0722][e.offset]
         }
-        let halo = luminance > 0.6 ? CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.55) : CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 0.7)
-        ctx.setShadow(offset: .zero, blur: fontSize * 0.18, color: halo)
+        let anyfmt = luminance > 0.6 ? CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.55) : CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 0.7)
+        ctx.setShadow(offset: .zero, blur: fontSize * 0.18, color: anyfmt)
         for (i, line) in ls.enumerated() {
             ctx.textPosition = CGPoint(x: origin.x, y: origin.y + ascent + CGFloat(i) * lineHeight)
             CTLineDraw(line, ctx)

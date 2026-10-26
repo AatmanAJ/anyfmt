@@ -1,10 +1,10 @@
 import AppKit
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 /// Renders every lane G2 editor offscreen with sample media, light and dark,
-/// into docs/screens/editor-<tool>.png (with HALO_EDITOR_SCREENS set).
+/// into docs/screens/editor-<tool>.png (with ANYFMT_EDITOR_SCREENS set).
 @MainActor
 final class MediaEditorScreenshotTests: XCTestCase {
     private func spec(_ id: ToolID) throws -> ToolSpec { try XCTUnwrap(ToolCatalog.spec(id)) }

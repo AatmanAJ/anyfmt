@@ -1,7 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// A global shortcut: Carbon virtual key code + Cocoa modifier flags, as
 /// stored in `AppSettings.dropRingKeyCode` / `dropRingModifiers`.
@@ -26,7 +26,7 @@ struct Hotkey: Equatable, Sendable {
 
     enum Issue: Equatable {
         /// macOS refuses Option-only / Option+Shift hotkeys, and plain keys
-        /// would fire while typing. Every Halo hotkey includes ⌘ or ⌃.
+        /// would fire while typing. Every anyfmt hotkey includes ⌘ or ⌃.
         case needsCommandOrControl
         case modifierOnly
         case reserved(String)
@@ -197,8 +197,8 @@ struct HotkeyRecorder: View {
         }
         .padding(.horizontal, recording ? DesignTokens.Space.m : 0)
         .frame(minHeight: DesignTokens.Component.Pill.height)
-        .background { if recording { Capsule().fill(Color.haloTile) } }
-        .haloBorder(Capsule(), recording ? Color.token(DesignTokens.Semantic.focusRing) : .clear,
+        .background { if recording { Capsule().fill(Color.anyfmtTile) } }
+        .anyfmtBorder(Capsule(), recording ? Color.token(DesignTokens.Semantic.focusRing) : .clear,
                     width: DesignTokens.Component.Focus.ringWidth)
         .contentShape(Capsule())
         .opacity(isEnabled ? 1 : 0.45)

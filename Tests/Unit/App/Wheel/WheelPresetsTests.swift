@@ -1,8 +1,8 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 @testable import RadialMenu
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Presets on the wheel, configure-after-drop, and the pinned options panel (D-038).
 @MainActor
@@ -11,14 +11,14 @@ final class WheelPresetsTests: XCTestCase {
     private var store: PresetStore!
     private var selections: [WheelSelection] = []
     private var tuned: [FormatID] = []
-    private let mov = URL(fileURLWithPath: "/tmp/halo-wheel-tests/clip.mov")
+    private let mov = URL(fileURLWithPath: "/tmp/anyfmt-wheel-tests/clip.mov")
 
     override func setUp() async throws {
         let rows = [Capability("mov", "gif", "test", schema: StandardSchemas.gif),
                     Capability("mov", "mp4", "test", schema: StandardSchemas.video),
                     Capability("mov", "webm", "test")]
         controller = WheelController(provider: WheelContentProvider(router: Router(table: CapabilityTable(rows))))
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("halo-presets-\(UUID().uuidString).json")
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-presets-\(UUID().uuidString).json")
         store = PresetStore(fileURL: file)
         controller.presetStore = store
         selections = []
@@ -192,7 +192,7 @@ final class FakeDragInfo: NSObject, @preconcurrency NSDraggingInfo {
     var draggingSourceOperationMask: NSDragOperation { .copy }
     var draggedImageLocation: NSPoint { .zero }
     var draggedImage: NSImage? { nil }
-    var draggingPasteboard: NSPasteboard { NSPasteboard(name: NSPasteboard.Name("HaloAppTests.drag.\(ObjectIdentifier(self).hashValue)")) }
+    var draggingPasteboard: NSPasteboard { NSPasteboard(name: NSPasteboard.Name("AnyfmtAppTests.drag.\(ObjectIdentifier(self).hashValue)")) }
     var draggingSource: Any? { nil }
     var draggingSequenceNumber: Int { 1 }
     func slideDraggedImage(to screenPoint: NSPoint) {}

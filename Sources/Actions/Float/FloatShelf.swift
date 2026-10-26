@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// The Float shelf: a floating pile of files you parked to
 /// drag somewhere later.

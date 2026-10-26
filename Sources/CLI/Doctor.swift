@@ -1,7 +1,7 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
-/// `halo doctor`: what this install can do and why. Read-only, local only:
+/// `anyfmt doctor`: what this install can do and why. Read-only, local only:
 /// it runs the bundled engines' `-version` and `/usr/bin/codesign -dv`, nothing else.
 @MainActor
 enum Doctor {
@@ -35,7 +35,7 @@ enum Doctor {
     static func collect() -> [String: Any] {
         let locator = EngineLocator.shared
         let env = ProcessInfo.processInfo.environment
-        let envDir = env["HALO_ENGINES_DIR"].flatMap { $0.isEmpty ? nil : URL(fileURLWithPath: $0).appendingPathComponent("Helpers").path }
+        let envDir = env["ANYFMT_ENGINES_DIR"].flatMap { $0.isEmpty ? nil : URL(fileURLWithPath: $0).appendingPathComponent("Helpers").path }
         let app = CLIPaths.appBundle
         var engines: [[String: Any]] = []
         for name in ["ffmpeg", "ffprobe", "resvg"] {
@@ -45,7 +45,7 @@ enum Doctor {
                 e["found"] = true
                 e["path"] = path
                 if CLIPaths.enginesBesideCLI { e["source"] = "bundled" }
-                else if let envDir, u.path.hasPrefix(envDir) { e["source"] = "HALO_ENGINES_DIR" }
+                else if let envDir, u.path.hasPrefix(envDir) { e["source"] = "ANYFMT_ENGINES_DIR" }
                 else if let app, path.hasPrefix(app.path) { e["source"] = "bundled" }
                 else { e["source"] = "beside the CLI or a source checkout" }
                 if let v = versionLine(u, arg: name == "resvg" ? "--version" : "-version") { e["version"] = v }
@@ -73,11 +73,11 @@ enum Doctor {
             "supportDirectory": CLIPaths.supportDirectory.path,
             "conversionOptions": Router.live().optionCount(),
             "routesUnavailable": unavailable,
-            "network": "none: the CLI and `halo mcp` never open sockets or ports",
+            "network": "none: the CLI and `anyfmt mcp` never open sockets or ports",
             "permissions": [
                 ["name": "none required", "note": "the CLI needs no macOS permission to convert files you can read"],
                 ["name": "Files and Folders / Full Disk Access",
-                 "note": "only if you convert files in protected folders (Desktop, Documents, Downloads) from a terminal that lacks access; macOS asks the terminal, not Halo"],
+                 "note": "only if you convert files in protected folders (Desktop, Documents, Downloads) from a terminal that lacks access; macOS asks the terminal, not anyfmt"],
                 ["name": "Automation (Pages)", "note": "only for the opt-in Pages export, which the app asks for; the CLI never triggers it"],
             ],
         ]

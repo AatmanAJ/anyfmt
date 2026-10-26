@@ -1,4 +1,4 @@
-$ halo formats --bogus --json
+$ anyfmt formats --bogus --json
 exit: 2
 --- stdout
 {

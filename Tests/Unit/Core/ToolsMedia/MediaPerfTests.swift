@@ -1,11 +1,11 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Opt-in timings on a 1-minute 1080p30 clip (TEST_RUNNER_HALO_MEDIA_PERF=1).
 /// Numbers go into docs/lanes/G2-media-tools.md.
 final class MediaPerfTests: XCTestCase {
     func testTimings() async throws {
-        guard ProcessInfo.processInfo.environment["HALO_MEDIA_PERF"] != nil else { throw XCTSkip("set TEST_RUNNER_HALO_MEDIA_PERF=1") }
+        guard ProcessInfo.processInfo.environment["ANYFMT_MEDIA_PERF"] != nil else { throw XCTSkip("set TEST_RUNNER_HALO_MEDIA_PERF=1") }
         let dir = try makeOutputDirectory()
         let clip = dir.appendingPathComponent("minute.mp4")
         try await TestEngines.ffmpeg(["-filter_complex", "testsrc2=size=1920x1080:rate=30:duration=60[v];sine=frequency=440:sample_rate=48000:duration=60[a]",

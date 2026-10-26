@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Every container the media tools write keeps its format through a re-encode.
 final class ContainerCoverageTests: XCTestCase {

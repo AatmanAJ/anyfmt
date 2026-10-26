@@ -1,11 +1,11 @@
 import AppKit
 import SwiftUI
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 /// Renders every lane G1 editor offscreen with sample content (light and dark).
-/// With HALO_SCREENSHOTS=1 the images go to docs/screens/editor-<tool>.png so
+/// With ANYFMT_SCREENSHOTS=1 the images go to docs/screens/editor-<tool>.png so
 /// regressions are visible in review; otherwise this is a rendering smoke test.
 @MainActor
 final class ImageEditorScreenshotTests: XCTestCase {

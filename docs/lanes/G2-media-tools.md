@@ -4,11 +4,11 @@ All 13 runners ship in `MediaToolRunners.all`, and all 8 editors open through
 `MediaEditors.open`. Both are built on the frozen contracts (`ToolRunner`,
 `EditorShell`/`EditorWindow`, `FFmpeg`, `ProcessRunner`). Nothing here touches the
 network or the user's files. Runners write only inside `request.outputDirectory` and
-remove their own `.halo-scratch-*` folders, and the tests check both.
+remove their own `.anyfmt-scratch-*` folders, and the tests check both.
 
 ## What's built
 
-### Core (`Sources/Tools/Core/Media/`, HaloCore)
+### Core (`Sources/Tools/Core/Media/`, AnyfmtCore)
 
 | File | What |
 |---|---|
@@ -258,13 +258,13 @@ Perf (M5 Max, `TEST_RUNNER_HALO_MEDIA_PERF=1`, 60 s 1080p30 H.264 8 Mbps source,
 ## Blockers
 
 - **Engines embedded in the app don't load (ad-hoc signing + hardened runtime).** Running
-  `build/DerivedData/Build/Products/Debug/Halo.app/Contents/Helpers/ffmpeg -version` fails
+  `build/DerivedData/Build/Products/Debug/anyfmt.app/Contents/Helpers/ffmpeg -version` fails
   with `Library not loaded: @rpath/libavfilter.12.dylib … different Team IDs`. Every
   ffmpeg-backed feature in the app is affected, not just this lane's. The fix, verified on
   a scratch copy, is for the owner of `scripts/embed-engines.sh` to sign helpers with
   `--entitlements` setting `com.apple.security.cs.disable-library-validation` = true when
   the identity is ad hoc. A real Developer ID shares the team ID and doesn't need it. Until
-  then, this lane's app-hosted tests set `HALO_ENGINES_DIR` to `Engines/dist`.
+  then, this lane's app-hosted tests set `ANYFMT_ENGINES_DIR` to `Engines/dist`.
 - Locally created, untracked empty source directories (`Sources/Wheel`, `Sources/Cloud`,
   `Sources/Actions`, `Sources/Jobs/UI`, `Sources/Settings`) are needed for `xcodegen` in a
   fresh worktree. They aren't committed: git doesn't track empty directories and they

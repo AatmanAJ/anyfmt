@@ -1,6 +1,6 @@
 import PDFKit
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// WebKit HTML → PDF pagination, and PDF → DOCX/PPTX/XLSX reconstruction.
 final class PDFRouteTests: XCTestCase {

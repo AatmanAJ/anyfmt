@@ -1,13 +1,13 @@
 import Combine
-import HaloCore
+import AnyfmtCore
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Sync used to have no real source, so "Sync Now" did nothing (audit, phase 2).
 @MainActor
 final class SettingsSyncSourceTests: XCTestCase {
     private func freshSettings() -> AppSettings {
-        let suite = "halo.sync.\(UUID().uuidString)"
+        let suite = "anyfmt.sync.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         return AppSettings(defaults: defaults)

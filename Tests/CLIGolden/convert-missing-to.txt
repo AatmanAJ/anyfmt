@@ -1,4 +1,4 @@
-$ halo convert /nonexistent/halo.png
+$ anyfmt convert /nonexistent/anyfmt.png
 exit: 2
 --- stdout
 --- stderr

@@ -49,7 +49,7 @@ When no re-encode is needed, nothing is re-encoded at all.
 
 | | Size |
 |---|---|
-| Halo.app on disk | **63 MB** (all engines + every lane) |
+| anyfmt.app on disk | **63 MB** (all engines + every lane) |
 | DMG (ULFO compressed) | **27 MB** |
 | Bundled engines (ffmpeg, ffprobe, libav*, resvg) | 39 MB |
 

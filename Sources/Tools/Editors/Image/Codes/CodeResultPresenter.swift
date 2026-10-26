@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Shows what Read QR / barcode found (tool 11): a small floating window
 /// listing every payload with a Copy button. Links are never opened on their
@@ -19,7 +19,7 @@ public enum CodeResultPresenter {
         panel.title = results.count == 1 ? String(localized: "1 code found") : String(localized: "\(results.count) codes found")
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
-        panel.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
+        panel.backgroundColor = .anyfmt(DesignTokens.Semantic.windowBackground)
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.isReleasedWhenClosed = false
@@ -84,11 +84,11 @@ struct CodeResultsView: View {
             VStack(alignment: .leading, spacing: DesignTokens.Space.xxs) {
                 DisplayText(results.count == 1 ? String(localized: "1 code") : String(localized: "\(results.count) codes"),
                             size: DesignTokens.Typeface.Size.displayM)
-                    .foregroundStyle(Color.haloInk)
+                    .foregroundStyle(Color.anyfmtInk)
                     .accessibilityAddTraits(.isHeader)
                 if let source {
                     Text(source).font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
-                        .foregroundStyle(Color.haloSecondaryText).lineLimit(1).truncationMode(.middle)
+                        .foregroundStyle(Color.anyfmtSecondaryText).lineLimit(1).truncationMode(.middle)
                 }
             }
             if results.isEmpty {
@@ -107,7 +107,7 @@ struct CodeResultsView: View {
                 if copiedAll && !results.isEmpty {
                     Label(String(localized: "Copied to the clipboard"), systemImage: "checkmark.circle.fill")
                         .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-                        .foregroundStyle(Color.haloSuccess)
+                        .foregroundStyle(Color.anyfmtSuccess)
                 }
                 Spacer()
                 if results.count > 1 {
@@ -115,10 +115,10 @@ struct CodeResultsView: View {
                         CodeResultPresenter.copy(results.map(\.payload).joined(separator: "\n"))
                         flash("*")
                     }
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                 }
                 Button(String(localized: "Done"), action: onDone)
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .keyboardShortcut(.defaultAction)
                 Button("", action: onDone).keyboardShortcut(.cancelAction).frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
             }
@@ -126,8 +126,8 @@ struct CodeResultsView: View {
         .padding(DesignTokens.Space.l)
         .frame(width: 420)
         .buttonStyle(.editorChip)
-        .foregroundStyle(Color.haloInk, Color.haloSecondaryText)
-        .background(Color.haloWindow.ignoresSafeArea())
+        .foregroundStyle(Color.anyfmtInk, Color.anyfmtSecondaryText)
+        .background(Color.anyfmtWindow.ignoresSafeArea())
     }
 
     private func row(_ r: CodeReadResult) -> some View {
@@ -141,7 +141,7 @@ struct CodeResultsView: View {
                 EditorCaption(r.label)
                 Text(r.payload)
                     .font(.system(size: DesignTokens.TypeRamp.body, design: r.link == nil && r.payload.allSatisfy(\.isNumber) ? .monospaced : .default))
-                    .foregroundStyle(Color.haloInk)
+                    .foregroundStyle(Color.anyfmtInk)
                     .textSelection(.enabled)
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
@@ -169,7 +169,7 @@ struct CodeResultsView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .haloTile(padding: DesignTokens.Space.m)
+        .anyfmtTile(padding: DesignTokens.Space.m)
         .accessibilityElement(children: .contain)
     }
 

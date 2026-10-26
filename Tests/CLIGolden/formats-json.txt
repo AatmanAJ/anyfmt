@@ -1,4 +1,4 @@
-$ halo formats --json
+$ anyfmt formats --json
 exit: 0
 --- stdout
 {

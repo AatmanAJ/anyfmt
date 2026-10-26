@@ -1,4 +1,4 @@
-$ halo convert <tmp>/photo.png --to tiff --json   (SIGINT after start)
+$ anyfmt convert <tmp>/photo.png --to tiff --json   (SIGINT after start)
 exit: 7
 --- stdout
 {"event":"start","jobs":1}

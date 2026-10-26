@@ -3,17 +3,17 @@ import CoreGraphics
 import CoreImage
 import ImageIO
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Shared fixtures for lane G1 tests: generated images, a temp workspace, and
 /// a runner harness. Nothing is read from disk except what the tests write.
 enum G1 {
     static let srgb = CGColorSpace(name: CGColorSpace.sRGB)!
 
-    /// Bundled engines: $HALO_ENGINES_DIR, else walk up from this file to a checkout's Engines/dist.
+    /// Bundled engines: $ANYFMT_ENGINES_DIR, else walk up from this file to a checkout's Engines/dist.
     static let locator: EngineLocator = {
         var dirs: [URL] = []
-        if let d = ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"], !d.isEmpty {
+        if let d = ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"], !d.isEmpty {
             dirs.append(URL(fileURLWithPath: d).appendingPathComponent("Helpers"))
         }
         var dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
@@ -29,7 +29,7 @@ enum G1 {
 
     static func tempDir(_ name: String = #function) throws -> URL {
         let safe = name.replacingOccurrences(of: "()", with: "")
-        let u = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g1-\(safe)-\(UUID().uuidString.prefix(8))", isDirectory: true)
+        let u = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-g1-\(safe)-\(UUID().uuidString.prefix(8))", isDirectory: true)
         try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
         return u
     }
@@ -141,7 +141,7 @@ enum G1 {
             XCTAssertTrue(FileManager.default.fileExists(atPath: f.path))
         }
         // Scratch folders must be gone.
-        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: out.path))?.filter { $0.hasPrefix(".halo-scratch") } ?? []
+        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: out.path))?.filter { $0.hasPrefix(".anyfmt-scratch") } ?? []
         XCTAssertEqual(leftovers, [])
         return result.files
     }

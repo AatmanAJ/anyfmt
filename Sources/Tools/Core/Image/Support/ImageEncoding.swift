@@ -131,7 +131,7 @@ public enum ToolImageFormats {
         [Formats.jpg, Formats.heic, Formats.heif, Formats.webp, Formats.avif, Formats.jp2].contains(format)
     }
 
-    /// True when Halo can write `format` (natively or via ffmpeg).
+    /// True when anyfmt can write `format` (natively or via ffmpeg).
     public static func canWrite(_ format: FormatID) -> Bool {
         format == Formats.webp || format == Formats.avif || destinationType(for: format) != nil
     }
@@ -164,7 +164,7 @@ struct ToolOutput {
 
     func url(for format: FormatID) throws -> URL { try url(ext: Formats.extension(for: format)) }
 
-    var scratch: URL { request.outputDirectory.appendingPathComponent(".halo-scratch-\(UUID().uuidString)", isDirectory: true) }
+    var scratch: URL { request.outputDirectory.appendingPathComponent(".anyfmt-scratch-\(UUID().uuidString)", isDirectory: true) }
 
     /// Writes `data` to a fresh URL and returns it.
     func write(_ data: Data, ext: String) throws -> URL {

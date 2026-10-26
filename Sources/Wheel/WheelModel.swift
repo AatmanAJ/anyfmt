@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import UniformTypeIdentifiers
 
 /// The three wheels: Shift → convert, Command → tools, Control → actions.

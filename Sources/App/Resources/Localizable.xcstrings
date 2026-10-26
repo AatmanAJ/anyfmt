@@ -98,7 +98,9 @@
     "%lld parts · lossless" : {},
     "%lld parts · re-encoded at exact times" : {},
     "%lld PDFs" : {},
-    "%lld px" : {},
+    "%lld px" : {
+      "extractionState" : "stale"
+    },
     "%lld running · %@" : {},
     "%lld s" : {},
     "%lld s left" : {},
@@ -106,7 +108,9 @@
     "%lld separate files" : {},
     "%lld videos" : {},
     "%lld · %@" : {},
-    "%lld × %lld" : {},
+    "%lld × %lld" : {
+      "extractionState" : "stale"
+    },
     "%lld × %lld → %lld × %lld px" : {},
     "%lld%%" : {},
     "%lld%% larger" : {},
@@ -201,6 +205,9 @@
     "Annotation canvas" : {},
     "Annotation text" : {},
     "another Mac" : {},
+    "ANYFMT1-…" : {
+      "comment" : "Placeholder for the licence key field"
+    },
     "Anyone with the link can download. Choose how long it lasts." : {},
     "App Exposé" : {},
     "Appearance" : {
@@ -287,7 +294,9 @@
     "Close Shelf" : {},
     "Close Window" : {},
     "Cloud conversion" : {},
-    "Cloud features are optional" : {},
+    "Cloud features are optional" : {
+      "extractionState" : "stale"
+    },
     "Cloud is optional" : {},
     "Code from the sign-in page" : {},
     "Collage" : {},
@@ -331,7 +340,9 @@
     "Copied to the clipboard" : {},
     "Copied “%@”" : {},
     "Copied “%@” to “%@”, but couldn’t remove the original." : {},
-    "Copies technical details for a bug report" : {},
+    "Copies technical details for a bug report" : {
+      "extractionState" : "stale"
+    },
     "Copies the audio without re-encoding. Cuts land within a few milliseconds of your marks." : {},
     "Copies the versions, the engine’s last output and what was tried, for a bug report" : {},
     "Copy" : {},
@@ -394,7 +405,8 @@
       "comment" : "Demo GIF caption"
     },
     "Drag a file, tap ⇧ Shift: every format it can become" : {
-      "comment" : "Demo GIF caption"
+      "comment" : "Demo GIF caption",
+      "extractionState" : "stale"
     },
     "Drag across the waveform to mark a bleep" : {},
     "Drag across the waveform to mark what to bleep" : {},
@@ -420,8 +432,12 @@
     "Drag.\nTap.\nDrop." : {
       "comment" : "Onboarding demo headline, one word per line"
     },
-    "Drag. Press. Drop." : {},
-    "Drag. Tap. Drop." : {},
+    "Drag. Press. Drop." : {
+      "extractionState" : "stale"
+    },
+    "Drag. Tap. Drop." : {
+      "extractionState" : "stale"
+    },
     "Draw" : {},
     "Drop files" : {
       "comment" : "Hub text of the empty drop ring"
@@ -543,11 +559,10 @@
     "Green" : {},
     "Grid" : {},
     "H" : {},
-    "HALO1-…" : {
-      "comment" : "Placeholder for the licence key field"
-    },
     "Haptic feedback" : {},
-    "Have a Pro key or account?" : {},
+    "Have a Pro key or account?" : {
+      "extractionState" : "stale"
+    },
     "Height" : {},
     "Held %@ for %@ — not a tap" : {},
     "Hidden formats stay available from the command line." : {},
@@ -744,7 +759,9 @@
     "No permissions\nneeded." : {
       "comment" : "Onboarding permissions headline; keep each line short"
     },
-    "No permissions needed" : {},
+    "No permissions needed" : {
+      "extractionState" : "stale"
+    },
     "No permissions? Use the Services menu" : {},
     "No presets for %@ yet." : {},
     "no sound" : {},
@@ -759,11 +776,15 @@
     "Not Now" : {},
     "Not synced yet" : {},
     "Nothing converted yet" : {},
-    "Nothing local ever needs a key. Skipping changes nothing." : {},
+    "Nothing local ever needs a key. Skipping changes nothing." : {
+      "extractionState" : "stale"
+    },
     "Nothing readable in this picture. A closer, sharper shot of the code usually works." : {},
     "Nothing to convert" : {},
     "Nothing to set: converting to %@ has no options." : {},
-    "Nothing yet" : {},
+    "Nothing yet" : {
+      "extractionState" : "stale"
+    },
     "Off by default. Needs the two permissions below. Return still renames in text fields." : {},
     "Office pack" : {},
     "OK" : {},
@@ -798,7 +819,9 @@
     "Optional. Pro adds cloud features like share links and cloud conversions. Nothing local ever needs a key, so skipping changes nothing." : {
       "comment" : "Onboarding activation page"
     },
-    "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account." : {},
+    "Optional. Pro adds cloud features like share links and cloud conversions. You can do this later in Settings › Account." : {
+      "extractionState" : "stale"
+    },
     "Optional: press Return in Finder to open the wheel" : {},
     "Options" : {},
     "Or sign in to your account" : {
@@ -932,7 +955,9 @@
     "Ready when\nyou drag." : {
       "comment" : "Onboarding launch-at-login headline; keep each line short"
     },
-    "Ready when you drag" : {},
+    "Ready when you drag" : {
+      "extractionState" : "stale"
+    },
     "Receive files from your phone or browser" : {},
     "Recent Conversions" : {},
     "Recent Move folders" : {},
@@ -947,7 +972,8 @@
     "Regular" : {},
     "Relaxed" : {},
     "Remember as default for %@" : {
-      "comment" : "Options panel checkbox, e.g. Remember as default for GIF"
+      "comment" : "Options panel checkbox, e.g. Remember as default for GIF",
+      "extractionState" : "stale"
     },
     "Remember as default for GIF" : {},
     "Remove" : {},
@@ -1049,7 +1075,9 @@
     "Select files and press Return instead of dragging. This one extra needs the permissions below." : {
       "comment" : "Onboarding: the Finder shortcut toggle"
     },
-    "Select files and press Return instead of dragging. This one extra needs two permissions:" : {},
+    "Select files and press Return instead of dragging. This one extra needs two permissions:" : {
+      "extractionState" : "stale"
+    },
     "Select files in Finder first, or drop files on the ring." : {},
     "Selection" : {},
     "Selects the new file in a Finder window." : {},
@@ -1141,7 +1169,9 @@
     "Stay up\nto date." : {
       "comment" : "Onboarding updates headline; keep each line short"
     },
-    "Stay up to date" : {},
+    "Stay up to date" : {
+      "extractionState" : "stale"
+    },
     "Step %lld of %lld" : {},
     "stereo" : {},
     "Stereo" : {},
@@ -1158,22 +1188,26 @@
     "Sync Now" : {},
     "Tap" : {},
     "Tap %@ or %@ mid-drag for the other wheels." : {},
-    "Tap detected ✓ %@" : {},
+    "Tap detected ✓ %@" : {
+      "extractionState" : "stale"
+    },
     "Tap detected: %@" : {},
     "Tap once mid-drag. Holds and combinations are ignored, so Finder’s ⌘ and ⌥ drag shortcuts keep working. Choosing a key that’s in use swaps the two." : {},
     "Tap speed" : {},
     "Tap ⌃ Control: AirDrop, Float, Copy, Move, Path, Terminal" : {
-      "comment" : "Demo GIF caption"
+      "comment" : "Demo GIF caption",
+      "extractionState" : "stale"
     },
     "Tap ⌘ Command: tools for this file" : {
-      "comment" : "Demo GIF caption"
+      "comment" : "Demo GIF caption",
+      "extractionState" : "stale"
     },
     "Target size" : {},
     "Target size in megabytes" : {},
     "Terminal opens in the folder of %@" : {},
     "Text" : {},
     "That cloud action isn’t turned on." : {},
-    "That doesn’t look like a licence key. It starts with HALO1-." : {},
+    "That doesn’t look like a licence key. It starts with ANYFMT1-." : {},
     "That doesn’t look like a server address." : {},
     "That file is larger than your plan allows (%@)." : {},
     "That file is larger than your plan allows." : {},
@@ -1226,7 +1260,9 @@
     "This uploads" : {
       "comment" : "Upload notice headline"
     },
-    "This uploads to %@." : {},
+    "This uploads to %@." : {
+      "extractionState" : "stale"
+    },
     "Time %@ of %@" : {},
     "Title" : {},
     "To" : {},
@@ -1245,11 +1281,16 @@
     "Turn speech in audio or video into SRT or VTT subtitles, using GPUs on the server." : {},
     "Two-pass encode that lands within a few percent of the size, sound included." : {},
     "Type a shortcut" : {},
-    "Type shortcut…" : {},
+    "Type shortcut…" : {
+      "extractionState" : "stale"
+    },
     "Undo" : {},
     "Unit" : {},
     "Unlimited share links" : {},
     "Updates" : {},
+    "updating" : {
+      "comment" : "Estimate caption while a fresh estimate is measured"
+    },
     "Upload" : {},
     "Uploads and copies the link" : {},
     "Uploads to %@" : {},

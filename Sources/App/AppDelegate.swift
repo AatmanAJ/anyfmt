@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 @main
 @MainActor
@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         if AppShellUI.handleLaunchArguments() { NSApp.terminate(nil); return }
+        LegacyBrandMigration.runIfNeeded()
         let c = AppCoordinator(launch: launch)
         c.start()
         coordinator = c

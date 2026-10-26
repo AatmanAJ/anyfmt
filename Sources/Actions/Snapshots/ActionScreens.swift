@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Offscreen renders of the actions' UI for docs/screens (D-025: UI tests
 /// can't run unattended, so screens are rendered from views directly).
@@ -235,7 +235,7 @@ enum SampleArt {
         }
     }
 
-    static func cg(_ hex: Int, alpha: CGFloat = 1) -> CGColor { NSColor.halo((light: hex, dark: hex)).withAlphaComponent(alpha).cgColor }
+    static func cg(_ hex: Int, alpha: CGFloat = 1) -> CGColor { NSColor.anyfmt((light: hex, dark: hex)).withAlphaComponent(alpha).cgColor }
 
     static func linear(_ ctx: CGContext, _ colors: [Int], from: CGPoint, to: CGPoint) {
         let cs = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()

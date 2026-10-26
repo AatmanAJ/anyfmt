@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 // Shared shell for every tool editor (BUILD.md §7): live preview, before/after
 // toggle, options sidebar, "Save copy" primary pill, Esc closes.
@@ -87,7 +87,7 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
                     if let s = model.statusLine {
                         Text(s)
                             .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium).monospacedDigit())
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                             .lineLimit(1).truncationMode(.middle)
                     }
                     Spacer(minLength: 0)
@@ -97,11 +97,11 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
                 VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
                     DisplayText(EditorTitle.display(model.tool), size: EditorTokens.titleSize)
                         .lineLimit(1)
-                        .foregroundStyle(Color.haloInk)
+                        .foregroundStyle(Color.anyfmtInk)
                         .accessibilityAddTraits(.isHeader)
                     Text(model.editorSubject)
                         .font(.system(size: DesignTokens.TypeRamp.label, weight: .medium))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .lineLimit(1).truncationMode(.middle)
                 }
                 .padding(.bottom, DesignTokens.Space.l)
@@ -113,13 +113,13 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
                 }
                 HStack(spacing: DesignTokens.Space.s) {
                     Button(String(localized: "Cancel"), action: onClose)
-                        .buttonStyle(.haloQuiet)
+                        .buttonStyle(.anyfmtQuiet)
                         .keyboardShortcut(.cancelAction)
                     Spacer(minLength: 0)
                     Button(String(localized: "Save copy")) {
                         onSave(EditorResult(tool: model.tool.id, inputs: model.inputs, options: model.options))
                     }
-                    .buttonStyle(HaloPillButtonStyle(kind: .primary, large: true))
+                    .buttonStyle(AnyfmtPillButtonStyle(kind: .primary, large: true))
                     .keyboardShortcut(.defaultAction)
                     .disabled(!model.canSave)
                 }
@@ -130,9 +130,9 @@ public struct EditorShell<Model: ToolEditorModel, Preview: View, Sidebar: View>:
         .buttonStyle(.editorChip)
         .toggleStyle(.editorSwitch)
         .padding(EditorTokens.gutter)
-        .foregroundStyle(Color.haloInk, Color.haloSecondaryText)
+        .foregroundStyle(Color.anyfmtInk, Color.anyfmtSecondaryText)
         .tint(Color.iris)
-        .background(Color.haloWindow.ignoresSafeArea())
+        .background(Color.anyfmtWindow.ignoresSafeArea())
     }
 }
 
@@ -155,7 +155,7 @@ public final class EditorWindow: NSWindowController, NSWindowDelegate {
         window.styleMask = [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView]
         // The chrome is the window: near-black (dark) or white (light), up into the title bar.
         window.titlebarAppearsTransparent = true
-        window.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
+        window.backgroundColor = .anyfmt(DesignTokens.Semantic.windowBackground)
         window.setContentSize(size)
         window.contentMinSize = NSSize(width: 760, height: 480)
         window.isReleasedWhenClosed = false

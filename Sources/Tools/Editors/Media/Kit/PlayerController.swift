@@ -1,7 +1,7 @@
 import AppKit
 import AVFoundation
 import Combine
-import HaloCore
+import AnyfmtCore
 
 /// AVPlayer wrapper for the editors: frame-exact, coalesced seeking (only one
 /// seek in flight; the latest request wins), frame stepping, range looping,

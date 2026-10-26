@@ -6,7 +6,7 @@ ENGINES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=versions.env
 source "$ENGINES_DIR/versions.env"
 
-WORK="${HALO_ENGINES_WORK:-$ENGINES_DIR/build}"
+WORK="${ANYFMT_ENGINES_WORK:-$ENGINES_DIR/build}"
 SRC="$WORK/src"
 PREFIX="$WORK/prefix"
 DIST="$ENGINES_DIR/dist"

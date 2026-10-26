@@ -2,9 +2,9 @@ import AppKit
 import ApplicationServices
 import CoreServices
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
-/// The only permissions Halo can ever ask for. The wheel needs none (D-001);
+/// The only permissions anyfmt can ever ask for. The wheel needs none (D-001);
 /// these exist solely for the opt-in Finder Return shortcut (D-004).
 enum OptionalPermission: String, CaseIterable, Identifiable, Sendable {
     case accessibility
@@ -233,7 +233,7 @@ struct PermissionRow: View {
                 Label { Text("Granted") } icon: { Image(systemName: "checkmark.circle.fill") }
                     .labelStyle(.titleAndIcon)
                     .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-                    .foregroundStyle(Color.haloSuccess)
+                    .foregroundStyle(Color.anyfmtSuccess)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                     .accessibilityIdentifier("permission.\(permission.rawValue).granted")
             } else {

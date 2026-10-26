@@ -1,7 +1,7 @@
 import XCTest
 import AppKit
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Drives the real Settings window offscreen (fully transparent, never key).
 @MainActor

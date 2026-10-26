@@ -1,7 +1,7 @@
 import AppKit
 import AVFoundation
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Thumbnails for the filmstrip, sized to the strip: as many frames as fit
 /// at the video's aspect ratio, evenly spaced, loaded progressively.
@@ -108,14 +108,14 @@ struct TimeRuler: View {
             var m = (axis.start / minor).rounded(.up) * minor
             while m <= axis.end {
                 let x = axis.x(m)
-                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 3)), with: .color(Color.haloSecondaryText.opacity(0.6)))
+                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 3)), with: .color(Color.anyfmtSecondaryText.opacity(0.6)))
                 m += minor
             }
             while t <= axis.end + 1e-9 {
                 let x = axis.x(t)
-                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 6)), with: .color(Color.haloSecondaryText))
+                ctx.fill(Path(CGRect(x: x, y: 0, width: 1, height: 6)), with: .color(Color.anyfmtSecondaryText))
                 let text = Text(MediaTimes.timecode(t, fraction: step < 1 ? 2 : 0)).font(MediaStyle.caption().monospacedDigit())
-                    .foregroundColor(Color.haloSecondaryText)
+                    .foregroundColor(Color.anyfmtSecondaryText)
                 let resolved = ctx.resolve(text)
                 let w = resolved.measure(in: size).width
                 let lx = min(max(0, x - w / 2), size.width - w)
@@ -173,7 +173,7 @@ struct FilmstripTimeline: View {
                         selectionOverlay(sel, axis: axis, height: geo.size.height)
                     }
                     if let ghost, selection != nil {
-                        // Where a lossless cut really lands: dashed white with a dark halo.
+                        // Where a lossless cut really lands: dashed white with a dark anyfmt.
                         OverlayStroke(path: Path(CGRect(x: axis.x(ghost.lowerBound), y: 6,
                                                         width: max(2, axis.x(ghost.upperBound) - axis.x(ghost.lowerBound)),
                                                         height: geo.size.height - 12)),

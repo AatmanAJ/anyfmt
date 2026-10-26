@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Cloud jobs end to end: upload → job → poll → download → placed beside
 /// the original (never overwriting), progress phases, cancel.

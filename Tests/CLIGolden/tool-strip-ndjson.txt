@@ -1,4 +1,4 @@
-$ halo tool meta.strip <tmp>/photo.png --json
+$ anyfmt tool meta.strip <tmp>/photo.png --json
 exit: 0
 --- stdout
 {"event":"start","jobs":1}

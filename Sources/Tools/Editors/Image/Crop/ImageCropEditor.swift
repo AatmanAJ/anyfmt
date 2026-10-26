@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Which part of the crop frame a drag grabbed.
 enum ImageCropHandle: CaseIterable, Hashable {
@@ -211,7 +211,7 @@ struct ImageCropCanvas: View {
             }
             .fill(EditorPalette.overlayHalo.opacity(contrast == .increased ? o.dimIncreased : o.dim), style: FillStyle(eoFill: true))
 
-            // Rule of thirds: quiet white lines with a dark halo.
+            // Rule of thirds: quiet white lines with a dark anyfmt.
             OverlayStroke(path: Path { p in
                 for i in 1...2 {
                     let x = crop.minX + crop.width * CGFloat(i) / 3, y = crop.minY + crop.height * CGFloat(i) / 3
@@ -242,7 +242,7 @@ struct ImageCropCanvas: View {
         .accessibilityHint(String(localized: "Drag to move or resize. Arrow keys nudge by one pixel, with Shift by ten."))
     }
 
-    /// Cobalt corner brackets (dark halo, white rim) plus square handles on the edges.
+    /// Cobalt corner brackets (dark anyfmt, white rim) plus square handles on the edges.
     private func handles(_ r: CGRect) -> some View {
         let o = EditorTokens.Overlay.self
         let len = min(o.cornerLength, min(r.width, r.height) / 3)
@@ -353,12 +353,12 @@ struct ImageCropSidebar: View {
         ImageEditorKit.Section(String(localized: "Size")) {
             HStack(alignment: .firstTextBaseline) {
                 Text(verbatim: "\(Int(model.cropPixels.width.rounded())) × \(Int(model.cropPixels.height.rounded()))")
-                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayM))
+                    .font(.anyfmtDisplay(DesignTokens.Typeface.Size.displayM))
                     .displayTracking(DesignTokens.Typeface.Size.displayM)
                     .monospacedDigit()
                     .lineLimit(1).minimumScaleFactor(0.6)
                     .accessibilityLabel(ImageEditorKit.pixelText(model.cropPixels))
-                Text("px").font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold)).foregroundStyle(Color.haloSecondaryText)
+                Text("px").font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold)).foregroundStyle(Color.anyfmtSecondaryText)
                 Spacer()
                 Button(String(localized: "Reset")) { model.reset() }
                     .disabled(model.isFullFrame && model.aspect == "free")

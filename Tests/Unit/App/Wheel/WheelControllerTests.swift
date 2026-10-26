@@ -1,8 +1,8 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 @testable import RadialMenu
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 private struct FakeEntitlements: Entitlements {
     var isSignedIn: Bool
@@ -266,17 +266,17 @@ final class WheelControllerTests: XCTestCase {
 final class WheelGalleryTests: XCTestCase {
     /// Dev hook: `TEST_RUNNER_HALO_GALLERY_OUT=<dir> xcodebuild test …` writes the full-size gallery there.
     func testRenderGalleryToRequestedDirectory() throws {
-        guard let out = ProcessInfo.processInfo.environment["HALO_GALLERY_OUT"], !out.isEmpty else {
-            throw XCTSkip("set HALO_GALLERY_OUT to render the gallery")
+        guard let out = ProcessInfo.processInfo.environment["ANYFMT_GALLERY_OUT"], !out.isEmpty else {
+            throw XCTSkip("set ANYFMT_GALLERY_OUT to render the gallery")
         }
         let files = try WheelGallery.renderAll(to: URL(fileURLWithPath: out), scale: 2)
         XCTAssertFalse(files.isEmpty)
     }
 
-    /// Dev hook: opens the interactive gallery window and captures it into HALO_GALLERY_OUT.
+    /// Dev hook: opens the interactive gallery window and captures it into ANYFMT_GALLERY_OUT.
     func testGalleryWindowCapture() async throws {
-        guard let out = ProcessInfo.processInfo.environment["HALO_GALLERY_OUT"], !out.isEmpty else {
-            throw XCTSkip("set HALO_GALLERY_OUT to capture the gallery window")
+        guard let out = ProcessInfo.processInfo.environment["ANYFMT_GALLERY_OUT"], !out.isEmpty else {
+            throw XCTSkip("set ANYFMT_GALLERY_OUT to capture the gallery window")
         }
         WheelGallery.showWindow()
         try await Task.sleep(nanoseconds: 1_500_000_000)

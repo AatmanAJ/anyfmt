@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Colours and small building blocks shared by the media editors. Everything
 /// comes from `DesignTokens`; colours resolve per appearance (light, dark,
@@ -10,9 +10,9 @@ enum MediaStyle {
 
     static let accent = Color.iris
     static let mint = Color.mint
-    static let danger = Color.haloDanger
-    static let success = Color.haloSuccess
-    static let ink = Color.haloInk
+    static let danger = Color.anyfmtDanger
+    static let success = Color.anyfmtSuccess
+    static let ink = Color.anyfmtInk
     static let warning = EditorPalette.warning
 
     /// Timeline geometry.
@@ -76,7 +76,7 @@ struct InfoRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label).foregroundStyle(Color.haloSecondaryText)
+            Text(label).foregroundStyle(Color.anyfmtSecondaryText)
             Spacer(minLength: DesignTokens.Space.s)
             Text(value).fontWeight(.semibold).monospacedDigit().multilineTextAlignment(.trailing)
         }
@@ -96,13 +96,13 @@ struct KeyHints: View {
                 HStack(spacing: DesignTokens.Space.s) {
                     Text(h.key)
                         .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.haloInk)
+                        .foregroundStyle(Color.anyfmtInk)
                         .padding(.horizontal, DesignTokens.Space.s).padding(.vertical, DesignTokens.Space.xxs)
                         .frame(minWidth: EditorTokens.keyCapMinWidth)
                         .background(Capsule().fill(EditorPalette.chip))
-                        .overlay(Capsule().strokeBorder(contrast == .increased ? Color.haloSecondaryText : Color.haloHairline,
+                        .overlay(Capsule().strokeBorder(contrast == .increased ? Color.anyfmtSecondaryText : Color.anyfmtHairline,
                                                         lineWidth: DesignTokens.Shape.hairline))
-                    Text(h.action).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText)
+                    Text(h.action).font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText)
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -115,12 +115,12 @@ struct KeyHints: View {
 struct Note: View {
     let systemImage: String
     let text: String
-    var tint: Color = Color.haloSecondaryText
+    var tint: Color = Color.anyfmtSecondaryText
 
     var body: some View {
         HStack(alignment: .top, spacing: DesignTokens.Space.s) {
             Image(systemName: systemImage).foregroundStyle(tint).frame(width: 16)
-            Text(text).font(MediaStyle.caption()).foregroundStyle(Color.haloSecondaryText).fixedSize(horizontal: false, vertical: true)
+            Text(text).font(MediaStyle.caption()).foregroundStyle(Color.anyfmtSecondaryText).fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
     }

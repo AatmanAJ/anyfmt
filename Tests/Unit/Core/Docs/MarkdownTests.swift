@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class MarkdownTests: XCTestCase {
     private func blocks(_ md: String) -> [DocBlock] { MarkdownReader.parse(md).blocks }
@@ -37,7 +37,7 @@ final class MarkdownTests: XCTestCase {
         XCTAssertEqual(inlines("[x](https://e.org \"t\")"), [.link(url: "https://e.org", [.text("x")])])
         XCTAssertEqual(inlines("[x](<a b.html>)"), [.link(url: "a b.html", [.text("x")])])
         XCTAssertEqual(inlines("[x](u(1))"), [.link(url: "u(1)", [.text("x")])])
-        XCTAssertEqual(inlines("<https://halo.example/a>"), [.link(url: "https://halo.example/a", [.text("https://halo.example/a")])])
+        XCTAssertEqual(inlines("<https://anyfmt.example/a>"), [.link(url: "https://anyfmt.example/a", [.text("https://anyfmt.example/a")])])
         XCTAssertEqual(inlines("<me@example.com>"), [.link(url: "mailto:me@example.com", [.text("me@example.com")])])
         XCTAssertEqual(inlines("see https://example.org/x."), [.text("see "), .link(url: "https://example.org/x", [.text("https://example.org/x")]), .text(".")])
         XCTAssertEqual(inlines("[*em* link](/u)"), [.link(url: "/u", [.emphasis([.text("em")]), .text(" link")])])
@@ -144,8 +144,8 @@ final class MarkdownTests: XCTestCase {
     func testFixtureParsesEveryConstruct() throws {
         let url = try DocsFixtures.url("sample.md")
         let doc = try DocumentIO.read(url, format: Formats.md)
-        XCTAssertEqual(doc.metadata.title, "Halo Markdown Sample")
-        XCTAssertEqual(doc.headings().map(\.1), ["Halo Markdown Sample", "Setext heading", "Lists", "Table"])
+        XCTAssertEqual(doc.metadata.title, "anyfmt Markdown Sample")
+        XCTAssertEqual(doc.headings().map(\.1), ["anyfmt Markdown Sample", "Setext heading", "Lists", "Table"])
         XCTAssertNotNil(doc.firstTable())
         XCTAssertEqual(doc.lists().count, 2)
         XCTAssertEqual(doc.allImages.first?.data != nil, true, "relative image resolved next to the file")

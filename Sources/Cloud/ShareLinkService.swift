@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Asks once per server before the first upload ("This uploads to {server}").
 /// The app's implementation shows `UploadNoticeView`; tests answer directly.

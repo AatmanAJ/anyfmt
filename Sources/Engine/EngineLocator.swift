@@ -3,7 +3,7 @@ import Foundation
 /// Finds bundled engine binaries (ffmpeg, ffprobe, resvg) and optional packs.
 ///
 /// Search order:
-/// 1. `HALO_ENGINES_DIR` environment variable (dev, tests, worktrees). Points at
+/// 1. `ANYFMT_ENGINES_DIR` environment variable (dev, tests, worktrees). Points at
 ///    a directory containing `Helpers/` (Engines/dist layout).
 /// 2. The app bundle: `<App>.app/Contents/Helpers`.
 /// 3. Next to the running executable (the CLI lives in Contents/Helpers).
@@ -18,7 +18,7 @@ public struct EngineLocator: Sendable {
     static func defaultDirectories() -> [URL] {
         var dirs: [URL] = []
         let env = ProcessInfo.processInfo.environment
-        if let d = env["HALO_ENGINES_DIR"], !d.isEmpty {
+        if let d = env["ANYFMT_ENGINES_DIR"], !d.isEmpty {
             dirs.append(URL(fileURLWithPath: d).appendingPathComponent("Helpers"))
         }
         let bundle = Bundle.main.bundleURL

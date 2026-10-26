@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 // Shared phase 2 components (PLAN-PHASE2 §2). Every surface builds from these:
@@ -9,7 +9,7 @@ import SwiftUI
 /// Pill buttons. Primary: cobalt with white text (5.0:1). Secondary: orange with
 /// black text (9.6:1). Quiet: no fill. Disabled lowers opacity *and* keeps the
 /// label, so state never rides on colour alone.
-struct HaloPillButtonStyle: ButtonStyle {
+struct AnyfmtPillButtonStyle: ButtonStyle {
     enum Kind { case primary, secondary, quiet }
     var kind: Kind = .primary
     var large = false
@@ -42,27 +42,27 @@ struct HaloPillButtonStyle: ButtonStyle {
         switch kind {
         case .primary: Color(hex: DesignTokens.Semantic.onAccentPrimary)
         case .secondary: Color(hex: DesignTokens.Semantic.onAccentSecondary)
-        case .quiet: Color.haloSecondaryText
+        case .quiet: Color.anyfmtSecondaryText
         }
     }
 }
 
-extension ButtonStyle where Self == HaloPillButtonStyle {
-    static var haloPrimary: HaloPillButtonStyle { HaloPillButtonStyle(kind: .primary) }
-    static var haloSecondary: HaloPillButtonStyle { HaloPillButtonStyle(kind: .secondary) }
-    static var haloQuiet: HaloPillButtonStyle { HaloPillButtonStyle(kind: .quiet) }
+extension ButtonStyle where Self == AnyfmtPillButtonStyle {
+    static var anyfmtPrimary: AnyfmtPillButtonStyle { AnyfmtPillButtonStyle(kind: .primary) }
+    static var anyfmtSecondary: AnyfmtPillButtonStyle { AnyfmtPillButtonStyle(kind: .secondary) }
+    static var anyfmtQuiet: AnyfmtPillButtonStyle { AnyfmtPillButtonStyle(kind: .quiet) }
 }
 
 extension View {
     /// A charcoal bento tile (one radius: `Shape.tile`).
-    func haloTile(padding: CGFloat = DesignTokens.Component.Tile.padding) -> some View {
+    func anyfmtTile(padding: CGFloat = DesignTokens.Component.Tile.padding) -> some View {
         self.padding(padding)
-            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+            .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
     }
 
     /// The window surface: near-black in dark (the hero), white in light.
-    func haloWindowBackground() -> some View {
-        background(Color.haloWindow.ignoresSafeArea())
+    func anyfmtWindowBackground() -> some View {
+        background(Color.anyfmtWindow.ignoresSafeArea())
     }
 }
 
@@ -80,9 +80,9 @@ struct DisplayText: View {
 
     var body: some View {
         Text(verbatim: uppercase ? text.localizedUppercase : text)
-            .font(.haloDisplay(size))
+            .font(.anyfmtDisplay(size))
             .displayTracking(size)
-            .foregroundStyle(Color.haloInk)
+            .foregroundStyle(Color.anyfmtInk)
             .lineLimit(2)
             .minimumScaleFactor(0.6)
     }
@@ -98,7 +98,7 @@ struct StatNumeral: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
             Text(verbatim: value)
-                .font(.haloDisplay(size))
+                .font(.anyfmtDisplay(size))
                 .displayTracking(size)
                 .monospacedDigit()
                 .lineLimit(1)
@@ -106,9 +106,9 @@ struct StatNumeral: View {
             Text(verbatim: caption)
                 .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
                 .opacity(hero ? 0.85 : 1)
-                .foregroundStyle(hero ? Color(hex: DesignTokens.Primitive.ink1000) : Color.haloSecondaryText)
+                .foregroundStyle(hero ? Color(hex: DesignTokens.Primitive.ink1000) : Color.anyfmtSecondaryText)
         }
-        .foregroundStyle(hero ? Color(hex: DesignTokens.Primitive.ink1000) : Color.haloInk)
+        .foregroundStyle(hero ? Color(hex: DesignTokens.Primitive.ink1000) : Color.anyfmtInk)
         .padding(DesignTokens.Component.Tile.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
@@ -116,7 +116,7 @@ struct StatNumeral: View {
                 BandGradient(bands: Array(DesignTokens.Band.heat.dropLast(2)), flat: DesignTokens.Band.heatFlat)
                     .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
             } else {
-                RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile)
+                RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile)
             }
         }
         .accessibilityElement(children: .combine)
@@ -125,7 +125,7 @@ struct StatNumeral: View {
 
 /// The named motion curves (DesignTokens.Curve) as SwiftUI animations.
 /// `reduceMotion` swaps any of them for the short crossfade.
-enum HaloMotion {
+enum AnyfmtMotion {
     case snap, glide, settle, exit
 
     func animation(reduceMotion: Bool = false) -> Animation {

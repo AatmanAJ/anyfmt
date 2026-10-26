@@ -1,6 +1,6 @@
 import Foundation
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 /// Preferences for the Control-wheel actions, stored in `UserDefaults`.
 /// Inject a suite (`UserDefaults(suiteName:)`) in tests.

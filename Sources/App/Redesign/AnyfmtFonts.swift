@@ -1,11 +1,11 @@
 import AppKit
 import CoreText
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// The bundled display face (Inter Display, SIL OFL 1.1, LICENSES/inter-4.1).
 /// Registered for this process only, so nothing is installed system-wide.
-enum HaloFonts {
+enum AnyfmtFonts {
     /// Runs once, thread-safely (a lazy static).
     private static let registration: Void = {
         let urls = (Bundle.main.urls(forResourcesWithExtension: "ttf", subdirectory: nil) ?? [])
@@ -27,8 +27,8 @@ enum HaloFonts {
 
 extension Font {
     /// Heavy uppercase display type with the token tracking applied by `.displayTracking(size)`.
-    static func haloDisplay(_ size: CGFloat, black: Bool = true) -> Font {
-        Font(HaloFonts.display(size, black: black))
+    static func anyfmtDisplay(_ size: CGFloat, black: Bool = true) -> Font {
+        Font(AnyfmtFonts.display(size, black: black))
     }
 }
 
@@ -44,7 +44,7 @@ extension Color {
     init(hex: Int) { self.init(nsColor: NSColor(hex: hex)) }
 
     /// A semantic token pair resolved for the view's appearance.
-    static func token(_ pair: (light: Int, dark: Int)) -> Color { Color(nsColor: .halo(pair)) }
+    static func token(_ pair: (light: Int, dark: Int)) -> Color { Color(nsColor: .anyfmt(pair)) }
 }
 
 /// Hard-edged vertical bands, each a short top-to-bottom fade into the next

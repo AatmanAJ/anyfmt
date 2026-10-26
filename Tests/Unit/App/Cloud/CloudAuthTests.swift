@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Browser sign-in with PKCE against the mock server, token refresh,
 /// sign-out, server URL handling.
@@ -251,7 +251,7 @@ final class CloudAuthTests: MockServerTestCase {
     func testValidateServerAgainstMock() async throws {
         let f = try fixture()
         await f.services.session.validateServer(mock.baseURL.absoluteString)
-        XCTAssertEqual(f.services.session.serverCheck, .ok(name: "Halo Mock"))
+        XCTAssertEqual(f.services.session.serverCheck, .ok(name: "anyfmt Mock"))
         await f.services.session.validateServer("http://example.com")
         guard case .failed = f.services.session.serverCheck else { return XCTFail("plain http to another host must be refused") }
         await f.services.session.validateServer("")
@@ -262,9 +262,9 @@ final class CloudAuthTests: MockServerTestCase {
         let f = try fixture()
         try await f.signIn()
         let s = f.services.session
-        XCTAssertTrue(s.setServer("https://halo.example.org"))
+        XCTAssertTrue(s.setServer("https://anyfmt.example.org"))
         XCTAssertFalse(f.state.snapshot.isSignedIn, "no account on the new server")
-        XCTAssertEqual(f.services.preferences.serverURL.absoluteString, "https://halo.example.org")
+        XCTAssertEqual(f.services.preferences.serverURL.absoluteString, "https://anyfmt.example.org")
         XCTAssertTrue(s.setServer(mock.baseURL.absoluteString))
         XCTAssertTrue(f.state.snapshot.isSignedIn, "back on the mock: still signed in there")
         s.resetServerToDefault()
@@ -276,14 +276,14 @@ final class CloudAuthTests: MockServerTestCase {
         func parse(_ s: String) -> String? { try? CloudServerAddress.parse(s).get().absoluteString }
         XCTAssertEqual(parse("cloud.example.com"), "https://cloud.example.com")
         XCTAssertEqual(parse(" https://Cloud.Example.com/ "), "https://cloud.example.com")
-        XCTAssertEqual(parse("https://example.com/halo/"), "https://example.com/halo")
+        XCTAssertEqual(parse("https://example.com/anyfmt/"), "https://example.com/anyfmt")
         XCTAssertEqual(parse("http://localhost:8787"), "http://localhost:8787")
         XCTAssertEqual(parse("http://127.0.0.1:9"), "http://127.0.0.1:9")
         XCTAssertNil(parse("http://example.com"), "plain http off this Mac")
         XCTAssertNil(parse("https://example.com/?a=1"))
         XCTAssertNil(parse("https://user:pw@example.com"))
         XCTAssertNil(parse(""))
-        XCTAssertEqual(CloudServerAddress.accountKey(for: URL(string: "https://example.com:8443/halo")!), "example.com:8443/halo")
+        XCTAssertEqual(CloudServerAddress.accountKey(for: URL(string: "https://example.com:8443/anyfmt")!), "example.com:8443/anyfmt")
         XCTAssertEqual(CloudServerAddress.origin(of: URL(string: "https://example.com/x")!), "https://example.com:443")
         XCTAssertNotEqual(CloudServerAddress.origin(of: URL(string: "http://localhost:5/")!),
                           CloudServerAddress.origin(of: URL(string: "http://127.0.0.1:5/")!))

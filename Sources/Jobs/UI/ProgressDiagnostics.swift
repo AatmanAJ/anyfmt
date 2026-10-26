@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Turns a failed job's raw details into the "Copy details" report: the
 /// versions (app, macOS, engines), the job and its route, the engine's exit

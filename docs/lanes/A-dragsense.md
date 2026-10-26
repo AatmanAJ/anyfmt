@@ -3,7 +3,7 @@
 `Packages/DragSense` is a standalone MIT SwiftPM package (macOS 13+, Swift 6
 language mode, strict concurrency). It does global file-drag and modifier-tap
 detection with no TCC permission. It's the Phase 0 winner (D-001)
-productionised, and it knows nothing about Halo or about file conversion.
+productionised, and it knows nothing about anyfmt or about file conversion.
 
 Status: **done**. `swift test`: 97 tests, 0 failures, ~0.02 s. Clean build
 with zero warnings. No contract changes needed.

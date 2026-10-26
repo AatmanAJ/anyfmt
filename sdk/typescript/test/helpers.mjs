@@ -89,14 +89,14 @@ export async function appAccessToken(baseUrl, email = 'aj@example.com') {
   const verifier = randomBytes(32).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const q = new URLSearchParams({
-    response_type: 'code', client_id: 'halo-mac', redirect_uri: 'halo://auth/callback',
+    response_type: 'code', client_id: 'anyfmt-mac', redirect_uri: 'anyfmt://auth/callback',
     code_challenge: challenge, code_challenge_method: 'S256', state: randomBytes(12).toString('hex'),
   });
   const auth = await fetch(`${baseUrl}/v1/auth/authorize?${q}`, { redirect: 'manual' });
   const code = new URL(auth.headers.get('location')).searchParams.get('code');
   const tok = await fetch(`${baseUrl}/v1/auth/token`, {
     method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'authorization_code', code, code_verifier: verifier, redirect_uri: 'halo://auth/callback', client_id: 'halo-mac' }),
+    body: new URLSearchParams({ grant_type: 'authorization_code', code, code_verifier: verifier, redirect_uri: 'anyfmt://auth/callback', client_id: 'anyfmt-mac' }),
   });
   return (await tok.json()).access_token;
 }

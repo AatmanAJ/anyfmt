@@ -13,8 +13,8 @@ tone() { ff -filter_complex "$TONE[a]" -map "[a]" "$@"; }
 movie() { ff -filter_complex "$PICT[v];$TONE[a]" -map "[v]" -map "[a]" "$@"; }
 
 # ---------------------------------------------------------------- audio (2 s stereo tone)
-tone -c:a libmp3lame -b:a 128k -id3v2_version 3 -metadata title="Halo Tone" -metadata artist="Halo" "$OUT/sample.mp3"
-tone -c:a aac_at -b:a 128k -metadata title="Halo Tone" "$OUT/sample.m4a"
+tone -c:a libmp3lame -b:a 128k -id3v2_version 3 -metadata title="anyfmt Tone" -metadata artist="anyfmt" "$OUT/sample.mp3"
+tone -c:a aac_at -b:a 128k -metadata title="anyfmt Tone" "$OUT/sample.m4a"
 tone -c:a pcm_s16le "$OUT/sample.wav"
 tone -c:a flac "$OUT/sample.flac"
 tone -c:a libvorbis -q:a 4 "$OUT/sample.ogg"
@@ -26,7 +26,7 @@ tone -c:a wmav2 -b:a 128k -f asf "$OUT/sample.wma"
 # Audio edge cases
 ff -filter_complex "testsrc2=size=96x96:rate=1:duration=1[v]" -map "[v]" -frames:v 1 -c:v png "$OUT/edge-cover.png"
 ff -i "$OUT/edge-cover.png" -filter_complex "$TONE[a]" -map "[a]" -map 0:v -c:a libmp3lame -b:a 128k -c:v copy -disposition:v:0 attached_pic \
-     -id3v2_version 3 -metadata title="Covered" -metadata artist="Halo" "$OUT/edge-cover.mp3"
+     -id3v2_version 3 -metadata title="Covered" -metadata artist="anyfmt" "$OUT/edge-cover.mp3"
 ff -filter_complex "aevalsrc=0.3*sin(2*PI*1000*t)|0.3*sin(2*PI*1500*t):s=96000:d=2[a]" -map "[a]" \
    -c:a flac -sample_fmt s32 -bits_per_raw_sample 24 "$OUT/edge-24bit.flac"
 ff -filter_complex "aevalsrc=0.2*sin(2*PI*220*t)|0.2*sin(2*PI*330*t)|0.2*sin(2*PI*440*t)|0.1*sin(2*PI*60*t)|0.2*sin(2*PI*550*t)|0.2*sin(2*PI*660*t):s=48000:d=1:c=5.1[a]" \
@@ -193,7 +193,7 @@ Second, no blank line before
 EOF
 
 cat > "$OUT/edge-header-blocks.vtt" <<'EOF'
-WEBVTT - Halo edge cases
+WEBVTT - anyfmt edge cases
 Kind: captions
 Language: en
 

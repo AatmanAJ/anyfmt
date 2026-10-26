@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Router memoisation (lane C owns Router internals) and executor step cleanup.
 final class RouterMemoTests: JobsTestCase {

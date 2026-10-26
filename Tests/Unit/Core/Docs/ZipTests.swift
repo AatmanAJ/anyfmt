@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class ZipTests: XCTestCase {
     func testCRC32KnownValues() {
@@ -12,7 +12,7 @@ final class ZipTests: XCTestCase {
     }
 
     func testDeflateRoundTripIncludingLargeInput() throws {
-        let text = Data(String(repeating: "Halo deflate round trip. ", count: 50_000).utf8)
+        let text = Data(String(repeating: "anyfmt deflate round trip. ", count: 50_000).utf8)
         let packed = try Deflate.compress(text)
         XCTAssertLessThan(packed.count, text.count / 10)
         XCTAssertEqual(try Deflate.decompress(packed, expectedSize: text.count), text)

@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for onboarding and About (PLAN-PHASE2 §2, "Onboarding" mood):
 // full-bleed pages, a left-aligned editorial column, heavy uppercase headlines,

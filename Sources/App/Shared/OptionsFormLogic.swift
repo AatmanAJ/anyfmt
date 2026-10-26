@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// The pure rules behind `OptionsForm`: visibility, value coercion and the
 /// parsing/validation of text-encoded kinds. Kept free of SwiftUI so it is

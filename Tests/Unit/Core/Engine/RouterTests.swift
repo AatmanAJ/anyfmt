@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// A fake engine so router tests don't depend on lanes.
 private struct FakeEngine: ConversionEngine {

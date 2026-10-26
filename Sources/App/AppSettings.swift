@@ -1,6 +1,6 @@
 import AppKit
 import Combine
-import HaloCore
+import AnyfmtCore
 
 /// Every user setting, persisted in UserDefaults. The Settings window edits
 /// this; the drag sensor, wheel, job queue and actions read snapshots from it.

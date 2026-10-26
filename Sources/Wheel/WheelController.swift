@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 import UniformTypeIdentifiers
 
@@ -31,7 +31,7 @@ public final class WheelController: NSObject {
     /// Presets shown as chips (and "Last used").
     public var presetStore: PresetStore = .shared
     /// Chip id for the last options used with a format.
-    public static let lastUsedPresetID = "halo.last-used"
+    public static let lastUsedPresetID = "anyfmt.last-used"
     /// Timing hook: called when the window server reports the panel visible.
     public var markVisible: (() -> Void)?
     /// The visible wheel changed (including fallbacks to Actions).

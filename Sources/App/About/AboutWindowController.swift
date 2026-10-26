@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// About window: icon, version, the open-source promise, engine credits.
 @MainActor
@@ -27,7 +27,7 @@ final class AboutWindowController: NSWindowController, NSWindowDelegate {
     init(info: AppInfo, engines: [EngineInfo]) {
         self.info = info
         self.engines = engines
-        let window = HaloWindow(contentRect: NSRect(origin: .zero, size: Self.contentSize),
+        let window = AnyfmtWindow(contentRect: NSRect(origin: .zero, size: Self.contentSize),
                                 styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: true)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
@@ -77,7 +77,7 @@ struct AboutView: View {
 
             HStack(alignment: .bottom, spacing: DesignTokens.Space.l) {
                 Text(verbatim: Brand.name.localizedUppercase)
-                    .font(.haloDisplay(DesignTokens.Typeface.Size.displayXL))
+                    .font(.anyfmtDisplay(DesignTokens.Typeface.Size.displayXL))
                     .displayTracking(DesignTokens.Typeface.Size.displayXL)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
@@ -93,7 +93,7 @@ struct AboutView: View {
 
             Text("Version \(info.version) (\(info.build))")
                 .font(.system(size: DesignTokens.TypeRamp.body).monospacedDigit())
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
                 .textSelection(.enabled)
                 .padding(.top, DesignTokens.Space.xxs)
 
@@ -117,26 +117,26 @@ struct AboutView: View {
 
             HStack(alignment: .center) {
                 Button("Licences…") { BundledEngines.revealLicences() }
-                    .buttonStyle(.haloSecondary)
+                    .buttonStyle(.anyfmtSecondary)
                     .accessibilityIdentifier("about.licences")
                 Spacer(minLength: DesignTokens.Space.s)
                 Text("Copyright © 2026 the \(Brand.name) contributors.")
                     .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
             .padding(.vertical, DesignTokens.Space.l)
         }
         .padding(.horizontal, margin)
         .frame(width: AboutWindowController.contentSize.width, height: AboutWindowController.contentSize.height, alignment: .top)
-        .foregroundStyle(Color.haloInk)
+        .foregroundStyle(Color.anyfmtInk)
         .ignoresSafeArea()
-        .haloWindowBackground()
+        .anyfmtWindowBackground()
     }
 
     private var credits: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Built with")
-                .font(.haloDisplay(DesignTokens.Component.Onboarding.tagSize))
+                .font(.anyfmtDisplay(DesignTokens.Component.Onboarding.tagSize))
                 .displayTracking(DesignTokens.Component.Onboarding.tagSize)
                 .textCase(.uppercase)
                 .padding(.horizontal, DesignTokens.Space.l)
@@ -152,11 +152,11 @@ struct AboutView: View {
                                 .lineLimit(1)
                             Text(verbatim: e.version)
                                 .font(.system(size: DesignTokens.TypeRamp.label).monospacedDigit())
-                                .foregroundStyle(Color.haloSecondaryText)
+                                .foregroundStyle(Color.anyfmtSecondaryText)
                             Spacer(minLength: DesignTokens.Space.s)
                             Text(verbatim: e.licence)
                                 .font(.system(size: DesignTokens.TypeRamp.caption))
-                                .foregroundStyle(Color.haloSecondaryText)
+                                .foregroundStyle(Color.anyfmtSecondaryText)
                                 .lineLimit(1)
                                 .help(Text(verbatim: e.licence))
                         }
@@ -164,7 +164,7 @@ struct AboutView: View {
                     }
                     Text("And macOS’s \(BundledEngines.systemFrameworks.joined(separator: ", ")).")
                         .font(.system(size: DesignTokens.TypeRamp.caption))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, DesignTokens.Space.xs)
                 }
@@ -177,7 +177,7 @@ struct AboutView: View {
                                  startPoint: .top, endPoint: .bottom))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.haloTile))
+        .background(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous).fill(Color.anyfmtTile))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Credits"))
     }

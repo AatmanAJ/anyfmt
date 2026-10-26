@@ -1,7 +1,7 @@
 import AppKit
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 @MainActor
 final class ClipboardActionTests: XCTestCase {
@@ -107,7 +107,7 @@ final class ClipboardActionTests: XCTestCase {
         return ActionPerformer(preferences: ActionPreferences(defaults: makeTestDefaults()),
                                pasteboard: pasteboard,
                                shelf: makeTestShelf(presenter: presenter),
-                               intake: PromiseIntake(root: FileManager.default.temporaryDirectory.appendingPathComponent("halo-r-\(UUID().uuidString)")),
+                               intake: PromiseIntake(root: FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-r-\(UUID().uuidString)")),
                                appLookup: { _ in nil },
                                openTerminal: { _ in },
                                chooseDestination: { _, _, _ in nil },

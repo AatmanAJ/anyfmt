@@ -1,6 +1,6 @@
 import AppKit
 import ApplicationServices
-import HaloCore
+import AnyfmtCore
 
 /// Opt-in "press Return on a Finder selection to open the wheel" (D-004).
 /// Needs Accessibility (an active event tap that can swallow Return before

@@ -313,7 +313,7 @@ public enum Estimator {
         let whole = duration <= length * 1.25
         let start = whole || fromStart ? 0 : (duration - length) / 2
 
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-estimate-\(UUID().uuidString)", isDirectory: true)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-estimate-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let ctx = AVConversionPlanner.Context(input: env.input, output: dir.appendingPathComponent("sample").appendingPathExtension(Formats.extension(for: env.target)),
@@ -441,7 +441,7 @@ public enum Estimator {
             est.duration = facts.duration
         }
         let outPixels = Double(out.0 * out.1)
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-estimate-\(UUID().uuidString)", isDirectory: true)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-estimate-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
 
@@ -548,7 +548,7 @@ public enum Estimator {
         guard let full = pagePixels(page, dpi: dpi) else { return est }
         est.pixelSize = CGSize(width: full.0, height: full.1)
 
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-estimate-\(UUID().uuidString)", isDirectory: true)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-estimate-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let fullPixels = Double(full.0 * full.1)

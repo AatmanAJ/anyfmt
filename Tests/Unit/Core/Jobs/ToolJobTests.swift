@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 private struct FakeToolRunner: ToolRunner {
     let id: ToolID

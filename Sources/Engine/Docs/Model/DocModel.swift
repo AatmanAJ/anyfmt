@@ -1,6 +1,6 @@
 import Foundation
 
-/// Halo's format-neutral document model. Every document reader produces one
+/// anyfmt's format-neutral document model. Every document reader produces one
 /// and every writer consumes one, so N readers + M writers give N×M routes
 /// without lossy intermediate files.
 public struct DocModel: Sendable, Hashable {

@@ -1,7 +1,7 @@
 import XCTest
 import ImageIO
 import CoreGraphics
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Shared helpers for lane D tests: tiny generated images, conversions through an
 /// engine with an explicit locator, and pixel/metadata readers.
@@ -9,9 +9,9 @@ enum ImageTestSupport {
     static let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
     static let p3 = CGColorSpace(name: CGColorSpace.displayP3)!
 
-    /// Bundled engines: HALO_ENGINES_DIR, else walk up from this file to a checkout's Engines/dist.
+    /// Bundled engines: ANYFMT_ENGINES_DIR, else walk up from this file to a checkout's Engines/dist.
     static let enginesDir: URL? = {
-        if let d = ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"], !d.isEmpty {
+        if let d = ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"], !d.isEmpty {
             let u = URL(fileURLWithPath: d)
             if FileManager.default.isExecutableFile(atPath: u.appendingPathComponent("Helpers/ffmpeg").path) { return u }
         }
@@ -28,7 +28,7 @@ enum ImageTestSupport {
         guard let enginesDir else { return EngineLocator(helperDirectories: []) }
         // Engines' isAvailable reads EngineLocator.shared; point it at the bundled engines
         // before anything touches it (it is initialised lazily on first use).
-        setenv("HALO_ENGINES_DIR", enginesDir.path, 0)
+        setenv("ANYFMT_ENGINES_DIR", enginesDir.path, 0)
         return EngineLocator(helperDirectories: [enginesDir.appendingPathComponent("Helpers")])
     }()
 
@@ -44,7 +44,7 @@ enum ImageTestSupport {
 
     static func tempDir(_ name: String = #function) throws -> URL {
         let safe = name.filter { $0.isLetter || $0.isNumber }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("halo-imgtests-\(safe)-\(UUID().uuidString.prefix(8))", isDirectory: true)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-imgtests-\(safe)-\(UUID().uuidString.prefix(8))", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

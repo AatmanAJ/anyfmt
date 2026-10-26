@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// What a licence can prove offline: a plan and a seat count, for a time window.
 ///

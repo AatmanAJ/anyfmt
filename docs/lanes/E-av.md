@@ -278,11 +278,11 @@ is skipped. The run takes 23 s.
 To run them:
 
 ```bash
-xcodebuild -project Halo.xcodeproj -derivedDataPath build/DerivedData -scheme Halo -configuration Debug test \
-  -only-testing:CoreTests/AVPlannerTests   # etc.; the target is CoreTests, not HaloCoreTests
+xcodebuild -project anyfmt.xcodeproj -derivedDataPath build/DerivedData -scheme anyfmt -configuration Debug test \
+  -only-testing:CoreTests/AVPlannerTests   # etc.; the target is CoreTests, not AnyfmtCoreTests
 ```
 
-The tests find the engines through `HALO_ENGINES_DIR`, or by walking up from
+The tests find the engines through `ANYFMT_ENGINES_DIR`, or by walking up from
 the test file to a checkout with `Engines/dist`. They generate fixtures once
 per run by calling `Tests/Fixtures/lanes/av.sh`.
 
@@ -309,7 +309,7 @@ Detail in `docs/contract-changes/E-av.md`.
 - **E-2** `audioLossless.bitDepth` needs a "Keep" default. Today's "16" default truncates 24-bit sources (with dither).
 - **E-3** `FFmpegProgressParser` reports 1.0 on `progress=end` even after SIGTERM. Lane E caps it locally.
 - **E-4** Let lane C use `AVRoutes.resourceClass(for:options:)` for its queue class.
-- **E-5** Nits: the `-only-testing` target name is `CoreTests`; empty source directories need `.gitkeep`; three new `L()` keys need syncing; there is no `lavfi` device in the bundled ffmpeg; and a Release `halo-matrix` fails to load the ad-hoc HaloCore under hardened runtime, so `make matrix` needs a Config fix.
+- **E-5** Nits: the `-only-testing` target name is `CoreTests`; empty source directories need `.gitkeep`; three new `L()` keys need syncing; there is no `lavfi` device in the bundled ffmpeg; and a Release `anyfmt-matrix` fails to load the ad-hoc AnyfmtCore under hardened runtime, so `make matrix` needs a Config fix.
 
 ## Licences and size
 

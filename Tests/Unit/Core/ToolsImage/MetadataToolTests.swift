@@ -3,7 +3,7 @@ import CoreGraphics
 import ImageIO
 import PDFKit
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class MetadataToolTests: XCTestCase {
     private var dir: URL!

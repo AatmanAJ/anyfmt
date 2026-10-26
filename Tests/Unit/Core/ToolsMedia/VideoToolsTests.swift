@@ -1,6 +1,6 @@
 import XCTest
 import ImageIO
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Tools 12–18 end to end with the bundled ffmpeg.
 final class VideoToolsTests: XCTestCase {

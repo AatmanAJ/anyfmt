@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Settings › Account. Calm and optional: the app is complete without it.
 /// The Settings lane hosts this view as a tab with `CloudServices.shared.session`.
@@ -22,7 +22,7 @@ struct AccountSettingsView: View {
             serverSection
         }
         .formStyle(.grouped)
-        .toggleStyle(HaloSwitchStyle())
+        .toggleStyle(AnyfmtSwitchStyle())
         .frame(minWidth: 480, idealWidth: 520)
         .onAppear { serverText = session.serverURL.absoluteString }
         .onChange(of: session.serverURL) { serverText = $0.absoluteString }
@@ -50,7 +50,7 @@ struct AccountSettingsView: View {
                 HStack {
                     Spacer()
                     Button(String(localized: "Sign In…")) { session.signIn() }
-                        .buttonStyle(.haloPrimary)
+                        .buttonStyle(.anyfmtPrimary)
                         .accessibilityHint(Text("Opens \(session.serverDisplayName) in your browser"))
                 }
             case .waitingForBrowser, .signingIn:
@@ -63,7 +63,7 @@ struct AccountSettingsView: View {
                     CloudStatusLine(text: error, tone: .error)
                     Spacer(minLength: Space.s)
                     Button(String(localized: "Dismiss")) { session.lastError = nil }
-                        .buttonStyle(.haloQuiet)
+                        .buttonStyle(.anyfmtQuiet)
                         .accessibilityLabel(Text("Dismiss this message"))
                 }
             }
@@ -101,7 +101,7 @@ struct AccountSettingsView: View {
                     .font(.system(size: TypeRamp.body))
                 Spacer()
                 Button(String(localized: "Cancel")) { session.cancelSignIn() }
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
             }
             .accessibilityElement(children: .combine)
             if session.status == .waitingForBrowser {
@@ -154,7 +154,7 @@ struct AccountSettingsView: View {
         HStack {
             Spacer()
             Button(String(localized: "Sign Out")) { Task { await session.signOut() } }
-                .buttonStyle(.haloQuiet)
+                .buttonStyle(.anyfmtQuiet)
                 .accessibilityHint(Text("Local conversions keep working after you sign out"))
         }
     }

@@ -1,6 +1,6 @@
 # Onboarding: 5-minute hand check
 
-Run on the dev Mac, ideally on a spare user account so your own Halo setup is
+Run on the dev Mac, ideally on a spare user account so your own anyfmt setup is
 untouched. Everything here is also covered offscreen
 (`OnboardingPermissionPathsTests`, `OnboardingModelTests`, renders in
 `docs/screens/onboarding/`) and by the UI test (`make uitest`, which needs
@@ -12,7 +12,7 @@ judge: real TCC prompts and how the flow feels.
 ```bash
 scripts/reset-first-run.sh          # dry run: read what it will do
 scripts/reset-first-run.sh --yes    # do it (app data goes to the Trash, not deleted)
-make build && open build/DerivedData/Build/Products/Debug/Halo.app
+make build && open build/DerivedData/Build/Products/Debug/anyfmt.app
 ```
 
 ## 1. Welcome → demo (1 min)
@@ -36,13 +36,13 @@ make build && open build/DerivedData/Build/Products/Debug/Halo.app
 
 ## 3. Launch at login, updates (30 s)
 
-- [ ] The launch-at-login switch really adds Halo to System Settings › General › Login Items.
+- [ ] The launch-at-login switch really adds anyfmt to System Settings › General › Login Items.
 - [ ] Updates are off unless you turn them on. With them off, `make netcheck` style:
-      Halo opens no sockets.
+      anyfmt opens no sockets.
 
 ## 4. Optional activation (1 min)
 
-- [ ] The last page says it's optional. **Start Using Halo** finishes without a key.
+- [ ] The last page says it's optional. **Start Using anyfmt** finishes without a key.
 - [ ] Paste a test key (`swift scripts/licence-tool.swift issue --plan pro --seats 1 --days 30`):
       it shows "Pro licence, valid until …". A garbled key shows a plain error and
       doesn't replace a good one.

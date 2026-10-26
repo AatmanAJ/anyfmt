@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// AppSettings on a throwaway, suite-named UserDefaults.
 @MainActor
@@ -9,7 +9,7 @@ func makeSettings(file: StaticString = #filePath, line: UInt = #line) throws -> 
 }
 
 func makeDefaults(file: StaticString = #filePath, line: UInt = #line) throws -> (UserDefaults, () -> Void) {
-    let name = "dev.aiwithaj.halo.tests.\(UUID().uuidString)"
+    let name = "app.anyfmt.tests.\(UUID().uuidString)"
     let defaults = try XCTUnwrap(UserDefaults(suiteName: name), file: file, line: line)
     return (defaults, { defaults.removePersistentDomain(forName: name) })
 }

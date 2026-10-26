@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// The real login Keychain, under a throwaway service name that's deleted afterwards.
 final class KeychainStoreTests: XCTestCase {

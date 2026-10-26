@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct FormatsPane: View {
     @ObservedObject var model: SettingsModel
@@ -52,7 +52,7 @@ private struct FormatsBrowser: View {
             VStack(spacing: 0) {
                 HStack(spacing: DesignTokens.Space.s) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .accessibilityHidden(true)
                     TextField("", text: $search, prompt: Text("Search formats"))
                         .textFieldStyle(.plain)
@@ -61,7 +61,7 @@ private struct FormatsBrowser: View {
                     if !search.isEmpty {
                         Button { search = "" } label: { Image(systemName: "xmark.circle.fill") }
                             .buttonStyle(.plain)
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                             .accessibilityLabel(Text("Clear search"))
                     }
                 }
@@ -86,7 +86,7 @@ private struct FormatsBrowser: View {
                             if settings.favouriteFormats.isEmpty {
                                 Text("Star a format to pin it to the start of the ring.")
                                     .font(.system(size: DesignTokens.TypeRamp.label))
-                                    .foregroundStyle(Color.haloSecondaryText)
+                                    .foregroundStyle(Color.anyfmtSecondaryText)
                                     .listRowSeparator(.hidden)
                             }
                             ForEach(settings.favouriteFormats, id: \.self) { id in
@@ -181,7 +181,7 @@ private struct FormatSidebarRow: View {
             Spacer(minLength: DesignTokens.Space.xs)
             if hidden {
                 Image(systemName: "eye.slash")
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .help(Text("Hidden from the wheel"))
                     .accessibilityLabel(Text("Hidden from the wheel"))
             }
@@ -190,7 +190,7 @@ private struct FormatSidebarRow: View {
                 else { settings.favouriteFormats.append(format.id) }
             } label: {
                 Image(systemName: favourite ? "star.fill" : "star")
-                    .foregroundStyle(favourite ? Color.accentText : Color.haloSecondaryText)
+                    .foregroundStyle(favourite ? Color.accentText : Color.anyfmtSecondaryText)
             }
             .buttonStyle(.plain)
             .help(favourite ? Text("Remove from Favourites") : Text("Add to Favourites"))
@@ -234,7 +234,7 @@ private struct FormatDetail: View {
                         FormatChip(label: format.kind.sectionTitle, kind: format.kind)
                         Text(verbatim: format.extensions.prefix(4).map { ".\($0)" }.joined(separator: " "))
                             .font(.system(size: DesignTokens.TypeRamp.label).monospaced())
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                     }
                 }
                 .padding(.vertical, DesignTokens.Space.xs)
@@ -268,7 +268,7 @@ private struct FormatDetail: View {
             Section {
                 if schema.specs.isEmpty {
                     Text("Nothing to set: converting to \(format.label) has no options.")
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                 } else {
                     OptionsForm(schema: schema, values: valuesBinding)
                 }
@@ -320,7 +320,7 @@ private struct PresetsSection: View {
         Section {
             if model.presets.isEmpty {
                 Text("No presets for \(format.label) yet.")
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
             ForEach(model.presets) { preset in
                 PresetRow(preset: preset, model: model) {
@@ -330,7 +330,7 @@ private struct PresetsSection: View {
             }
             HStack {
                 Button("Save Current Defaults as Preset") { model.saveAsPreset(currentValues) }
-                    .buttonStyle(.haloSecondary)
+                    .buttonStyle(.anyfmtSecondary)
                     .accessibilityIdentifier("formats.presets.save")
                 Spacer()
             }
@@ -374,7 +374,7 @@ private struct PresetRow: View {
                 if !summary.isEmpty {
                     Text(verbatim: summary)
                         .font(.system(size: DesignTokens.TypeRamp.label))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .lineLimit(1)
                 }
             }
@@ -382,7 +382,7 @@ private struct PresetRow: View {
             if preset.isBuiltIn {
                 Text("Built-in")
                     .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                     .padding(.horizontal, DesignTokens.Space.s)
                     .padding(.vertical, DesignTokens.Space.xxs)
                     .background(Capsule().fill(Color.token(DesignTokens.Component.Settings.chipFill)))
@@ -525,7 +525,7 @@ private struct ToolsList: View {
                                         Text(verbatim: tool.title)
                                         Text(tool.needsEditor ? "Opens an editor with a live preview" : "Runs straight away with your defaults")
                                             .font(.system(size: DesignTokens.TypeRamp.label))
-                                            .foregroundStyle(Color.haloSecondaryText)
+                                            .foregroundStyle(Color.anyfmtSecondaryText)
                                     }
                                 }
                             }

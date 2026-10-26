@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import RadialMenu
 import SwiftUI
 
@@ -148,7 +148,7 @@ public enum WheelGallery {
                 host.layoutSubtreeIfNeeded()
                 guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { continue }
                 // Popover-like backing so the controls read correctly in both modes.
-                let background = NSColor.halo(DesignTokens.Semantic.windowBackground)
+                let background = NSColor.anyfmt(DesignTokens.Semantic.windowBackground)
                 if let ctx = NSGraphicsContext(bitmapImageRep: rep) {
                     NSGraphicsContext.saveGraphicsState()
                     NSGraphicsContext.current = ctx

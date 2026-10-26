@@ -28,17 +28,17 @@ for DOCX/PPTX/XLSX/EPUB/MD/HTML it should use its own id (e.g. `ooxml`, `markdow
 
 ## 3. Let unit tests see the bundled engines
 
-`EngineLocator.shared` reads `HALO_ENGINES_DIR`, but `xcodebuild test` doesn't reliably forward the shell's
-environment to the test process. Proposed (project.yml, scheme `Halo` → test):
+`EngineLocator.shared` reads `ANYFMT_ENGINES_DIR`, but `xcodebuild test` doesn't reliably forward the shell's
+environment to the test process. Proposed (project.yml, scheme `anyfmt` → test):
 
 ```yaml
     test:
       environmentVariables:
-        HALO_ENGINES_DIR: $(ENGINES_DIST)
+        ANYFMT_ENGINES_DIR: $(ENGINES_DIST)
 ```
 
 **Workaround.** `ImageTestSupport` finds `Engines/dist` by walking up from the test file, builds its own
-`EngineLocator` for every request, and `setenv`s `HALO_ENGINES_DIR` (no overwrite) before first use of
+`EngineLocator` for every request, and `setenv`s `ANYFMT_ENGINES_DIR` (no overwrite) before first use of
 `EngineLocator.shared`.
 
 ## 4. Matrix runner notes (Tests/Matrix, Phase 4)
@@ -51,7 +51,7 @@ environment to the test process. Proposed (project.yml, scheme `Halo` → test):
 - Lane D's own sweep (`ImageRouteSweepTests`) already validates every image row; its `validate(_:route:)`
   can be lifted into the matrix runner as-is.
 
-## 5. New localisable strings in HaloCore
+## 5. New localisable strings in AnyfmtCore
 
 Added via `L(...)`; please add to `Sources/Shared/Localizable.xcstrings` when merging:
 

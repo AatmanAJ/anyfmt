@@ -1,5 +1,5 @@
-$ halo convert <tmp>/photo.png --to nope
+$ anyfmt convert <tmp>/photo.png --to nope
 exit: 2
 --- stdout
 --- stderr
-error: unknown format “nope”. Try `halo formats`.
+error: unknown format “nope”. Try `anyfmt formats`.

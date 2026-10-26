@@ -1,6 +1,6 @@
 import Combine
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// This Mac's real data for sync, one small JSON document per namespace:
 ///

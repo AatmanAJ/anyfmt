@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// A browser sign-in the user started: the PKCE verifier and CSRF state we
 /// must see again in the callback. Lives in memory only.

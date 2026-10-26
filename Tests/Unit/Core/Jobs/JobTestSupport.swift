@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Engine whose behaviour is a closure, so each test says exactly what a hop does.
 struct ScriptedEngine: ConversionEngine {
@@ -105,7 +105,7 @@ class JobsTestCase: XCTestCase {
     var scratch: JobScratch!
 
     override func setUpWithError() throws {
-        root = FileManager.default.temporaryDirectory.appendingPathComponent("halo-jobs-tests-\(UUID().uuidString)", isDirectory: true)
+        root = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-jobs-tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         scratch = JobScratch(root: root.appendingPathComponent("scratch", isDirectory: true))
     }

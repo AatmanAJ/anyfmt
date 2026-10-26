@@ -2,13 +2,13 @@
   <img src="docs/screens/app-icon.png" width="128" alt="">
 </p>
 
-<h1 align="center">Halo</h1>
+<h1 align="center">anyfmt</h1>
 
 <p align="center"><b>Drag a file. Tap a key. Drop it on what you want.</b><br>
 A free, open-source file converter that lives in your Mac's menu bar.</p>
 
 <p align="center">
-  <img src="docs/screens/wheel-demo.gif" width="560" alt="Dragging a photo from Finder, tapping Shift, and dropping it on the JPG segment of Halo's wheel">
+  <img src="docs/screens/wheel-demo.gif" width="560" alt="Dragging a photo from Finder, tapping Shift, and dropping it on the JPG segment of anyfmt's wheel">
 </p>
 
 ---
@@ -33,10 +33,10 @@ Inspired by drag-to-convert tools.
 
 **Requirements:** a Mac with Apple silicon, macOS 13 Ventura or later.
 
-- Download the latest `Halo-x.y.z.dmg` from [Releases](https://github.com/aiwithaj/halo/releases) and drag Halo to Applications, or
-- `brew install --cask aiwithaj/tap/halo`
+- Download the latest `anyfmt-x.y.z.dmg` from [Releases](https://github.com/aiwithaj/anyfmt/releases) and drag anyfmt to Applications, or
+- `brew install --cask aiwithaj/tap/anyfmt`
 
-Halo appears in the menu bar. There's no Dock icon and no main window.
+anyfmt appears in the menu bar. There's no Dock icon and no main window.
 
 ## Using it
 
@@ -52,13 +52,13 @@ Halo appears in the menu bar. There's no Dock icon and no main window.
 - Hover over a format for a moment mid-drag (or right-click it in keyboard mode) to set **options**:
   quality, target size, DPI, codec and more.
 - **No dragging?** Select files in Finder and use **Finder › Services ›
-  Open in Halo Wheel** (bind it to any shortcut), or press **⌃⌥Space** to open an
+  Open in anyfmt Wheel** (bind it to any shortcut), or press **⌃⌥Space** to open an
   empty ring you can drop files onto.
 - Keys are remappable in **Settings › Keys**.
 
 ## Permissions, honestly
 
-**The wheel needs no permissions at all.** Halo watches the mouse button and
+**The wheel needs no permissions at all.** anyfmt watches the mouse button and
 modifier keys (the same public state any app can read) and the system drag
 pasteboard, which every app can read. It never logs keystrokes, and it can't:
 it doesn't see ordinary keys.
@@ -69,9 +69,9 @@ Two optional extras ask for more, and both are off until you turn them on:
 |---|---|---|
 | Press Return on a Finder selection to open the wheel | **Accessibility** | To catch Return before Finder starts renaming the file |
 | | **Automation → Finder** | To ask Finder which files are selected |
-| Export to `.pages` / open `.key` `.numbers` | **Automation → Pages / Keynote / Numbers** | Halo asks your installed iWork apps to do the conversion |
+| Export to `.pages` / open `.key` `.numbers` | **Automation → Pages / Keynote / Numbers** | anyfmt asks your installed iWork apps to do the conversion |
 
-Update checks are also opt-in. When they're on, Halo fetches an appcast once a
+Update checks are also opt-in. When they're on, anyfmt fetches an appcast once a
 day and sends nothing else.
 
 ## Formats
@@ -147,19 +147,19 @@ available from the CLI. What's not covered yet, and why, is in [docs/PARITY.md](
 
 ## Pro (optional, needs our servers)
 
-Halo makes money the way [Cap](https://cap.so) does: the app is free, and things
+anyfmt makes money the way [Cap](https://cap.so) does: the app is free, and things
 that cost us servers are paid. **Nothing that runs on your Mac is ever behind
 a paywall.** Pro adds share links, cloud conversions for heavy video, sync
 across Macs, an inbox from your phone, and GPU features (transcription,
 upscaling, HQ background removal). Pro segments carry a small cloud glyph, and
 the first upload always tells you which server it's going to. You can point
-Halo at your own server (Settings › Account › Server URL). The API contract is
+anyfmt at your own server (Settings › Account › Server URL). The API contract is
 in [`Server/openapi.yaml`](Server/openapi.yaml).
 
 ## Build from source
 
 ```bash
-git clone https://github.com/aiwithaj/halo && cd halo
+git clone https://github.com/aiwithaj/anyfmt && cd anyfmt
 make bootstrap   # build-machine tools (xcodegen, meson, ninja, nasm)
 make engines     # ffmpeg/ffprobe/resvg from pinned, checksummed sources
 make build
@@ -168,13 +168,13 @@ make matrix      # every conversion on a generated fixture → docs/MATRIX.md
 make dmg         # styled DMG (signed + notarized when credentials are present)
 ```
 
-You need Xcode 16+ (Swift 6) and Rust (for resvg). The `halo` command-line tool
-ships inside the app (`Halo.app/Contents/Helpers/halo`):
+You need Xcode 16+ (Swift 6) and Rust (for resvg). The `anyfmt` command-line tool
+ships inside the app (`anyfmt.app/Contents/Helpers/anyfmt`):
 
 ```bash
-halo convert IMG_0042.heic --to jpg --opt quality=85
-halo tool image.compress *.png --opt sizeMode=size --opt targetSize=500000
-halo formats
+anyfmt convert IMG_0042.heic --to jpg --opt quality=85
+anyfmt tool image.compress *.png --opt sizeMode=size --opt targetSize=500000
+anyfmt formats
 ```
 
 Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Decisions:
@@ -183,7 +183,7 @@ one row"): [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Licence
 
-Halo is **AGPL-3.0** ([LICENSE](LICENSE)). The two reusable pieces other Mac
+anyfmt is **AGPL-3.0** ([LICENSE](LICENSE)). The two reusable pieces other Mac
 developers may want are **MIT**:
 
 - [`Packages/DragSense`](Packages/DragSense): global file-drag + modifier-tap detection, no permissions
@@ -194,7 +194,7 @@ Store build possible while guaranteeing your code stays open source.
 
 ## Credits
 
-Halo stands on these projects, which are bundled unmodified (apart from one
+anyfmt stands on these projects, which are bundled unmodified (apart from one
 build-flag fix) with their licences in [`LICENSES/`](LICENSES/NOTICE.md),
 including a written source offer:
 [FFmpeg](https://ffmpeg.org) · [x264](https://www.videolan.org/developers/x264.html) ·

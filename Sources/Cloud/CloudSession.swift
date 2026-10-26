@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import HaloCore
+import AnyfmtCore
 
 /// Main-actor mirror of the cloud state for SwiftUI (Settings › Account,
 /// the explainer, share-link options). Every method that talks to a server

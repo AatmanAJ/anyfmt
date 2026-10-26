@@ -2,7 +2,7 @@ import XCTest
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class CompressImageTests: XCTestCase {
     private var dir: URL!

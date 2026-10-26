@@ -1,6 +1,6 @@
 import XCTest
-@testable import HaloApp
-@testable import HaloCore
+@testable import AnyfmtApp
+@testable import AnyfmtCore
 
 /// "Copy details": versions, the route, the engine's exit line and stderr tail,
 /// with the home folder written as ~.
@@ -13,7 +13,7 @@ final class ProgressDiagnosticsTests: XCTestCase {
 
     func testAddsEngineVersionsAndRedactsHome() {
         let raw = """
-        Halo 2.0 (200) · macOS 14.6.1 · arm64
+        anyfmt 2.0 (200) · macOS 14.6.1 · arm64
         Job: clip.mov → MP4
         Inputs: clip.mov (mov)
         Error: unreadable /Users/sam/Movies/clip.mov: moov atom not found
@@ -30,7 +30,7 @@ final class ProgressDiagnosticsTests: XCTestCase {
 
     func testKeepsTheStderrTail() {
         let stderr = (1...100).map { "line \($0)" }.joined(separator: "\n")
-        let raw = "Halo · macOS\nError: ffmpeg exited 1\n\(stderr)"
+        let raw = "anyfmt · macOS\nError: ffmpeg exited 1\n\(stderr)"
         let out = ProgressDiagnostics.report(raw, home: "/Users/nobody", engines: [])
         XCTAssertTrue(out.contains("ffmpeg exited 1"), "the engine's exit line stays")
         XCTAssertTrue(out.contains("line 100"))

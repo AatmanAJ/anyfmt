@@ -2,14 +2,14 @@ import XCTest
 import AppKit
 import CoreText
 import PDFKit
-@testable import HaloCore
+@testable import AnyfmtCore
 
-/// Bundled engines for tests: HALO_ENGINES_DIR, else the checkout's Engines/dist
+/// Bundled engines for tests: ANYFMT_ENGINES_DIR, else the checkout's Engines/dist
 /// found by walking up from this file (worktrees live inside the main checkout).
 enum TestEngines {
     static let locator: EngineLocator = {
         var dirs: [URL] = []
-        if let d = ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"], !d.isEmpty {
+        if let d = ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"], !d.isEmpty {
             dirs.append(URL(fileURLWithPath: d).appendingPathComponent("Helpers"))
         }
         var dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
@@ -48,7 +48,7 @@ enum TestEngines {
 actor MediaFixtures {
     static let store = MediaFixtures()
     private var built: Set<String> = []
-    let dir: URL = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g2-fixtures-\(ProcessInfo.processInfo.processIdentifier)")
+    let dir: URL = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-g2-fixtures-\(ProcessInfo.processInfo.processIdentifier)")
 
     static func url(_ name: String) async throws -> URL { try await store.make(name) }
 
@@ -91,7 +91,7 @@ actor MediaFixtures {
             try await TestEngines.ffmpeg(["-filter_complex", "sine=frequency=440:sample_rate=48000:duration=6,volume=0.12[a]",
                                           "-map", "[a]", "-ac", "2", "-c:a", "flac", u.path])
         case "pages.pdf":
-            try Self.makePDF(u, pages: 3, label: "Halo fixture page", imagePixels: (2400, 1800), outline: true)
+            try Self.makePDF(u, pages: 3, label: "anyfmt fixture page", imagePixels: (2400, 1800), outline: true)
         case "extra.pdf":
             try Self.makePDF(u, pages: 2, label: "Extra page", imagePixels: (800, 600), outline: false)
         case "text.pdf":
@@ -161,7 +161,7 @@ actor MediaFixtures {
 
 /// A fresh output directory per test, like the job layer's private temp dir.
 func makeOutputDirectory() throws -> URL {
-    let u = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g2-out-\(UUID().uuidString)")
+    let u = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-g2-out-\(UUID().uuidString)")
     try FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
     return u
 }
@@ -175,7 +175,7 @@ func runTool(_ runner: any ToolRunner, _ inputs: [URL], _ options: [String: Opti
     let out = try await runner.run(req, context: TestEngines.context)
     // Tools write only inside their output directory and clean their scratch.
     for f in out.files { XCTAssertEqual(f.deletingLastPathComponent().standardizedFileURL, dir.standardizedFileURL) }
-    let leftovers = (try FileManager.default.contentsOfDirectory(atPath: dir.path)).filter { $0.hasPrefix(".halo-scratch") }
+    let leftovers = (try FileManager.default.contentsOfDirectory(atPath: dir.path)).filter { $0.hasPrefix(".anyfmt-scratch") }
     XCTAssertTrue(leftovers.isEmpty, "scratch left behind: \(leftovers)")
     return (out, dir)
 }

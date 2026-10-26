@@ -1,6 +1,6 @@
 import Foundation
 import CryptoKit
-import HaloCore
+import AnyfmtCore
 
 // Wire types for Server/openapi.yaml. Field names match the contract
 // (camelCase), except the OAuth token response, which is RFC 6749 snake_case.

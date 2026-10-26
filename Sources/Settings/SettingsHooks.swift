@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Pieces of Settings that other lanes own. The app delegate wires these
 /// before the window first opens (`SettingsWindowController.hooks = …`).
@@ -116,7 +116,7 @@ enum BundledEngines {
 | Sparkle | 2.10.0 | SwiftPM, github.com/sparkle-project/Sparkle tag 2.10.0 | MIT | `Contents/Frameworks/Sparkle.framework` |
 """#
 
-    /// Apple frameworks and system tools Halo uses but doesn't redistribute.
+    /// Apple frameworks and system tools anyfmt uses but doesn't redistribute.
     static let systemFrameworks = ["ImageIO", "PDFKit", "AVFoundation", "VideoToolbox", "Vision", "WebKit", "Quick Look", "bsdtar"]
 
     /// Bundle.main/Contents/Resources/LICENSES (added to the bundle by the build).

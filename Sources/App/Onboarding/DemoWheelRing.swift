@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Fallback wheel for the onboarding demo, used until the real `RadialMenuView`
 /// is wired through `OnboardingHooks.demoWheel`. Drawn in the phase 2 wheel look:
@@ -97,7 +97,7 @@ struct DemoWheelRing: View {
         let isFormat = context.kind == .convert
         let size = isFormat ? T.formatLabel : T.toolLabel
         return Text(verbatim: seg.title.localizedUppercase)
-            .font(.haloDisplay(size, black: isFormat))
+            .font(.anyfmtDisplay(size, black: isFormat))
             .displayTracking(size)
             .multilineTextAlignment(.center)
             .lineLimit(isFormat ? 1 : 2)

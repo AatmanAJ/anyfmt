@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// "Local is sacred": signed out, every public cloud entry point makes zero
 /// requests, and the URLSession isn't even created. Verified with a
@@ -50,9 +50,9 @@ final class CloudGateTests: XCTestCase {
         s.session.setInboxEnabled(true)
         await s.session.signOut()
         // A callback with no sign-in in progress: recognised, never redeemed.
-        XCTAssertTrue(s.session.handleCallback(URL(string: "halo://auth/callback?code=abc&state=xyz")!))
+        XCTAssertTrue(s.session.handleCallback(URL(string: "anyfmt://auth/callback?code=abc&state=xyz")!))
         XCTAssertFalse(s.handleCallback(URL(string: "https://example.com/other")!))
-        await XCTAssertThrowsAsync(try await s.auth.completeSignIn(callbackURL: URL(string: "halo://auth/callback?code=abc&state=xyz")!))
+        await XCTAssertThrowsAsync(try await s.auth.completeSignIn(callbackURL: URL(string: "anyfmt://auth/callback?code=abc&state=xyz")!))
         await XCTAssertThrowsAsync(try await s.auth.completeSignIn(code: "abc"))
         await XCTAssertThrowsAsync(try await s.auth.refreshAccount())
 

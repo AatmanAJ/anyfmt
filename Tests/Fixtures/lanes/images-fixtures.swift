@@ -20,7 +20,7 @@ guard let p3 = CGColorSpace(name: CGColorSpace.displayP3), let srgb = CGColorSpa
 
 /// 640×480 test card: saturated P3 bars, a gradient, a corner marker (top-left red
 /// square, so orientation is visible) and a half-transparent band at the bottom.
-func card(width w: Int = 640, height h: Int = 480, space: CGColorSpace = p3, bits: Int = 8, alpha: Bool = true, label: String = "Halo") -> CGImage {
+func card(width w: Int = 640, height h: Int = 480, space: CGColorSpace = p3, bits: Int = 8, alpha: Bool = true, label: String = "anyfmt") -> CGImage {
     var info = alpha ? CGImageAlphaInfo.premultipliedLast.rawValue : CGImageAlphaInfo.noneSkipLast.rawValue
     if bits == 16 { info |= CGBitmapInfo.byteOrder16Little.rawValue }
     guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: bits, bytesPerRow: 0, space: space, bitmapInfo: info) else { fail("context") }
@@ -58,18 +58,18 @@ let cameraProps: [CFString: Any] = [
     kCGImagePropertyOrientation: 6,
     kCGImagePropertyDPIWidth: 144, kCGImagePropertyDPIHeight: 144,
     kCGImagePropertyTIFFDictionary: [
-        kCGImagePropertyTIFFOrientation: 6, kCGImagePropertyTIFFMake: "Halo", kCGImagePropertyTIFFModel: "Fixture Cam",
+        kCGImagePropertyTIFFOrientation: 6, kCGImagePropertyTIFFMake: "anyfmt", kCGImagePropertyTIFFModel: "Fixture Cam",
         kCGImagePropertyTIFFArtist: "Fixture Author", kCGImagePropertyTIFFSoftware: "images-fixtures",
     ],
     kCGImagePropertyExifDictionary: [
-        kCGImagePropertyExifDateTimeOriginal: "2026:10:18 12:00:00", kCGImagePropertyExifBodySerialNumber: "HALO-0001",
+        kCGImagePropertyExifDateTimeOriginal: "2026:10:18 12:00:00", kCGImagePropertyExifBodySerialNumber: "ANYFMT-0001",
         kCGImagePropertyExifLensModel: "Fixture 24mm", kCGImagePropertyExifISOSpeedRatings: [100], kCGImagePropertyExifFNumber: 2.8,
     ],
     kCGImagePropertyGPSDictionary: [
         kCGImagePropertyGPSLatitude: 51.5007, kCGImagePropertyGPSLatitudeRef: "N",
         kCGImagePropertyGPSLongitude: 0.1246, kCGImagePropertyGPSLongitudeRef: "W",
     ],
-    kCGImagePropertyIPTCDictionary: [kCGImagePropertyIPTCByline: ["Fixture Author"], kCGImagePropertyIPTCCity: "London", kCGImagePropertyIPTCKeywords: ["halo", "fixture"]],
+    kCGImagePropertyIPTCDictionary: [kCGImagePropertyIPTCByline: ["Fixture Author"], kCGImagePropertyIPTCCity: "London", kCGImagePropertyIPTCKeywords: ["anyfmt", "fixture"]],
 ]
 
 func write(_ name: String, _ uti: String, _ images: [(CGImage, [CFString: Any])], container: [CFString: Any]? = nil) {
@@ -103,13 +103,13 @@ write("sample.tga", "com.truevision.tga-image", [(srgbCard, [:])])
 write("sample.exr", "com.ilm.openexr-image", [(srgbCard, [:])])
 
 // Square icons at several sizes.
-func square(_ s: Int) -> CGImage { card(width: s, height: s, space: srgb, label: "Halo") }
+func square(_ s: Int) -> CGImage { card(width: s, height: s, space: srgb, label: "anyfmt") }
 write("sample.ico", "com.microsoft.ico", [16, 32, 48, 256].map { (square($0), [:]) })
 write("sample.icns", "com.apple.icns", [16, 32, 128, 256, 512].map { (square($0), [:]) })
 
 // Animated GIF: 5 frames, 100…500 ms, looping forever.
 let frames: [(CGImage, [CFString: Any])] = (0..<5).map { i in
-    let img = card(width: 320, height: 240, space: srgb, label: "Halo \(i + 1)")
+    let img = card(width: 320, height: 240, space: srgb, label: "anyfmt \(i + 1)")
     return (img, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.1 * Double(i + 1)]])
 }
 write("sample.gif", "com.compuserve.gif", frames, container: [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]])
@@ -123,7 +123,7 @@ func pdf(_ name: String, pages: Int, rotateSecond: Bool = false, scanned: Bool =
     let url = out.appendingPathComponent(name)
     try? FileManager.default.removeItem(at: url)
     var box = CGRect(x: 0, y: 0, width: 595.28, height: 841.89)
-    guard let ctx = CGContext(url as CFURL, mediaBox: &box, [kCGPDFContextTitle: "Halo fixture", kCGPDFContextCreator: "images-fixtures"] as CFDictionary) else { fail("pdf \(name)") }
+    guard let ctx = CGContext(url as CFURL, mediaBox: &box, [kCGPDFContextTitle: "anyfmt fixture", kCGPDFContextCreator: "images-fixtures"] as CFDictionary) else { fail("pdf \(name)") }
     for i in 1...pages {
         ctx.beginPDFPage(nil)
         if scanned {
@@ -136,7 +136,7 @@ func pdf(_ name: String, pages: Int, rotateSecond: Bool = false, scanned: Bool =
             ctx.setLineWidth(6)
             ctx.stroke(CGRect(x: 300, y: 620, width: 220, height: 140))
             let font = CTFontCreateWithName("Helvetica" as CFString, 22, nil)
-            for (n, line) in ["Halo fixture page \(i)", "The quick brown fox jumps over the lazy dog."].enumerated() {
+            for (n, line) in ["anyfmt fixture page \(i)", "The quick brown fox jumps over the lazy dog."].enumerated() {
                 let s = NSAttributedString(string: line, attributes: [NSAttributedString.Key(kCTFontAttributeName as String): font])
                 ctx.textPosition = CGPoint(x: 60, y: 520 - CGFloat(n) * 44)
                 CTLineDraw(CTLineCreateWithAttributedString(s), ctx)
@@ -167,7 +167,7 @@ let svg = """
   <rect x="4" y="4" width="152" height="92" rx="14" fill="url(#g)"/>
   <circle cx="40" cy="50" r="24" fill="#ffffff" fill-opacity="0.6"/>
   <path d="M90 30 L140 50 L90 70 Z" fill="#111111"/>
-  <text x="80" y="92" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ffffff">Halo</text>
+  <text x="80" y="92" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ffffff">anyfmt</text>
 </svg>
 """
 try? Data(svg.utf8).write(to: out.appendingPathComponent("sample.svg"))

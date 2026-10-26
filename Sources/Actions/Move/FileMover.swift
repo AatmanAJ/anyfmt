@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 public struct MovedItem: Equatable, Sendable {
     public let source: URL

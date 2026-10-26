@@ -32,9 +32,9 @@ Direction: PLAN-PHASE2 §2 and `docs/screens/after/direction/`.
 **Canvas marks**
 
 - Crop frames, selections, handles, the playhead and the lossless "ghost" are drawn as
-  a dark halo + white rim + cobalt core (`OverlayStroke`, `OverlayHandle`), so they
+  a dark anyfmt + white rim + cobalt core (`OverlayStroke`, `OverlayHandle`), so they
   read over bright, dark and blue footage alike. Increased Contrast thickens the core
-  and makes the halo opaque.
+  and makes the anyfmt opaque.
 - Crop shows a live size badge on the frame and the size as a big numeral in the sidebar.
 - No drop shadows: images get a hairline edge instead; the lifted collage photo is
   outlined in cobalt instead of floating on a shadow.

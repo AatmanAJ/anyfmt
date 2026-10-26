@@ -1,6 +1,6 @@
 import Foundation
 import os
-import HaloCore
+import AnyfmtCore
 
 /// Makes the one URLSession the cloud stack uses. Injectable so tests can
 /// register recording URLProtocols and count sessions.

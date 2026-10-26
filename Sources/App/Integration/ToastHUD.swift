@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// A brief confirmation near the drop point ("Copied 3 items", "Path copied"),
 /// in the progress cards' language: a charcoal pill (or tile, when it wraps),

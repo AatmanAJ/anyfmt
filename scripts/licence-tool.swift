@@ -1,5 +1,5 @@
 #!/usr/bin/env swift
-// Issues and checks Halo licence keys. See docs/LICENCE_KEYS.md.
+// Issues and checks anyfmt licence keys. See docs/LICENCE_KEYS.md.
 //
 //   swift scripts/licence-tool.swift issue --plan pro --seats 1 --days 365 [--kid kid-2026-1]
 //         [--email buyer@example.com] [--lid L-ABC] [--perpetual] [--issued-at <unix seconds>]
@@ -7,8 +7,8 @@
 //   swift scripts/licence-tool.swift keygen --kid kid-2027-1
 //
 // The private key is read from the login Keychain (service
-// dev.aiwithaj.halo.licence-signing, account = kid) through /usr/bin/security,
-// or from $HALO_LICENCE_SIGNING_KEY (base64 raw key) when set. Public keys are
+// app.anyfmt.licence-signing, account = kid) through /usr/bin/security,
+// or from $ANYFMT_LICENCE_SIGNING_KEY (base64 raw key) when set. Public keys are
 // read from Sources/Cloud/Licence/LicenceVerifier.swift, so there is one table.
 //
 // The format code below mirrors Sources/Cloud/Licence/LicenceKey.swift (a
@@ -18,7 +18,7 @@
 import CryptoKit
 import Foundation
 
-let signingService = "dev.aiwithaj.halo.licence-signing"
+let signingService = "app.anyfmt.licence-signing"
 let defaultKid = "kid-2026-1"
 let alphabet = Array("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
 
@@ -63,12 +63,12 @@ func encodeKey(payload: Data, signature: Data) -> String {
     blob.append(signature)
     let body = Array(base32Encode(blob))
     let groups = stride(from: 0, to: body.count, by: 5).map { String(body[$0..<min($0 + 5, body.count)]) }
-    return (["HALO1"] + groups).joined(separator: "-")
+    return (["ANYFMT1"] + groups).joined(separator: "-")
 }
 
 func decodeKey(_ key: String) -> (payload: Data, signature: Data)? {
     let compact = String(key.filter { !$0.isWhitespace && $0 != "-" }).uppercased()
-    guard compact.hasPrefix("HALO1"), let blob = base32Decode(String(compact.dropFirst(5))), blob.count >= 2 else { return nil }
+    guard let used = ["ANYFMT1", "HALO1"].first(where: { compact.hasPrefix($0) }), let blob = base32Decode(String(compact.dropFirst(used.count))), blob.count >= 2 else { return nil }
     let b = [UInt8](blob)
     let length = Int(b[0]) << 8 | Int(b[1])
     guard length > 0, b.count == 2 + length + 64 else { return nil }
@@ -116,7 +116,7 @@ func run(_ path: String, _ args: [String]) -> (status: Int32, out: String) {
 
 func privateKey(kid: String) -> Curve25519.Signing.PrivateKey {
     let b64: String
-    if let env = ProcessInfo.processInfo.environment["HALO_LICENCE_SIGNING_KEY"], !env.isEmpty {
+    if let env = ProcessInfo.processInfo.environment["ANYFMT_LICENCE_SIGNING_KEY"], !env.isEmpty {
         b64 = env
     } else {
         let r = run("/usr/bin/security", ["find-generic-password", "-s", signingService, "-a", kid, "-w"])
@@ -211,7 +211,7 @@ func keygen(_ args: ArraySlice<String>) {
     guard let kid = o["kid"], kid.hasPrefix("kid-") else { fail("keygen --kid kid-YYYY-N") }
     let key = Curve25519.Signing.PrivateKey()
     let r = run("/usr/bin/security", ["add-generic-password", "-s", signingService, "-a", kid,
-                                      "-l", "Halo licence signing key (\(kid))",
+                                      "-l", "anyfmt licence signing key (\(kid))",
                                       "-w", key.rawRepresentation.base64EncodedString()])
     guard r.status == 0 else { fail("couldn't store the key (does \(kid) already exist?)") }
     print("Stored the private key for \(kid) in the login Keychain (service \(signingService)).")

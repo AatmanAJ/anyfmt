@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Halo Cloud API
+  title: anyfmt Cloud API
   version: 1.0.0
-  summary: The contract between the Halo Mac app (cloud client) and a Halo server.
+  summary: The contract between the anyfmt Mac app (cloud client) and an anyfmt server.
   description: |
     Everything that runs on the Mac is free and never talks to this API.
     This API backs only the Pro features (BUILD.md §9b): share links, cloud
@@ -38,10 +38,10 @@ info:
     ## Two kinds of credentials
     - `bearerAuth`: the Mac app's OAuth access token (sign-in). Used by
       every app endpoint, and to manage API keys.
-    - `apiKeyAuth`: `Authorization: Bearer halo_sk_…`, for the public
+    - `apiKeyAuth`: `Authorization: Bearer anyfmt_sk_…`, for the public
       pay-per-use conversion API (`/v1/files`, `/v1/conversions`,
       `/v1/formats`, `/v1/schema`, `/v1/webhooks`, `/v1/usage`). Servers
-      tell them apart by the `halo_sk_` prefix. API keys never work on
+      tell them apart by the `anyfmt_sk_` prefix. API keys never work on
       the app endpoints except the resumable `/v1/uploads` operations,
       and app tokens never work on the public API except `/v1/usage`.
       The public API is documented with curl examples in docs/API.md.
@@ -110,7 +110,7 @@ paths:
       description: |
         Unauthenticated. The app calls this only when the user presses
         "Validate" next to the Server URL field, to confirm the URL points
-        at a Halo-compatible server before they sign in.
+        at an anyfmt-compatible server before they sign in.
       security: []
       responses:
         "200":
@@ -136,7 +136,7 @@ paths:
 
         When the user opens the magic link, the server redirects the browser
         to `redirect_uri?code=…&state=…`, which macOS hands to the app via its
-        registered URL scheme (`halo://auth/callback`, scheme derived from
+        registered URL scheme (`anyfmt://auth/callback`, scheme derived from
         the brand). If the user opens the link on another device, the page
         instead shows the `code` so they can type it into the app; the PKCE
         verifier (kept in the app) is still required to redeem it.
@@ -146,12 +146,12 @@ paths:
       security: []
       parameters:
         - { name: response_type, in: query, required: true, schema: { type: string, const: code } }
-        - { name: client_id, in: query, required: true, schema: { type: string, examples: [halo-mac] } }
+        - { name: client_id, in: query, required: true, schema: { type: string, examples: [anyfmt-mac] } }
         - name: redirect_uri
           in: query
           required: true
           description: Must exactly match a registered redirect for `client_id`. For the Mac app this is `<scheme>://auth/callback`.
-          schema: { type: string, format: uri, examples: ["halo://auth/callback"] }
+          schema: { type: string, format: uri, examples: ["anyfmt://auth/callback"] }
         - name: code_challenge
           in: query
           required: true
@@ -1124,7 +1124,7 @@ paths:
       operationId: createConversion
       summary: Start a conversion
       description: |
-        `options` keys are Halo option keys from the target's option
+        `options` keys are anyfmt option keys from the target's option
         schema (`GET /v1/schema`, `optionSchemas[].id` named by the
         route's `optionsSchema`). Unknown keys, wrong types and values out
         of range are `422 validation_failed` with `error.details.fields`.
@@ -1270,7 +1270,7 @@ paths:
     get:
       tags: [formats]
       operationId: getSchema
-      summary: The whole registry (formats, routes, option schemas, tools, presets) in the shape `halo schema --json` prints
+      summary: The whole registry (formats, routes, option schemas, tools, presets) in the shape `anyfmt schema --json` prints
       security:
         - apiKeyAuth: []
         - {}
@@ -1285,7 +1285,7 @@ paths:
             X-Request-Id: { $ref: "#/components/headers/X-Request-Id" }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HaloSchema" }
+              schema: { $ref: "#/components/schemas/AnyfmtSchema" }
         "429": { $ref: "#/components/responses/RateLimited" }
 
   /v1/webhooks:
@@ -1321,7 +1321,7 @@ paths:
       summary: Register a webhook endpoint; its signing secret is returned once
       description: |
         Deliveries are `POST`s with a JSON `WebhookEvent` body and a
-        `Halo-Signature` header (see the `conversionSucceeded` webhook and
+        `Anyfmt-Signature` header (see the `conversionSucceeded` webhook and
         docs/API.md). URLs must be `https` (the mock also accepts
         `http://127.0.0.1` / `localhost`). A server must refuse URLs that
         resolve to private, loopback or link-local addresses.
@@ -1479,20 +1479,20 @@ webhooks:
       operationId: onConversionSucceeded
       summary: "`conversion.succeeded`, sent to subscribed endpoints"
       description: |
-        Verify `Halo-Signature` before trusting the body:
+        Verify `Anyfmt-Signature` before trusting the body:
         `t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>`.
         Reject when `|now - t| > 300` (5 minutes). There may be more than
         one `v1=` during a secret rotation; accept if any matches. Answer
         any `2xx` within 10 s. Anything else (or a timeout) is retried with
         exponential backoff (about 1 min, 5 min, 30 min, 2 h, 6 h, 12 h,
-        24 h: 8 attempts over roughly 2 days); `Halo-Delivery-Attempt`
+        24 h: 8 attempts over roughly 2 days); `Anyfmt-Delivery-Attempt`
         counts from 1. Deliveries can repeat and arrive out of order:
         dedupe on `WebhookEvent.id` and trust `data.conversion.status`.
       security: []
       parameters:
-        - $ref: "#/components/parameters/HaloSignature"
-        - $ref: "#/components/parameters/HaloWebhookId"
-        - $ref: "#/components/parameters/HaloDeliveryAttempt"
+        - $ref: "#/components/parameters/AnyfmtSignature"
+        - $ref: "#/components/parameters/AnyfmtWebhookId"
+        - $ref: "#/components/parameters/AnyfmtDeliveryAttempt"
       requestBody:
         required: true
         content:
@@ -1509,9 +1509,9 @@ webhooks:
       description: Same delivery, signature and retry rules as `conversion.succeeded`. `data.conversion.error` says why.
       security: []
       parameters:
-        - $ref: "#/components/parameters/HaloSignature"
-        - $ref: "#/components/parameters/HaloWebhookId"
-        - $ref: "#/components/parameters/HaloDeliveryAttempt"
+        - $ref: "#/components/parameters/AnyfmtSignature"
+        - $ref: "#/components/parameters/AnyfmtWebhookId"
+        - $ref: "#/components/parameters/AnyfmtDeliveryAttempt"
       requestBody:
         required: true
         content:
@@ -1535,10 +1535,10 @@ components:
     apiKeyAuth:
       type: http
       scheme: bearer
-      bearerFormat: "halo_sk_…"
+      bearerFormat: "anyfmt_sk_…"
       description: |
         Public API key from `POST /v1/api-keys`, sent as
-        `Authorization: Bearer halo_sk_…`. Keys carry scopes (`read`,
+        `Authorization: Bearer anyfmt_sk_…`. Keys carry scopes (`read`,
         `convert`); a missing scope is `403 insufficient_scope`. A
         revoked, expired or unknown key is `401 invalid_api_key`. Keys
         are never refreshed: there is no token exchange.
@@ -1567,20 +1567,20 @@ components:
       schema: { type: string }
 
   parameters:
-    HaloSignature:
-      name: Halo-Signature
+    AnyfmtSignature:
+      name: Anyfmt-Signature
       in: header
       required: true
       description: '`t=<unix seconds>,v1=<hex HMAC-SHA256(secret, t + "." + rawBody)>` (more than one `v1` during a secret rotation).'
       schema: { type: string, examples: ["t=1792310400,v1=5f2b…"] }
-    HaloWebhookId:
-      name: Halo-Webhook-Id
+    AnyfmtWebhookId:
+      name: Anyfmt-Webhook-Id
       in: header
       required: true
       description: The endpoint id this delivery is for.
       schema: { type: string }
-    HaloDeliveryAttempt:
-      name: Halo-Delivery-Attempt
+    AnyfmtDeliveryAttempt:
+      name: Anyfmt-Delivery-Attempt
       in: header
       required: true
       description: 1 for the first delivery, then 2, 3, … on retries.
@@ -1747,7 +1747,7 @@ components:
       properties:
         status: { type: string, enum: [ok, degraded] }
         api: { type: string, const: "1", description: Contract major version. }
-        name: { type: string, description: "Display name, e.g. \"Halo Cloud\" or \"Acme self-hosted\"." }
+        name: { type: string, description: "Display name, e.g. \"anyfmt Cloud\" or \"Acme self-hosted\"." }
         version: { type: string, description: Server build version. }
         selfHosted: { type: boolean }
         capabilities:
@@ -1941,10 +1941,10 @@ components:
           required: [type, target]
           properties:
             type: { const: convert }
-            target: { type: string, description: "Halo FormatID of the output, e.g. `mp4`, `webm`, `mov`." }
+            target: { type: string, description: "anyfmt FormatID of the output, e.g. `mp4`, `webm`, `mov`." }
             options:
               type: object
-              description: Halo `OptionValues` for the target's options schema (string/number/bool values).
+              description: anyfmt `OptionValues` for the target's options schema (string/number/bool values).
               additionalProperties: { type: [string, number, boolean] }
         - type: object
           required: [type, tool]
@@ -1953,7 +1953,7 @@ components:
             tool:
               type: string
               enum: [cloud.transcribe, cloud.upscale, cloud.removeBackgroundHQ]
-              description: Halo ToolID.
+              description: anyfmt ToolID.
             target: { type: string, description: "Output format where the tool has a choice: `srt`/`vtt`/`txt` for transcribe, `png`/`jpg` for upscale." }
             options:
               type: object
@@ -2092,7 +2092,7 @@ components:
         scopes:
           type: array
           items: { $ref: "#/components/schemas/ApiKeyScope" }
-        prefix: { type: string, description: "First 12 characters of the secret, for recognising it (`halo_sk_AbCd`).", examples: [halo_sk_AbCd] }
+        prefix: { type: string, description: "First 12 characters of the secret, for recognising it (`anyfmt_sk_AbCd`).", examples: [anyfmt_sk_AbCd] }
         createdAt: { type: string, format: date-time }
         lastUsedAt: { type: [string, "null"], format: date-time }
         expiresAt: { type: [string, "null"], format: date-time }
@@ -2105,7 +2105,7 @@ components:
         apiKey: { $ref: "#/components/schemas/ApiKey" }
         secret:
           type: string
-          pattern: "^halo_sk_[A-Za-z0-9_-]{32,}$"
+          pattern: "^anyfmt_sk_[A-Za-z0-9_-]{32,}$"
           description: "The full key. Shown once; send it as `Authorization: Bearer <secret>`."
 
     StoredFile:
@@ -2117,7 +2117,7 @@ components:
         size: { type: integer, format: int64 }
         sha256: { $ref: "#/components/schemas/Sha256" }
         contentType: { type: string }
-        format: { type: [string, "null"], description: "Detected Halo format id, e.g. `png`, or `null` when unknown." }
+        format: { type: [string, "null"], description: "Detected anyfmt format id, e.g. `png`, or `null` when unknown." }
         createdAt: { type: string, format: date-time }
         expiresAt: { type: [string, "null"], format: date-time }
 
@@ -2143,17 +2143,17 @@ components:
 
     OptionValue:
       type: [string, number, boolean]
-      description: A Halo `OptionValue`. `choice` options take the choice id as a string.
+      description: An anyfmt `OptionValue`. `choice` options take the choice id as a string.
 
     ConversionCreate:
       type: object
       required: [input, target]
       properties:
         input: { $ref: "#/components/schemas/ConversionInput" }
-        target: { type: string, description: "Halo format id of the output (`GET /v1/formats`).", examples: [webp] }
+        target: { type: string, description: "anyfmt format id of the output (`GET /v1/formats`).", examples: [webp] }
         options:
           type: object
-          description: Keys are Halo option keys of the route's option schema; validated by schema id.
+          description: Keys are anyfmt option keys of the route's option schema; validated by schema id.
           additionalProperties: { $ref: "#/components/schemas/OptionValue" }
           examples: [{ quality: 80, maxDimension: 2048 }]
         webhook:
@@ -2291,7 +2291,7 @@ components:
       type: object
       required: [id, label, kind, default]
       properties:
-        id: { type: string, description: "Halo option key (`OptionKey`), e.g. `quality`." }
+        id: { type: string, description: "anyfmt option key (`OptionKey`), e.g. `quality`." }
         label: { type: string }
         kind: { $ref: "#/components/schemas/OptionKindName" }
         default: { $ref: "#/components/schemas/OptionValue" }
@@ -2347,17 +2347,17 @@ components:
           type: object
           additionalProperties: { $ref: "#/components/schemas/OptionValue" }
 
-    HaloSchema:
+    AnyfmtSchema:
       type: object
       required: [schemaVersion, formats, optionSchemas]
       description: |
-        The registry document. `halo schema --json` (CLI, phase G) prints
+        The registry document. `anyfmt schema --json` (CLI, phase G) prints
         exactly this shape; servers serve their own copy, which may be a
         subset of what the app can do locally. `schemaVersion` increments
         on any breaking change to this shape; additions don't bump it.
       properties:
         schemaVersion: { type: integer, minimum: 1, examples: [1] }
-        generator: { type: string, description: "Who produced it, e.g. `halo 1.0.0` or `halo-cloud 2026.10`." }
+        generator: { type: string, description: "Who produced it, e.g. `anyfmt 1.0.0` or `anyfmt-cloud 2026.10`." }
         formats:
           type: array
           items: { $ref: "#/components/schemas/FormatInfo" }
@@ -2405,7 +2405,7 @@ components:
         - type: object
           required: [secret]
           properties:
-            secret: { type: string, pattern: "^whsec_[A-Za-z0-9_-]{32,}$", description: "HMAC key for `Halo-Signature`. Shown once." }
+            secret: { type: string, pattern: "^whsec_[A-Za-z0-9_-]{32,}$", description: "HMAC key for `Anyfmt-Signature`. Shown once." }
 
     WebhookEvent:
       type: object
@@ -2459,7 +2459,7 @@ components:
       type: object
       required: [key, deviceId]
       properties:
-        key: { type: string, minLength: 8, maxLength: 64, examples: [HALO-MOCK-PRO0-0001] }
+        key: { type: string, minLength: 8, maxLength: 64, examples: [ANYFMT-MOCK-PRO0-0001] }
         deviceId: { type: string, minLength: 8, maxLength: 128, description: "Stable, random per-install id the app generates (not a hardware serial)." }
         deviceName: { type: string, maxLength: 100 }
 

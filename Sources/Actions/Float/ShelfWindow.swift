@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Floating, non-activating panel that hosts the shelf card. Joins every
 /// Space and full-screen apps, never steals focus from the app you're in.

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 @MainActor
 final class ImageAdjustModel: ToolEditorModel {

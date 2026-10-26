@@ -1,6 +1,6 @@
 import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { Halo, HaloConnectionError, HaloRateLimitError, HaloServerError, parseRetryAfter } from '../dist/index.js';
+import { Anyfmt, AnyfmtConnectionError, AnyfmtRateLimitError, AnyfmtServerError, parseRetryAfter } from '../dist/index.js';
 import { startMock } from './helpers.mjs';
 
 let mock; let key;
@@ -8,7 +8,7 @@ before(async () => { mock = await startMock(); });
 after(async () => { await mock.stop(); });
 beforeEach(async () => { await mock.reset(); key = await mock.apiKey(); });
 
-const client = (extra = {}) => new Halo({ apiKey: key, baseUrl: mock.baseUrl, retryBaseMs: 10, ...extra });
+const client = (extra = {}) => new Anyfmt({ apiKey: key, baseUrl: mock.baseUrl, retryBaseMs: 10, ...extra });
 // The mock's test limiter uses 1-second windows; start just after a boundary
 // so two quick requests land in the same window.
 const alignToSecond = () => new Promise((r) => setTimeout(r, 1000 - (Date.now() % 1000) + 20));
@@ -23,11 +23,11 @@ test('parseRetryAfter: seconds and HTTP dates', () => {
 });
 
 test('429 from the rate limiter (X-Mock-Rate-Limit) is retried after Retry-After and succeeds', async () => {
-  const halo = client({ headers: { 'X-Mock-Rate-Limit': '1' } });
+  const anyfmt = client({ headers: { 'X-Mock-Rate-Limit': '1' } });
   await alignToSecond();
-  await halo.formats.list();
+  await anyfmt.formats.list();
   const t0 = Date.now();
-  const r = await halo.conversions.list();
+  const r = await anyfmt.conversions.list();
   const waited = Date.now() - t0;
   assert.deepEqual(r.items, []);
   assert.ok(waited >= 400, `waited ${waited} ms for the window to reset`);
@@ -43,10 +43,10 @@ test('Retry-After is respected', async () => {
   assert.equal(await count('GET', '/v1/schema'), 2);
 });
 
-test('gives up after 3 retries: HaloRateLimitError carries retryAfterMs', async () => {
+test('gives up after 3 retries: AnyfmtRateLimitError carries retryAfterMs', async () => {
   await mock.fault({ method: 'GET', pathPrefix: '/v1/formats', times: 10, mode: 'status', status: 429, retryAfter: 0 });
   await assert.rejects(client().formats.list(), (e) => {
-    assert.ok(e instanceof HaloRateLimitError);
+    assert.ok(e instanceof AnyfmtRateLimitError);
     assert.equal(e.status, 429);
     assert.equal(e.code, 'rate_limited');
     assert.equal(e.retryAfterMs, 0);
@@ -55,7 +55,7 @@ test('gives up after 3 retries: HaloRateLimitError carries retryAfterMs', async 
   assert.equal(await count('GET', '/v1/formats'), 4, '1 try + 3 retries');
 });
 
-test('5xx is retried for idempotent calls, then HaloServerError', async () => {
+test('5xx is retried for idempotent calls, then AnyfmtServerError', async () => {
   await mock.fault({ method: 'GET', pathPrefix: '/v1/usage', times: 2, mode: 'status', status: 503, retryAfter: 0 });
   const u = await client().usage.get();
   assert.equal(u.conversions.total, 0);
@@ -63,17 +63,17 @@ test('5xx is retried for idempotent calls, then HaloServerError', async () => {
 
   await mock.clearRequests();
   await mock.fault({ method: 'GET', pathPrefix: '/v1/usage', times: 9, mode: 'status', status: 500 });
-  await assert.rejects(client({ maxRetries: 2 }).usage.get(), (e) => e instanceof HaloServerError && e.status === 500);
+  await assert.rejects(client({ maxRetries: 2 }).usage.get(), (e) => e instanceof AnyfmtServerError && e.status === 500);
   assert.equal(await count('GET', '/v1/usage'), 3, 'maxRetries is configurable');
 });
 
 test('conversions.create retries a 500 safely thanks to its Idempotency-Key', async () => {
-  const halo = client();
-  const file = await halo.files.upload(new Blob(['x']), { filename: 'a.png' });
+  const anyfmt = client();
+  const file = await anyfmt.files.upload(new Blob(['x']), { filename: 'a.png' });
   await mock.fault({ method: 'POST', pathPrefix: '/v1/conversions', times: 1, mode: 'status', status: 500 });
-  const c = await halo.conversions.create({ input: { fileId: file.id }, target: 'jpg' });
+  const c = await anyfmt.conversions.create({ input: { fileId: file.id }, target: 'jpg' });
   assert.ok(c.id);
-  assert.equal((await halo.conversions.list()).items.length, 1);
+  assert.equal((await anyfmt.conversions.list()).items.length, 1);
   const posts = (await mock.requests()).filter((r) => r.method === 'POST' && r.path === '/v1/conversions');
   assert.deepEqual(posts.map((r) => r.status), [500, 202]);
   assert.ok(posts[0].idempotencyKey, 'a key is always sent');
@@ -81,20 +81,20 @@ test('conversions.create retries a 500 safely thanks to its Idempotency-Key', as
 });
 
 test('non-idempotent webhooks.create is not retried after a 5xx, but is after a 429', async () => {
-  const halo = client();
+  const anyfmt = client();
   await mock.fault({ method: 'POST', pathPrefix: '/v1/webhooks', times: 1, mode: 'status', status: 502 });
-  await assert.rejects(halo.webhooks.create({ url: 'https://h.example.com', events: ['conversion.succeeded'] }), HaloServerError);
+  await assert.rejects(anyfmt.webhooks.create({ url: 'https://h.example.com', events: ['conversion.succeeded'] }), AnyfmtServerError);
   assert.equal(await count('POST', '/v1/webhooks'), 1);
   await mock.fault({ method: 'POST', pathPrefix: '/v1/webhooks', times: 1, mode: 'status', status: 429, retryAfter: 0 });
-  await halo.webhooks.create({ url: 'https://h.example.com', events: ['conversion.succeeded'] });
+  await anyfmt.webhooks.create({ url: 'https://h.example.com', events: ['conversion.succeeded'] });
   assert.equal(await count('POST', '/v1/webhooks'), 3);
 });
 
-test('dropped connections are retried for GETs and surface as HaloConnectionError when nothing answers', async () => {
+test('dropped connections are retried for GETs and surface as AnyfmtConnectionError when nothing answers', async () => {
   await mock.fault({ method: 'GET', pathPrefix: '/v1/conversions', times: 1, mode: 'reset' });
   assert.deepEqual((await client().conversions.list()).items, []);
-  const dead = new Halo({ apiKey: key, baseUrl: 'http://127.0.0.1:1', retryBaseMs: 1, maxRetries: 1 });
-  await assert.rejects(dead.formats.list(), (e) => e instanceof HaloConnectionError && e.status === 0);
+  const dead = new Anyfmt({ apiKey: key, baseUrl: 'http://127.0.0.1:1', retryBaseMs: 1, maxRetries: 1 });
+  await assert.rejects(dead.formats.list(), (e) => e instanceof AnyfmtConnectionError && e.status === 0);
 });
 
 test('RateLimit headers are on every public API response, including errors', async () => {

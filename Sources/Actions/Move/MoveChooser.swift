@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// The Move action's destination picker: a compact card at the drop point
 /// listing recent destinations, plus "Choose Folder…" (a standard open panel).

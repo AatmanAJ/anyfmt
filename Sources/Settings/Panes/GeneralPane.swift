@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 struct GeneralPane: View {
     @ObservedObject var model: SettingsModel

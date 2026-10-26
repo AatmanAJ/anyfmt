@@ -1,6 +1,6 @@
 import XCTest
 import ImageIO
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// BUILD.md §10 budget: 12 MP HEIC → JPG under 400 ms.
 final class ImagePerfTests: XCTestCase {

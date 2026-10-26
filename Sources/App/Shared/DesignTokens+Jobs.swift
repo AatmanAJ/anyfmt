@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for the jobs surfaces: progress cards, the "+N more" card
 // and toasts (PLAN-PHASE2 §2, board 5-progress-cards-dark). Built only from

@@ -1,7 +1,7 @@
 import AppKit
 import AVFoundation
 import Combine
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// The pinned options panel: opened by a drop on a segment's tune lip, a drop
@@ -308,7 +308,7 @@ struct OptionsPanelView: View {
                 if let input = model.input {
                     Text(verbatim: "\(input.lastPathComponent) → \(model.title)")
                         .font(.system(size: DesignTokens.TypeRamp.body, weight: .medium))
-                        .foregroundStyle(Color.haloSecondaryText)
+                        .foregroundStyle(Color.anyfmtSecondaryText)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
@@ -329,15 +329,15 @@ struct OptionsPanelView: View {
                     .toggleStyle(.checkbox)
                     .lineLimit(1)
                     .fixedSize()
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
                 Spacer()
                 Button(String(localized: "Cancel", comment: "Options panel button")) { model.cancel() }
-                    .buttonStyle(.haloQuiet)
+                    .buttonStyle(.anyfmtQuiet)
                     .keyboardShortcut(.cancelAction)
                 Button(String(localized: "Save as Preset", comment: "Options panel button")) { model.saveAsPreset() }
-                    .buttonStyle(.haloSecondary)
+                    .buttonStyle(.anyfmtSecondary)
                 Button(String(localized: "Convert", comment: "Options panel button that runs the conversion")) { model.convert() }
-                    .buttonStyle(.haloPrimary)
+                    .buttonStyle(.anyfmtPrimary)
                     .keyboardShortcut(.defaultAction)
             }
             if let saved = model.savedPresetTitle {
@@ -347,14 +347,14 @@ struct OptionsPanelView: View {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.accentText)
                 }
                 .font(.system(size: DesignTokens.TypeRamp.caption))
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
             }
         }
         .padding(DesignTokens.Space.xl + DesignTokens.Space.xs)
         .frame(width: 560)
         .font(.system(size: DesignTokens.TypeRamp.body))
         .tint(Color.iris)
-        .haloWindowBackground()
+        .anyfmtWindowBackground()
     }
 }
 
@@ -373,7 +373,7 @@ private struct EstimateTiles: View {
                         caption: String(localized: "Frames", comment: "Options panel estimate tile"))
         }
         // Numbers change in place (provisional first, then measured): no dimming, no jump.
-        .animation(HaloMotion.snap.animation(reduceMotion: reduceMotion), value: estimate)
+        .animation(AnyfmtMotion.snap.animation(reduceMotion: reduceMotion), value: estimate)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Estimate", comment: "VoiceOver label of the estimate tiles"))
     }
@@ -411,10 +411,10 @@ private struct PresetRow: View {
                     Button(preset.title) { apply(preset) }
                         .buttonStyle(.plain)
                         .font(.system(size: DesignTokens.TypeRamp.body, weight: on ? .bold : .medium))
-                        .foregroundStyle(on ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+                        .foregroundStyle(on ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
                         .padding(.horizontal, DesignTokens.Space.m)
                         .padding(.vertical, DesignTokens.Space.xs + 2)
-                        .background(Capsule().fill(on ? Color.iris : Color.haloTile))
+                        .background(Capsule().fill(on ? Color.iris : Color.anyfmtTile))
                         .contentShape(Capsule())
                         .accessibilityAddTraits(on ? .isSelected : [])
                         .help(String(localized: "Use these options", comment: "Tooltip on a preset in the options panel"))
@@ -461,14 +461,14 @@ struct PanelChoiceRow: View {
             Text(verbatim: spec.label.localizedUppercase)
                 .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
                 .tracking(0.6)
-                .foregroundStyle(Color.haloSecondaryText)
+                .foregroundStyle(Color.anyfmtSecondaryText)
             HStack(spacing: DesignTokens.Space.xs) {
                 ForEach(choices) { choice in chip(choice) }
             }
             if let help = spec.help {
                 Text(verbatim: help)
                     .font(.system(size: DesignTokens.TypeRamp.caption))
-                    .foregroundStyle(Color.haloSecondaryText)
+                    .foregroundStyle(Color.anyfmtSecondaryText)
             }
         }
         .accessibilityElement(children: .contain)
@@ -479,7 +479,7 @@ struct PanelChoiceRow: View {
         let selected = choice.id == selectedID
         let sub = hint(choice)
         return Button {
-            withAnimation(HaloMotion.snap.animation(reduceMotion: reduceMotion)) { values[spec.id] = .string(choice.id) }
+            withAnimation(AnyfmtMotion.snap.animation(reduceMotion: reduceMotion)) { values[spec.id] = .string(choice.id) }
         } label: {
             VStack(spacing: 1) {
                 Text(verbatim: choice.label)
@@ -492,11 +492,11 @@ struct PanelChoiceRow: View {
                 }
             }
             .lineLimit(1)
-            .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.haloInk)
+            .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .frame(minWidth: 58)
             .padding(.horizontal, DesignTokens.Space.s)
             .padding(.vertical, sub == nil ? DesignTokens.Space.xs + 2 : DesignTokens.Space.xs)
-            .background(Capsule().fill(selected ? Color.iris : Color.haloTile))
+            .background(Capsule().fill(selected ? Color.iris : Color.anyfmtTile))
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)

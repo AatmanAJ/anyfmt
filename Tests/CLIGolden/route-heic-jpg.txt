@@ -1,4 +1,4 @@
-$ halo route heic jpg
+$ anyfmt route heic jpg
 exit: 0
 --- stdout
 heic → jpg(imageio)  (cost 1.0)

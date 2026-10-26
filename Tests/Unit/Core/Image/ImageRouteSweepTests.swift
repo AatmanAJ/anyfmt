@@ -1,7 +1,7 @@
 import XCTest
 import ImageIO
 import PDFKit
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Lane D's own mini-matrix: generates the lane fixtures with images.sh, runs every
 /// available image route (direct rows and router hops from SVG) and validates each
@@ -91,7 +91,7 @@ final class ImageRouteSweepTests: XCTestCase {
                 if route.from == Formats.tiff && doc.pageCount != 2 { return "TIFF pages \(doc.pageCount) ≠ 2" }
             case Formats.txt:
                 guard let t = try? String(contentsOf: u, encoding: .utf8) else { return "text unreadable" }
-                if route.from == Formats.pdf && !t.contains("Halo fixture page 1") { return "PDF text missing" }
+                if route.from == Formats.pdf && !t.contains("anyfmt fixture page 1") { return "PDF text missing" }
                 if t.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "OCR text empty" }
             default:
                 guard let src = S.source(u), CGImageSourceGetCount(src) > 0, let img = CGImageSourceCreateImageAtIndex(src, 0, nil),

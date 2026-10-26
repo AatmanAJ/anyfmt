@@ -1,7 +1,7 @@
 import XCTest
 import ServiceManagement
 import os
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Thread-safe flag for probes called off the main thread.
 private final class Flag: Sendable {

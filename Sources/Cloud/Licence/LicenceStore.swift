@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Why `LicenceStore.activate(_:)` refused a key. `message` is for the person.
 struct LicenceActivationError: Error, Equatable, Sendable, CustomStringConvertible {

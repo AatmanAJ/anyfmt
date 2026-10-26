@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloApp
+@testable import AnyfmtApp
 
 @MainActor
 final class AppSmokeTests: XCTestCase {

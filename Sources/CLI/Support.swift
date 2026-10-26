@@ -1,8 +1,8 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 // Exit codes, errors, flag parsing and the JSON writers shared by every
-// command and by `halo mcp`. Everything here is part of the documented
+// command and by `anyfmt mcp`. Everything here is part of the documented
 // contract in docs/CLI.md: change it on purpose only.
 
 /// Stable process exit codes. Agents branch on these.
@@ -211,16 +211,16 @@ enum CLIPaths {
     }
 
     /// Where presets.json and recents.json live: the app's Application Support
-    /// folder, or `HALO_SUPPORT_DIR` (tests, sandboxes).
+    /// folder, or `ANYFMT_SUPPORT_DIR` (tests, sandboxes).
     static var supportDirectory: URL {
-        if let d = ProcessInfo.processInfo.environment["HALO_SUPPORT_DIR"], !d.isEmpty {
+        if let d = ProcessInfo.processInfo.environment["ANYFMT_SUPPORT_DIR"], !d.isEmpty {
             return URL(fileURLWithPath: d, isDirectory: true)
         }
         return RecentConversions.defaultDirectory
     }
 
     static var usesDefaultSupportDirectory: Bool {
-        (ProcessInfo.processInfo.environment["HALO_SUPPORT_DIR"] ?? "").isEmpty
+        (ProcessInfo.processInfo.environment["ANYFMT_SUPPORT_DIR"] ?? "").isEmpty
     }
 
     /// The same presets file the app reads.
@@ -234,11 +234,11 @@ enum CLIPaths {
 
     /// The running binary, symlinks resolved.
     static var executable: URL {
-        let raw = Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments.first ?? "halo")
+        let raw = Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments.first ?? "anyfmt")
         return raw.resolvingSymlinksInPath()
     }
 
-    /// The app bundle this CLI ships in (Contents/Helpers/halo), if any.
+    /// The app bundle this CLI ships in (Contents/Helpers/anyfmt), if any.
     static var appBundle: URL? {
         var dir = executable.deletingLastPathComponent()
         for _ in 0..<4 {
@@ -248,30 +248,30 @@ enum CLIPaths {
         return nil
     }
 
-    /// True when `locateBundledEngines` pointed HALO_ENGINES_DIR at our own Helpers folder.
+    /// True when `locateBundledEngines` pointed ANYFMT_ENGINES_DIR at our own Helpers folder.
     nonisolated(unsafe) static var enginesBesideCLI = false
 
-    /// Run from a PATH symlink, argv[0] is just "halo", so EngineLocator can't
-    /// see the engines next to the real binary (Halo.app/Contents/Helpers, or
+    /// Run from a PATH symlink, argv[0] is just "anyfmt", so EngineLocator can't
+    /// see the engines next to the real binary (anyfmt.app/Contents/Helpers, or
     /// the Homebrew formula's libexec/Helpers). Point it there, unless the
     /// caller already chose a folder. Call before anything converts.
     static func locateBundledEngines() {
-        guard (ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"] ?? "").isEmpty else { return }
+        guard (ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"] ?? "").isEmpty else { return }
         let dir = executable.deletingLastPathComponent()
         guard dir.lastPathComponent == "Helpers",
               FileManager.default.isExecutableFile(atPath: dir.appendingPathComponent("ffmpeg").path) else { return }
-        setenv("HALO_ENGINES_DIR", dir.deletingLastPathComponent().path, 1)
+        setenv("ANYFMT_ENGINES_DIR", dir.deletingLastPathComponent().path, 1)
         enginesBesideCLI = true
     }
 
-    /// Test hook: `HALO_TEST_DELAY_MS` delays each conversion job (cancellably)
+    /// Test hook: `ANYFMT_TEST_DELAY_MS` delays each conversion job (cancellably)
     /// so exit-code 7 and MCP cancellation can be tested deterministically.
     static var testDelay: UInt64? {
-        guard let s = ProcessInfo.processInfo.environment["HALO_TEST_DELAY_MS"], let ms = UInt64(s), ms > 0 else { return nil }
+        guard let s = ProcessInfo.processInfo.environment["ANYFMT_TEST_DELAY_MS"], let ms = UInt64(s), ms > 0 else { return nil }
         return ms * 1_000_000
     }
 }
 
 var cliVersion: String {
-    Bundle.haloCore.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+    Bundle.anyfmtCore.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
 }

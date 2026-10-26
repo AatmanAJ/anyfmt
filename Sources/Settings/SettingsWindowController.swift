@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// The Settings window: an AppKit window with a `.preference` toolbar (one
 /// selectable item per pane), SwiftUI panes inside. No SwiftUI `Settings`
@@ -33,12 +33,12 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSW
     init(model: SettingsModel, pane: SettingsPane? = nil) {
         self.model = model
         self.pane = pane ?? model.lastPane
-        let window = HaloWindow(contentRect: NSRect(x: 0, y: 0, width: self.pane.width, height: 400),
+        let window = AnyfmtWindow(contentRect: NSRect(x: 0, y: 0, width: self.pane.width, height: 400),
                                 styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: true)
         window.title = self.pane.title
         window.toolbarStyle = .preference
         // Near-black in dark (the hero), white in light: the token window surface.
-        window.backgroundColor = .halo(DesignTokens.Semantic.windowBackground)
+        window.backgroundColor = .anyfmt(DesignTokens.Semantic.windowBackground)
         window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
         window.contentView = container
@@ -195,9 +195,9 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSW
     }
 }
 
-/// Root of one pane: fixed width, Halo's cobalt switch style. Menus, focus
+/// Root of one pane: fixed width, anyfmt's cobalt switch style. Menus, focus
 /// rings and list selection keep the person's own system accent, as every
-/// Mac Settings window does; Halo's own controls (switches, sliders, pills)
+/// Mac Settings window does; anyfmt's own controls (switches, sliders, pills)
 /// carry the cobalt.
 private struct SettingsPaneRoot: View {
     let pane: SettingsPane
@@ -205,9 +205,9 @@ private struct SettingsPaneRoot: View {
 
     var body: some View {
         content
-            .toggleStyle(HaloSwitchStyle())
+            .toggleStyle(AnyfmtSwitchStyle())
             .scrollContentBackground(.hidden)
-            .background(Color.haloWindow)
+            .background(Color.anyfmtWindow)
             .frame(width: pane.width)
             .frame(height: pane.fixedHeight)
     }

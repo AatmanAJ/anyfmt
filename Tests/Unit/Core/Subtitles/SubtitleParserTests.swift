@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class SubtitleTimeTests: XCTestCase {
     func testParsesBothSeparatorsAndHourForms() {
@@ -152,7 +152,7 @@ final class VTTParserTests: XCTestCase {
 
     func testHeaderBlocksAndCue() {
         let src = """
-        WEBVTT - Halo edge cases
+        WEBVTT - anyfmt edge cases
         Kind: captions
         Language: en
 
@@ -174,7 +174,7 @@ final class VTTParserTests: XCTestCase {
 
         """
         let doc = parse(src)
-        XCTAssertEqual(doc.header, ["WEBVTT - Halo edge cases", "Kind: captions", "Language: en"])
+        XCTAssertEqual(doc.header, ["WEBVTT - anyfmt edge cases", "Kind: captions", "Language: en"])
         XCTAssertEqual(doc.blocks.map(\.kind), [.style, .region, .note, .note])
         XCTAssertEqual(doc.blocks.map(\.beforeCue), [0, 0, 0, 1])
         XCTAssertEqual(doc.blocks[2].lines, ["NOTE This is a comment", "spanning two lines"])

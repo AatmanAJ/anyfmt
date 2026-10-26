@@ -1,4 +1,4 @@
-$ halo tools --json
+$ anyfmt tools --json
 exit: 0
 --- stdout
 {

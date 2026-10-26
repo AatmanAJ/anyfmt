@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// What the shelf's views ask the controller to do.
 enum ShelfCommand {

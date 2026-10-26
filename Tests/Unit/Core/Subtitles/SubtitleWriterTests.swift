@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class SubtitleWriterTests: XCTestCase {
     private func text(_ d: Data) -> String { String(decoding: d, as: UTF8.self) }

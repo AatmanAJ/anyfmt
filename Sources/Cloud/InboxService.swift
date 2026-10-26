@@ -1,5 +1,5 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// Files sent from a phone or browser land in a folder on this Mac.
 ///

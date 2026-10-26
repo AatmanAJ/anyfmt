@@ -1,8 +1,8 @@
 import Foundation
-import HaloCore
+import AnyfmtCore
 
 /// JSON descriptions of formats, routes, option schemas, tools and presets.
-/// The CLI (`--json`), `halo schema` and the MCP server all use these, so the
+/// The CLI (`--json`), `anyfmt schema` and the MCP server all use these, so the
 /// three never disagree. Everything comes from the live registry the wheel uses.
 @MainActor
 enum Catalog {
@@ -49,7 +49,7 @@ enum Catalog {
         }
     }
 
-    /// Targets every input can reach, as `halo targets` / MCP `targets` show them.
+    /// Targets every input can reach, as `anyfmt targets` / MCP `targets` show them.
     static func targets(for inputs: [FormatID]) -> [[String: Any]] {
         router.commonTargets(for: inputs).map { t in
             let routes = t.routes.sorted { $0.key < $1.key }.map(\.value)
@@ -105,7 +105,7 @@ enum Catalog {
         ["schema": s.id, "options": s.specs.map(spec)]
     }
 
-    /// `halo options <format>`: the saved-default / preset schema for a target.
+    /// `anyfmt options <format>`: the saved-default / preset schema for a target.
     static func options(for format: FormatID) -> [String: Any]? {
         guard let s = OptionsSchema.forTarget(format) else { return nil }
         var d = schema(s)
@@ -192,7 +192,7 @@ enum Catalog {
 
     // MARK: Schema
 
-    /// `halo schema`: everything an agent needs to plan, in one document.
+    /// `anyfmt schema`: everything an agent needs to plan, in one document.
     static func everything() -> [String: Any] {
         [
             "schemaVersion": schemaVersion,

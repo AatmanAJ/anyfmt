@@ -1,6 +1,6 @@
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 final class WaveformEnvelopeTests: XCTestCase {
     func testBuilderFoldsChannelsAndHandlesChunkBoundaries() {

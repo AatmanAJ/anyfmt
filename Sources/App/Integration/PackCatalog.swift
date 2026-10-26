@@ -1,7 +1,7 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
-/// Optional engine packs in Settings › Engines (D-022). Halo never downloads them:
+/// Optional engine packs in Settings › Engines (D-022). anyfmt never downloads them:
 /// "Get…" opens the official download in the browser, then the user picks the
 /// downloaded file, which is verified against its pinned SHA-256 before install.
 @MainActor

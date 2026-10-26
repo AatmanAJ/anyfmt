@@ -1,5 +1,5 @@
 import CoreGraphics
-import HaloCore
+import AnyfmtCore
 
 // Component tokens for the action surfaces: the Float shelf, the Move chooser
 // and the small controls they share (PLAN-PHASE2 §2). Charcoal tiles, display

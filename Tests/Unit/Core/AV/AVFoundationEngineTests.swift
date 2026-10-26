@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 final class AVFoundationEngineTests: XCTestCase {
     private func request(_ to: FormatID, _ opts: [String: OptionValue] = [:]) -> ConversionRequest {

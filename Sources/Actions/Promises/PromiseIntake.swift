@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Receives file promises (drags from Mail, Photos, Safari's downloads, the
 /// screenshot thumbnail) into our own staging area so actions have real files:

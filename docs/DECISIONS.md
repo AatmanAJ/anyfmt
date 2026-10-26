@@ -103,7 +103,7 @@ wheel only when Finder is frontmost, a selection exists, and Finder's focused
 element is not a text field (so rename still works).
 
 Zero-permission alternatives, both on by default:
-- **Services menu** item "Open in Halo Wheel" (`NSSendFileTypes` + `NSRequiredContext`
+- **Services menu** item "Open in anyfmt Wheel" (`NSSendFileTypes` + `NSRequiredContext`
   so it's enabled without a trip to System Settings). Users can assign it any
   shortcut in System Settings › Keyboard › Shortcuts › Services.
 - **Global hotkey** (Carbon `RegisterEventHotKey`, needs no permission, default
@@ -149,14 +149,14 @@ conversions copy creation/modification dates from the source; tools don't.
 ### D-013 Brand in one place
 `Config/Brand.xcconfig` (`BRAND_NAME`) + `Sources/Shared/Brand.swift` (`name`).
 Bundle id, URL scheme, CLI name and window titles all derive from these. Swift
-module names are fixed (`HaloCore`, `HaloApp`, `HaloCLI`) so a rename never
+module names are fixed (`AnyfmtCore`, `AnyfmtApp`, `AnyfmtCLI`) so a rename never
 touches `import` lines.
 
 ### D-014 Module split
-`HaloCore.framework` (no UI: Shared, Engine, Jobs/Core, Tools/Core) is linked by
-the app, the `halo` CLI and the matrix runner. App-only code (wheel, editors,
+`AnyfmtCore.framework` (no UI: Shared, Engine, Jobs/Core, Tools/Core) is linked by
+the app, the `anyfmt` CLI and the matrix runner. App-only code (wheel, editors,
 actions, cloud, settings, progress windows) lives in the app target. The two
-MIT packages are local SwiftPM packages with no dependency on Halo.
+MIT packages are local SwiftPM packages with no dependency on anyfmt.
 
 ---
 
@@ -236,10 +236,10 @@ The ones that changed a shared contract are applied in the code and listed in `d
 
 ### D-031 Hardened runtime only on Developer ID builds
 With hardened runtime on, dyld's library validation refuses to map an ad-hoc-signed
-`HaloCore.framework` or libav dylib into an ad-hoc-signed process ("different Team IDs"),
+`AnyfmtCore.framework` or libav dylib into an ad-hoc-signed process ("different Team IDs"),
 so a local Release build couldn't even launch its CLI or the embedded ffmpeg. Every
 Developer ID build (`make dmg` with `DEVELOPER_ID`, the release workflow) sets
-`HALO_HARDENED_RUNTIME=YES` and signs every nested binary with `--options runtime`, as
+`ANYFMT_HARDENED_RUNTIME=YES` and signs every nested binary with `--options runtime`, as
 notarization requires. Local ad-hoc builds leave it off. Nothing is weakened for
 distributed builds. No `disable-library-validation` entitlement is used.
 
@@ -253,7 +253,7 @@ step. Direct rows and anything ending in PDF stay visible. All 793 routes still 
 the CLI, the matrix, and Settings › Formats can switch any target on. 516 are on the
 wheel out of the box.
 
-### D-033 Optional packs: Halo never downloads them
+### D-033 Optional packs: anyfmt never downloads them
 F built a checksum-verified installer that installs from a local file only. Settings ›
 Engines opens the official download page in the browser, then the user picks the
 downloaded file, which is verified against its pinned SHA-256 before installing. The
@@ -264,7 +264,7 @@ install is refused until BLOCKERS B-011 is done.
 `xcodebuild` emits `.stringsdata` but only the Xcode IDE writes them into `.xcstrings`.
 `scripts/sync-strings.py` runs after every `make build`. It keeps comments and
 translations and marks removed keys stale, so all 1,388 user-facing strings are in the
-two catalogs (HaloCore, app).
+two catalogs (AnyfmtCore, app).
 
 ### D-035 The wheel opens on key-down by default
 The first real-hardware session (B-001) found the quick-tap rule too strict: the
@@ -362,10 +362,10 @@ deep cobalt instead.
 
 ### D-040 Pro activation is optional, offline-verified, and gates nothing local
 Onboarding ends with "Have a Pro key or account?". The page has a key field and a
-sign-in button, and the primary button is still **Start Using Halo**, so skipping
+sign-in button, and the primary button is still **Start Using anyfmt**, so skipping
 is the default. Nothing nags afterwards. Activation also lives in Settings ›
 Account and in the menu bar ("Pro Licence & Account…").
-- Keys are `HALO1-…`: Crockford base32 of a length-prefixed canonical JSON payload
+- Keys are `ANYFMT1-…`: Crockford base32 of a length-prefixed canonical JSON payload
   (plan, seats, issue and expiry dates, key id) plus an Ed25519 signature. They're
   verified offline with CryptoKit against a public-key table indexed by key id, so
   keys can be rotated, and stored in the login Keychain. Details are in
@@ -380,9 +380,9 @@ Account and in the menu bar ("Pro Licence & Account…").
   only tax honest users.
 
 ### D-041 The CLI is the agent interface; MCP is in-house over stdio
-- **One registry.** `halo` links HaloCore, so formats, routes, option schemas
+- **One registry.** `anyfmt` links AnyfmtCore, so formats, routes, option schemas
   (`OptionsSchema.forTarget`), presets (the same `presets.json`, re-read whenever
-  either process changes it) and estimates are the app's own. `halo schema --json`
+  either process changes it) and estimates are the app's own. `anyfmt schema --json`
   (`schemaVersion: 1`) dumps all of it, so an agent can plan without guessing.
 - **Contract.** `--json` on every command. Convert and tool print NDJSON events on
   stdout (start / progress / output / skip / error / done), with human text on
@@ -398,7 +398,7 @@ Account and in the menu bar ("Pro Licence & Account…").
   Inspector passed `tools/list` and `tools/call`. There's no network and no port:
   local automation goes through the CLI and MCP only, never an HTTP server.
 - **PATH symlinks.** Through the cask's or Settings' symlink, argv[0] is plain
-  "halo", so the CLI couldn't find its bundled engines and every audio, video and
+  "anyfmt", so the CLI couldn't find its bundled engines and every audio, video and
   SVG route vanished. It now resolves its own Helpers folder.
 
 ### D-042 The wheel's phase 2 look: painted, banded, display-type
@@ -407,7 +407,7 @@ used like a spotlight and no glass.
 - **Painted, not vibrant.** RadialMenu gains an optional `RadialMenuStyle.surface`
   (disc, segment, hub, stroke, content, pill colours per appearance). When it's set,
   no `NSVisualEffectView` is created, glow is off and there's one quiet shadow.
-  Halo uses a black disc, charcoal (`ink.800`) wedges and `ink.700` hairlines. In
+  anyfmt uses a black disc, charcoal (`ink.800`) wedges and `ink.700` hairlines. In
   light mode: a paper disc, white wedges and `paper.100` hairlines. The package's
   defaults are unchanged for other hosts, and the MIT API is additive.
 - **Heat band on hover.** `style.highlightBands` paints hard-edged vertical bands
@@ -424,3 +424,22 @@ used like a spotlight and no glass.
   colour. The lock always also says "· Locked", so colour is never the only signal.
 - Gallery and demo GIF backdrops lost their violet tint: neutral graphite/grey for
   the "desktop" behind the wheel, black for the README GIF.
+
+### D-043 The app is anyfmt (was the codename Halo)
+
+AJ bought `anyfmt.app` and named the product **anyfmt**, written lowercase everywhere users see it.
+
+- `Config/Brand.xcconfig` and `Sources/Shared/Brand.swift` say `anyfmt`. The bundle id is
+  `app.anyfmt` (reverse DNS of the domain we own) instead of `dev.aiwithaj.<slug>`, and the URL
+  scheme and CLI are `anyfmt`.
+- Code identifiers use `Anyfmt` (`AnyfmtCore`, `AnyfmtApp`, `Color.anyfmtInk`, the SDK's
+  `Anyfmt` class, `Anyfmt-Signature` webhook header). API keys are `anyfmt_sk_…`.
+- Licence keys are now `ANYFMT1-…`. `HALO1-…` keys already issued still verify (same payload and
+  signature, legacy prefix accepted by the app and `scripts/licence-tool.swift`).
+- A one-time `LegacyBrandMigration` on first launch copies settings from the old
+  `dev.aiwithaj.halo` defaults domain, the old keychain items (cloud sign-in, licence) and
+  `Application Support/Halo`. It never deletes the old copies.
+- macOS ties permissions to the bundle id, so anyone who ran Halo grants Accessibility again once
+  (onboarding's permission coach handles it).
+- The `halo` glow terms in editor tokens (`overlayHalo`, `haloWidth`) are a visual effect, not
+  the brand, and stay. BUILD.md is AJ's original brief and keeps the codename.

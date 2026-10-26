@@ -1,6 +1,6 @@
 import Foundation
 import UniformTypeIdentifiers
-import HaloCore
+import AnyfmtCore
 
 enum CloudUploadPurpose: String, Sendable {
     case share, job, inbox

@@ -12,7 +12,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 OUT="${OUT:-$PWD/Tests/Fixtures/generated}"
-ENG="${HALO_ENGINES_DIR:-$PWD/Engines/dist}"
+ENG="${ANYFMT_ENGINES_DIR:-$PWD/Engines/dist}"
 if [[ ! -x "$ENG/Helpers/ffmpeg" ]]; then
   common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   [[ -n "$common" ]] && ENG="$(dirname "$common")/Engines/dist"

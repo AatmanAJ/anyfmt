@@ -1,8 +1,8 @@
 import XCTest
 import DragSense
-import HaloCore
+import AnyfmtCore
 @testable import RadialMenu
-@testable import HaloApp
+@testable import AnyfmtApp
 
 /// Settings must drive behaviour, not just persist (the wiring the UI relies on).
 @MainActor
@@ -12,7 +12,7 @@ final class AppCoordinatorTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let suite = "halo.coordinator.\(UUID().uuidString)"
+        let suite = "anyfmt.coordinator.\(UUID().uuidString)"
         defaults = UserDefaults(suiteName: suite)
         defaults.removePersistentDomain(forName: suite)
         settings = AppSettings(defaults: defaults)

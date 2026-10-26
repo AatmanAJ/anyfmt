@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 
 /// Sends files with AirDrop from a menu-bar agent.
 ///

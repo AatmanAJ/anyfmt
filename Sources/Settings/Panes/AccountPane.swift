@@ -1,5 +1,5 @@
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// Lane I's account view when wired; otherwise a calm note. Never an upsell:
 /// nothing local depends on an account (BUILD.md §9b).
@@ -18,7 +18,7 @@ struct AccountPane: View {
                             .accessibilityAddTraits(.isHeader)
                         Text("Every conversion, tool and action runs on your Mac, free, with no account. Sign-in for share links and sync will appear here when it’s available.")
                             .font(.system(size: DesignTokens.TypeRamp.body))
-                            .foregroundStyle(Color.haloSecondaryText)
+                            .foregroundStyle(Color.anyfmtSecondaryText)
                             .fixedSize(horizontal: false, vertical: true)
                         StatusBadge(tone: .good, text: String(localized: "Everything local works offline"))
                     }

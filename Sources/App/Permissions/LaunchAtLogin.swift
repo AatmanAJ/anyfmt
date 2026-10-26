@@ -2,7 +2,7 @@ import AppKit
 import os
 import ServiceManagement
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// What `LaunchAtLogin` needs from ServiceManagement. Faked in tests and
 /// screenshots so nothing ever registers a login item from a test run.
@@ -115,7 +115,7 @@ struct LaunchAtLoginRow: View {
                     Text("Launch \(Brand.name) at login")
                     Text("Starts quietly in the menu bar when you log in.")
                 }
-                .toggleStyle(HaloSwitchStyle())
+                .toggleStyle(AnyfmtSwitchStyle())
                 .accessibilityIdentifier("settings.launchAtLogin")
             }
         }
@@ -123,7 +123,7 @@ struct LaunchAtLoginRow: View {
         if let note = model.statusNote {
             HStack(alignment: .firstTextBaseline) {
                 Image(systemName: model.status == .requiresApproval ? "hourglass" : "exclamationmark.triangle")
-                    .foregroundStyle(model.status == .requiresApproval ? Color.secondary : Color.haloDanger)
+                    .foregroundStyle(model.status == .requiresApproval ? Color.secondary : Color.anyfmtDanger)
                 Text(verbatim: note)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

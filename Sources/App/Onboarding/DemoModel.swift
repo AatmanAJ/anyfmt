@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HaloCore
+import AnyfmtCore
 
 /// The three wheels of the demo.
 enum DemoWheelKind: String, CaseIterable, Sendable {

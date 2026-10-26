@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// An icon shown for a job: a Finder icon or a Quick Look thumbnail. Kept for
@@ -172,7 +172,7 @@ struct ProgressCard: View {
                     .buttonStyle(ProgressQuietButtonStyle(large: true))
                 if s.canRetry {
                     Button(s.retryLabel, action: model.onRetry)
-                        .buttonStyle(.haloPrimary)
+                        .buttonStyle(.anyfmtPrimary)
                 }
             }
             .padding(.top, DesignTokens.Component.ProgressCard.actionsTop)
@@ -193,7 +193,7 @@ struct ProgressSummaryCard: View {
         let highContrast = overrides.increasedContrast ?? (contrast == .increased)
         HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.s) {
             Text(verbatim: model.state.numeral.text ?? "")
-                .font(.haloDisplay(ProgressTheme.Typography.summaryNumeral))
+                .font(.anyfmtDisplay(ProgressTheme.Typography.summaryNumeral))
                 .displayTracking(ProgressTheme.Typography.summaryNumeral)
                 .monospacedDigit()
                 .foregroundStyle(ProgressTheme.ink(scheme))
@@ -229,7 +229,7 @@ struct ProgressNumeralView: View {
             switch numeral {
             case .text(let text, let tone):
                 Text(verbatim: text)
-                    .font(.haloDisplay(ProgressTheme.Typography.numeral))
+                    .font(.anyfmtDisplay(ProgressTheme.Typography.numeral))
                     .displayTracking(ProgressTheme.Typography.numeral)
                     .monospacedDigit()
                     .lineLimit(1)

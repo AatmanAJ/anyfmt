@@ -1,6 +1,6 @@
 import XCTest
 import PDFKit
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Tools 25–26 end to end with PDFKit.
 final class PDFToolsTests: XCTestCase {
@@ -12,8 +12,8 @@ final class PDFToolsTests: XCTestCase {
         let (out, _) = try await runTool(OrganizePDFRunner(), [a, b], ["order": .string("1:3,1:1:90,2:2")])
         let d = try doc(try XCTUnwrap(out.files.first))
         XCTAssertEqual(d.pageCount, 3)
-        XCTAssertTrue(d.page(at: 0)?.string?.contains("Halo fixture page 3") ?? false)
-        XCTAssertTrue(d.page(at: 1)?.string?.contains("Halo fixture page 1") ?? false, "text stays text")
+        XCTAssertTrue(d.page(at: 0)?.string?.contains("anyfmt fixture page 3") ?? false)
+        XCTAssertTrue(d.page(at: 1)?.string?.contains("anyfmt fixture page 1") ?? false, "text stays text")
         XCTAssertEqual(d.page(at: 1)?.rotation, 90)
         XCTAssertTrue(d.page(at: 2)?.string?.contains("Extra page 2") ?? false)
         // Bookmarks: one entry per input, A's kept chapters nested.
@@ -77,7 +77,7 @@ final class PDFToolsTests: XCTestCase {
         XCTAssertLessThan(Double(after), Double(before) * 0.25, "\(before) → \(after)")
         let d = try doc(u)
         XCTAssertEqual(d.pageCount, 3)
-        XCTAssertTrue(d.string?.contains("Halo fixture page 2 searchable text") ?? false, "text is still vector text")
+        XCTAssertTrue(d.string?.contains("anyfmt fixture page 2 searchable text") ?? false, "text is still vector text")
         XCTAssertEqual(d.outlineRoot?.numberOfChildren, 3, "bookmarks survive")
     }
 

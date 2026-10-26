@@ -1,6 +1,6 @@
 import XCTest
 import AppKit
-@testable import HaloApp
+@testable import AnyfmtApp
 
 final class TriggerAssignmentTests: XCTestCase {
     func testAssigningAUsedKeySwapsTheTwoWheels() {

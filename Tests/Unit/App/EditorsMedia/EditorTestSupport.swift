@@ -3,20 +3,20 @@ import CoreText
 import PDFKit
 import SwiftUI
 import XCTest
-@testable import HaloApp
-import HaloCore
+@testable import AnyfmtApp
+import AnyfmtCore
 
 /// Points `EngineLocator.shared` at the checkout's Engines/dist before anything
 /// reads it. (Engines embedded in an ad-hoc signed debug app currently fail
 /// library validation; see docs/lanes/G2-media-tools.md, Blockers.)
 enum TestEngineSetup {
     static let done: Bool = {
-        if ProcessInfo.processInfo.environment["HALO_ENGINES_DIR"]?.isEmpty ?? true {
+        if ProcessInfo.processInfo.environment["ANYFMT_ENGINES_DIR"]?.isEmpty ?? true {
             var dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
             for _ in 0..<12 {
                 let dist = dir.appendingPathComponent("Engines/dist")
                 if FileManager.default.isExecutableFile(atPath: dist.appendingPathComponent("Helpers/ffmpeg").path) {
-                    setenv("HALO_ENGINES_DIR", dist.path, 1)
+                    setenv("ANYFMT_ENGINES_DIR", dist.path, 1)
                     break
                 }
                 dir.deleteLastPathComponent()
@@ -31,7 +31,7 @@ enum TestEngineSetup {
 actor MediaEditorSamples {
     static let store = MediaEditorSamples()
     private var built: Set<String> = []
-    let dir = FileManager.default.temporaryDirectory.appendingPathComponent("halo-g2-editor-samples-\(ProcessInfo.processInfo.processIdentifier)")
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-g2-editor-samples-\(ProcessInfo.processInfo.processIdentifier)")
 
     static func url(_ name: String) async throws -> URL {
         _ = TestEngineSetup.done
@@ -151,12 +151,12 @@ enum EditorRender {
         return dir.appendingPathComponent("docs/screens")
     }
 
-    /// Writes `rep` to docs/screens/<name>.png when HALO_EDITOR_SCREENS is set
+    /// Writes `rep` to docs/screens/<name>.png when ANYFMT_EDITOR_SCREENS is set
     /// (TEST_RUNNER_HALO_EDITOR_SCREENS=1 on the xcodebuild line), else to a temp dir.
     @discardableResult
     static func save(_ rep: NSBitmapImageRep, name: String) throws -> URL {
-        let wantsDocs = ProcessInfo.processInfo.environment["HALO_EDITOR_SCREENS"] != nil
-        let dir = wantsDocs ? screensDirectory : FileManager.default.temporaryDirectory.appendingPathComponent("halo-editor-screens")
+        let wantsDocs = ProcessInfo.processInfo.environment["ANYFMT_EDITOR_SCREENS"] != nil
+        let dir = wantsDocs ? screensDirectory : FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-editor-screens")
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("\(name).png")
         // Dark variants are kept at 1× to keep the repo light; light ones stay Retina.

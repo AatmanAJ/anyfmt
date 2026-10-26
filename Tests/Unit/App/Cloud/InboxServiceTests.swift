@@ -1,6 +1,6 @@
 import XCTest
-import HaloCore
-@testable import HaloApp
+import AnyfmtCore
+@testable import AnyfmtApp
 
 /// Inbox: items sent from a phone/browser are downloaded into the chosen
 /// folder with collision-safe, sanitised names, verified and acknowledged.

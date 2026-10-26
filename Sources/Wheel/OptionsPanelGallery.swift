@@ -1,5 +1,5 @@
 import AppKit
-import HaloCore
+import AnyfmtCore
 import SwiftUI
 
 /// Renders the pinned options panel for `make gallery` (light and dark, with a
@@ -9,7 +9,7 @@ enum OptionsPanelGallery {
     static func render(into dir: URL) throws -> [URL] {
         let router = Router(table: CapabilityTable([Capability("mov", "gif", "gallery", schema: StandardSchemas.gif)]))
         guard let target = router.commonTargets(for: ["mov"]).first(where: { $0.format == "gif" }) else { return [] }
-        let store = PresetStore(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("halo-gallery-presets-\(UUID().uuidString).json"))
+        let store = PresetStore(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("anyfmt-gallery-presets-\(UUID().uuidString).json"))
         var out: [URL] = []
         for (name, appearance) in [("options-panel-dark", NSAppearance.Name.darkAqua), ("options-panel-light", .aqua)] {
             let model = OptionsPanelModel(target: target, values: OptionValues([OptionKey.gifWidth: .int(480), OptionKey.fps: .int(15)]),

@@ -1,10 +1,10 @@
 import Foundation
 import XCTest
 
-/// Drives `halo mcp` through pipes, one request at a time, and compares the
+/// Drives `anyfmt mcp` through pipes, one request at a time, and compares the
 /// whole conversation with Tests/CLIGolden/mcp-transcript.txt.
 final class MCPTranscriptTests: XCTestCase {
-    /// A running `halo mcp` with line-buffered stdout.
+    /// A running `anyfmt mcp` with line-buffered stdout.
     private final class Server: @unchecked Sendable {
         let process = Process()
         private let input = Pipe()
@@ -16,9 +16,9 @@ final class MCPTranscriptTests: XCTestCase {
         private let arrived = DispatchSemaphore(value: 0)
 
         init(env: [String: String]) throws {
-            process.executableURL = HaloCLI.binary
+            process.executableURL = AnyfmtCLI.binary
             process.arguments = ["mcp"]
-            process.environment = HaloCLI.environment(env)
+            process.environment = AnyfmtCLI.environment(env)
             process.standardInput = input
             process.standardOutput = output
             process.standardError = FileHandle.nullDevice
@@ -76,18 +76,18 @@ final class MCPTranscriptTests: XCTestCase {
     }
 
     func testTranscript() throws {
-        try XCTSkipUnless(HaloCLI.isBuilt, "halo not built next to the tests")
-        let scratch = try HaloCLI.scratch("mcp")
+        try XCTSkipUnless(AnyfmtCLI.isBuilt, "anyfmt not built next to the tests")
+        let scratch = try AnyfmtCLI.scratch("mcp")
         defer { try? FileManager.default.removeItem(at: scratch) }
         let support = scratch.appendingPathComponent("support", isDirectory: true)
         try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
         let png = scratch.appendingPathComponent("photo.png")
-        try HaloCLI.makePNG(at: png)
+        try AnyfmtCLI.makePNG(at: png)
         let outDir = scratch.appendingPathComponent("out").path
 
         // Each convert that really runs waits 1 s first, so the cancellation below
-        // lands while the job is in flight (HALO_TEST_DELAY_MS; dry runs don't wait).
-        let server = try Server(env: ["HALO_SUPPORT_DIR": support.path, "HALO_TEST_DELAY_MS": "1000"])
+        // lands while the job is in flight (ANYFMT_TEST_DELAY_MS; dry runs don't wait).
+        let server = try Server(env: ["ANYFMT_SUPPORT_DIR": support.path, "ANYFMT_TEST_DELAY_MS": "1000"])
         var transcript = ""
         var progressTokens: [String] = []
 
@@ -102,7 +102,7 @@ final class MCPTranscriptTests: XCTestCase {
             }
         }
         func normalise(_ s: String) -> String {
-            var t = HaloCLI.normalise(s, paths: [scratch: "<tmp>"])
+            var t = AnyfmtCLI.normalise(s, paths: [scratch: "<tmp>"])
             // Encoder output size can change with the OS's ImageIO.
             t = t.replacingOccurrences(of: #"("|\\")bytes("|\\"):\d+"#, with: "$1bytes$2:<n>", options: .regularExpression)
             return t
@@ -162,6 +162,6 @@ final class MCPTranscriptTests: XCTestCase {
         for p in progressTokens { XCTAssertTrue(p.contains(#""progressToken":"convert-9""#), p) }
         XCTAssertTrue(progressTokens.last?.contains(#""progress":1"#) == true, "\(progressTokens)")
 
-        try HaloCLI.check("mcp-transcript", transcript)
+        try AnyfmtCLI.check("mcp-transcript", transcript)
     }
 }

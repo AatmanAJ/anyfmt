@@ -1,22 +1,22 @@
 #!/bin/bash
-# Puts Halo back to its first-run state on this Mac, for testing onboarding.
+# Puts anyfmt back to its first-run state on this Mac, for testing onboarding.
 #
 # Dry run by default: prints every step. Pass --yes to do it.
 #
-# What it resets (bundle id from Config/Brand.xcconfig, default dev.aiwithaj.halo):
-#   1. Quits Halo if it's running.
+# What it resets (bundle id from Config/Brand.xcconfig, default app.anyfmt):
+#   1. Quits anyfmt if it's running.
 #   2. Preferences: `defaults delete <bundle id>` (onboarding state, keys, formats, sync switch…).
 #   3. Keychain: every generic password in the services <bundle id>.cloud (sign-in tokens)
 #      and <bundle id>.licence (Pro licence key). Never <bundle id>.licence-signing (the
 #      developer's signing key) or anything else.
-#   4. Files: ~/Library/Application Support/Halo (presets, recents, received files),
-#      ~/Library/Caches/<bundle id>, ~/Library/Logs/Halo. Moved to the Trash, not deleted.
-#   5. The `halo` CLI symlink, only if it's a symlink into a Halo.app.
-#   6. The launch-at-login item: `Halo --unregister-login-item` (SMAppService needs the app).
+#   4. Files: ~/Library/Application Support/anyfmt (presets, recents, received files),
+#      ~/Library/Caches/<bundle id>, ~/Library/Logs/anyfmt. Moved to the Trash, not deleted.
+#   5. The `anyfmt` CLI symlink, only if it's a symlink into an anyfmt.app.
+#   6. The launch-at-login item: `anyfmt --unregister-login-item` (SMAppService needs the app).
 #   7. Privacy grants for the bundle id: `tccutil reset All <bundle id>` (Accessibility,
 #      Input Monitoring, Automation…). The wheel itself needs none of them.
 #
-# Usage: scripts/reset-first-run.sh [--yes] [--app path/to/Halo.app]
+# Usage: scripts/reset-first-run.sh [--yes] [--app path/to/anyfmt.app]
 set -euo pipefail
 
 CONFIRM=0
@@ -49,7 +49,7 @@ run() {
 trash() {
   local path="$1"
   [[ -e "$path" ]] || { echo "absent: $path"; return; }
-  local dest="$HOME/.Trash/$(basename "$path") (Halo reset $(date +%Y%m%d-%H%M%S))"
+  local dest="$HOME/.Trash/$(basename "$path") (anyfmt reset $(date +%Y%m%d-%H%M%S))"
   run mv "$path" "$dest"
 }
 

@@ -1,5 +1,5 @@
 import XCTest
-@testable import HaloCore
+@testable import AnyfmtCore
 
 /// Metadata policies on real files, through both engines.
 final class AVMetadataTests: XCTestCase {
