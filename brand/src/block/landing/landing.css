@@ -1,0 +1,18 @@
+/* Landing-only additions on top of block.css. */
+.bk-btn-cream { background: var(--bk-cream); color: var(--bk-ink); box-shadow: 4px 4px 0 var(--bk-orange); }
+.bk-btn-cream:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk-orange); }
+.bk-btn-cream:active { transform: translate(4px,4px); box-shadow: 0 0 0 var(--bk-orange); }
+
+/* Tiles lift on a hard shadow. */
+.bkl-lift { transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1); }
+.bkl-lift:hover { transform: translate(-4px,-4px); box-shadow: 8px 8px 0 var(--lift, var(--bk-orange)); }
+
+.bkl-dots { background-image: radial-gradient(#34343C 1.2px, transparent 1.5px); background-size: 14px 14px; }
+
+@keyframes bkl-caret { 50% { opacity: 0 } }
+.bkl-caret { animation: bkl-caret 1s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bkl-lift, .bkl-lift:hover { transition: none; transform: none; }
+  .bkl-caret { animation: none; }
+}

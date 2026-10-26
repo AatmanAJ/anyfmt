@@ -7,6 +7,9 @@ import { loaders } from './directions/registry'
 import { DirectionBar } from './shared/DirectionBar'
 
 const AnyfmtLanding = lazy(() => import('./anyfmt/Landing'))
+const BlockPreview = lazy(() => import('./block/Preview'))
+const BlockLanding = lazy(() => import('./block/Landing'))
+const BlockBook = lazy(() => import('./block/BrandBook'))
 const AnyfmtBook = lazy(() => import('./anyfmt/BrandBook'))
 
 function ScrollTop() {
@@ -38,6 +41,9 @@ createRoot(document.getElementById('root')!).render(
       <ScrollTop />
       <Routes>
         <Route path="/" element={<Hub />} />
+        <Route path="/block" element={<Suspense fallback={<div className="min-h-screen bg-[#0E0E10]" />}><BlockLanding /></Suspense>} />
+        <Route path="/block/book" element={<Suspense fallback={<div className="min-h-screen bg-[#0E0E10]" />}><BlockBook /></Suspense>} />
+        <Route path="/block/preview" element={<Suspense fallback={null}><BlockPreview /></Suspense>} />
         <Route path="/anyfmt" element={<Suspense fallback={<div className="min-h-screen bg-[#F7F7F7]" />}><AnyfmtLanding /></Suspense>} />
         <Route path="/anyfmt/book" element={<Suspense fallback={<div className="min-h-screen bg-[#F7F7F7]" />}><AnyfmtBook /></Suspense>} />
         <Route path="/d/:id" element={<DirectionPage view="book" />} />

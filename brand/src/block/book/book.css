@@ -1,0 +1,36 @@
+/* Brand-book-only helpers for the Block style. Tokens come from ../block.css. */
+.bkb-nav { transition: background .15s, transform .12s, box-shadow .12s; }
+.bkb-nav:not([aria-current]):hover { background: var(--bk-ink-2); transform: translate(-1px, -1px); }
+.bkb-nav:focus-visible, .bkb button:focus-visible { outline: 2px solid var(--bk-lilac); outline-offset: 2px; }
+
+/* Frozen button states for the spec sheet. */
+.bk-btn-orange.is-hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk-wine); }
+.bk-btn-orange.is-pressed { transform: translate(4px,4px); box-shadow: 0 0 0 var(--bk-wine); }
+.bk-btn-ink.is-hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk-orange); }
+.bk-btn-ink.is-pressed { transform: translate(4px,4px); box-shadow: 0 0 0 var(--bk-orange); }
+.bk-btn-line.is-hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+.bk-btn-line.is-pressed { background: color-mix(in srgb, currentColor 18%, transparent); transform: translateY(1px); }
+
+/* Dot-matrix texture on black. */
+.bkb-dots { background-image: radial-gradient(circle, rgba(244,241,236,.16) 1.1px, transparent 1.6px); background-size: 14px 14px; }
+.bkb-dots-orange { background-image: radial-gradient(circle, rgba(255,107,26,.55) 1.3px, transparent 1.8px); background-size: 12px 12px; }
+
+/* Thinking dots. */
+@keyframes bkb-blink { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+.bkb-think span { animation: bkb-blink 1.2s infinite both; }
+.bkb-think span:nth-child(2) { animation-delay: .15s; }
+.bkb-think span:nth-child(3) { animation-delay: .3s; }
+
+/* Hover lift for panels. */
+.bkb-lift { transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s; }
+.bkb-lift:hover { transform: translate(-3px,-3px); box-shadow: 6px 6px 0 var(--bk-orange); }
+
+@keyframes bkb-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+.bkb-bob { animation: bkb-bob 4.5s ease-in-out infinite; }
+@keyframes bkb-spin { to { transform: rotate(360deg) } }
+.bkb-spin { animation: bkb-spin 1s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bkb-think span, .bkb-bob, .bkb-spin { animation: none; }
+  .bkb-lift:hover { transform: none; }
+}

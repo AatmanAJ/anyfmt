@@ -1,0 +1,65 @@
+@import "@fontsource-variable/funnel-display";
+@import "@fontsource-variable/funnel-sans";
+@import "@fontsource-variable/funnel-sans/wght-italic.css";
+
+/* anyfmt "Block": loud orange, ink and wine, lilac and pink stripes, isometric blocks. */
+.bk {
+  --bk-orange: #FF6B1A;
+  --bk-orange-hi: #FF8F4D;
+  --bk-orange-lo: #D9500A;
+  --bk-ink: #0E0E10;
+  --bk-ink-2: #1C1C21;
+  --bk-ink-3: #2C2C33;
+  --bk-wine: #3A0E1E;
+  --bk-wine-2: #561629;
+  --bk-lilac: #B8B3FF;
+  --bk-lilac-lo: #8E87F2;
+  --bk-pink: #FF4FA0;
+  --bk-pink-lo: #D62F7E;
+  --bk-cream: #F4F1EC;
+  --bk-white: #FFFFFF;
+  --bk-mute: #8A8790;
+  --bk-line: #2A2A30;
+  --bk-line-light: #DEDAD3;
+
+  font-family: "Funnel Sans Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  background: var(--bk-ink);
+  color: var(--bk-cream);
+}
+.bk ::selection { background: var(--bk-orange); color: var(--bk-ink); }
+.bk-display { font-family: "Funnel Display Variable", "Funnel Sans Variable", ui-sans-serif, sans-serif; letter-spacing: -0.045em; }
+.bk-mono { font-family: "JetBrains Mono Variable", ui-monospace, monospace; }
+
+/* Diagonal stripe fills for flat (non-isometric) surfaces. */
+.bk-stripe-pink { background: repeating-linear-gradient(135deg, var(--bk-pink) 0 14px, var(--bk-wine) 14px 28px); }
+.bk-stripe-lilac { background: repeating-linear-gradient(135deg, var(--bk-lilac) 0 14px, var(--bk-ink-2) 14px 28px); }
+.bk-stripe-orange { background: repeating-linear-gradient(135deg, var(--bk-orange) 0 14px, var(--bk-wine) 14px 28px); }
+
+/* Buttons: flat, chunky, with a hard offset "extrusion" that collapses when pressed. */
+.bk-btn {
+  display: inline-flex; align-items: center; gap: .55rem;
+  height: 48px; padding: 0 22px; border-radius: 6px;
+  font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap;
+  transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
+}
+.bk-btn:focus-visible { outline: 2px solid var(--bk-lilac); outline-offset: 3px; }
+.bk-btn-orange { background: var(--bk-orange); color: var(--bk-ink); box-shadow: 4px 4px 0 var(--bk-wine); }
+.bk-btn-orange:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk-wine); }
+.bk-btn-orange:active { transform: translate(4px,4px); box-shadow: 0 0 0 var(--bk-wine); }
+.bk-btn-ink { background: var(--bk-ink); color: var(--bk-cream); box-shadow: 4px 4px 0 var(--bk-orange); }
+.bk-btn-ink:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk-orange); }
+.bk-btn-ink:active { transform: translate(4px,4px); box-shadow: 0 0 0 var(--bk-orange); }
+.bk-btn-line { color: currentColor; box-shadow: inset 0 0 0 1.5px currentColor; }
+.bk-btn-line:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+
+/* A chip/tag: small, square-ish, mono label. */
+.bk-tag {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 4px;
+  font-family: "JetBrains Mono Variable", ui-monospace, monospace; font-size: 11.5px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+@keyframes bk-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+@keyframes bk-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.bk-marquee { animation: bk-marquee 40s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .bk-marquee { animation: none; } }
