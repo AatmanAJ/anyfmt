@@ -108,7 +108,7 @@ function Cover() {
               Warm paper, soft light. The <em className="aura-em">calm, human</em> take on a power tool.
             </p>
             <p className="mt-6 max-w-[36rem] text-[17px] leading-[1.6] text-[#5B524A]">
-              Halo does a lot of heavy lifting: 793 routes, 26 tools, a CLI. Aura’s job is to make all of that feel like a sunny desk.
+              anyfmt does a lot of heavy lifting: 793 routes, 26 tools, a CLI. Aura’s job is to make all of that feel like a sunny desk.
               Light pools where your attention is. Surfaces are paper and frosted glass. The voice talks to you like a friend who happens to know codecs.
             </p>
           </div>
@@ -356,7 +356,7 @@ function TypeSection() {
     { n: 'UI', s: 'Inter 500–600 · 13/1.3', el: <span className="text-[13px] font-semibold">clip.gif is ready · 2.4 MB</span> },
     { n: 'Label', s: 'Inter 600 · 12 caps · +14%', el: <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#8A7F74]">Frame rate</span> },
     { n: 'Hand', s: 'Fraunces italic opsz 9 · WONK', el: <span className="aura-hand text-[22px] text-[#B04E1B]">psst, try <K>⌃</K> for AirDrop</span> },
-    { n: 'Mono', s: 'JetBrains Mono · 13/1.8', el: <span className="font-mono text-[13px]">halo convert clip.mov --to gif --json</span> },
+    { n: 'Mono', s: 'JetBrains Mono · 13/1.8', el: <span className="font-mono text-[13px]">anyfmt convert clip.mov --to gif --json</span> },
   ]
   return (
     <Section id="type" n="03 — Type" title={<>A serif that <em>smiles</em>.</>}
@@ -423,9 +423,9 @@ function Slider({ label, v, min, max, on }: { label: string; v: number; min: num
 /* ------------------------------------------------------------------ 5 voice */
 
 const VOICE = [
-  { t: 'Talk to one person.', b: 'Second person, present tense. You drag, you drop. Halo is “it”, and “we” only when we, the people who make it, owe you something.', do: 'Drop it on GIF and you’re done.', dont: 'Users can initiate a conversion workflow.' },
+  { t: 'Talk to one person.', b: 'Second person, present tense. You drag, you drop. anyfmt is “it”, and “we” only when we, the people who make it, owe you something.', do: 'Drop it on GIF and you’re done.', dont: 'Users can initiate a conversion workflow.' },
   { t: 'Plain beats clever.', b: 'Say the format, the size, the place. Wit is a garnish, at most once per screen.', do: 'clip.gif is ready. 2.4 MB, next to the original.', dont: 'Boom! Your media has been transformed ✨' },
-  { t: 'Reassure before you ask.', b: 'Tell people why, then what. Especially for permissions and money.', do: 'Accessibility lets Halo notice ⇧ while you drag. Nothing leaves your Mac.', dont: 'Halo requires Accessibility access to function.' },
+  { t: 'Reassure before you ask.', b: 'Tell people why, then what. Especially for permissions and money.', do: 'Accessibility lets anyfmt notice ⇧ while you drag. Nothing leaves your Mac.', dont: 'anyfmt requires Accessibility access to function.' },
   { t: 'Own the mistake, offer the fix.', b: 'Errors say what happened, that nothing broke, and what to do next. No codes in the headline.', do: 'clip.mov moved before we finished. Drop it again and we’ll pick up.', dont: 'Error -43: source unavailable.' },
   { t: 'Quietly confident.', b: 'Real numbers, no superlatives. Let 43 ms do the bragging.', do: 'Key press to wheel in 43 ms.', dont: 'The fastest, most powerful converter ever made.' },
 ]
@@ -608,7 +608,7 @@ export default function BrandBook() {
           <AppBoard />
         </Section>
         <footer className="px-5 pb-10 pt-6 text-center text-[13px] text-[#8A7F74]">
-          <Lockup size={20} className="mx-auto" /> <p className="mt-3">Aura · a Halo brand direction · {meta.tagline}</p>
+          <Lockup size={20} className="mx-auto" /> <p className="mt-3">Aura · a anyfmt brand direction · {meta.tagline}</p>
         </footer>
       </div>
     </div>

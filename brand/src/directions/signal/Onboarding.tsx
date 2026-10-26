@@ -59,16 +59,16 @@ export function Onboarding() {
   const [granted, setGranted] = useState(false)
   return (
     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-      <Win step={1} title={<>Welcome to <i>Halo.</i></>} body="Drag a file. Press a key. Drop on the wheel. Setup takes under a minute." primary="Begin"
+      <Win step={1} title={<>Welcome to <i>anyfmt.</i></>} body="Drag a file. Press a key. Drop on the wheel. Setup takes under a minute." primary="Begin"
         visual={<div className="flex flex-col items-center gap-4"><Mark size={104} animate /><Label>v1 · local · AGPL-3.0</Label></div>} />
 
-      <Win step={2} title={<>Let Halo <i>see the drag.</i></>} secondary="Later" primary={granted ? 'Continue' : 'Open Settings'}
-        body="macOS asks for Accessibility so Halo can notice a drag and a key press. Nothing is recorded or sent."
+      <Win step={2} title={<>Let anyfmt <i>see the drag.</i></>} secondary="Later" primary={granted ? 'Continue' : 'Open Settings'}
+        body="macOS asks for Accessibility so anyfmt can notice a drag and a key press. Nothing is recorded or sent."
         visual={
           <button type="button" onClick={() => setGranted((g) => !g)} className="flex w-[290px] max-w-[calc(100vw-96px)] flex-col gap-3 text-left outline-none">
             <div className="flex items-center gap-3 rounded-[12px] px-3 py-2.5" style={{ background: C.carbon2, boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,.1)' }}>
               <AppIcon size={34} />
-              <div className="flex-1"><div className="text-[13px] font-medium">Halo</div><div className="text-[11px]" style={{ color: C.ash }}>Accessibility</div></div>
+              <div className="flex-1"><div className="text-[13px] font-medium">anyfmt</div><div className="text-[11px]" style={{ color: C.ash }}>Accessibility</div></div>
               <Toggle on={granted} />
             </div>
             <span className="flex items-center gap-2 pl-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: granted ? C.solar : C.ash }}>
@@ -118,7 +118,7 @@ export function Onboarding() {
         } />
 
       <Win step={6} title={<>Ready. <i>793 routes armed.</i></>} primary="Finish"
-        body="Halo lives in the menu bar. Drag any file to start. Press Esc mid-drag to cancel."
+        body="anyfmt lives in the menu bar. Drag any file to start. Press Esc mid-drag to cancel."
         visual={
           <div className="flex w-[300px] max-w-[calc(100vw-96px)] flex-col items-end gap-2">
             <div className="flex h-[24px] w-full items-center justify-end gap-3 rounded-[6px] px-2.5 text-[11.5px]" style={{ background: 'rgba(30,30,33,.9)' }}>
@@ -126,7 +126,7 @@ export function Onboarding() {
               <span className="font-medium tabular-nums">Mon 9:41</span>
             </div>
             <span className="relative mr-[30px] rounded-[8px] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ background: C.solar, color: C.void }}>
-              Halo lives here
+              anyfmt lives here
               <span className="absolute -top-1 left-1/2 size-2 -translate-x-1/2 rotate-45" style={{ background: C.solar }} />
             </span>
           </div>

@@ -104,7 +104,7 @@ function Cover() {
     <section id="cover" data-sec="cover" className="relative overflow-hidden">
       <div className={cn(wrap, 'relative pb-16 pt-6 md:min-h-[860px]')}>
         <div className={cn(grid, 'border-b border-[#D6D6D0] pb-3')}>
-          <Mono className="col-span-2 md:col-span-3">Halo — Brand book</Mono>
+          <Mono className="col-span-2 md:col-span-3">anyfmt — Brand book</Mono>
           <Mono className="col-span-2 text-right text-[#5C5C56] md:col-span-3 md:text-left">Direction: {meta.name}</Mono>
           <Mono className="hidden text-[#5C5C56] md:col-span-3 md:block">Rev. 1.0 · Oct 2026</Mono>
           <Mono className="hidden text-right text-[#5C5C56] md:col-span-3 md:block">Sheet 01 / 09</Mono>
@@ -328,11 +328,11 @@ function ColourSection() {
     ['White on Vermilion', C.white, C.red, 'Avoid for text'],
   ]
   const tokens = [
-    ['--halo-bg', C.sheet, 'Page and window canvas'], ['--halo-surface', C.white, 'Panels, menus, toasts'],
-    ['--halo-ink', C.ink, 'Primary text, disc, primary button'], ['--halo-ink-2', C.ink2, 'Secondary text, indices'],
-    ['--halo-rule', C.rule, 'Hairlines, grid, dividers'], ['--halo-accent', C.red, 'Armed wedge, progress, focus ring'],
-    ['--halo-on-accent', C.ink, 'Text on vermilion (5.6 : 1)'], ['--halo-wedge', C.sheet, 'Wheel wedge at rest'],
-    ['--halo-danger', C.red, 'Errors use the one colour + "!"'], ['--halo-success', C.ink, 'Success is a black check, not green'],
+    ['--anyfmt-bg', C.sheet, 'Page and window canvas'], ['--anyfmt-surface', C.white, 'Panels, menus, toasts'],
+    ['--anyfmt-ink', C.ink, 'Primary text, disc, primary button'], ['--anyfmt-ink-2', C.ink2, 'Secondary text, indices'],
+    ['--anyfmt-rule', C.rule, 'Hairlines, grid, dividers'], ['--anyfmt-accent', C.red, 'Armed wedge, progress, focus ring'],
+    ['--anyfmt-on-accent', C.ink, 'Text on vermilion (5.6 : 1)'], ['--anyfmt-wedge', C.sheet, 'Wheel wedge at rest'],
+    ['--anyfmt-danger', C.red, 'Errors use the one colour + "!"'], ['--anyfmt-success', C.ink, 'Success is a black check, not green'],
   ]
   return (
     <Section id="colour" n="03" kicker="Colour" title={<>Paper, ink,<br />one red.</>} caption="Colour is information. If something is vermilion, it is the thing you are about to do.">
@@ -471,7 +471,7 @@ function TypeSection() {
 const VOICE = [
   ['Say what it does.', 'Converted to GIF. 2.4 MB.', 'Your masterpiece is ready to shine!'],
   ['Number things.', '793 routes. 43 ms to open.', 'Tons of formats, blazing fast.'],
-  ['Use the imperative.', 'Drag a file. Press ⇧. Drop.', 'Halo empowers you to effortlessly…'],
+  ['Use the imperative.', 'Drag a file. Press ⇧. Drop.', 'anyfmt empowers you to effortlessly…'],
   ['Name the file.', "Can't open locked.pdf.", 'Oops! Something went wrong.'],
   ['No adjective we can\'t measure.', 'Runs on your Mac. 0 network calls.', 'Seamless, secure, next-gen privacy.'],
 ]
@@ -483,7 +483,7 @@ const MICRO = [
   ['Error · disk', 'Not enough space for clip.mp4', 'Needs 1.2 GB. Free some space or pick another folder.'],
   ['Empty · Float', 'Float is empty.', 'Drag a file here to hold it.'],
   ['Empty · presets', 'No presets yet.', 'Set options on any wedge, then press ⌘S.'],
-  ['Permission', 'Halo needs Accessibility.', 'It reads which key you press while you drag. Nothing else.'],
+  ['Permission', 'anyfmt needs Accessibility.', 'It reads which key you press while you drag. Nothing else.'],
   ['Button', 'Convert ⏎', 'Not “Let\'s go!”, not “Magic”.'],
 ]
 

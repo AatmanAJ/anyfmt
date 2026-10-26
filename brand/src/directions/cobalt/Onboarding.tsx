@@ -63,7 +63,7 @@ export function Onboarding() {
       <OnbWindow step={0} side={<Mark size={64} />} title={<>Hey. <span style={{ color: C.flame }}>Let's go fast.</span></>}
         footer={<Btn>Start <ChevronRight size={15} strokeWidth={3} /></Btn>}>
         <div className="flex h-full flex-col justify-between gap-5">
-          <p className="max-w-[34ch] text-[14px] leading-relaxed text-[#E9EEFF]/80">Halo lives in your menu bar. Drag a file, press a key, drop it on the wheel. You'll have it in ten seconds.</p>
+          <p className="max-w-[34ch] text-[14px] leading-relaxed text-[#E9EEFF]/80">anyfmt lives in your menu bar. Drag a file, press a key, drop it on the wheel. You'll have it in ten seconds.</p>
           <div className="flex items-center gap-3">
             <Wordmark size={54} />
             <span className="rounded-[6px] px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ boxShadow: 'inset 0 0 0 1px rgba(233,238,255,.25)' }}>Local · AGPL-3.0</span>
@@ -72,14 +72,14 @@ export function Onboarding() {
       </OnbWindow>
 
       {/* 2 · Accessibility */}
-      <OnbWindow step={1} side={<ShieldCheck size={44} strokeWidth={2} />} title="Let Halo see the drag."
+      <OnbWindow step={1} side={<ShieldCheck size={44} strokeWidth={2} />} title="Let anyfmt see the drag."
         footer={<><Btn ghost>Why?</Btn><Btn>Open System Settings</Btn></>}>
-        <p className="max-w-[40ch] text-[14px] leading-relaxed text-[#E9EEFF]/80">macOS asks first. Halo needs Accessibility to notice a drag and the key you press. That's all it looks at.</p>
+        <p className="max-w-[40ch] text-[14px] leading-relaxed text-[#E9EEFF]/80">macOS asks first. anyfmt needs Accessibility to notice a drag and the key you press. That's all it looks at.</p>
         <div className="mt-4 overflow-hidden rounded-[12px]" style={{ background: 'rgba(233,238,255,.06)', boxShadow: 'inset 0 0 0 1px rgba(233,238,255,.1)' }}>
           <div className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] opacity-50">Privacy & Security › Accessibility</div>
-          {[['Halo', true], ['Terminal', false]].map(([n, on]) => (
+          {[['anyfmt', true], ['Terminal', false]].map(([n, on]) => (
             <div key={String(n)} className="flex items-center gap-3 border-t px-3 py-2.5" style={{ borderColor: 'rgba(233,238,255,.08)' }}>
-              {n === 'Halo'
+              {n === 'anyfmt'
                 ? <span className="grid size-7 place-items-center rounded-[7px]" style={{ background: C.cobalt }}><Mark size={20} /></span>
                 : <span className="grid size-7 place-items-center rounded-[7px] bg-black font-mono text-[10px]">&gt;_</span>}
               <span className="text-[13px] font-medium">{n}</span>
@@ -143,7 +143,7 @@ export function Onboarding() {
       {/* 6 · Done */}
       <OnbWindow step={5} side={<Check size={52} strokeWidth={3} />} title={<>Green light. <span style={{ color: C.flame }}>Go.</span></>}
         footer={<Btn>Finish</Btn>}>
-        <p className="text-[14px] leading-relaxed text-[#E9EEFF]/80">Halo is up in the menu bar. Drag anything, anywhere.</p>
+        <p className="text-[14px] leading-relaxed text-[#E9EEFF]/80">anyfmt is up in the menu bar. Drag anything, anywhere.</p>
         <div className="mt-4 overflow-hidden rounded-[12px]" style={{ background: 'linear-gradient(180deg, #1F3BFF, #0B1A8C)' }}>
           <div className="flex h-7 items-center justify-end gap-3 px-3 text-[11px] font-medium" style={{ background: 'rgba(5,10,46,.55)' }}>
             <span className="opacity-60">Wi-Fi</span>

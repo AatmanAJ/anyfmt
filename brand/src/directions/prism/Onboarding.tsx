@@ -4,12 +4,12 @@ import { cn } from '../../shared/cn'
 import { FileTile } from './AppSurfaces'
 import { MenuGlyph, PrismMark, Wordmark } from './Logo'
 import { Hub, PrismWheel, SEG } from './PrismWheel'
-import { HaloRing, IRIS, Mesh, P, Scaled, glass } from './theme'
+import { FormatRing, IRIS, Mesh, P, Scaled, glass } from './theme'
 
 export const OB_W = 680
 export const OB_H = 400
 
-/** A stadium-shaped onboarding window, the way Halo's setup actually looks. */
+/** A stadium-shaped onboarding window, the way anyfmt's setup actually looks. */
 function Stadium({ children, step, iris, dark, label }: { children: ReactNode; step: number; iris?: boolean; dark?: boolean; label: string }) {
   return (
     <figure className="m-0">
@@ -79,7 +79,7 @@ function Welcome() {
     <Stadium step={0} iris label="Welcome">
       <div className="flex h-full flex-col items-center justify-center text-center">
         <div className="relative grid place-items-center">
-          <HaloRing size={128} thickness={1.5} className="opacity-80" />
+          <FormatRing size={128} thickness={1.5} className="opacity-80" />
           <PrismMark size={92} />
         </div>
         <div className="mt-5 text-[13px] font-medium text-[#3A3152]">Welcome to</div>
@@ -97,11 +97,11 @@ function Permission() {
       <div className="absolute left-[96px] top-1/2 w-[238px] -translate-y-1/2">
         <div className="rounded-[18px] p-3" style={{ background: '#F4F1FA', boxShadow: 'inset 0 0 0 .5px rgba(28,21,48,.08)' }}>
           <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-medium text-[#8E87A6]"><Lock size={10} /> Privacy & Security › Accessibility</div>
-          {[['Terminal', false, '#2B2B2B'], ['Halo', true, ''], ['Raycast', true, '#FF5C5C']].map(([n, on, c]) => (
-            <div key={n as string} className={cn('flex items-center gap-2.5 rounded-[10px] px-2 py-1.5', n === 'Halo' && 'bg-white shadow-[0_6px_16px_-8px_rgba(44,30,90,.35)]')}>
-              {n === 'Halo' ? <PrismMark size={20} /> : <span className="size-5 rounded-[5px]" style={{ background: c as string }} />}
+          {[['Terminal', false, '#2B2B2B'], ['anyfmt', true, ''], ['Raycast', true, '#FF5C5C']].map(([n, on, c]) => (
+            <div key={n as string} className={cn('flex items-center gap-2.5 rounded-[10px] px-2 py-1.5', n === 'anyfmt' && 'bg-white shadow-[0_6px_16px_-8px_rgba(44,30,90,.35)]')}>
+              {n === 'anyfmt' ? <PrismMark size={20} /> : <span className="size-5 rounded-[5px]" style={{ background: c as string }} />}
               <span className="flex-1 text-[12px] font-medium">{n}</span>
-              <span className="relative h-[16px] w-[28px] rounded-full" style={{ background: on ? (n === 'Halo' ? `linear-gradient(120deg, ${P.coral}, ${P.lilac})` : '#34C759') : 'rgba(28,21,48,.15)' }}>
+              <span className="relative h-[16px] w-[28px] rounded-full" style={{ background: on ? (n === 'anyfmt' ? `linear-gradient(120deg, ${P.coral}, ${P.lilac})` : '#34C759') : 'rgba(28,21,48,.15)' }}>
                 <span className="absolute top-[2px] size-[12px] rounded-full bg-white shadow" style={{ left: on ? 14 : 2 }} />
               </span>
             </div>
@@ -110,8 +110,8 @@ function Permission() {
         <MousePointer2 size={20} className="absolute -bottom-3 right-6 fill-white text-[#1C1530]" strokeWidth={1.6} />
       </div>
       <Right>
-        <H>Let Halo feel your drags</H>
-        <Body>Halo listens for ⇧ ⌘ ⌃ only while a file is mid-drag. Never your typing, never your screen.</Body>
+        <H>Let anyfmt feel your drags</H>
+        <Body>anyfmt listens for ⇧ ⌘ ⌃ only while a file is mid-drag. Never your typing, never your screen.</Body>
         <div className="mt-5 flex items-center gap-1"><Btn>Open Settings</Btn><Btn ghost>Why?</Btn></div>
       </Right>
     </Stadium>
@@ -171,7 +171,7 @@ function Pro() {
       <div className="absolute left-[100px] top-1/2 w-[226px] -translate-y-1/2">
         <div className="relative overflow-hidden rounded-[22px] p-4" style={{ background: `linear-gradient(150deg, #FFE3EA, #EDE6FF 50%, #DDF8F6)`, boxShadow: 'inset 0 1px 0 #fff, 0 16px 34px -18px rgba(44,30,90,.5)' }}>
           <div className="flex items-baseline justify-between">
-            <span className="text-[13px] font-semibold">Halo Pro</span>
+            <span className="text-[13px] font-semibold">anyfmt Pro</span>
             <span className="text-[22px] font-semibold tracking-[-0.04em]">$4<span className="text-[11px] font-medium text-[#5E5677]">/mo</span></span>
           </div>
           <ul className="mb-0 mt-3 list-none space-y-1.5 p-0 text-[11.5px] text-[#3A3152]">
@@ -215,7 +215,7 @@ function Done() {
       </div>
       <Right dark>
         <H>You’re all set</H>
-        <Body dark>Halo lives in your menu bar. Drag any file, tap a key, and enjoy the magic.</Body>
+        <Body dark>anyfmt lives in your menu bar. Drag any file, tap a key, and enjoy the magic.</Body>
         <div className="mt-5"><span className="inline-flex h-9 items-center rounded-full bg-white px-6 text-[13px] font-semibold text-[#1C1530]">Done</span></div>
       </Right>
     </Stadium>

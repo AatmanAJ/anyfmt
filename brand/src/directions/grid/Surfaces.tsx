@@ -165,7 +165,7 @@ export function MenuBarMenu({ className }: { className?: string }) {
     'sep',
     { t: 'Open Float shelf', k: '⌥⌘F' }, { t: 'Presets…' }, { t: 'Settings…', k: '⌘,' },
     'sep',
-    { t: 'Pause Halo' }, { t: 'Quit Halo', k: '⌘Q' },
+    { t: 'Pause anyfmt' }, { t: 'Quit anyfmt', k: '⌘Q' },
   ]
   return (
     <div className={cn('w-full max-w-[400px]', className)}>
@@ -177,7 +177,7 @@ export function MenuBarMenu({ className }: { className?: string }) {
       <div className="relative">
         <div className="ml-auto mr-[96px] mt-1 w-[260px] max-w-[calc(100%-8px)] rounded-[8px] border border-[#D6D6D0] bg-white p-1 font-sans text-[13px] text-[#0B0B0B] shadow-[0_18px_40px_-16px_rgba(0,0,0,.3)] max-[420px]:mr-1">
           <div className="flex items-center justify-between px-2.5 py-2">
-            <span className="font-grotesk text-[14px] font-semibold tracking-[-0.02em]">Halo 1.0</span>
+            <span className="font-grotesk text-[14px] font-semibold tracking-[-0.02em]">anyfmt 1.0</span>
             <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.08em]"><span className="size-1.5 bg-[#0B0B0B]" />Ready</span>
           </div>
           <div className="mx-2 mb-1 h-px bg-[#D6D6D0]" />

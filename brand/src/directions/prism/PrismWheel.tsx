@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../shared/cn'
 import { isShot } from '../../shared/kit'
-import { HaloRing, P } from './theme'
+import { FormatRing, P } from './theme'
 
 export type PSeg = { id: string; label: string; sub?: string; icon?: ReactNode }
 
@@ -129,10 +129,10 @@ export function PrismWheel({
           }}
           onPointerLeave={() => hoverIndex === undefined && setHover(null)}
           onClick={() => active != null && onPick?.(segments[active], active)}
-          role="menu" aria-label="Halo wheel"
+          role="menu" aria-label="anyfmt wheel"
         >
-          {/* Halo rim */}
-          {rim && <HaloRing size={size + 10} thickness={1.6} className="left-[-5px] top-[-5px] opacity-80" speed="p-spin-slow" bloom={!compact} />}
+          {/* anyfmt rim */}
+          {rim && <FormatRing size={size + 10} thickness={1.6} className="left-[-5px] top-[-5px] opacity-80" speed="p-spin-slow" bloom={!compact} />}
           {/* Disc */}
           <div className="absolute inset-0 rounded-full" style={{
             background: dark

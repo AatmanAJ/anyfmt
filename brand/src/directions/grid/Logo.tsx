@@ -17,7 +17,7 @@ export function Mark({
 }) {
   const n = 6, step = TAU / n
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" className={className} style={style} role="img" aria-label="Halo">
+    <svg width={size} height={size} viewBox="0 0 100 100" className={className} style={style} role="img" aria-label="anyfmt">
       {Array.from({ length: n }).map((_, i) => {
         const a0 = -step / 2 + i * step
         if (template && i === hot) return null
@@ -30,7 +30,7 @@ export function Mark({
 export function Wordmark({ className, style, color = C.ink }: { className?: string; style?: CSSProperties; color?: string }) {
   return (
     <span className={cn('font-grotesk font-semibold leading-none tracking-[-0.065em]', className)} style={{ color, ...style }}>
-      Halo
+      anyfmt
     </span>
   )
 }
@@ -54,7 +54,7 @@ export function AppIcon({ size = 160, dark, className }: { size?: number; dark?:
   const n = 6, step = TAU / n
   const id = dark ? 'gi-d' : 'gi-l'
   return (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="Halo app icon">
+    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="anyfmt app icon">
       <defs>
         <clipPath id={`${id}-c`}><path d={squircle(100, 100, 824, 185)} /></clipPath>
         <filter id={`${id}-s`} x="-20%" y="-20%" width="140%" height="150%">

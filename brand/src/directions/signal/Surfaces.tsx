@@ -180,7 +180,7 @@ export function MenuBarMenu({ className }: { className?: string }) {
     'sep',
     { k: 'pause', label: 'Pause for 1 hour' },
     { k: 'settings', label: 'Settings…', right: '⌘,' },
-    { k: 'quit', label: 'Quit Halo', right: '⌘Q' },
+    { k: 'quit', label: 'Quit anyfmt', right: '⌘Q' },
   ]
   return (
     <div className={cn('w-[340px] max-w-full font-geist text-[13px]', className)}>
@@ -193,7 +193,7 @@ export function MenuBarMenu({ className }: { className?: string }) {
       </div>
       <div className="ml-auto mr-1 mt-1 w-[260px] sm:mr-[96px] max-w-[calc(100%-8px)] rounded-[11px] p-[5px]" style={{ ...vibrancy, color: C.bone }}>
         <div className="flex items-center justify-between px-2.5 pb-2 pt-1.5">
-          <div className="flex items-center gap-2"><Led size={6} /><span className="font-semibold">Halo</span></div>
+          <div className="flex items-center gap-2"><Led size={6} /><span className="font-semibold">anyfmt</span></div>
           <span className="font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: C.ash }}>Ready · local</span>
         </div>
         {rows.map((r, i) => {

@@ -87,7 +87,7 @@ export function CobaltWheel({
           }}
           onPointerLeave={() => hoverIndex === undefined && setPh(null)}
           onClick={() => active != null && onPick?.(segments[active], active)}
-          role="menu" aria-label="Halo wheel"
+          role="menu" aria-label="anyfmt wheel"
         >
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 overflow-visible" aria-hidden>
             <defs>

@@ -21,7 +21,7 @@ export function Nav({ fixed = true }: { fixed?: boolean }) {
     <div className={cn('inset-x-0 top-3 z-50 px-3', fixed ? 'fixed' : 'absolute')}>
       <nav className="mx-auto flex h-14 max-w-[1320px] items-center justify-between rounded-[16px] pl-4 pr-2 font-geist backdrop-blur-xl"
            style={{ background: 'rgba(5,10,46,.72)', color: C.ice, boxShadow: 'inset 0 0 0 1px rgba(233,238,255,.14)' }} aria-label="Main">
-        <a href="#top" className="flex items-center" aria-label="Halo home"><Lockup size={24} /></a>
+        <a href="#top" className="flex items-center" aria-label="anyfmt home"><Lockup size={24} /></a>
         <div className="hidden items-center gap-1 md:flex">
           {links.map(([l, h]) => (
             <a key={l} href={h} onClick={(e) => { e.preventDefault(); document.querySelector(h)?.scrollIntoView({ behavior: 'smooth' }) }}
@@ -291,7 +291,7 @@ function Bento() {
             <Eyebrow style={{ color: C.flame }}>Nº 05 · The kit</Eyebrow>
             <h2 className="mt-4 font-anton uppercase leading-[0.88]" style={{ fontSize: 'clamp(52px, 7vw, 112px)' }}>Everything, mid-drag.</h2>
           </div>
-          <p className="max-w-sm font-geist text-[15px] leading-relaxed text-[#E9EEFF]/70">Six things Halo does without opening a window. Each saves a new copy. Your original stays put.</p>
+          <p className="max-w-sm font-geist text-[15px] leading-relaxed text-[#E9EEFF]/70">Six things anyfmt does without opening a window. Each saves a new copy. Your original stays put.</p>
         </div>
         <div className="mt-12 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           <Card n="01" title="Convert" className="min-h-[340px] lg:col-span-2">
@@ -337,7 +337,7 @@ function Bento() {
           </Card>
           <Card n="05" title="Agents" className="min-h-[300px]">
             <div className="mt-6 rounded-[12px] p-3 font-mono text-[11.5px] leading-[1.7]" style={{ background: C.deep, boxShadow: 'inset 0 0 0 1px rgba(233,238,255,.1)' }}>
-              <div><span style={{ color: C.flame }}>$</span> halo convert clip.mov --to gif --json</div>
+              <div><span style={{ color: C.flame }}>$</span> anyfmt convert clip.mov --to gif --json</div>
               <div className="text-[#E9EEFF]/45">{'{"event":"progress","pct":64}'}</div>
               <div className="text-[#E9EEFF]/60">{'{"event":"done","output":"clip.gif"}'}</div>
               <div className="mt-2 text-[#E9EEFF]/45"># or let Claude call it over MCP</div>
@@ -529,8 +529,8 @@ export function Pricing() {
 
 /* ───────────────────────── FAQ ───────────────────────── */
 const FAQS = [
-  { q: 'Is it really free?', a: 'Yes. Halo is open source under AGPL-3.0, and every local feature is free, forever: all 793 conversions, all 26 tools, the six actions, the CLI and the MCP server. Pro only adds cloud extras.' },
-  { q: 'Does anything leave my Mac?', a: 'No. Conversions run on your Mac. Halo makes zero network calls unless you ask for a Pro cloud feature, and there is no account and no telemetry.' },
+  { q: 'Is it really free?', a: 'Yes. anyfmt is open source under AGPL-3.0, and every local feature is free, forever: all 793 conversions, all 26 tools, the six actions, the CLI and the MCP server. Pro only adds cloud extras.' },
+  { q: 'Does anything leave my Mac?', a: 'No. Conversions run on your Mac. anyfmt makes zero network calls unless you ask for a Pro cloud feature, and there is no account and no telemetry.' },
   { q: 'Which Macs does it run on?', a: 'macOS 13 or later on Apple silicon. It lives in the menu bar and wakes up when you drag.' },
   { q: 'Why does it need Accessibility access?', a: 'To see that you are dragging and which modifier you pressed, so it can open the wheel under your pointer. It does not read your screen or your keystrokes otherwise.' },
   { q: 'What happens to my original file?', a: 'Nothing. Every conversion and tool saves a new copy next to it. Undo is just the trash.' },
@@ -583,7 +583,7 @@ function Final() {
       <div className={cn(W, 'relative z-10 flex flex-col items-center pb-10 pt-28 text-center')}>
         <Eyebrow>Nº 11 · Lights out</Eyebrow>
         <p className="mt-5 max-w-lg font-geist text-[18px] leading-relaxed">Free, local, open source. Install it, drag something, press a key.</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-4"><CTA><ArrowDownToLine size={20} strokeWidth={2.8} /> Download Halo</CTA><CTA ghost href="#agents"><GitFork size={18} /> Read the source</CTA></div>
+        <div className="mt-8 flex flex-wrap justify-center gap-4"><CTA><ArrowDownToLine size={20} strokeWidth={2.8} /> Download anyfmt</CTA><CTA ghost href="#agents"><GitFork size={18} /> Read the source</CTA></div>
       </div>
       <div className="relative h-[29vw] select-none overflow-hidden" aria-hidden>
         <motion.div className="absolute left-1/2 top-0 whitespace-nowrap font-anton uppercase leading-[0.8]" style={{ fontSize: '38vw', skewX, x: '-50%' }}>
@@ -598,7 +598,7 @@ function Footer() {
   const cols = [
     { h: 'Product', l: ['Download', 'Pricing', 'Changelog', 'Formats'] },
     { h: 'Build', l: ['Source code', 'CLI docs', 'MCP server', 'Licence'] },
-    { h: 'Halo', l: ['Privacy', 'Press kit', 'Contact'] },
+    { h: 'anyfmt', l: ['Privacy', 'Press kit', 'Contact'] },
   ]
   return (
     <footer className="pb-28 pt-16" style={{ background: C.deep, color: C.ice }}>

@@ -48,7 +48,7 @@ export const SCREENS: { name: string; node: ReactNode }[] = [
     node: (
       <Stadium step={1} art={<div className="relative grid place-items-center"><div className="absolute size-[170px] rounded-full bg-[#FFB27A]/40 blur-2xl" /><Mark size={132} /></div>}>
         <Title>Hello. Let’s make files <em>easier</em> to move.</Title>
-        <Body>Halo lives in your menu bar and only wakes up when you drag something. Setup takes about two minutes.</Body>
+        <Body>anyfmt lives in your menu bar and only wakes up when you drag something. Setup takes about two minutes.</Body>
         <Buttons><Primary>Get started</Primary><span className="text-[12px] text-[#8A7F74]">Free and open source</span></Buttons>
       </Stadium>
     ),
@@ -59,7 +59,7 @@ export const SCREENS: { name: string; node: ReactNode }[] = [
       <Stadium step={2} art={
         <div className="w-[210px] rounded-[18px] bg-white p-3 shadow-[0_14px_30px_-12px_rgba(120,70,30,.35)]">
           <div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold text-[#8A7F74]"><Lock size={10} /> Privacy & Security › Accessibility</div>
-          {[{ n: 'Halo', on: true }, { n: 'Terminal', on: false }].map((r) => (
+          {[{ n: 'anyfmt', on: true }, { n: 'Terminal', on: false }].map((r) => (
             <div key={r.n} className={cn('flex items-center gap-2 rounded-[10px] px-2 py-1.5', r.on && 'bg-[#FFF3E8]')}>
               {r.on ? <Mark size={18} /> : <span className="size-[18px] rounded-[5px] bg-[#2B2724]" />}
               <span className="flex-1 text-[12px] font-medium text-[#1E1B18]">{r.n}</span>
@@ -71,7 +71,7 @@ export const SCREENS: { name: string; node: ReactNode }[] = [
         </div>
       }>
         <Title>One permission, and <em>why</em>.</Title>
-        <Body>Accessibility lets Halo notice ⇧ ⌘ ⌃ while you drag. It doesn’t read your screen or your typing, and nothing leaves your Mac.</Body>
+        <Body>Accessibility lets anyfmt notice ⇧ ⌘ ⌃ while you drag. It doesn’t read your screen or your typing, and nothing leaves your Mac.</Body>
         <Buttons>
           <Primary>Open System Settings <ArrowUpRight size={14} /></Primary>
           <span className="flex items-center gap-2 text-[12px] text-[#5B524A]"><span className="relative flex size-2"><span className="aura-pulse-ring absolute inset-0 rounded-full bg-[#FFA868]" /><span className="relative size-2 rounded-full bg-[#FF9858]" /></span>Waiting for the switch…</span>
@@ -152,9 +152,9 @@ export const SCREENS: { name: string; node: ReactNode }[] = [
           <span className="aura-hand absolute right-[64px] top-[84px] -rotate-3 text-[16px] text-[#B04E1B]">it lives here</span>
         </div>
       }>
-        <Title>You’re set. Halo is <em>up there</em>.</Title>
+        <Title>You’re set. anyfmt is <em>up there</em>.</Title>
         <Body>Look for the little ring in your menu bar. Drag anything, press a key, drop. That’s the whole trick.</Body>
-        <Buttons><Primary><Check size={14} strokeWidth={2.6} /> Start using Halo</Primary></Buttons>
+        <Buttons><Primary><Check size={14} strokeWidth={2.6} /> Start using anyfmt</Primary></Buttons>
       </Stadium>
     ),
   },

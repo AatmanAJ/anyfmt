@@ -23,7 +23,7 @@ export function Nav({ sticky = true }: { sticky?: boolean }) {
   return (
     <header className={cn('z-50 border-b border-[#0B0B0B] bg-[#F4F4F1]', sticky && 'sticky top-0')}>
       <div className={cn(wrap, 'flex h-16 items-center justify-between gap-6')}>
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Halo, top of page"><Lockup h={24} /></button>
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="anyfmt, top of page"><Lockup h={24} /></button>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Sections">
           {NAV.map(([id, label], i) => (
             <button key={id} type="button" onClick={() => go(id)}
@@ -55,7 +55,7 @@ export function Hero({ embedded }: { embedded?: boolean }) {
       <div className={wrap}>
         {/* Meta row */}
         <div className={cn(grid, 'gap-y-2 border-b border-[#D6D6D0] py-3')}>
-          <Mono className="col-span-2 md:col-span-3">Halo / 1.0</Mono>
+          <Mono className="col-span-2 md:col-span-3">anyfmt / 1.0</Mono>
           <Mono className="col-span-2 text-right text-[#5C5C56] md:col-span-3 md:text-left">{product.platform}</Mono>
           <Mono className="col-span-2 hidden text-[#5C5C56] md:col-span-3 md:block">AGPL-3.0 · No account</Mono>
           <Mono className="col-span-2 hidden text-right text-[#5C5C56] md:col-span-3 md:block">Fig. 01 — the drag</Mono>
@@ -206,7 +206,7 @@ export function Bento() {
   return (
     <section id="features" className="relative scroll-mt-16 py-16 md:py-24">
       <div className={wrap}>
-        <SectionHead n="04" kicker="Features" title={<>Six things.<br />Each one exact.</>} caption="Every line below is a thing Halo does today. Nothing here is a roadmap." />
+        <SectionHead n="04" kicker="Features" title={<>Six things.<br />Each one exact.</>} caption="Every line below is a thing anyfmt does today. Nothing here is a roadmap." />
         <div className="mt-14 grid grid-cols-1 gap-px border border-[#0B0B0B] bg-[#0B0B0B] md:mt-20 md:grid-cols-12">
           <Cell n="01" title={f[0].title} dark className="md:col-span-7 md:row-span-2">
             <div className="mt-4 flex items-end justify-between gap-6">
@@ -261,7 +261,7 @@ export function Bento() {
           <Cell n="05" title={f[4].title} className="md:col-span-4">
             <p className="mt-4 text-[15px] leading-snug text-[#5C5C56]">{f[4].body}</p>
             <div className="mt-6 overflow-x-auto bg-[#0B0B0B] px-3 py-2.5 font-mono text-[12px] text-[#F4F4F1] no-scrollbar">
-              <span className="text-[#FF3D2E]">$</span> halo convert clip.mov --to gif --json
+              <span className="text-[#FF3D2E]">$</span> anyfmt convert clip.mov --to gif --json
             </div>
           </Cell>
           <Cell n="06" title={f[5].title} className="md:col-span-4">
@@ -378,7 +378,7 @@ export function Privacy() {
 /* ───────────────────────── Agents / CLI ───────────────────────── */
 
 const TERM = [
-  { p: '$', t: 'halo convert clip.mov --to gif --json' },
+  { p: '$', t: 'anyfmt convert clip.mov --to gif --json' },
   { t: '{"event":"start","input":"clip.mov","to":"gif"}' },
   { t: '{"event":"progress","pct":34}' },
   { t: '{"event":"progress","pct":78}' },
@@ -498,7 +498,7 @@ export function Pricing() {
 /* ───────────────────────── FAQ ───────────────────────── */
 
 const QA = [
-  ['What does Halo do?', product.how],
+  ['What does anyfmt do?', product.how],
   ['Is it free?', `Yes. ${product.licence} Pro is $4 a month and adds features that need a server.`],
   ['Does anything leave my Mac?', 'No. Zero network calls unless you ask. No account, no upload, no telemetry. Pro cloud is opt-in.'],
   ['Which Macs does it run on?', 'macOS 13 or later, on Apple silicon.'],
@@ -597,7 +597,7 @@ export function Footer() {
         </div>
         <DrawRule className="mt-14" />
         <div className="mt-3 flex flex-wrap justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.08em] text-[#5C5C56]">
-          <span>© 2026 Halo · AGPL-3.0</span>
+          <span>© 2026 anyfmt · AGPL-3.0</span>
           <span className="flex items-center gap-2"><Mark size={12} /> Set on a 12-column grid</span>
         </div>
       </div>

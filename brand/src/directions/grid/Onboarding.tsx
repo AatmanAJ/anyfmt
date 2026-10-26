@@ -57,7 +57,7 @@ export function Onboarding() {
             <Mono className="text-[#5C5C56]">v1.0</Mono>
           </div>
           <div className="mt-auto pt-10">
-            <h3 className="font-grotesk text-[64px] font-semibold leading-[0.82] tracking-[-0.065em] md:text-[80px]">Halo.</h3>
+            <h3 className="font-grotesk text-[64px] font-semibold leading-[0.82] tracking-[-0.065em] md:text-[80px]">anyfmt.</h3>
             <P>A wheel for every file. Three keys, one drag. Setup takes five steps.</P>
             <div className="mt-6 grid grid-cols-3 border-t border-[#D6D6D0] font-mono text-[10px] uppercase tracking-[0.08em]">
               {['⇧ Convert', '⌘ Tools', '⌃ Actions'].map((t, i) => (
@@ -72,10 +72,10 @@ export function Onboarding() {
       <Screen at={1} title="Permission" className="min-h-[440px]"
         foot={<><Mono className="mr-2 hidden items-center gap-2 text-[#5C5C56] sm:flex"><span className="size-1.5 animate-pulse bg-[#FF3D2E]" />Waiting</Mono><Btn size="sm">Open Settings <Arrow /></Btn></>}>
         <H>Allow<br />Accessibility.</H>
-        <P>Halo reads which modifier key you press while you drag. Nothing else. No screen recording, no keystroke log.</P>
+        <P>anyfmt reads which modifier key you press while you drag. Nothing else. No screen recording, no keystroke log.</P>
         <div className="relative mt-6 rounded-[8px] border border-[#D6D6D0] bg-[#F4F4F1] p-1">
           <div className="px-2.5 pb-1.5 pt-1 font-sans text-[11px] font-semibold text-[#5C5C56]">Privacy &amp; Security › Accessibility</div>
-          {[['Finder', false], ['Halo', true], ['Terminal', false]].map(([n, me]) => (
+          {[['Finder', false], ['anyfmt', true], ['Terminal', false]].map(([n, me]) => (
             <div key={n as string} className={cn('flex items-center justify-between rounded-[5px] px-2.5 py-2 font-sans text-[13px]', me && 'bg-white outline outline-1 outline-[#0B0B0B]')}>
               <span className="flex items-center gap-2.5">
                 {me ? <Mark size={18} /> : <span className="size-[18px] rounded-[4px] bg-[#D6D6D0]" />}
@@ -88,7 +88,7 @@ export function Onboarding() {
           ))}
         </div>
         <div className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em]">
-          <span className="block h-px w-6 bg-[#FF3D2E]" /> Turn on Halo
+          <span className="block h-px w-6 bg-[#FF3D2E]" /> Turn on anyfmt
         </div>
       </Screen>
 
@@ -162,7 +162,7 @@ export function Onboarding() {
           <Mono className="text-[#5C5C56]">Setup 6 / 6</Mono>
         </div>
         <div className="mt-8"><H>Ready.</H></div>
-        <P>Halo lives in your menu bar. Drag any file and press a key.</P>
+        <P>anyfmt lives in your menu bar. Drag any file and press a key.</P>
         <div className="relative mt-8">
           <div className="flex h-7 items-center justify-end gap-4 rounded-[6px] border border-[#D6D6D0] bg-[#F4F4F1] px-3 font-sans text-[12px] font-medium">
             <span className="text-[#5C5C56]">Wi-Fi</span>
@@ -175,7 +175,7 @@ export function Onboarding() {
           <div className="mr-[76px] mt-2 flex justify-end">
             <div className="flex flex-col items-end">
               <span className="h-6 w-px bg-[#FF3D2E]" />
-              <Mono className="mt-1">Halo is here</Mono>
+              <Mono className="mt-1">anyfmt is here</Mono>
             </div>
           </div>
         </div>

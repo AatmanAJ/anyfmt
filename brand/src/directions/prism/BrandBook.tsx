@@ -8,7 +8,7 @@ import { LandingParts } from './Landing'
 import { AppIcon, Lockup, MenuGlyph, PrismMark, Wordmark } from './Logo'
 import { Onboarding } from './Onboarding'
 import { Hub, PrismWheel, SEG } from './PrismWheel'
-import { Eyebrow, HaloRing, IRIS, Mesh, P, Pill, PrismStyle, Rise, Scaled, Wallpaper, glass } from './theme'
+import { Eyebrow, FormatRing, IRIS, Mesh, P, Pill, PrismStyle, Rise, Scaled, Wallpaper, glass } from './theme'
 import { meta } from './meta'
 
 const W = 'mx-auto w-full max-w-[1200px] px-5 md:px-8'
@@ -66,12 +66,12 @@ function Cover() {
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#F6F4FB]" />
       <div className={cn(W, 'relative grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]')}>
         <div>
-          <Rise><Eyebrow>Halo brand · Direction 05</Eyebrow></Rise>
+          <Rise><Eyebrow>anyfmt brand · Direction 05</Eyebrow></Rise>
           <Rise delay={0.06}><h1 className="p-display mb-0 mt-6 text-[96px] font-semibold leading-[.85] sm:text-[150px] lg:text-[190px]"><span className="p-iris-text-anim">Prism</span></h1></Rise>
           <Rise delay={0.12}><p className="mb-0 mt-6 max-w-[520px] text-[21px] leading-[1.4] tracking-[-0.015em] text-[#3A3152] md:text-[24px]">{meta.tagline}</p></Rise>
           <Rise delay={0.18}>
             <p className="mb-0 mt-4 max-w-[500px] text-[15px] leading-[1.6] text-[#5E5677]">
-              Halo should feel like it shipped with macOS: frosted pearl glass, soft plum shadows, and light that splits into coral, lilac and aqua the moment something happens. Calm at rest, a little magic in motion.
+              anyfmt should feel like it shipped with macOS: frosted pearl glass, soft plum shadows, and light that splits into coral, lilac and aqua the moment something happens. Calm at rest, a little magic in motion.
             </p>
           </Rise>
           <Rise delay={0.24} className="mt-8 flex flex-wrap gap-3">
@@ -80,8 +80,8 @@ function Cover() {
           </Rise>
         </div>
         <div className="relative mx-auto grid size-[340px] place-items-center sm:size-[460px]">
-          <HaloRing size="100%" thickness={1.5} />
-          <HaloRing size="78%" thickness={1} bloom={false} className="opacity-50" speed="p-spin-rev" />
+          <FormatRing size="100%" thickness={1.5} />
+          <FormatRing size="78%" thickness={1} bloom={false} className="opacity-50" speed="p-spin-rev" />
           <PrismWheel segments={SEG.convert} size={300} hoverIndex={0} interactive={false} rim={false} className="scale-[.8] sm:scale-100"
                       hubLabel={<PrismMark size={58} />} />
           {[['Pearl', P.pearl, 'left-0 top-[12%]'], ['Coral', P.coral, 'right-0 top-[6%]'], ['Aqua', P.aqua, 'right-[-2%] bottom-[16%]'], ['Lilac', P.lilac, 'left-[2%] bottom-[8%]']].map(([n, c, pos]) => (
@@ -127,7 +127,7 @@ function LogoChapter() {
         <Card className="grid min-h-[420px] place-items-center p-10" label="Primary mark">
           <Mesh intensity={0.5} />
           <div className="relative grid place-items-center">
-            <HaloRing size={300} thickness={1} bloom={false} className="opacity-40" />
+            <FormatRing size={300} thickness={1} bloom={false} className="opacity-40" />
             <PrismMark size={220} />
           </div>
         </Card>
@@ -321,7 +321,7 @@ function TypeChapter() {
     ['Body', '17 / 1.55', '−0.5%', 'Drag a file in Finder. Press a key. Drop.'],
     ['UI', '13.5 / 1.3', '−1.5%', 'Making clip.gif · 62% · 3 s left'],
     ['Label', '11 / caps', '+8%', 'FRAME RATE'],
-    ['Mono', '12 / 1.7', '0', 'halo convert clip.mov --to gif'],
+    ['Mono', '12 / 1.7', '0', 'anyfmt convert clip.mov --to gif'],
   ]
   return (
     <Chapter id="type" n="04 — Type" title={<>Inter, cut<br />for display.</>}
@@ -379,7 +379,7 @@ function VoiceChapter() {
   ]
   return (
     <Chapter id="voice" n="05 — Voice" title={<>Friendly,<br />light, clear.</>}
-      intro="Halo talks like a helpful friend looking over your shoulder: brief, specific, a little delighted when things work, and calm when they don’t.">
+      intro="anyfmt talks like a helpful friend looking over your shoulder: brief, specific, a little delighted when things work, and calm when they don’t.">
       <div className="space-y-3">
         {rules.map(([h, s, d, dn], i) => (
           <Rise key={h} delay={i * 0.03}>
@@ -435,9 +435,9 @@ function MotionChapter() {
         <Card className="h-[340px]" label="Iridescence · conic, one turn per 40 s" dark>
           <Mesh dark intensity={0.6} />
           <div className="relative grid h-full place-items-center pb-8">
-            <HaloRing size={190} thickness={3} speed="p-spin" />
-            <HaloRing size={130} thickness={1.5} bloom={false} speed="p-spin-rev" />
-            <span className="absolute text-[13px] font-medium text-white/80">Halo ring</span>
+            <FormatRing size={190} thickness={3} speed="p-spin" />
+            <FormatRing size={130} thickness={1.5} bloom={false} speed="p-spin-rev" />
+            <span className="absolute text-[13px] font-medium text-white/80">anyfmt ring</span>
           </div>
         </Card>
         <Card className="h-[340px]" label="Lift · hovered wedge rises 2% and glows (try it)">
@@ -576,7 +576,7 @@ export function BrandBook() {
       <AppChapter />
       <footer className={cn(W, 'flex flex-col items-center gap-3 pb-28 pt-10 text-center')}>
         <Lockup size={26} />
-        <span className="text-[12.5px] text-[#8E87A6]">Prism · a brand direction for Halo · open source, AGPL-3.0</span>
+        <span className="text-[12.5px] text-[#8E87A6]">Prism · a brand direction for anyfmt · open source, AGPL-3.0</span>
       </footer>
     </div>
   )

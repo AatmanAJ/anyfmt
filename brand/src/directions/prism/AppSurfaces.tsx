@@ -271,7 +271,7 @@ export function MenuBarMenu({ dark, className }: { dark?: boolean; className?: s
         <div className="flex items-center gap-3 px-2.5 pb-2.5 pt-2">
           <PrismMark size={30} />
           <div className="leading-tight">
-            <div className="text-[13.5px] font-semibold tracking-[-0.015em]">Halo is ready</div>
+            <div className="text-[13.5px] font-semibold tracking-[-0.015em]">anyfmt is ready</div>
             <div className={cn('flex items-center gap-1.5 text-[11.5px]', sub)}>
               <span className="size-1.5 rounded-full" style={{ background: P.success, boxShadow: `0 0 6px ${P.success}` }} />
               Local · 0 network calls
@@ -293,10 +293,10 @@ export function MenuBarMenu({ dark, className }: { dark?: boolean; className?: s
         {sep}
         <MenuRow dark={dark} icon={<FolderOpen size={14} />} right="⌘O">Open Float shelf</MenuRow>
         <MenuRow dark={dark} icon={<Sparkles size={14} />} right={<ChevronRight size={13} />}>Presets</MenuRow>
-        <MenuRow dark={dark} icon={<Pause size={14} />} right="⌥⌘P">Pause Halo</MenuRow>
+        <MenuRow dark={dark} icon={<Pause size={14} />} right="⌥⌘P">Pause anyfmt</MenuRow>
         {sep}
         <MenuRow dark={dark} icon={<Settings size={14} />} right="⌘,">Settings…</MenuRow>
-        <MenuRow dark={dark} right="⌘Q">Quit Halo</MenuRow>
+        <MenuRow dark={dark} right="⌘Q">Quit anyfmt</MenuRow>
       </div>
     </div>
   )

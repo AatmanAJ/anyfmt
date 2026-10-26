@@ -103,7 +103,7 @@ function Cover() {
   return (
     <section id="cover" className="relative pb-14 pt-10 lg:pt-16">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="flex items-center gap-2"><Led size={6} blink /><Label style={{ color: C.bone }}>Halo · Brand direction</Label></span>
+        <span className="flex items-center gap-2"><Led size={6} blink /><Label style={{ color: C.bone }}>anyfmt · Brand direction</Label></span>
         <Label dim>Ref. dot-matrix LED · editorial serif</Label>
       </div>
       <div className="relative mt-8 h-[220px] overflow-hidden rounded-[24px] sm:h-[340px] md:h-[460px]" style={{ background: '#030304', boxShadow: `inset 0 0 0 1px ${C.graphite}` }}>
@@ -166,7 +166,7 @@ function LogoSection() {
         </Tile>
         <Tile label="Mark" className="min-h-[240px]"><Mark size={110} /></Tile>
         <Tile label="Silkscreen" note="Mono lockup, for hardware moments" className="min-h-[240px]">
-          <div className="flex items-center gap-3"><Mark size={34} /><span className="font-mono text-[18px] font-medium uppercase tracking-[0.32em]">Halo</span></div>
+          <div className="flex items-center gap-3"><Mark size={34} /><span className="font-mono text-[18px] font-medium uppercase tracking-[0.32em]">anyfmt</span></div>
         </Tile>
       </div>
       {/* Backgrounds */}
@@ -385,7 +385,7 @@ function VoiceSection() {
   ]
   return (
     <Sec id="voice" n={4} title={<>Precise. Terse. <i>Measured.</i></>}
-      intro="Halo talks like a good instrument reads: a value, a unit, a state. Short sentences. No exclamation marks. Numbers do the persuading.">
+      intro="anyfmt talks like a good instrument reads: a value, a unit, a state. Short sentences. No exclamation marks. Numbers do the persuading.">
       <div className="flex flex-col">
         {rules.map(([h, b, d, n], i) => (
           <div key={h} className="grid gap-5 py-7 lg:grid-cols-[0.9fr_1fr_1fr]" style={{ borderTop: `1px solid ${C.graphite}` }}>
@@ -591,7 +591,7 @@ export function BrandBook() {
             <Scale ticks={96} className="mt-6" />
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <Lockup size={22} />
-              <Label dim>Signal · Halo brand direction</Label>
+              <Label dim>Signal · anyfmt brand direction</Label>
             </div>
           </div>
         </main>

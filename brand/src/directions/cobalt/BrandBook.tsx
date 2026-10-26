@@ -77,7 +77,7 @@ function Cover() {
       <Bands target={ref} />
       <div className={cn(W, 'relative z-10 flex flex-wrap items-start justify-between gap-6 pt-16')}>
         <div className="font-mono text-[11px] uppercase leading-[1.9] tracking-[0.18em]">
-          <div>Halo · Brand direction 04</div>
+          <div>anyfmt · Brand direction 04</div>
           <div className="opacity-70">{meta.lineage}</div>
         </div>
         <div className="flex gap-2">
@@ -95,7 +95,7 @@ function Cover() {
         <div>
           <p className="font-anton uppercase leading-[0.9]" style={{ fontSize: 'clamp(36px, 4.6vw, 72px)' }}>Loud, fast, kinetic.<br />Conversion as a <span style={{ color: C.flame }}>sport.</span></p>
           <p className="mt-6 max-w-[52ch] font-geist text-[17px] leading-relaxed">
-            Halo turns a drag into a hit: press a key, a wheel opens, you take the wedge. Cobalt dresses that moment like a race:
+            anyfmt turns a drag into a hit: press a key, a wheel opens, you take the wedge. Cobalt dresses that moment like a race:
             full-bleed blue bands that slide as you scroll, a condensed wordmark too big for the page, and one flame-orange hit per view.
           </p>
         </div>
@@ -338,7 +338,7 @@ function TypeSection() {
         <Panel className="relative min-h-[380px] p-6 lg:col-span-2" style={{ background: C.cobalt }} label="Anton · display">
           <Bands count={6} />
           <div className="relative mt-10 font-anton uppercase leading-[0.98]" style={{ fontSize: 'clamp(72px, 10vw, 168px)' }}>
-            <div>Halo <span style={{ color: C.flame }}>43</span></div>
+            <div>anyfmt <span style={{ color: C.flame }}>43</span></div>
             <div style={outline(C.ice, 2)}>MOV→GIF</div>
           </div>
         </Panel>
@@ -401,7 +401,7 @@ function VoiceSection() {
   ]
   return (
     <div className={W}>
-      <SectionHead n="04" id="voice" kicker="How Halo talks" title={<>Punchy. <span style={{ color: C.flame }}>Never cringe.</span></>}>
+      <SectionHead n="04" id="voice" kicker="How anyfmt talks" title={<>Punchy. <span style={{ color: C.flame }}>Never cringe.</span></>}>
         A race engineer on the radio: short, specific, calm under pressure. Headlines shout in caps; sentences under them speak normally.
       </SectionHead>
       <div className="mt-12 grid gap-3 md:grid-cols-2 lg:grid-cols-5">

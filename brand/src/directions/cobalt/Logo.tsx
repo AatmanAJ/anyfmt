@@ -16,7 +16,7 @@ const LIFT = 7
 const NOTCH = arc(50 + LIFT * Math.sin((NOTCH_MID * Math.PI) / 180), 50 - LIFT * Math.cos((NOTCH_MID * Math.PI) / 180), 25, 41, 26, 64)
 
 export function Mark({
-  size = 64, ring = C.ice, notch = C.flame, slant = true, glow = false, className, style, title = 'Halo',
+  size = 64, ring = C.ice, notch = C.flame, slant = true, glow = false, className, style, title = 'anyfmt',
 }: { size?: number; ring?: string; notch?: string; slant?: boolean; glow?: boolean; className?: string; style?: CSSProperties; title?: string }) {
   const id = useId().replace(/:/g, '')
   return (
@@ -88,7 +88,7 @@ export function AppIcon({ size = 180 }: { size?: number }) {
   const sq = squircle(body)
   const bands = [C.ultra, C.cobalt, '#2A46FF', C.cobalt, C.ultra]
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${S} ${S}`} role="img" aria-label="Halo app icon">
+    <svg width={size} height={size} viewBox={`0 0 ${S} ${S}`} role="img" aria-label="anyfmt app icon">
       <defs>
         <clipPath id={`c${id}`}><path d={sq} transform={`translate(${inset} ${inset})`} /></clipPath>
         <linearGradient id={`s${id}`} x1="0" y1="0" x2="0" y2="1">
@@ -121,7 +121,7 @@ export function AppIcon({ size = 180 }: { size?: number }) {
 /** Monochrome template glyph for the menu bar (no slant at this size: crisper on pixels). */
 export function MenuGlyph({ size = 18, color = '#000' }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-label="Halo menu bar icon">
+    <svg width={size} height={size} viewBox="0 0 100 100" aria-label="anyfmt menu bar icon">
       <path d={arc(50, 50, 27, 44, 72, 378)} fill={color} />
       <path d={arc(56, 44, 27, 44, 28, 62)} fill={color} />
     </svg>

@@ -37,7 +37,7 @@ export function Nav() {
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-4">
       <nav className={cn('mx-auto flex max-w-[1180px] items-center justify-between rounded-full py-2 pl-4 pr-2 transition-all duration-500',
         scrolled ? 'aura-frost' : 'bg-transparent')} aria-label="Main">
-        <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Halo home"><Lockup size={24} /></a>
+        <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="anyfmt home"><Lockup size={24} /></a>
         <div className="hidden items-center gap-1 lg:flex">
           {NAV.map((n) => (
             <a key={n.id} href={`#${n.id}`} onClick={go(n.id)} className="rounded-full px-3.5 py-2 text-[14px] font-medium text-[#5B524A] transition hover:bg-white/70 hover:text-[#1E1B18]">{n.label}</a>
@@ -212,7 +212,7 @@ export function HowItWorks() {
     <section id="how" className="relative scroll-mt-24 px-5 py-24 md:py-32">
       <div className="mx-auto max-w-[1180px]">
         <SectionHead eyebrow="How it works" title={<>Three keys. <em>Three</em> wheels.</>}
-          body="You already know the gesture: pick something up, put it somewhere. Halo just adds one key in the middle, and the right wheel opens." />
+          body="You already know the gesture: pick something up, put it somewhere. anyfmt just adds one key in the middle, and the right wheel opens." />
 
         <div className="mt-16 grid grid-cols-1 items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-3">
@@ -322,7 +322,7 @@ function Bento() {
           </Card>
           <Card i={4} className="md:col-span-2">
             <div className="rounded-[16px] bg-[#1E1B18] p-4 font-mono text-[12px] leading-[1.7] text-[#EDE3D6]">
-              <div><span className="text-[#FFB27A]">❯</span> halo convert clip.mov --to gif --json</div>
+              <div><span className="text-[#FFB27A]">❯</span> anyfmt convert clip.mov --to gif --json</div>
               <div className="text-[#9DB4FF]">{'{"ok":true,"out":"clip.gif"}'}</div>
             </div>
             <H t={f[4].title} b={f[4].body} />
@@ -421,7 +421,7 @@ function Privacy() {
 
 function Agents() {
   const lines: { t: ReactNode; c?: string }[] = [
-    { t: <><span className="text-[#FFB27A]">~/Desktop ❯</span> halo convert clip.mov --to gif --json</> },
+    { t: <><span className="text-[#FFB27A]">~/Desktop ❯</span> anyfmt convert clip.mov --to gif --json</> },
     { t: '{"event":"progress","pct":0.31,"stage":"encode"}', c: 'text-[#A79C8F]' },
     { t: '{"event":"progress","pct":0.78,"stage":"encode"}', c: 'text-[#A79C8F]' },
     { t: <><span className="text-[#9DB4FF]">{'{'}</span>"ok":<span className="text-[#FFB27A]">true</span>,"input":"clip.mov","output":"clip.gif",</> },
@@ -491,7 +491,7 @@ function Pricing() {
                   </ul>
                   <div className="mt-auto pt-9">
                     <a href="#download" onClick={go('download')} className={cn('aura-btn w-full justify-center px-5 py-3.5 text-[15px]', pro ? 'aura-btn-ink' : 'aura-btn-soft')}>
-                      {pro ? 'Add Pro later, from the app' : 'Download Halo'}
+                      {pro ? 'Add Pro later, from the app' : 'Download anyfmt'}
                     </a>
                   </div>
                 </div>
@@ -507,8 +507,8 @@ function Pricing() {
 /* ------------------------------------------------------------------ faq */
 
 const FAQ = [
-  { q: 'Is Halo really free?', a: 'Yes. Every local feature, all 793 conversions, 26 tools and 6 actions, plus the CLI and MCP server, is free and open source under AGPL-3.0. Pro only covers things that genuinely need a server.' },
-  { q: 'Does anything leave my Mac?', a: 'No. Halo makes zero network calls unless you ask for a Pro cloud feature. No account, no upload, no telemetry.' },
+  { q: 'Is anyfmt really free?', a: 'Yes. Every local feature, all 793 conversions, 26 tools and 6 actions, plus the CLI and MCP server, is free and open source under AGPL-3.0. Pro only covers things that genuinely need a server.' },
+  { q: 'Does anything leave my Mac?', a: 'No. anyfmt makes zero network calls unless you ask for a Pro cloud feature. No account, no upload, no telemetry.' },
   { q: 'Which Macs does it run on?', a: 'macOS 13 or later, on Apple silicon.' },
   { q: 'Why does it want Accessibility permission?', a: 'So it can notice ⇧ ⌘ or ⌃ while you’re mid-drag. That’s the only thing it’s used for, and setup shows you exactly where the switch is.' },
   { q: 'Can Claude or my scripts use it?', a: 'Yes. There’s a real CLI with JSON and NDJSON progress, and an MCP server, so an agent can convert your files on your Mac.' },
@@ -600,7 +600,7 @@ function Footer() {
         ))}
       </div>
       <div className="mx-auto mt-14 flex max-w-[1180px] flex-wrap items-center justify-between gap-3 text-[13px] text-[#8A7F74]">
-        <span>© 2026 Halo · Open source, AGPL-3.0</span>
+        <span>© 2026 anyfmt · Open source, AGPL-3.0</span>
         <span>{product.platform}</span>
       </div>
     </footer>

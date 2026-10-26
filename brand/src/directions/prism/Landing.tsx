@@ -10,7 +10,7 @@ import { FloatShelf, Toast } from './AppSurfaces'
 import { GlassKey, PrismDemo } from './Demo'
 import { Lockup, PrismMark } from './Logo'
 import { Hub, PrismWheel, SEG, type PSeg } from './PrismWheel'
-import { Eyebrow, HaloRing, IRIS, Mesh, P, Pill, PrismStyle, Rise, Scaled, Ticker, glass } from './theme'
+import { Eyebrow, FormatRing, IRIS, Mesh, P, Pill, PrismStyle, Rise, Scaled, Ticker, glass } from './theme'
 
 const W = 'mx-auto w-full max-w-[1200px] px-5 md:px-8'
 
@@ -89,8 +89,8 @@ function Hero() {
             <span className="flex items-center gap-3"><PrismMark size={15} /><span className="tabular-nums">Mon 9:41</span></span>
           </div>
           <div className="relative grid h-[460px] place-items-center sm:h-[540px] md:h-[600px]">
-            <HaloRing size={560} thickness={1} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-60" speed="p-spin-slow" />
-            <HaloRing size={720} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" speed="p-spin-rev" />
+            <FormatRing size={560} thickness={1} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-60" speed="p-spin-slow" />
+            <FormatRing size={720} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" speed="p-spin-rev" />
             <div className="w-full max-w-[400px]"><Scaled w={400} h={400}><PrismDemo size={360} paused={!inView && !isShot} /></Scaled></div>
             <OrbitChip className="left-[7%] top-[16%]"><span className="font-mono text-[11px] text-[#8E87A6]">⇧</span> Convert · 793 routes</OrbitChip>
             <OrbitChip className="right-[6%] top-[22%]" delay={0.15}><Zap size={13} className="text-[#FF6B8B]" /> 43 ms to wheel</OrbitChip>
@@ -243,7 +243,7 @@ function Bento() {
   return (
     <section id="features" className="relative scroll-mt-24 py-24 md:py-32">
       <div className={W}>
-        <SectionHead eyebrow="Features" title={<>Small app.<br />Surprisingly deep.</>} body="Six things Halo does, each one a drag away." />
+        <SectionHead eyebrow="Features" title={<>Small app.<br />Surprisingly deep.</>} body="Six things anyfmt does, each one a drag away." />
         <div className="mt-14 grid gap-4 md:grid-cols-6">
           <Tile className="md:col-span-4" title={f[0].title} body={f[0].body} icon={<Layers size={14} />}>
             <div className="relative flex h-full flex-col justify-center gap-3 overflow-hidden">
@@ -272,7 +272,7 @@ function Bento() {
           <Tile className="md:col-span-2" title={f[4].title} body={f[4].body} icon={<Bot size={14} />}>
             <div className="flex h-full items-center">
               <pre className="m-0 w-full overflow-hidden rounded-[18px] p-4 font-mono text-[11.5px] leading-[1.7] text-white/85" style={{ background: P.plum, boxShadow: 'inset 0 1px 0 rgba(255,255,255,.12)' }}>
-                <span className="text-[#5EE7DF]">$</span> halo convert clip.mov \{'\n'}  --to gif --json{'\n'}<span className="text-white/45">{'{"event":"done", …}'}</span>
+                <span className="text-[#5EE7DF]">$</span> anyfmt convert clip.mov \{'\n'}  --to gif --json{'\n'}<span className="text-white/45">{'{"event":"done", …}'}</span>
               </pre>
             </div>
           </Tile>
@@ -280,8 +280,8 @@ function Bento() {
             <SpotlightCard className="grid overflow-hidden rounded-[30px] md:grid-cols-[1.1fr_1fr]" color="rgba(94,231,223,.2)" style={glass.light}>
               <div className="relative grid h-[260px] place-items-center overflow-hidden md:h-[300px]">
                 <Mesh intensity={0.6} />
-                <HaloRing size={230} thickness={1.5} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                <HaloRing size={330} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40" speed="p-spin-rev" />
+                <FormatRing size={230} thickness={1.5} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <FormatRing size={330} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40" speed="p-spin-rev" />
                 <div className="relative text-center">
                   <div className="p-display text-[96px] font-semibold leading-none">0</div>
                   <div className="mt-1 text-[13px] text-[#5E5677]">network calls unless you ask</div>
@@ -328,7 +328,7 @@ function Stats() {
 /* ---------------- night: privacy + agents ---------------- */
 function Night() {
   const lines: [string, string][] = [
-    ['p', 'halo convert clip.mov --to gif --json'],
+    ['p', 'anyfmt convert clip.mov --to gif --json'],
     ['o', '{"event":"start","input":"clip.mov","route":["mov","gif"]}'],
     ['o', '{"event":"progress","pct":0.42}'],
     ['o', '{"event":"progress","pct":0.91}'],
@@ -344,7 +344,7 @@ function Night() {
           <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-14 md:grid-cols-2">
             <div>
               <SectionHead dark center={false} eyebrow="Private by default" title={<>Nothing leaves<br />your Mac.</>}
-                body="Everything runs on your Mac. No account, no upload, no telemetry. Pro cloud is opt-in, and Halo asks before a single byte leaves." />
+                body="Everything runs on your Mac. No account, no upload, no telemetry. Pro cloud is opt-in, and anyfmt asks before a single byte leaves." />
               <ul className="mb-0 mt-8 grid list-none gap-3 p-0 text-[15px] text-white/80 sm:grid-cols-2">
                 {['No account to make', 'No upload, ever', 'No telemetry', 'AGPL source you can read'].map((t) => (
                   <li key={t} className="flex items-center gap-2.5"><span className="grid size-5 place-items-center rounded-full" style={{ background: IRIS }}><Check size={11} strokeWidth={3} className="text-[#1C1530]" /></span>{t}</li>
@@ -352,8 +352,8 @@ function Night() {
               </ul>
             </div>
             <div className="relative mx-auto grid size-[300px] place-items-center sm:size-[400px]">
-              <HaloRing size="100%" thickness={1.5} />
-              <HaloRing size="72%" thickness={1} bloom={false} className="opacity-50" speed="p-spin-rev" />
+              <FormatRing size="100%" thickness={1.5} />
+              <FormatRing size="72%" thickness={1} bloom={false} className="opacity-50" speed="p-spin-rev" />
               <div className="relative grid size-[150px] place-items-center rounded-full" style={glass.dark}>
                 <ShieldCheck size={46} strokeWidth={1.4} className="text-white" />
               </div>
@@ -385,7 +385,7 @@ function Night() {
               <SectionHead dark center={false} eyebrow="For agents" title={<>Your agent<br />can drag too.</>}
                 body="A real CLI with JSON and NDJSON progress, plus an MCP server. Claude can convert your files, locally." />
               <div className="mt-7 flex flex-wrap gap-2">
-                {['halo convert', 'halo tools', '--json', '--ndjson', 'MCP server'].map((t) => (
+                {['anyfmt convert', 'anyfmt tools', '--json', '--ndjson', 'MCP server'].map((t) => (
                   <span key={t} className="rounded-full px-3 py-1.5 font-mono text-[12px] text-white/80" style={glass.dark}>{t}</span>
                 ))}
               </div>
@@ -409,7 +409,7 @@ function Pricing() {
             return (
               <Rise key={p.name} delay={i * 0.08}>
                 <div className="relative h-full overflow-hidden rounded-[34px] p-7 md:p-8" style={pro ? { ...glass.light, background: 'linear-gradient(160deg, rgba(255,227,234,.9), rgba(237,230,255,.85) 50%, rgba(221,248,246,.9))' } : glass.light}>
-                  {pro && <div className="absolute -right-24 -top-24"><HaloRing size={260} thickness={1.5} className="relative" /></div>}
+                  {pro && <div className="absolute -right-24 -top-24"><FormatRing size={260} thickness={1.5} className="relative" /></div>}
                   <div className="relative flex items-center justify-between">
                     <h3 className="m-0 text-[17px] font-semibold">{p.name}</h3>
                     {pro ? <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#6B4EFF] shadow-sm">Optional</span>
@@ -423,7 +423,7 @@ function Pricing() {
                     {p.points.map((t) => <li key={t} className="flex items-center gap-2.5"><Check size={16} strokeWidth={2.6} className={pro ? 'text-[#6B4EFF]' : 'text-[#2FBF9B]'} />{t}</li>)}
                   </ul>
                   <div className="relative mt-8">
-                    {pro ? <Pill variant="white" className="w-full">Try Pro</Pill> : <Pill className="w-full"><Download size={15} /> Download Halo</Pill>}
+                    {pro ? <Pill variant="white" className="w-full">Try Pro</Pill> : <Pill className="w-full"><Download size={15} /> Download anyfmt</Pill>}
                   </div>
                 </div>
               </Rise>
@@ -437,8 +437,8 @@ function Pricing() {
 
 /* ---------------- FAQ ---------------- */
 const FAQ: [string, string][] = [
-  ['Is Halo really free?', 'Yes. Every local feature, all 793 conversions, all 26 tools and 6 actions, the CLI and the MCP server. It’s open source under AGPL-3.0. Pro only adds cloud extras.'],
-  ['Does anything get uploaded?', 'No. Halo makes 0 network calls unless you ask. Pro cloud conversions are opt-in, and Halo tells you before a file leaves your Mac.'],
+  ['Is anyfmt really free?', 'Yes. Every local feature, all 793 conversions, all 26 tools and 6 actions, the CLI and the MCP server. It’s open source under AGPL-3.0. Pro only adds cloud extras.'],
+  ['Does anything get uploaded?', 'No. anyfmt makes 0 network calls unless you ask. Pro cloud conversions are opt-in, and anyfmt tells you before a file leaves your Mac.'],
   ['Which Macs does it run on?', 'macOS 13 or later, on Apple silicon.'],
   ['Why does it ask for Accessibility?', 'So it can notice a modifier key while you’re mid-drag. It listens for ⇧ ⌘ ⌃ during a drag, nothing else.'],
   ['Can my AI agent use it?', 'Yes. There’s a real CLI with JSON and NDJSON progress, plus an MCP server, so Claude can convert your files locally.'],
@@ -483,8 +483,8 @@ function FinalCta() {
     <section className="relative px-3 md:px-5">
       <div className="relative overflow-hidden rounded-[40px] py-24 text-center md:rounded-[56px] md:py-36" style={{ background: '#F1ECFB' }}>
         <Mesh intensity={1.4} />
-        <HaloRing size={620} thickness={1.5} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-        <HaloRing size={860} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40" speed="p-spin-rev" />
+        <FormatRing size={620} thickness={1.5} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+        <FormatRing size={860} thickness={1} bloom={false} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40" speed="p-spin-rev" />
         <div className="relative px-5">
           <PrismMark size={84} className="mx-auto" />
           <h2 className="p-display mx-auto mb-0 mt-8 max-w-[760px] text-[48px] font-semibold leading-[.95] md:text-[88px]">Go on.<br />Drag something.</h2>

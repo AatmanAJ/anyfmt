@@ -39,7 +39,7 @@ function Nav() {
     <header className="fixed inset-x-0 top-0 z-50 transition-[background,box-shadow] duration-300"
       style={solid ? { background: 'rgba(5,5,6,.72)', backdropFilter: 'blur(18px) saturate(140%)', WebkitBackdropFilter: 'blur(18px) saturate(140%)', boxShadow: `0 1px 0 ${C.graphite}` } : undefined}>
       <div className={cn(wrap, 'flex h-16 items-center justify-between')}>
-        <a href="#top" aria-label="Halo home"><Lockup size={24} /></a>
+        <a href="#top" aria-label="anyfmt home"><Lockup size={24} /></a>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Sections">
           {links.map(([l, h]) => (
             <a key={l} href={h} className="font-mono text-[11px] uppercase tracking-[0.18em] transition-colors hover:text-[#EDEDE6]" style={{ color: C.ash }}>{l}</a>
@@ -258,7 +258,7 @@ function Features() {
           </Card>
           <Card ch="05" title={f[4].title} body={f[4].body} className="md:col-span-2">
             <div className="w-full rounded-[12px] p-3.5 font-mono text-[11px] leading-[1.8]" style={{ background: C.void, boxShadow: `inset 0 0 0 1px ${C.graphite}` }}>
-              <div><span style={{ color: C.solar }}>❯</span> halo convert clip.mov --to gif --json</div>
+              <div><span style={{ color: C.solar }}>❯</span> anyfmt convert clip.mov --to gif --json</div>
               <div style={{ color: C.ash }}>{'{"event":"progress","pct":0.42}'}</div>
               <div style={{ color: C.ash }}>{'{"event":"done","out":"clip.gif"}'}</div>
             </div>
@@ -313,7 +313,7 @@ function Privacy() {
         </div>
         <div>
           <SectionHead ch="04" kicker="Local" title={<>Your files <i>stay home.</i></>}
-            lede="Everything runs on your Mac. Halo makes zero network calls unless you ask for a Pro cloud feature, per file, every time." />
+            lede="Everything runs on your Mac. anyfmt makes zero network calls unless you ask for a Pro cloud feature, per file, every time." />
           <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-[16px]" style={{ background: C.graphite, boxShadow: `0 0 0 1px ${C.graphite}` }}>
             {[['Account', 'Not needed'], ['Upload', 'Never'], ['Telemetry', 'None'], ['Cloud', 'Opt-in, Pro']].map(([k, v]) => (
               <div key={k} className="flex flex-col gap-2 p-5" style={{ background: C.void }}>
@@ -345,7 +345,7 @@ export function Agents({ compact }: { compact?: boolean }) {
         </div>
         <Terminal lines={[
           '# convert, stream progress, get a path back',
-          '$ halo convert clip.mov --to gif --json',
+          '$ anyfmt convert clip.mov --to gif --json',
           '{"event":"start","route":"mov→gif","fps":15}',
           '{"event":"progress","pct":0.42}',
           '{"event":"progress","pct":1}',
@@ -398,9 +398,9 @@ export function Pricing({ compact }: { compact?: boolean }) {
 /* ───────────────────────────── FAQ ───────────────────────────── */
 
 const FAQ = [
-  ['Is Halo really free?', 'Yes. Every local feature is free, forever, and the code is open source under AGPL-3.0. Pro adds cloud extras for $4 a month. You never need it.'],
+  ['Is anyfmt really free?', 'Yes. Every local feature is free, forever, and the code is open source under AGPL-3.0. Pro adds cloud extras for $4 a month. You never need it.'],
   ['Does anything leave my Mac?', 'No. Conversions, tools and actions run on your Mac. No account, no upload, no telemetry. Pro cloud features are opt-in.'],
-  ['What do I need?', 'macOS 13 or later on Apple silicon. Halo lives in the menu bar and asks for Accessibility so it can see the drag.'],
+  ['What do I need?', 'macOS 13 or later on Apple silicon. anyfmt lives in the menu bar and asks for Accessibility so it can see the drag.'],
   ['How many formats?', '793 conversion routes across images, video, audio, documents, ebooks and archives. Every route is tested. Multi-hop routes are picked for quality.'],
   ['Can my agent use it?', 'Yes. The halo CLI prints JSON and streams NDJSON progress, and the MCP server lets Claude convert files locally.'],
   ['Why a key, not a right-click?', 'Because you are already dragging. A key puts the wheel round your pointer in 43 ms, and the drop is the click.'],
@@ -469,7 +469,7 @@ function Footer() {
   const cols: [string, string[]][] = [
     ['Product', ['Download', 'Pricing', 'Changelog', 'Roadmap']],
     ['Build', ['CLI', 'MCP server', 'Source', 'Licence']],
-    ['Halo', ['Privacy', 'Press kit', 'Contact']],
+    ['anyfmt', ['Privacy', 'Press kit', 'Contact']],
   ]
   return (
     <footer className="pb-28 pt-16" style={{ borderTop: `1px solid ${C.graphite}` }}>
@@ -486,7 +486,7 @@ function Footer() {
         ))}
       </div>
       <div className={cn(wrap, 'mt-16 flex flex-wrap items-center justify-between gap-4')}>
-        <Label dim>© 2026 Halo · AGPL-3.0</Label>
+        <Label dim>© 2026 anyfmt · AGPL-3.0</Label>
         <span className="flex items-center gap-2"><Led size={5} /><Label dim>{product.platform}</Label></span>
       </div>
     </footer>

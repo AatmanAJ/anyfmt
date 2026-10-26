@@ -29,7 +29,7 @@ export function Mark({
   const dots = ringDots(24, 40, 50)
   const isLit = (i: number) => ((i - s + 24) % 24) < count
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" className={cn('shrink-0', className)} role="img" aria-label="Halo">
+    <svg width={size} height={size} viewBox="0 0 100 100" className={cn('shrink-0', className)} role="img" aria-label="anyfmt">
       {glow && (
         <defs>
           <filter id={`g${id}`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" /></filter>
@@ -44,7 +44,7 @@ export function Mark({
 
 /** Wordmark: Instrument Serif, tight. */
 export function Wordmark({ className, size = 32, color = C.bone }: { className?: string; size?: number; color?: string }) {
-  return <span className={cn('font-serif leading-none tracking-[-0.035em]', className)} style={{ fontSize: size, color }}>Halo</span>
+  return <span className={cn('font-serif leading-none tracking-[-0.035em]', className)} style={{ fontSize: size, color }}>anyfmt</span>
 }
 
 /** Horizontal lockup: mark + wordmark, gap = 0.28 × height. */
@@ -85,7 +85,7 @@ export function AppIcon({ size = 160, className }: { size?: number; className?: 
     grid.push({ x, y, o: 0.09 * (1 - d / 330) + 0.02 })
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="Halo app icon">
+    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="anyfmt app icon">
       <defs>
         <linearGradient id={`b${id}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#1E1E22" /><stop offset="0.55" stopColor="#0E0E10" /><stop offset="1" stopColor="#060607" />
@@ -120,7 +120,7 @@ export function MenuGlyph({ size = 16, color = 'currentColor' }: { size?: number
   const dots = ringDots(12, 5.9, 8)
   const lit = new Set([1, 2])
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" role="img" aria-label="Halo menu bar icon">
+    <svg width={size} height={size} viewBox="0 0 16 16" role="img" aria-label="anyfmt menu bar icon">
       {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={lit.has(i) ? 1.55 : 1.05} fill={color} opacity={lit.has(i) ? 1 : 0.5} />)}
     </svg>
   )

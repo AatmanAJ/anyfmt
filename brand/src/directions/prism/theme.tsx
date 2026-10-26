@@ -99,7 +99,7 @@ export function Mesh({ className, intensity = 1, dark }: { className?: string; i
 }
 
 /** The signature: a slowly rotating iridescent ring of light (thin, with a bloom). */
-export function HaloRing({ size, thickness = 2, bloom = true, className, speed = 'p-spin', style }: {
+export function FormatRing({ size, thickness = 2, bloom = true, className, speed = 'p-spin', style }: {
   size: number | string; thickness?: number; bloom?: boolean; className?: string; speed?: string; style?: CSSProperties
 }) {
   const mask = `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px + .5px))`

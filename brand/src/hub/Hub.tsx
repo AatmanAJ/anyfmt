@@ -59,7 +59,7 @@ export function Hub() {
       <div className="pointer-events-none fixed inset-0 opacity-[0.035] [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><filter id=%22n%22><feTurbulence baseFrequency=%22.8%22/></filter><rect width=%22100%%22 height=%22100%%22 filter=%22url(%23n)%22/></svg>')]" />
       <header className="mx-auto max-w-[1240px] px-4 pb-16 pt-20 sm:px-6 md:pt-28">
         <div className="mb-10 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">
-          <span className="size-1.5 animate-pulse rounded-full bg-[#D7FF3A]" /> Halo · Brand exploration · 5 directions
+          <span className="size-1.5 animate-pulse rounded-full bg-[#D7FF3A]" /> anyfmt · Brand exploration · 5 directions
         </div>
         <h1 className="max-w-5xl font-serif text-[56px] leading-[0.95] tracking-[-0.01em] sm:text-[88px] md:text-[120px]">
           <WordsReveal text="One wheel." /><br />

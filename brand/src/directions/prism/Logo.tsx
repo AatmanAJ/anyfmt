@@ -27,7 +27,7 @@ function IridescentRing({ cx, cy, r, w, segs = 72, rot = -20 }: { cx: number; cy
 }
 
 /** The Prism mark: a glass halo that catches light. */
-export function PrismMark({ size = 40, className, title = 'Halo' }: { size?: number; className?: string; title?: string }) {
+export function PrismMark({ size = 40, className, title = 'anyfmt' }: { size?: number; className?: string; title?: string }) {
   const id = useId().replace(/:/g, '')
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" className={className} role="img" aria-label={title}>
@@ -92,7 +92,7 @@ export function AppIcon({ size = 160, dark, className }: { size?: number; dark?:
     </radialGradient>
   )
   return (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="Halo app icon">
+    <svg width={size} height={size} viewBox="0 0 1024 1024" className={className} role="img" aria-label="anyfmt app icon">
       <defs>
         <linearGradient id={`bg${id}`} x1="0" y1="0" x2="1" y2="1">
           {dark ? (<><stop offset="0" stopColor="#2A1F48" /><stop offset="1" stopColor="#0E0A1A" /></>)

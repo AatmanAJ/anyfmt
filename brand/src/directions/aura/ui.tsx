@@ -36,7 +36,7 @@ export const WHEELS = [
 
 /* ------------------------------------------------------------------ marks */
 
-/** The Halo mark: a ring of light with a gap where the dragged file sits, like a sun clearing the horizon. */
+/** The anyfmt mark: a ring of light with a gap where the dragged file sits, like a sun clearing the horizon. */
 export function Mark({ size = 40, tone = 'glow', className, title }: { size?: number; tone?: 'glow' | 'ink' | 'paper' | 'mono'; className?: string; title?: string }) {
   const id = `m${size}${tone}`
   const stroke = tone === 'glow' ? `url(#${id}g)` : tone === 'ink' ? '#1E1B18' : tone === 'paper' ? '#FBF7F0' : 'currentColor'

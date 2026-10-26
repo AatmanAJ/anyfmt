@@ -2,7 +2,7 @@
 // the look and the voice, never these. Numbers are from the real app (docs/).
 
 export const product = {
-  name: 'Halo',
+  name: 'anyfmt',
   oneLiner: 'Convert, edit and share any file in the middle of a drag.',
   how: 'Drag a file in Finder. Press a key. A wheel of everything that file can become opens around your pointer. Drop.',
   platform: 'macOS 13+ · Apple silicon',

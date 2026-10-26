@@ -128,7 +128,7 @@ export function AuraWheel({
           role="menu"
           aria-label="Wheel"
         >
-          {/* Halo of light behind the disc */}
+          {/* anyfmt of light behind the disc */}
           {halo && (
             <div className="pointer-events-none absolute -inset-[22%]" aria-hidden>
               <div className="aura-breathe absolute inset-0 rounded-full"

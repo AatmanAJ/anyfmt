@@ -184,7 +184,7 @@ export function MenuBarMenu() {
   const rows: (null | { l: string; r?: string; hot?: boolean; chev?: boolean })[] = [
     { l: 'Open Float shelf', r: '3 files', hot: true }, { l: 'Presets', chev: true }, { l: 'Recent', chev: true }, null,
     { l: 'Practice the wheel' }, { l: 'Keys: ⇧ Convert  ⌘ Tools  ⌃ Actions' }, null,
-    { l: 'Settings…', r: '⌘,' }, { l: 'Check for updates' }, { l: 'Quit Halo', r: '⌘Q' },
+    { l: 'Settings…', r: '⌘,' }, { l: 'Check for updates' }, { l: 'Quit anyfmt', r: '⌘Q' },
   ]
   return (
     <div className="w-full max-w-[340px] font-geist">

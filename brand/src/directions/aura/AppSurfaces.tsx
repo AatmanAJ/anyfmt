@@ -211,7 +211,7 @@ export function MenuBarScene() {
              style={{ background: 'radial-gradient(circle at 15% 50%, rgba(255,178,122,.35), transparent 70%)' }}>
           <Mark size={26} />
           <div className="flex-1 leading-tight">
-            <div className="font-semibold">Halo is ready</div>
+            <div className="font-semibold">anyfmt is ready</div>
             <div className="text-[11.5px] text-[#5B524A]">Hold a file, then ⇧ ⌘ or ⌃</div>
           </div>
           <span className="relative flex size-2.5"><span className="aura-pulse-ring absolute inset-0 rounded-full bg-[#7BC88A]" /><span className="relative size-2.5 rounded-full bg-[#5DB06E]" /></span>
@@ -228,7 +228,7 @@ export function MenuBarScene() {
         <MenuRow icon={<Pause size={14} />} label="Pause for an hour" />
         <Sep />
         <MenuRow icon={<Settings size={14} />} label="Settings…" right="⌘," />
-        <MenuRow label="Quit Halo" right="⌘Q" />
+        <MenuRow label="Quit anyfmt" right="⌘Q" />
       </div>
     </div>
   )
