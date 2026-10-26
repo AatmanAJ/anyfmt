@@ -13,6 +13,7 @@ const BlockBook = lazy(() => import('./block/BrandBook'))
 const SheetLanding = lazy(() => import('./sheet/Landing'))
 const SheetBook = lazy(() => import('./sheet/BrandBook'))
 const SheetPreview = lazy(() => import('./sheet/Preview'))
+const NovaLanding = lazy(() => import('./nova/Landing'))
 const AnyfmtBook = lazy(() => import('./anyfmt/BrandBook'))
 
 function ScrollTop() {
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')!).render(
       <ScrollTop />
       <Routes>
         <Route path="/" element={<Hub />} />
+        <Route path="/nova" element={<Suspense fallback={<div className="min-h-screen bg-[#050507]" />}><NovaLanding /></Suspense>} />
         <Route path="/sheet" element={<Suspense fallback={<div className="min-h-screen bg-white" />}><SheetLanding /></Suspense>} />
         <Route path="/sheet/book" element={<Suspense fallback={<div className="min-h-screen bg-white" />}><SheetBook /></Suspense>} />
         <Route path="/sheet/preview" element={<Suspense fallback={null}><SheetPreview /></Suspense>} />

@@ -1,0 +1,66 @@
+@import "@fontsource-variable/bricolage-grotesque";
+
+/* anyfmt "Nova": molten light on obsidian. Every colour below is a token; nothing is hard-coded twice. */
+.nv {
+  --nv-void: #050507;
+  --nv-ink-1: #0A0A0F;
+  --nv-ink-2: #101018;
+  --nv-ink-3: #181824;
+  --nv-line: rgba(255, 255, 255, 0.08);
+  --nv-line-2: rgba(255, 255, 255, 0.14);
+  --nv-text: #F3F1F7;
+  --nv-mute: #9592A3;
+  --nv-dim: #5E5B6B;
+  --nv-solar: #FFC24B;
+  --nv-ember: #FF5A1F;
+  --nv-magma: #FF2E63;
+  --nv-ion: #4DF0FF;
+  --nv-molten: linear-gradient(100deg, var(--nv-solar) 0%, var(--nv-ember) 48%, var(--nv-magma) 100%);
+
+  font-family: "Geist Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  background: var(--nv-void);
+  color: var(--nv-text);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+.nv ::selection { background: var(--nv-ember); color: #000; }
+
+.nv-display { font-family: "Bricolage Grotesque Variable", "Geist Variable", sans-serif; font-variation-settings: "opsz" 96, "wdth" 92; letter-spacing: -0.045em; line-height: 0.95; font-weight: 600; }
+.nv-mono { font-family: "Geist Mono Variable", "JetBrains Mono Variable", ui-monospace, monospace; letter-spacing: 0.04em; }
+.nv-molten-text { background: var(--nv-molten); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Film grain over everything (fixed, cheap, non-interactive). */
+.nv-grain::after {
+  content: ""; position: fixed; inset: -50%; pointer-events: none; z-index: 60; opacity: .07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: nv-grain 1.2s steps(6) infinite;
+}
+@keyframes nv-grain { 0% { transform: translate(0,0) } 25% { transform: translate(-3%,2%) } 50% { transform: translate(2%,-3%) } 75% { transform: translate(-2%,-1%) } 100% { transform: translate(0,0) } }
+
+/* Animated conic border ("beam") on any element with .nv-beam; set --nv-beam-a / --nv-beam-b. */
+@property --nv-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+.nv-beam { position: relative; isolation: isolate; }
+.nv-beam::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
+  background: conic-gradient(from var(--nv-angle), transparent 0 62%, var(--nv-beam-a, var(--nv-ember)) 74%, var(--nv-beam-b, var(--nv-magma)) 82%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: nv-spin 4s linear infinite;
+}
+@keyframes nv-spin { to { --nv-angle: 360deg } }
+
+/* Shimmer sweep across a button face. */
+.nv-shimmer { position: relative; overflow: hidden; }
+.nv-shimmer::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
+  animation: nv-sweep 3.2s cubic-bezier(.6,0,.2,1) infinite;
+}
+@keyframes nv-sweep { 0%, 55% { transform: translateX(-120%) } 100% { transform: translateX(120%) } }
+
+@keyframes nv-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes nv-caret { 50% { opacity: 0 } }
+@keyframes nv-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-grain::after, .nv-beam::before, .nv-shimmer::after { animation: none; }
+}
