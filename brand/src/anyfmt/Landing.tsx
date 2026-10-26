@@ -26,7 +26,7 @@ function useWidth<T extends HTMLElement>() {
   return [ref, w] as const
 }
 
-function Streaks({ className }: { className?: string }) {
+export function Streaks({ className }: { className?: string }) {
   return (
     <svg className={`af-streak ${className ?? ''}`} viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden>
       <defs>
@@ -42,7 +42,7 @@ function Streaks({ className }: { className?: string }) {
   )
 }
 
-function Eyebrow({ children, tone = 'paper' }: { children: ReactNode; tone?: 'paper' | 'stage' }) {
+export function Eyebrow({ children, tone = 'paper' }: { children: ReactNode; tone?: 'paper' | 'stage' }) {
   return (
     <span className={`inline-flex h-7 items-center gap-2 rounded-full px-3 text-[12.5px] font-medium ${tone === 'stage' ? 'bg-white/15 text-white ring-1 ring-white/35 backdrop-blur' : 'bg-white text-[#55524F] ring-1 ring-[#E7E5E2]'}`}>
       <span className={`size-1.5 rounded-full ${tone === 'stage' ? 'bg-white' : 'bg-[#EA7C25]'}`} />{children}
@@ -60,7 +60,7 @@ function SectionHead({ eyebrow, title, body, center }: { eyebrow: string; title:
   )
 }
 
-function Key({ k, label, on }: { k: string; label: string; on?: boolean }) {
+export function Key({ k, label, on }: { k: string; label: string; on?: boolean }) {
   return (
     <span className="af-key" style={on ? { boxShadow: 'inset 0 1px 0 #fff, inset 0 -1px 0 #E2E0DC, 0 0 0 1.5px #E5701E, 0 2px 4px -2px rgba(17,17,17,.3)', transform: 'translateY(2px)' } : undefined}>
       <span className="text-[19px] leading-none" style={{ color: on ? '#E5701E' : '#111' }}>{k}</span>
@@ -69,7 +69,7 @@ function Key({ k, label, on }: { k: string; label: string; on?: boolean }) {
   )
 }
 
-const iconFor: Record<string, ReactNode> = {
+export const iconFor: Record<string, ReactNode> = {
   Compress: <Minimize2 size={15} />, Crop: <Crop size={15} />, Edit: <PenLine size={15} />, Annotate: <PenLine size={15} />,
   'Add BG': <Plus size={15} />, Redact: <EyeOff size={15} />, Trim: <Scissors size={15} />,
   AirDrop: <Send size={15} />, Float: <Pin size={15} />, Copy: <Copy size={15} />, Move: <FolderInput size={15} />,
@@ -77,7 +77,7 @@ const iconFor: Record<string, ReactNode> = {
 }
 const withIcons = (ws: readonly Wedge[]) => ws.map((w) => ({ ...w, icon: iconFor[w.label] }))
 
-const WHEELS = [
+export const WHEELS = [
   { key: '⇧', name: 'shift', wheel: 'Convert', blurb: product.keys[0].blurb, wedges: convertWedges as readonly Wedge[], hub: 'MOV' },
   { key: '⌘', name: 'command', wheel: 'Tools', blurb: product.keys[1].blurb, wedges: withIcons(toolWedges), hub: 'Tools' },
   { key: '⌃', name: 'control', wheel: 'Actions', blurb: product.keys[2].blurb, wedges: withIcons(actionWedges), hub: 'Share' },
@@ -562,7 +562,7 @@ function Footer() {
   const cols: [string, string[]][] = [
     ['Product', ['How it works', 'Features', 'Pricing', 'Changelog']],
     ['Developers', ['Command line', 'MCP server', 'Source code', 'AGPL-3.0']],
-    ['Company', ['Privacy', 'Contact', brand.domain]],
+    ['Company', ['Brand book', 'Privacy', 'Contact', brand.domain]],
   ]
   return (
     <footer className="mx-auto max-w-[1240px] px-4 pb-28 pt-14 sm:px-6">
@@ -574,7 +574,7 @@ function Footer() {
         {cols.map(([h, ls]) => (
           <div key={h}>
             <div className="text-[13px] font-semibold">{h}</div>
-            <ul className="mt-3 flex flex-col gap-2 text-[14px] text-[#55524F]">{ls.map((l) => <li key={l}>{l}</li>)}</ul>
+            <ul className="mt-3 flex flex-col gap-2 text-[14px] text-[#55524F]">{ls.map((l) => <li key={l}>{l === 'Brand book' ? <a href="#/anyfmt/book" className="hover:text-[#111]">{l}</a> : l}</li>)}</ul>
           </div>
         ))}
       </div>
