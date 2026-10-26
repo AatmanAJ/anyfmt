@@ -1,0 +1,116 @@
+@import "@fontsource-variable/inter-tight";
+@import "@fontsource-variable/inter-tight/wght-italic.css";
+
+/* anyfmt: orange light on soft white. Tokens first; everything else reads them. */
+.af {
+  --af-orange: #EA7C25;
+  --af-ember: #BB3F14;
+  --af-apricot: #FFA45C;
+  --af-glow: #FFD2A8;
+  --af-ink: #111111;
+  --af-ink-2: #55524F;
+  --af-ink-3: #8C8884;
+  --af-paper: #F7F7F7;
+  --af-white: #FFFFFF;
+  --af-line: #E7E5E2;
+  --af-line-2: #D9D6D2;
+  --af-ok: #1F9D55;
+
+  font-family: "Inter Tight Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  background: var(--af-paper);
+  color: var(--af-ink);
+  font-feature-settings: "ss01", "cv11";
+}
+.af ::selection { background: var(--af-orange); color: #fff; }
+
+.af-mono { font-family: "JetBrains Mono Variable", ui-monospace, monospace; }
+
+/* The orange stage used for heroes and bands. */
+.af-stage {
+  background:
+    radial-gradient(120% 90% at 20% 0%, #FF9A4A 0%, transparent 55%),
+    radial-gradient(90% 80% at 100% 100%, #C9461A 0%, transparent 60%),
+    linear-gradient(160deg, #F08A35 0%, #EA7C25 40%, #D9601D 100%);
+  color: #fff;
+}
+
+/* Primary button: orange, lit from the top, pressed into the page. */
+.af-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  height: 44px; padding: 0 20px; border-radius: 12px;
+  font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  white-space: nowrap;
+}
+.af-btn:active { transform: translateY(1px); }
+.af-btn:focus-visible { outline: 2px solid var(--af-ink); outline-offset: 3px; }
+.af-btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #F59248 0%, #E5701E 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(140,40,5,.25), 0 0 0 1px #C5521A, 0 6px 16px -4px rgba(187,63,20,.55);
+}
+.af-btn-primary:hover { filter: brightness(1.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(140,40,5,.25), 0 0 0 1px #C5521A, 0 10px 24px -6px rgba(187,63,20,.6); }
+.af-btn-light {
+  color: var(--af-ink);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F3F2F0 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(17,17,17,.10), 0 4px 12px -4px rgba(17,17,17,.18);
+}
+.af-btn-light:hover { box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(17,17,17,.16), 0 8px 18px -6px rgba(17,17,17,.25); }
+.af-btn-ghost {
+  color: #fff;
+  background: rgba(255,255,255,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+  backdrop-filter: blur(10px);
+}
+.af-btn-ghost:hover { background: rgba(255,255,255,.2); }
+.af-btn-dark {
+  color: #fff;
+  background: linear-gradient(180deg, #2A2A2A 0%, #111 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1px #000, 0 6px 16px -6px rgba(0,0,0,.5);
+}
+
+/* Soft UI card: white, one hairline, a low long shadow. */
+.af-card {
+  background: var(--af-white);
+  border-radius: 20px;
+  box-shadow: 0 0 0 1px var(--af-line), 0 1px 2px rgba(17,17,17,.04), 0 12px 32px -16px rgba(17,17,17,.14);
+}
+.af-well {
+  background: linear-gradient(180deg, #F4F3F1 0%, #FAFAF9 100%);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 2px rgba(17,17,17,.06), inset 0 0 0 1px rgba(17,17,17,.05);
+}
+.af-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 12px; border-radius: 999px;
+  background: linear-gradient(180deg, #FFFFFF, #F5F4F2);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px var(--af-line-2), 0 2px 4px -2px rgba(17,17,17,.12);
+  font-size: 13px; font-weight: 500; color: var(--af-ink);
+}
+.af-chip-on {
+  color: #fff;
+  background: linear-gradient(180deg, #F59248, #E5701E);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 0 1px #C5521A, 0 4px 10px -4px rgba(187,63,20,.6);
+}
+.af-pill-status {
+  display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; color: #B4570F; background: #FFF3E6; box-shadow: inset 0 0 0 1px #FFD9B3;
+}
+
+/* Keycap with real depth. */
+.af-key {
+  display: inline-flex; flex-direction: column; justify-content: space-between;
+  width: 64px; height: 64px; padding: 8px 10px; border-radius: 14px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1F0EE 100%);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -3px 0 #E2E0DC, 0 0 0 1px var(--af-line-2), 0 6px 14px -6px rgba(17,17,17,.3);
+  color: var(--af-ink); text-align: left;
+}
+
+/* Light streaks over orange, like light through glass. */
+.af-streak { position: absolute; pointer-events: none; mix-blend-mode: screen; }
+
+@keyframes af-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+@keyframes af-spin { to { transform: rotate(360deg) } }
+@keyframes af-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.af-marquee { animation: af-marquee 50s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .af-marquee { animation: none; } }

@@ -84,9 +84,9 @@ export function NumberTicker({ value, className, duration = 1.4 }: { value: stri
   const inView = useInView(ref, { once: true }) || isShot
   const m = value.match(/^([^\d]*)([\d.,]+)(.*)$/)
   const target = m ? parseFloat(m[2].replace(/,/g, '')) : 0
-  const [shown, setShown] = useState(m ? m[1] + '0' + m[3] : value)
+  const [shown, setShown] = useState(m && !isShot ? m[1] + '0' + m[3] : value)
   useEffect(() => {
-    if (!inView || !m) return
+    if (!inView || !m || isShot) return
     const c = animate(0, target, {
       duration: isShot ? 0 : duration, ease: [0.16, 1, 0.3, 1],
       onUpdate: (v) => setShown(m[1] + (Number.isInteger(target) ? Math.round(v).toLocaleString() : v.toFixed(1)) + m[3]),

@@ -6,6 +6,8 @@ import { Hub } from './hub/Hub'
 import { loaders } from './directions/registry'
 import { DirectionBar } from './shared/DirectionBar'
 
+const AnyfmtLanding = lazy(() => import('./anyfmt/Landing'))
+
 function ScrollTop() {
   const { pathname } = useLocation()
   useEffect(() => { if (!location.hash.includes('#', 1)) window.scrollTo(0, 0) }, [pathname])
@@ -35,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
       <ScrollTop />
       <Routes>
         <Route path="/" element={<Hub />} />
+        <Route path="/anyfmt" element={<Suspense fallback={<div className="min-h-screen bg-[#F7F7F7]" />}><AnyfmtLanding /></Suspense>} />
         <Route path="/d/:id" element={<DirectionPage view="book" />} />
         <Route path="/d/:id/landing" element={<DirectionPage view="landing" />} />
       </Routes>
