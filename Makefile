@@ -43,7 +43,7 @@ test-packages:
 	cd Packages/RadialMenu && swift test
 
 test-unit:
-	$(XCB) -scheme anyfmt -configuration Debug test -quiet
+	$(XCB) -scheme anyfmt -configuration Debug test -quiet < /dev/null
 
 ## TypeScript SDK (sdk/typescript) + public API contract, run against Tests/Mock/server.mjs.
 ## Lints Server/openapi.yaml, checks the generated types are current, builds, tests.

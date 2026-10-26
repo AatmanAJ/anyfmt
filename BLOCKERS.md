@@ -302,7 +302,11 @@ defaults write app.anyfmt optIn.iWorkAppleEvents -bool YES
 anyfmt convert report.pages --to pdf && anyfmt convert notes.docx --to pages
 ```
 
-## B-016 `make test-unit` hangs on this Mac: xcodebuild's test host never starts (found 2026-10-26)
+## B-016 `make test-unit` hung on this Mac: xcodebuild's test host never started ✅ resolved 2026-10-26
+
+**Fix:** the hung host had inherited the terminal (`/dev/ttys000`) as its stdin. Running xcodebuild with
+stdin from `/dev/null` lets it start; the Makefile now does that for `test-unit`, and the full `make test`
+passes end to end (exit 0).
 
 **What happens:** `xcodebuild … test` launches the app as the test host, and the host blocks inside dyld
 (`open()` of a linked library) before any of our code runs. xcodebuild gives up after ~7 minutes with
