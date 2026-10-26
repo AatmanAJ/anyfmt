@@ -1,0 +1,5 @@
+/* Landing-only additions on top of sheet.css. */
+
+/* At statement sizes the highlight box becomes a tight block so it never covers the line above. */
+.shl-xl { line-height: 1; }
+.shl-xl .sh-hl { display: inline-block; line-height: 0.86; padding: 0.02em 0.06em 0.12em; margin-top: 0.04em; }

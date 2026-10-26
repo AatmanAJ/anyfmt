@@ -1,0 +1,53 @@
+/* Brand-book-only helpers for the Sheet direction. Tokens come from ../sheet.css. */
+.shb {
+  --shb-line: #D3D9E2;      /* quiet hairline on paper */
+  --shb-line-ink: #000;     /* the rule: section openers, tables */
+  --shb-d-bg: #0B0B0B;      /* dark app surfaces */
+  --shb-d-1: #161616;
+  --shb-d-2: #202020;
+  --shb-d-line: #2C2C2C;
+  --shb-d-mute: #9A9794;
+}
+/* Hairlines are outlines drawn inside the edge, so tinted children can't paint over them. */
+.shb-hair { outline: 1px solid var(--shb-line); outline-offset: -1px; }
+.shb-hair-ink { outline: 1px solid #000; outline-offset: -1px; }
+.shb-hair-d { outline: 1px solid var(--shb-d-line); outline-offset: -1px; }
+.shb-rule { border-top: 1px solid #000; }
+.shb-rule-q { border-top: 1px solid var(--shb-line); }
+
+.shb-lbl { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3; }
+.shb-num { font-family: "Geist Mono Variable", ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+/* Nav: mono labels; the current one is underlined in ink (orange never marks UI state). */
+.shb-nav a { position: relative; color: var(--sh-graphite); white-space: nowrap; transition: color .15s; }
+.shb-nav a:hover { color: #000; }
+.shb-nav a[aria-current="true"] { color: #000; }
+.shb-nav a[aria-current="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: #000; }
+.shb-nav a:focus-visible { outline: 2px solid #000; outline-offset: 2px; border-radius: 2px; }
+
+.shb-scroll { scrollbar-width: none; }
+.shb-scroll::-webkit-scrollbar { display: none; }
+
+/* Pills shown in forced states for the component sheet. */
+.shb-btn-ink-hover { background: #222 !important; }
+.shb-btn-ghost-hover { background: var(--sh-lavender) !important; }
+.shb-focus { outline: 2px solid #000; outline-offset: 3px; }
+.shb-dark .shb-focus { outline-color: #fff; }
+
+/* Dots tuned for dark grounds. */
+.shb-dots-d { background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1.2px); background-size: 10px 10px; }
+.shb-dots-lg { background-image: radial-gradient(rgba(0,0,0,.22) 1.4px, transparent 1.6px); background-size: 14px 14px; }
+
+.shb-toggle { width: 34px; height: 20px; border-radius: 99px; position: relative; flex: none; transition: background .15s; }
+.shb-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 99px; background: var(--thumb, #fff); transition: transform .15s; }
+.shb-toggle[aria-checked="true"]::after { transform: translateX(14px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .shb * { transition: none !important; }
+}
+
+/* A headline's highlight never breaks across lines: one phrase, one box. */
+.shb h2 .sh-hl, .shb h3 .sh-hl, .shb h4 .sh-hl, .shb .sh-display .sh-hl { white-space: nowrap; }
+
+/* Grid items may shrink below their content (long code lines scroll inside their card instead). */
+.shb .grid > * { min-width: 0; }

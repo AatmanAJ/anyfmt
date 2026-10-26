@@ -1,0 +1,58 @@
+@import "@fontsource-variable/host-grotesk";
+@import "@fontsource-variable/geist-mono";
+
+/* anyfmt "Sheet": editorial broadsheet meets data terminal. Near-monochrome, one hot orange. */
+.sh {
+  --sh-ink: #000000;
+  --sh-paper: #FFFFFF;
+  --sh-slate: #F8FAFC;
+  --sh-lavender: #E2E9F3;
+  --sh-mist: #C5D3E8;
+  --sh-cream: #FFFDE6;
+  --sh-sky: #C4EDFF;
+  --sh-graphite: #686562;
+  --sh-orange: #FF4500;
+  /* Pixel-art accents for imagery only (never UI): */
+  --sh-px-green: #2FB36B;
+  --sh-px-yellow: #FFD23F;
+
+  font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px; line-height: 1.5; letter-spacing: 0.007em;
+  background: var(--sh-paper);
+  color: var(--sh-ink);
+}
+.sh ::selection { background: var(--sh-orange); color: var(--sh-ink); }
+
+/* Display: Host Grotesk standing in for GT Planar. Tighter as it gets bigger. */
+.sh-display { font-family: "Host Grotesk Variable", "Inter Variable", sans-serif; font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+.sh-display-xl { font-family: "Host Grotesk Variable", "Inter Variable", sans-serif; font-weight: 500; letter-spacing: -0.05em; line-height: 0.92; }
+/* Mono labels: Geist Mono standing in for GT Standard Mono. Uppercase, tracked out. */
+.sh-mono { font-family: "Geist Mono Variable", "JetBrains Mono Variable", ui-monospace, monospace; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.2; }
+.sh-code { font-family: "Geist Mono Variable", "JetBrains Mono Variable", ui-monospace, monospace; letter-spacing: 0; text-transform: none; }
+
+/* The signature: one orange highlight box per headline, same size and baseline as the text. */
+.sh-hl { background: var(--sh-orange); color: var(--sh-ink); padding: 0 0.12em; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+/* Buttons: the black pill is the only action surface. Orange never fills a control. */
+.sh-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 21px; border-radius: 50px; font-size: 16px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s, box-shadow .15s; }
+.sh-btn:focus-visible { outline: 2px solid var(--sh-ink); outline-offset: 3px; }
+.sh-btn-ink { background: var(--sh-ink); color: var(--sh-paper); }
+.sh-btn-ink:hover { background: #222; }
+.sh-btn-ghost { background: transparent; color: var(--sh-ink); box-shadow: inset 0 0 0 1px var(--sh-ink); }
+.sh-btn-ghost:hover { background: var(--sh-lavender); }
+
+/* Surfaces: grouping by tint, never shadows. */
+.sh-card { border-radius: 4px; padding: 24px; }
+.sh-tag { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--sh-orange); }
+.sh-link { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; color: var(--sh-ink); }
+
+/* Halftone dot texture for atmospheric washes. */
+.sh-dots { background-image: radial-gradient(rgba(0,0,0,.14) 1px, transparent 1.2px); background-size: 10px 10px; }
+
+@keyframes sh-blink { 50% { opacity: 0 } }
+.sh-caret { display: inline-block; width: .55em; height: 1em; background: var(--sh-ink); vertical-align: -0.12em; animation: sh-blink 1s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) { .sh-caret { animation: none; } }
+
+/* At statement sizes the inline background would paint the font's whole content area and cover the
+   line above, so the highlight becomes a tight block around the letters. */
+.sh-display-xl .sh-hl { display: inline-block; line-height: 0.86; padding: 0.02em 0.06em 0.12em; margin-top: 0.04em; }
