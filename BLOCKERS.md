@@ -311,9 +311,10 @@ so it isn't the code.
 
 **What I tried:** restarting `testmanagerd`; checking for iCloud placeholder files, pipes or sockets
 in the dyld search paths (none); checking for Endpoint Security extensions (none installed). Launching
-the same test host by hand with the same injected libraries works: 351 app tests ran with 0 failures
-before the run stopped at a test that needs an XCTest-managed run loop. Package tests (115), the SDK
-(42), `make check` and the build all pass.
+the same test host by hand with the same injected libraries works. Every suite `make test` runs passed
+that way after the rename: app tests 399/399 (2 skipped by design), core tests 528 (2 skipped, run with
+`xcrun xctest` and `ANYFMT_ENGINES_DIR=Engines/dist` as the scheme sets it), both packages, the SDK (42),
+`make check` and `make gallery`.
 
 **Needed from a human (2 minutes):** restart the Mac (clears whatever is wedged in launchd/dyld for
 xcodebuild-launched processes), then run `make test`. If it still hangs, open `anyfmt.xcodeproj` in
