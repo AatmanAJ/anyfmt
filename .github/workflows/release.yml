@@ -12,6 +12,36 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Fail in seconds, not after the engines build: wrong tag, stale build number, missing secrets.
+      - name: Preflight
+        env:
+          DEVELOPER_ID: ${{ secrets.DEVELOPER_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          DEVELOPER_ID_CERT_P12_BASE64: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+          AC_API_KEY_ID: ${{ secrets.AC_API_KEY_ID }}
+          AC_API_ISSUER: ${{ secrets.AC_API_ISSUER }}
+          AC_API_KEY_P8: ${{ secrets.AC_API_KEY_P8 }}
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          version="$(sed -n 's/^MARKETING_VERSION = //p' Config/Base.xcconfig)"
+          build="$(sed -n 's/^CURRENT_PROJECT_VERSION = //p' Config/Base.xcconfig)"
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "::error::Tag $GITHUB_REF_NAME doesn't match MARKETING_VERSION $version in Config/Base.xcconfig"; exit 1; }
+          previous="$(git tag --list 'v*' --sort=-v:refname | grep -vx "$GITHUB_REF_NAME" | head -1)"
+          if [ -n "$previous" ]; then
+            before="$(git show "$previous:Config/Base.xcconfig" | sed -n 's/^CURRENT_PROJECT_VERSION = //p')"
+            [ "$build" -gt "$before" ] || { echo "::error::CURRENT_PROJECT_VERSION $build must be above $before ($previous), or Sparkle won't offer the update"; exit 1; }
+          fi
+          missing=""
+          for s in DEVELOPER_ID TEAM_ID DEVELOPER_ID_CERT_P12_BASE64 DEVELOPER_ID_CERT_PASSWORD AC_API_KEY_ID AC_API_ISSUER AC_API_KEY_P8 SPARKLE_ED_PRIVATE_KEY; do
+            [ -n "${!s}" ] || missing="$missing $s"
+          done
+          [ -z "$missing" ] || { echo "::error::Missing repository secrets:$missing (see docs/RELEASING.md)"; exit 1; }
+          echo "Releasing $version (build $build)"
+
       - name: Select newest Xcode
         run: sudo xcode-select -s "$(find /Applications -maxdepth 1 -name "Xcode*.app" | sort -V | tail -1)"
       - name: Tools
@@ -50,6 +80,9 @@ jobs:
           DMG_LAYOUT: "0"
         run: make dmg
 
+      - name: CLI tarball for Homebrew
+        run: packaging/homebrew/make-cli-tarball.sh | tee "$RUNNER_TEMP/shas.txt"
+
       - name: Engine sources archive (GPL source offer)
         run: tar -czf "dist/anyfmt-${GITHUB_REF_NAME#v}-engine-sources.tar.gz" -C Engines build/src versions.env build-ffmpeg.sh build-resvg.sh lib.sh VERSIONS.md
 
@@ -63,6 +96,7 @@ jobs:
         with:
           files: |
             dist/*.dmg
+            dist/*-cli-*-arm64.tar.gz
             dist/*-engine-sources.tar.gz
             dist/appcast.xml
           body: |

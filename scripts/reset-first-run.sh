@@ -34,7 +34,7 @@ done
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 NAME="$(sed -n 's/^BRAND_NAME = //p' "$ROOT/Config/Brand.xcconfig")"
 SLUG="$(echo "$NAME" | tr '[:upper:]' '[:lower:]')"
-BUNDLE_ID="dev.aiwithaj.$SLUG"
+BUNDLE_ID="app.$SLUG"
 [[ -z "$APP" ]] && APP="$ROOT/build/DerivedData/Build/Products/Debug/$NAME.app"
 
 run() {

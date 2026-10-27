@@ -98,7 +98,7 @@ targets:
         SUEnableAutomaticChecks: false
         SUAutomaticallyUpdate: false
         SUEnableSystemProfiling: false
-        SUFeedURL: "https://updates.example.invalid/appcast.xml"
+        SUFeedURL: "https://github.com/AatmanAJ/anyfmt/releases/latest/download/appcast.xml"
         SUPublicEDKey: "9bpyosf5ny/ai9Ww4gS0HQSGqy27V5sEaewoMiqr6pI="
     settings:
       base:

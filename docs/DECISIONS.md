@@ -210,7 +210,7 @@ The Wheel Gallery and editor screenshots are therefore rendered **offscreen**
 (`NSView` caching) by `make gallery`/`make test`, and the XCUITest suite runs
 under `make uitest` once a human enables Automation Mode (BLOCKERS.md B-003).
 
-### D-026 Contributor agreement: lightweight licence-grant CLA via CLA Assistant
+### D-026 Contributor agreement: lightweight licence-grant CLA via CLA Assistant (superseded by D-044)
 See research/CLA_RESEARCH.md. Cap uses neither CLA nor DCO (so it can't
 relicense outside contributions). Grafana, Plausible, Element, Mattermost,
 Cal.com, Twenty and Documenso use CLAs, and Grafana and Cal.com have actually
@@ -443,3 +443,26 @@ AJ bought `anyfmt.app` and named the product **anyfmt**, written lowercase every
   (onboarding's permission coach handles it).
 - The `halo` glow terms in editor tokens (`overlayHalo`, `haloWidth`) are a visual effect, not
   the brand, and stay. BUILD.md is AJ's original brief and keeps the codename.
+
+### D-044 Contributions use the DCO, not a CLA (supersedes D-026)
+
+AJ chose the Developer Certificate of Origin for v1. A sign-off (`git commit -s`) needs no legal
+name, no hosted CLA Assistant and no lawyer, and it's the norm contributors already know.
+
+- `CLA.md` is gone. `CONTRIBUTING.md` and the README explain the sign-off, and
+  `.github/workflows/dco.yml` fails a pull request whose commits lack a `Signed-off-by` line.
+- **What it gives up:** contributions come in under AGPL-3.0 (MIT for the two packages) and
+  nothing more. Offering anyfmt under other terms later (a paid desktop licence, a Mac App Store
+  build) needs every outside contributor whose code is still in the app to agree, or that code
+  rewritten. Code AJ writes stays AJ's to relicense.
+
+### D-045 v1 ships without the cloud service
+
+The hosted server (docs/BLOCKERS.md B-006) isn't built, so v1 is local-only. `Brand.cloudAvailable`
+is `false`, and every cloud surface reads it: Pro segments are filtered out of the wheel, the
+"Convert in the cloud" option is dropped from the options popover, Settings › Account, the
+"Got a Pro key?" onboarding page and the menu bar's "Pro Licence & Account…" item are hidden, and
+onboarding says "Files never leave your Mac." The cloud code, contract and tests stay as they
+are; flipping the constant (after `CloudConfig.defaultServer` points at a live server) brings it
+all back. The site hides Pro and cloud features the same way.
+

@@ -151,6 +151,9 @@ than the button state.
 
 ## B-002 Developer ID signing + notarization
 
+**Status (2026-10-27):** everything else for a release is ready; see `docs/RELEASING.md` for the secrets table and steps. Waiting on the Apple Developer Program membership.
+
+
 **Why blocked.** No signing identity on this machine (`security find-identity -v -p codesigning`
 → 0) and no notarytool profile. `make dmg` therefore produces an **ad-hoc signed**
 DMG (verified: builds, styled layout, launches). Hardened runtime is switched on
@@ -181,7 +184,10 @@ sudo automationmodetool enable-automationmode-without-authentication
 make uitest
 ```
 
-## B-004 GitHub repository + CI
+## B-004 GitHub repository + CI ✅ resolved 2026-10-27
+
+**Resolved 2026-10-27:** public at https://github.com/AatmanAJ/anyfmt. The first CI runs failed in `make engines` because a log line went to stdout and became part of the tarball path; `Engines/lib.sh` now logs to stderr.
+
 
 **Why blocked.** No remote is configured, and creating a public repository is
 publishing, which needs the owner's go-ahead. CI workflows exist
@@ -200,6 +206,9 @@ cached afterwards, keyed on `Engines/versions.env`. If the slug differs, update
 
 ## B-005 Sparkle update feed
 
+**Status (2026-10-27):** `SUFeedURL` is `https://github.com/AatmanAJ/anyfmt/releases/latest/download/appcast.xml`, and a signed appcast was generated from the 0.1.0 DMG. The key's Keychain account is `halo-updates` (made before the rename), not `anyfmt-updates` as written below; the scripts use it. Still to do: back it up and add the `SPARKLE_ED_PRIVATE_KEY` secret (docs/RELEASING.md).
+
+
 **Why blocked.** It needs a hosting decision and a URL.
 
 - The EdDSA key pair **was generated** (`generate_keys --account anyfmt-updates`). The
@@ -217,6 +226,9 @@ cached afterwards, keyed on `Engines/versions.env`. If the slug differs, update
   Update checks stay off unless a user opts in.
 
 ## B-006 Cloud server
+
+**v1 ships without it (D-045):** `Brand.cloudAvailable` is `false`, which hides every cloud surface in the app, and the site hides Pro and the hosted API.
+
 
 **Why blocked.** BUILD.md says not to build the server in this run. The client, the
 OpenAPI contract (`Server/openapi.yaml`, 31 operations) and a mock server
@@ -238,7 +250,10 @@ OpenAPI contract (`Server/openapi.yaml`, 31 operations) and a mock server
 
 **Still untested:** actual runtime behaviour on 13–15. Run `make test && make matrix` on a macOS 13 machine or VM. Expect rows to drop out (e.g. ImageIO AVIF → the ffmpeg fallback; remove background → people only), not failures.
 
-## B-008 Contributor agreement setup
+## B-008 Contributor agreement setup ✅ resolved 2026-10-27
+
+**Resolved 2026-10-27 (D-044):** contributions use the DCO. `CLA.md` is gone, CONTRIBUTING.md explains `git commit -s`, and `.github/workflows/dco.yml` checks pull requests. Nothing below is needed any more.
+
 
 **Why blocked.** It needs the owner's legal name and accounts.
 
@@ -259,14 +274,19 @@ decodes real DNG/CR3/NEF/ARW files.
 
 ## B-010 Homebrew cask
 
+**Status (2026-10-27):** the release workflow now also attaches `anyfmt-cli-<version>-arm64.tar.gz` (`packaging/homebrew/make-cli-tarball.sh`, which prints both SHA-256s). Still to do: create `AatmanAJ/homebrew-tap` and copy the two templates in at the first release.
+
+
 **Why blocked.** There's no release DMG URL yet (B-002, B-004).
 
 ```bash
-gh repo create aiwithaj/homebrew-tap --public
+gh repo create AatmanAJ/homebrew-tap --public
 shasum -a 256 dist/anyfmt-0.1.0.dmg   # into packaging/homebrew/anyfmt.rb, then copy it to Casks/anyfmt.rb in the tap
 ```
 
-## B-011 Office pack checksum (LibreOffice)
+## B-011 Office pack checksum (LibreOffice) ✅ resolved 2026-10-27
+
+**Resolved:** downloaded LibreOffice 26.8.1 (aarch64), `gpg --verify` of its `.asc` passed against The Document Foundation's release key C2839ECAD9408FBE9531C3E9F434A1EFAFEEAEA3, and the SHA-256 `ca074e0b…0dfc` is pinned in `OfficePack.libreOffice`. Not yet tried: installing the pack from inside the app.
 
 **Why blocked.** The installer only accepts a pinned, verified file (D-033), and
 LibreOffice's SHA-256 can't be pinned without downloading the release. The pandoc pack

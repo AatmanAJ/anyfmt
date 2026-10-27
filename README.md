@@ -189,8 +189,9 @@ developers may want are **MIT**:
 - [`Packages/DragSense`](Packages/DragSense): global file-drag + modifier-tap detection, no permissions
 - [`Packages/RadialMenu`](Packages/RadialMenu): the wheel component
 
-Contributions are accepted under a short [CLA](CLA.md) that keeps a future App
-Store build possible while guaranteeing your code stays open source.
+Contributions are welcome under the same licences. Sign off your commits
+(`git commit -s`) to accept the [Developer Certificate of Origin](https://developercert.org);
+see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 

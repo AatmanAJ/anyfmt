@@ -21,7 +21,7 @@ export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
 
 mkdir -p "$SRC" "$PREFIX" "$DIST/Helpers" "$DIST/Frameworks"
 
-log() { printf '\033[1;34m[engines]\033[0m %s\n' "$*"; }
+log() { printf '\033[1;34m[engines]\033[0m %s\n' "$*" >&2; }
 die() { printf '\033[1;31m[engines]\033[0m %s\n' "$*" >&2; exit 1; }
 
 # fetch URL SHA256 -> prints path of verified tarball

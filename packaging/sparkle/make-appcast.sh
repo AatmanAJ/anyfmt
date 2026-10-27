@@ -2,10 +2,10 @@
 # Signs release DMGs with the Sparkle EdDSA key and (re)generates appcast.xml.
 #
 # The PRIVATE key never lives in this repo. It was generated with
-#   generate_keys --account anyfmt-updates
+#   generate_keys --account halo-updates  (made before the rename; the account name stays)
 # and is stored in the maintainer's login Keychain (item "https://sparkle-project.org",
-# account "anyfmt-updates"). Export a backup with
-#   generate_keys --account anyfmt-updates -x anyfmt-updates-private.key
+# account "halo-updates"). Export a backup with
+#   generate_keys --account halo-updates -x anyfmt-updates-private.key
 # and keep it in a password manager (BLOCKERS.md B-005). CI reads it from the
 # SPARKLE_ED_PRIVATE_KEY secret (base64), never from disk.
 #
@@ -22,6 +22,6 @@ if [[ -n "${SPARKLE_ED_PRIVATE_KEY:-}" ]]; then
   printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > "$KEYFILE"
   "$BIN/generate_appcast" --ed-key-file "$KEYFILE" --download-url-prefix "$BASE" "$DIR"
 else
-  "$BIN/generate_appcast" --account anyfmt-updates --download-url-prefix "$BASE" "$DIR"
+  "$BIN/generate_appcast" --account halo-updates --download-url-prefix "$BASE" "$DIR"
 fi
 echo "appcast: $DIR/appcast.xml (host it at the SUFeedURL in project.yml)"

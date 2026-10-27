@@ -6,19 +6,22 @@ places: the **capability table** (formats), a **tool**, or the **wheel**.
 ## Licence of contributions
 
 anyfmt is AGPL-3.0, and `Packages/DragSense` and `Packages/RadialMenu` are MIT.
-Before we can merge your first pull request, we ask you to accept the short
-[anyfmt Contributor Licence Agreement](CLA.md). The CLA Assistant check on your PR
-walks you through it, and you only do it once. You keep ownership of your work.
-The agreement lets the maintainer also offer anyfmt under other terms, such as a
-paid licence or a Mac App Store build, which the AGPL alone doesn't allow. In
-return, it guarantees your contribution always stays available under the AGPL or
-another OSI-approved licence.
+Your contribution goes in under the same licence as the code it touches, and you
+keep the copyright.
 
-Link the email you commit with to your GitHub account, or the CLA check can't
-match your commits.
+We use the [Developer Certificate of Origin](https://developercert.org) (DCO)
+instead of a contributor agreement. Sign off every commit to say you wrote it, or
+otherwise have the right to submit it under the project's licence:
 
-Why a CLA and not a DCO? See `docs/DECISIONS.md` D-026 and
-`research/CLA_RESEARCH.md`.
+```bash
+git commit -s -m "fix(wheel): …"
+```
+
+That adds a `Signed-off-by: Your Name <you@example.com>` line. The DCO check on
+your pull request fails if a commit is missing one. To fix earlier commits, run
+`git rebase --signoff main` and force-push your branch.
+
+Why a DCO? See `docs/DECISIONS.md` D-044.
 
 ## Build from source
 

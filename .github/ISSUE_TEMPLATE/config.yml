@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/AatmanAJ/anyfmt/security/advisories/new
+    about: Report it privately, not as an issue.
+  - name: Docs
+    url: https://anyfmt.app/docs
+    about: How the wheel, options, CLI and MCP server work.
