@@ -55,9 +55,12 @@ export function AppDemo({ className }: { className?: string }) {
   useEffect(() => {
     const el = box.current
     if (!el) return
-    const ro = new ResizeObserver(() => setScale(el.offsetWidth / W))
+    const fit = () => setScale(el.offsetWidth / W)
+    fit()
+    const ro = new ResizeObserver(fit)
     ro.observe(el)
-    return () => ro.disconnect()
+    window.addEventListener('resize', fit)
+    return () => { ro.disconnect(); window.removeEventListener('resize', fit) }
   }, [])
 
   useEffect(() => {

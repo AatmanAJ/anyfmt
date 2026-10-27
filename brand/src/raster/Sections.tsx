@@ -79,7 +79,7 @@ const KEYS = [
   { key: 'control', icon: 'control', title: 'Control moves it', body: 'Control opens actions that work on anything, folders included: AirDrop, Float, copy, move, copy path, open in Terminal.' },
 ]
 
-export function KeysSection() {
+export function KeysSection({ title, className = 'py-28 sm:py-40' }: { title?: ReactNode; className?: string } = {}) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
   const box = useRef<HTMLDivElement>(null)
@@ -91,9 +91,9 @@ export function KeysSection() {
   }, [active, paused, inView])
 
   return (
-    <section ref={box} className="py-28 sm:py-40">
+    <section ref={box} className={className}>
       <Wrap>
-        <Display>Three keys. <Pixel>Every</Pixel> file.</Display>
+        {title ?? <Display>Three keys. <Pixel>Every</Pixel> file.</Display>}
         <div className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16" onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
           <div className="flex flex-col">
             {KEYS.map((k, i) => (

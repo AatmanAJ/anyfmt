@@ -19,6 +19,7 @@ const HeroIndex = lazy(() => import('./heroes/Heroes').then((m) => ({ default: m
 const HeroPage = lazy(() => import('./heroes/Heroes').then((m) => ({ default: m.HeroPage })))
 const AnyfmtBook = lazy(() => import('./anyfmt/BrandBook'))
 const RasterPage = lazy(() => import('./raster/Raster'))
+const SitePage = lazy(() => import('./raster/Site'))
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Hub />} />
         <Route path="/heroes" element={<Suspense fallback={<div className="min-h-screen bg-[#0B0B0D]" />}><HeroIndex /></Suspense>} />
         <Route path="/heroes/:n" element={<Suspense fallback={<div className="min-h-screen bg-[#0B0B0D]" />}><HeroPage /></Suspense>} />
+        <Route path="/site" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><SitePage /></Suspense>} />
         <Route path="/raster" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><RasterPage /></Suspense>} />
         <Route path="/raster/:n" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><RasterPage /></Suspense>} />
         <Route path="/liquid" element={<Suspense fallback={<div className="min-h-screen bg-[#ECEAE6]" />}><LiquidLanding /></Suspense>} />
