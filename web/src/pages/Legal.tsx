@@ -1,14 +1,14 @@
 /**
- * Privacy and Terms. Long-form text with a sticky contents list, and an "in short" line beside
- * every section, so the plain-English version is never more than a glance away. Privacy opens
- * with a ledger of every byte that can leave your Mac.
+ * Privacy and Terms. Long-form text with a sticky contents list, and an "in short" summary beside
+ * every section (above it on a phone), so the plain-English version is never more than a glance
+ * away. Privacy opens with a ledger of every byte that can leave your Mac.
  */
-import { Check, Cloud, Minus } from '@phosphor-icons/react'
+import { Check, Cloud, Power } from '@phosphor-icons/react'
 import { motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Page } from '../components/Page'
-import { Container, Eyebrow } from '../components/ui'
+import { Container, CopyButton, Eyebrow } from '../components/ui'
 import { useHead } from '../lib/head'
 import { EASE } from '../lib/hooks'
 import { PRICES, SITE } from '../lib/site'
@@ -29,28 +29,32 @@ function useSpy(ids: string[]) {
 function LegalBody({ sections }: { sections: Section[] }) {
   const on = useSpy(sections.map((s) => s.id))
   return (
-    <div className="grid gap-12 lg:grid-cols-[240px_minmax(0,1fr)]">
+    <div className="grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-16">
       <nav aria-label="Sections" className="hidden lg:block">
         <ol className="sticky top-28 flex flex-col gap-0.5 border-l border-line">
           {sections.map((s, i) => (
             <li key={s.id} className="relative">
-              {on === s.id && <motion.span layoutId="legal-bar" className="absolute -left-px top-1 bottom-1 w-[2px] bg-flare" />}
-              <a href={`#${s.id}`} className={`flex gap-2.5 py-1.5 pl-4 text-[14px] leading-[1.35] transition-colors ${on === s.id ? 'font-medium text-ink' : 'text-mute-2 hover:text-ink'}`}><span className="w-5 shrink-0 font-mono text-[12px] leading-[1.6]">{String(i + 1).padStart(2, '0')}</span>{s.title}</a>
+              {on === s.id && <motion.span layoutId="legal-bar" className="absolute -left-px bottom-1 top-1 w-[2px] bg-flare" />}
+              <a href={`#${s.id}`} aria-current={on === s.id ? 'location' : undefined}
+                className={`flex gap-2.5 rounded-r-md py-1.5 pl-4 pr-2 text-[14px] leading-[1.35] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-flare ${on === s.id ? 'font-medium text-ink' : 'text-mute-2 hover:text-ink'}`}>
+                <span className="w-5 shrink-0 text-[13px] leading-[1.6] tabular-nums">{String(i + 1).padStart(2, '0')}</span>{s.title}
+              </a>
             </li>
           ))}
         </ol>
       </nav>
       <div className="min-w-0">
         {sections.map((s, i) => (
-          <section key={s.id} id={s.id} className="grid scroll-mt-28 gap-4 border-t border-line py-10 first:border-0 first:pt-0 xl:grid-cols-[minmax(0,1fr)_260px] xl:gap-12">
-            <div className="min-w-0">
-              <h2 className="flex items-baseline gap-3 text-[clamp(24px,2.4vw,32px)] font-semibold leading-[1.1] tracking-[-0.035em]"><span className="font-mono text-[14px] font-normal text-flare">{String(i + 1).padStart(2, '0')}</span>{s.title}</h2>
-              <div className="prose-flare mt-5 max-w-[680px]">{s.body}</div>
-            </div>
-            <aside className="h-fit rounded-[18px] bg-sand p-5 xl:sticky xl:top-28">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-flare">In short</p>
-              <p className="mt-2 text-[15.5px] font-medium leading-[1.45]">{s.short}</p>
+          <section key={s.id} id={s.id} className="grid scroll-mt-28 gap-x-12 gap-y-6 border-t border-line py-12 first:border-0 first:pt-0 xl:grid-cols-[minmax(0,34rem)_17rem] xl:justify-between">
+            <h2 className="flex items-baseline gap-3.5 text-[clamp(26px,2.6vw,34px)] font-semibold leading-[1.1] tracking-[-0.035em] xl:col-span-2">
+              <span className="text-[15px] font-normal tabular-nums tracking-normal text-mute-2">{String(i + 1).padStart(2, '0')}</span>{s.title}
+            </h2>
+            {/* the summary comes first on a phone, and sits beside the text from xl up */}
+            <aside className="h-fit border-l-2 border-flare pl-5 xl:sticky xl:top-28 xl:col-start-2 xl:row-start-2">
+              <p className="text-[14px] font-semibold text-mute-2">In short</p>
+              <p className="mt-1.5 text-[17px] font-medium leading-[1.45] text-ink">{s.short}</p>
             </aside>
+            <div className="prose-flare min-w-0 max-w-[34rem] xl:col-start-1 xl:row-start-2">{s.body}</div>
           </section>
         ))}
       </div>
@@ -58,9 +62,20 @@ function LegalBody({ sections }: { sections: Section[] }) {
   )
 }
 
+/** The one thing to do on a legal page: ask about it. */
+function AskLegal({ what }: { what: string }) {
+  return (
+    <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
+      <p className="text-[15px] text-mute">{what} <a href={`mailto:${SITE.email.legal}`} className="font-medium text-ink underline decoration-flare/60 underline-offset-4 outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">{SITE.email.legal}</a></p>
+      <CopyButton text={SITE.email.legal} label="Copy address" />
+    </div>
+  )
+}
+
 /* ── Privacy ───────────────────────────────────────────────── */
 
-const LEDGER: { when: string; sends: string; to: string; on: 'never' | 'opt-in' | 'you-ask' }[] = [
+type When = 'never' | 'opt-in' | 'you-ask'
+const LEDGER: { when: string; sends: string; to: string; on: When }[] = [
   { when: 'Converting, editing, any action', sends: 'Nothing', to: 'Nowhere. The bundled ffmpeg is built without network support.', on: 'never' },
   { when: 'Using the CLI or the MCP server', sends: 'Nothing', to: 'Neither opens a socket or a port.', on: 'never' },
   { when: 'Update checks', sends: 'A request for the release feed, once a day', to: 'Our update server. No identifier is attached.', on: 'opt-in' },
@@ -69,6 +84,17 @@ const LEDGER: { when: string; sends: string; to: string; on: 'never' | 'opt-in' 
   { when: 'Activating a licence key', sends: 'The key, a random install id, the Mac\'s name', to: 'Our licence server. Never a hardware serial.', on: 'you-ask' },
   { when: 'Pro: share links, cloud jobs, sync, inbox', sends: 'The files and settings you choose', to: 'Our servers, or yours if you set a Server URL.', on: 'you-ask' },
 ]
+
+/** "Never" is the one highlight; the other defaults are said in words. */
+function Status({ on, className = '' }: { on: When; className?: string }) {
+  if (on === 'never') return <span className={`w-fit shrink-0 items-center gap-1.5 rounded-full bg-volt px-3 py-1 text-[13px] font-semibold text-ink ${className}`}><Check size={13} weight="bold" aria-hidden />Never</span>
+  return (
+    <span className={`shrink-0 items-center gap-1.5 text-[14px] font-medium text-ink ${className}`}>
+      {on === 'opt-in' ? <Power size={14} weight="bold" aria-hidden className="shrink-0" /> : <Cloud size={14} weight="fill" aria-hidden className="shrink-0" />}
+      {on === 'opt-in' ? 'Off until you turn it on' : 'Only when you ask'}
+    </span>
+  )
+}
 
 const PRIVACY: Section[] = [
   { id: 'app', title: 'The app', short: 'The app collects nothing. No analytics, no crash reporting, no account.', body: <>
@@ -94,7 +120,7 @@ const PRIVACY: Section[] = [
     <p>“Copy for AI” works in your browser and sends nothing to us. “Open in Claude” and “Open in ChatGPT” take you to those services with a link to the page; their privacy policies apply there.</p>
   </> },
   { id: 'payments', title: 'Payments and donations', short: 'A payment provider handles cards. We never see your card number.', body: <>
-    <p>Purchases are handled by a payment provider. We receive your name, email address, country and what you bought, so we can issue your licence and answer support questions. We never see or store your card details.</p>
+    <p>Purchases are handled by a payment provider. We receive the name and email address you give at checkout, your country and what you bought, so we can issue your licence and answer support questions. We never see or store your card details.</p>
     <p>Donations go through <a href={PRICES.donateUrl}>Buy Me a Coffee</a>, whose privacy policy applies to the donation itself.</p>
   </> },
   { id: 'email', title: 'When you email us', short: 'We use your email to reply, and keep it as long as the conversation needs it.', body: <>
@@ -115,27 +141,31 @@ export function Privacy() {
     <Page>
       <section className="bg-sand pb-16 pt-36 lg:pb-24 lg:pt-44">
         <Container>
-          <div className="grid items-end gap-10 lg:grid-cols-[auto_1fr] lg:gap-16">
-            <motion.p initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease: EASE }}
-              className="text-[clamp(160px,24vw,360px)] font-semibold leading-[0.78] tracking-[-0.08em]">0<span className="text-flare">.</span></motion.p>
-            <div className="pb-4">
+          <div className="grid items-end gap-x-16 gap-y-8 lg:grid-cols-[auto_minmax(0,1fr)]">
+            <motion.p aria-hidden initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease: EASE }}
+              className="text-[clamp(112px,24vw,360px)] font-semibold leading-[0.78] tracking-[-0.08em]">0<span className="text-flare">.</span></motion.p>
+            <div className="lg:pb-4">
               <Eyebrow>Privacy</Eyebrow>
-              <h1 className="mt-5 max-w-[620px] text-[clamp(36px,4.4vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Bytes the app sends about you.</h1>
-              <p className="mt-5 max-w-[520px] text-[17.5px] leading-[1.55] text-mute">No analytics, no crash reports, no account. Below is every situation in which anything leaves your Mac at all. Updated {UPDATED}.</p>
+              <h1 className="mt-5 max-w-[640px] text-[clamp(36px,4.4vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]"><span className="sr-only">Zero </span>Bytes the app sends about you.</h1>
+              <p className="mt-5 max-w-[520px] text-[17px] leading-[1.55] text-mute">No analytics, no crash reports, no account. The table is every situation in which anything leaves your Mac at all. Updated {UPDATED}.</p>
+              <AskLegal what="Questions about your data:" />
             </div>
           </div>
-          <div className="mt-16 overflow-hidden rounded-[26px] bg-white ring-1 ring-black/5">
-            <div className="grid grid-cols-[1.1fr_1fr] gap-4 border-b border-line bg-white px-6 py-3 text-[12.5px] font-semibold uppercase tracking-[0.12em] text-mute-2 sm:grid-cols-[1.2fr_1fr_1.4fr_auto] sm:px-8"><span>When</span><span>What leaves</span><span className="hidden sm:block">Where</span><span className="hidden sm:block">Default</span></div>
-            <ul>
+          <div className="mt-16 overflow-hidden rounded-[28px] bg-white ring-1 ring-black/[.07]">
+            <div className="hidden grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1.35fr)_196px] gap-6 border-b border-line px-8 py-4 text-[14px] font-semibold text-mute-2 md:grid">
+              <span>When</span><span>What leaves your Mac</span><span>Where it goes</span><span>Default</span>
+            </div>
+            <ul className="divide-y divide-line">
               {LEDGER.map((r, i) => (
-                <motion.li key={r.when} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: EASE, delay: i * 0.04 }}
-                  className="grid grid-cols-[1.1fr_1fr] gap-4 border-b border-line px-6 py-4 last:border-0 sm:grid-cols-[1.2fr_1fr_1.4fr_auto] sm:items-center sm:px-8">
-                  <span className="text-[15.5px] font-medium">{r.when}</span>
-                  <span className={`text-[15px] ${r.sends === 'Nothing' ? 'font-semibold' : 'text-mute'}`}>{r.sends}</span>
-                  <span className="col-span-2 text-[14px] text-mute-2 sm:col-span-1">{r.to}</span>
-                  <span className={`w-fit rounded-full px-2.5 py-1 text-[12px] font-semibold ${r.on === 'never' ? 'bg-volt' : r.on === 'opt-in' ? 'bg-sand-2' : 'bg-ink text-white'}`}>
-                    {r.on === 'never' ? <span className="flex items-center gap-1"><Check size={12} weight="bold" />Never</span> : r.on === 'opt-in' ? <span className="flex items-center gap-1"><Minus size={12} weight="bold" />Off until you turn it on</span> : <span className="flex items-center gap-1"><Cloud size={12} weight="fill" />Only when you do it</span>}
+                <motion.li key={r.when} initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: EASE, delay: i * 0.04 }}
+                  className="grid gap-x-6 gap-y-1.5 px-6 py-5 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1.35fr)_196px] md:items-baseline md:px-8">
+                  <span className="flex flex-col items-start gap-2 md:block">
+                    <span className="text-[16px] font-semibold leading-[1.4]">{r.when}</span>
+                    <Status on={r.on} className="flex md:hidden" />
                   </span>
+                  <span className={`text-[15.5px] leading-[1.45] ${r.sends === 'Nothing' ? 'font-semibold text-ink' : 'text-ink'}`}><span className="text-mute-2 md:hidden">Sends: </span>{r.sends}</span>
+                  <span className="text-[15px] leading-[1.45] text-mute"><span className="text-mute-2 md:hidden">To: </span>{r.to}</span>
+                  <Status on={r.on} className="hidden md:flex" />
                 </motion.li>
               ))}
             </ul>
@@ -159,7 +189,7 @@ const TERMS: Section[] = [
   </> },
   { id: 'desktop', title: 'The Desktop licence', short: `$${PRICES.desktop.once} once: the signed app, every update, up to ${PRICES.desktop.macs} of your Macs.`, body: <>
     <p>A Desktop licence gives one person the signed and notarized anyfmt app, every future update of it, and email support, on up to {PRICES.desktop.macs} Macs they use. It's a one-time payment and doesn't expire.</p>
-    <p>A licence key never unlocks or limits anything that runs locally; it records that you bought the app. Keys verify offline. Please don't share yours: deactivate a Mac in the app to move a seat to another.</p>
+    <p>A licence key never limits anything that runs locally; it only records that you bought the app. Keys verify offline. Please don't share yours: deactivate a Mac in the app to move a seat to another.</p>
   </> },
   { id: 'pro', title: 'Pro', short: 'Monthly or yearly, cancel any time, keeps working until the period ends.', body: <>
     <p>Pro is a subscription that adds features running on our servers: share links, cloud conversions, sync, the inbox and GPU tools. It includes everything in the Desktop licence. You can pay monthly or yearly, and cancel at any time; Pro then stays active until the end of the period you paid for.</p>
@@ -197,8 +227,9 @@ export function Terms() {
       <section className="bg-sand pb-16 pt-36 lg:pb-20 lg:pt-44">
         <Container>
           <Eyebrow>Terms</Eyebrow>
-          <h1 className="mt-6 max-w-[1000px] text-[clamp(44px,6vw,92px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">The deal, with the short version beside it.</h1>
-          <p className="mt-6 max-w-[560px] text-[17.5px] leading-[1.55] text-mute">Read the orange notes for the gist, and the text for the detail. If they ever seem to disagree, the text wins. Updated {UPDATED}.</p>
+          <h1 className="mt-6 max-w-[1040px] text-[clamp(44px,6vw,92px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">The terms, with a plain summary of every section.</h1>
+          <p className="mt-6 max-w-[560px] text-[17px] leading-[1.55] text-mute">Read the summaries for the gist and the full text for the detail. If the two ever seem to disagree, the full text wins. Updated {UPDATED}.</p>
+          <AskLegal what="Questions about these terms:" />
         </Container>
       </section>
       <section className="bg-white py-20 lg:py-28"><Container><LegalBody sections={TERMS} /></Container></section>

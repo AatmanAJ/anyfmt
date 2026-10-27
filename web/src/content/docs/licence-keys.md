@@ -1,9 +1,9 @@
 ---
 title: Licence keys
-description: What an anyfmt ANYFMT1 licence key is, how to activate or remove one, how it's checked offline, and why it never unlocks or limits anything on your Mac.
+description: What an anyfmt ANYFMT1 licence key is, how to activate or remove one, how it's checked offline, and why it never switches on or limits anything on your Mac.
 ---
 
-A licence key is a signed string that proves, offline, that this Mac holds a paid Pro or Team licence and for how many seats. It never unlocks, limits or changes anything that runs on your Mac: every local conversion, tool and action is free without one.
+A licence key is a signed string that proves, offline, that this Mac holds a paid Pro or Team licence and for how many seats. It never switches on, limits or changes anything that runs on your Mac: every local conversion, tool and action is free without one.
 
 ## What a key does, and doesn't
 

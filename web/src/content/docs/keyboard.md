@@ -13,7 +13,7 @@ anyfmt is driven by modifier keys while you drag, and by ordinary keys once a wh
 | ⌘ Command | Opens the Tools wheel |
 | ⌃ Control | Opens the Actions wheel |
 | Another trigger key | Switches to that wheel |
-| ⌥ Option, tapped | Locks the highlighted segment. Tap again to unlock |
+| ⌥ Option, tapped | Locks the highlighted segment. Tap again to release it |
 | ⌥ Option, held as you drop | Opens the options panel instead of converting |
 | ⌥ Option, held as you drop on Copy Path | Copies shell-quoted paths |
 
@@ -30,7 +30,7 @@ A wheel takes the keyboard when you open it without dragging: from the Services 
 | 1 to 9 | Highlights segment 1 to 9. Press Return to apply it |
 | Return or Enter | Applies the highlighted segment |
 | ⌥ Return | Opens the options panel for the highlighted segment |
-| Space | Locks or unlocks the highlighted segment |
+| Space | Locks or releases the highlighted segment |
 | Tab, ⇧ Tab | Next or previous wheel |
 | Page Up, Page Down | Previous or next page of the outer ring |
 | Escape | Cancels |

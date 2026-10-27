@@ -12,7 +12,7 @@ import { DownloadButton } from '../components/Buttons'
 import { CodeBlock } from '../components/docs/Markdown'
 import { formatKind, formatLabel, GuideVisual } from '../components/guides/Visuals'
 import { Page } from '../components/Page'
-import { Container, Eyebrow, FormatChip, Keycap } from '../components/ui'
+import { Container, Eyebrow, FormatChip } from '../components/ui'
 import type { Guide } from '../data/guide-types'
 import { GUIDES } from '../data/guides'
 import options from '../data/options.json'
@@ -40,33 +40,51 @@ function describe(o?: Opt) {
   return null
 }
 
-const pairLabel = (g: Guide) => (g.kind === 'tool' ? toolOf(g.to)?.title ?? g.to : `${g.from.map(formatLabel).join(' / ')} to ${formatLabel(g.to)}`)
+/** "HEIC to JPG", or for a tool the task in the guide's own words: "Compress images", "Trim a video". */
+const pairLabel = (g: Guide) => (g.kind === 'tool' ? g.title.split(' on Mac')[0] : `${g.from.map(formatLabel).join(' / ')} to ${formatLabel(g.to)}`)
+
+/** The gesture for this guide, as one line: drag the file, tap the key, drop on the target. */
+function Gesture({ g }: { g: Guide }) {
+  const target = g.kind === 'tool' ? toolOf(g.to)?.title ?? '' : formatLabel(g.to)
+  const key = g.kind === 'tool' ? '⌘ Command' : '⇧ Shift'
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[15px] font-medium">
+      <span className="inline-flex h-10 items-center gap-2 rounded-full bg-white pl-4 pr-1.5 ring-1 ring-black/10">Drag {g.kind === 'tool' ? 'the file' : <FormatChip label={formatLabel(g.from[0])} kind={formatKind(g.from[0])} />}</span>
+      <ArrowRight size={16} weight="bold" aria-hidden className="hidden text-mute-2 sm:block" />
+      <kbd className="inline-flex h-10 items-center rounded-full bg-white px-4 font-sans ring-1 ring-black/10">Tap {key}</kbd>
+      <ArrowRight size={16} weight="bold" aria-hidden className="hidden text-mute-2 sm:block" />
+      <span className="inline-flex h-10 items-center rounded-full bg-ink px-4 text-white">Drop on {target}</span>
+    </p>
+  )
+}
 
 function Hero({ g }: { g: Guide }) {
-  const target = g.kind === 'tool' ? toolOf(g.to)?.title ?? '' : formatLabel(g.to)
-  const key = g.kind === 'tool' ? { glyph: '⌘', name: 'Command' } : { glyph: '⇧', name: 'Shift' }
   return (
     <section className="bg-sand pb-20 pt-36 lg:pb-28 lg:pt-44">
-      <Container className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <Container className="grid items-start gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div>
-          <Eyebrow><Link to="/convert" className="hover:underline">Guides</Link> <span className="text-mute-2">/ {pairLabel(g)}</span></Eyebrow>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-3 text-[16px] sm:text-[18px]">
+            <span className="h-2.5 w-2.5 shrink-0 bg-ink" />
+            <Link to="/convert" className="link-line outline-none focus-visible:ring-2 focus-visible:ring-flare">Guides</Link>
+            <span className="text-mute-2">/</span>
+            <span className="text-mute-2">{pairLabel(g)}</span>
+          </nav>
           <motion.h1 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE }}
-            className="mt-6 text-[clamp(40px,5vw,78px)] font-semibold leading-[0.98] tracking-[-0.05em] [text-wrap:balance]">{g.h1}</motion.h1>
-          <p className="mt-7 max-w-[580px] text-[17.5px] leading-[1.6] text-ink-2">{g.answer}</p>
-          <div className="mt-8 flex flex-wrap items-center gap-3 text-[15px] font-medium">
-            <span className="rounded-full bg-white px-3.5 py-2 ring-1 ring-black/10">Drag {g.kind === 'tool' ? 'the file' : <FormatChip label={formatLabel(g.from[0])} kind={formatKind(g.from[0])} size="sm" />}</span>
-            <ArrowRight size={16} className="text-flare" />
-            <Keycap glyph={key.glyph} size="sm" />
-            <ArrowRight size={16} className="text-flare" />
-            <span className="rounded-full bg-ink px-3.5 py-2 text-white">Drop on {target}</span>
-          </div>
+            className="mt-6 text-[clamp(36px,3.9vw,58px)] font-semibold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">{/[.?!]$/.test(g.h1) ? g.h1 : `${g.h1}.`}</motion.h1>
+          <p className="mt-7 max-w-[580px] text-[17px] leading-[1.6] text-mute">{g.answer}</p>
+          <div className="mt-9"><DownloadButton /></div>
           {g.measured && (
-            <ul className="mt-8 flex flex-wrap gap-2">
-              {g.measured.map((m) => <li key={m.label} className="rounded-[14px] bg-white px-4 py-2.5 ring-1 ring-black/5"><span className="text-[22px] font-semibold tracking-[-0.03em]">{m.value}</span><span className="ml-2 text-[13px] text-mute">{m.label}</span></li>)}
+            <ul className="mt-10 grid max-w-[600px] gap-x-10 gap-y-5 border-t border-line pt-6 sm:grid-cols-2">
+              {g.measured.slice(0, 2).map((m) => (
+                <li key={m.label}>
+                  <span className="block text-[22px] font-semibold leading-none tracking-[-0.03em] tabular-nums">{m.value}</span>
+                  <span className="mt-2 block text-[14px] leading-[1.4] text-mute-2">{m.label}</span>
+                </li>
+              ))}
             </ul>
           )}
         </div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}><GuideVisual g={g} /></motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: EASE, delay: 0.15 }} className="min-w-0"><GuideVisual g={g} /></motion.div>
       </Container>
     </section>
   )
@@ -90,75 +108,85 @@ export function GuidePage() {
       <Hero g={g} />
 
       <section className="bg-white py-24 lg:py-28">
-        <Container className="grid gap-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
+        <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div>
             <Eyebrow>Step by step</Eyebrow>
-            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">How to do it.</h2>
+            <h2 className="mt-6 text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">How to do it.</h2>
           </div>
-          <ol className="space-y-3">
+          <div>
+          <div className="mb-8"><Gesture g={g} /></div>
+          <ol className="border-t border-line">
             {g.steps.map((s, i) => (
-              <motion.li key={i} initial={{ opacity: 0, x: 12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.5, ease: EASE, delay: i * 0.05 }}
-                className="flex gap-5 rounded-[22px] bg-sand p-6">
-                <span className="font-wordmark text-[40px] font-bold leading-none tracking-[-0.04em] text-flare">{i + 1}</span>
-                <p className="pt-1.5 text-[17px] leading-[1.55]">{s}</p>
-              </motion.li>
+              <li key={i} className="grid grid-cols-[32px_minmax(0,1fr)] items-baseline gap-3 border-b border-line py-6 sm:grid-cols-[48px_minmax(0,1fr)] sm:gap-4">
+                <span className="text-[28px] font-semibold leading-none tracking-[-0.04em] tabular-nums">{i + 1}</span>
+                <p className="text-[17px] leading-[1.55]">{s}</p>
+              </li>
             ))}
           </ol>
+          </div>
         </Container>
       </section>
 
       <section className="bg-sand py-24 lg:py-28">
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <div>
-              <Eyebrow>Why people do this</Eyebrow>
-              <ul className="mt-8 space-y-3">{g.why.map((w) => <li key={w} className="flex gap-3 text-[16.5px] leading-[1.55]"><span className="mt-2.5 h-1.5 w-1.5 shrink-0 bg-ink" />{w}</li>)}</ul>
+        <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div>
+            <Eyebrow>Why people do this</Eyebrow>
+            <ul className="mt-8 space-y-3">{g.why.map((w) => <li key={w} className="flex gap-3 text-[17px] leading-[1.55]"><span className="mt-[11px] h-1.5 w-1.5 shrink-0 bg-ink" />{w}</li>)}</ul>
+          </div>
+          <div className="overflow-hidden rounded-[28px] bg-white ring-1 ring-black/[.07]">
+            <div className="hidden grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-line text-[15px] font-semibold sm:grid">
+              <span className="px-6 py-4"><span className="sr-only">What changes</span></span>
+              <span className="px-6 py-4">{g.kind === 'tool' ? 'Before' : fromL}</span>
+              <span className="flex items-center gap-2 px-6 py-4"><span className="h-2 w-2 shrink-0 bg-flare" />{toL}</span>
             </div>
-            <div className="overflow-hidden rounded-[26px] bg-white ring-1 ring-black/5">
-              <div className="grid grid-cols-[0.8fr_1fr_1fr] bg-white text-[12.5px] font-semibold uppercase tracking-[0.12em]">
-                <span className="px-5 py-4 text-mute-2">&nbsp;</span><span className="px-5 py-4 text-mute">{g.kind === 'tool' ? 'Before' : fromL}</span><span className="px-5 py-4 text-flare">{toL}</span>
-              </div>
+            <dl>
               {g.facts.map((f) => (
-                <div key={f.label} className="grid grid-cols-[0.8fr_1fr_1fr] border-t border-line text-[14.5px]">
-                  <span className="px-5 py-3.5 font-semibold">{f.label}</span><span className="px-5 py-3.5 text-mute">{f.from}</span><span className="px-5 py-3.5">{f.to}</span>
+                <div key={f.label} className="grid grid-cols-2 border-b border-line text-[15px] last:border-0 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                  <dt className="col-span-2 px-5 pt-4 font-semibold sm:col-span-1 sm:px-6 sm:py-4 sm:font-normal sm:text-mute">{f.label}</dt>
+                  <dd className="px-5 pb-4 pt-1.5 text-mute sm:px-6 sm:py-4"><span className="mb-0.5 block text-[12px] font-medium text-mute-2 sm:hidden">{g.kind === 'tool' ? 'Before' : fromL}</span>{f.from}</dd>
+                  <dd className="px-5 pb-4 pt-1.5 sm:px-6 sm:py-4"><span className="mb-0.5 block text-[12px] font-medium text-mute-2 sm:hidden">{toL}</span>{f.to}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
         </Container>
       </section>
 
+      {g.options.length > 0 && (
       <section className="bg-white py-24 lg:py-28">
         <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div>
             <Eyebrow>Options worth knowing</Eyebrow>
-            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">{g.options.length ? 'The settings that matter.' : 'Nothing to set.'}</h2>
-            <p className="mt-5 max-w-[420px] text-[16px] leading-[1.55] text-mute">Hold ⌥ Option as you drop to open the options panel, or pick a preset chip on the segment. Defaults below come straight from the app.</p>
+            <h2 className="mt-6 text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">The settings that matter.</h2>
+            <p className="mt-6 max-w-[420px] text-[17px] leading-[1.55] text-mute">Hold ⌥ Option as you drop to open the options panel, or pick a preset chip on the segment. The defaults here come straight from the app.</p>
           </div>
-          <div className="space-y-3">
+          <ul className="border-t border-line">
             {g.options.map((o) => {
               const meta = describe(optionMeta(g, o.id))
               return (
-                <div key={o.id} className="rounded-[22px] bg-sand p-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2"><p className="text-[18px] font-semibold tracking-[-0.02em]">{o.label}</p>{meta && <p className="font-mono text-[12.5px] text-mute-2">{meta}</p>}</div>
-                  <p className="mt-2 text-[15.5px] leading-[1.55] text-mute">{o.advice}</p>
-                  <p className="mt-3 font-mono text-[12px] text-mute-3">--opt {o.id}=…</p>
-                </div>
+                <li key={o.id} className="border-b border-line py-6">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 className="text-[20px] font-semibold tracking-[-0.02em]">{o.label}</h3>
+                    {meta && <p className="text-[14px] text-mute-2 tabular-nums">{meta}</p>}
+                  </div>
+                  <p className="mt-2 text-[16px] leading-[1.55] text-mute">{o.advice}</p>
+                  <p className="mt-3 font-mono text-[13px] text-mute-2">--opt {o.id}=…</p>
+                </li>
               )
             })}
-            {!g.options.length && <p className="rounded-[22px] bg-sand p-6 text-[16px] text-mute">This one has no options. Drop it and it's done.</p>}
-          </div>
+          </ul>
         </Container>
       </section>
+      )}
 
       <section className="bg-sand py-24 lg:py-28">
         <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div>
             <Eyebrow>From Terminal</Eyebrow>
-            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">The same thing, scripted.</h2>
-            <p className="mt-5 max-w-[420px] text-[16px] leading-[1.55] text-mute">The <Link to="/docs/cli" className="underline decoration-flare/60 underline-offset-4">anyfmt command</Link> runs the same route with the same options. Add <span className="font-mono text-[14px]">--json</span> for machine-readable progress.</p>
+            <h2 className="mt-6 text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">{g.kind === 'tool' ? 'The same edit, scripted.' : 'The same conversion, scripted.'}</h2>
+            <p className="mt-6 max-w-[420px] text-[17px] leading-[1.55] text-mute">The <Link to="/docs/cli" className="underline decoration-flare/60 underline-offset-4 outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">anyfmt command</Link> runs the same route with the same options. Add <span className="font-mono text-[15px]">--json</span> for machine-readable progress.</p>
           </div>
-          <div>
+          <div className="min-w-0 space-y-4">
             <CodeBlock code={g.cli} lang="bash" title="One file" />
             {g.batch && <CodeBlock code={g.batch} lang="bash" title="A batch" />}
           </div>
@@ -166,10 +194,16 @@ export function GuidePage() {
       </section>
 
       <section className="bg-white py-24 lg:py-28">
-        <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <Container className="grid gap-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
           <div>
             <Eyebrow>Good to know</Eyebrow>
-            <ul className="mt-8 space-y-4">{g.gotchas.map((w) => <li key={w} className="rounded-[18px] bg-[#FFF3EC] p-5 text-[15.5px] leading-[1.55] ring-1 ring-flare/15">{w}</li>)}</ul>
+            <ul className="mt-8 border-t border-line">
+              {g.gotchas.map((w) => (
+                <li key={w} className="flex gap-3.5 border-b border-line py-5 text-[16px] leading-[1.55]">
+                  <span className="mt-[9px] h-2 w-2 shrink-0 bg-flare" />{w}
+                </li>
+              ))}
+            </ul>
           </div>
           <div>
             <Eyebrow>Questions</Eyebrow>
@@ -178,20 +212,24 @@ export function GuidePage() {
         </Container>
       </section>
 
-      <section className="bg-sand py-20">
+      <section className="border-t border-line bg-white py-16 lg:py-20">
         <Container>
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <p className="text-[clamp(28px,3vw,42px)] font-semibold tracking-[-0.04em]">Related guides</p>
-            <DownloadButton />
+            <h2 className="text-[22px] font-semibold tracking-[-0.025em]">Related guides</h2>
           </div>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <ul className="mt-6 grid border-t border-line sm:grid-cols-2 lg:grid-cols-3">
             {g.related.map((r) => G[r]).filter(Boolean).map((o) => (
-              <Link key={o.slug} to={`/convert/${o.slug}`} className="group rounded-[20px] bg-white p-5 ring-1 ring-black/5 transition-transform duration-500 hover:-translate-y-1">
-                <p className="text-[16.5px] font-semibold leading-[1.25] tracking-[-0.02em]">{pairLabel(o)}</p>
-                <p className="mt-2 line-clamp-2 text-[13.5px] text-mute">{o.h1}</p>
-              </Link>
+              <li key={o.slug} className="border-b border-line">
+                <Link to={`/convert/${o.slug}`} className="group flex h-full items-center justify-between gap-4 py-5 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-flare sm:pr-6">
+                  <span className="min-w-0">
+                    <span className="block text-[18px] font-semibold tracking-[-0.02em]"><span className="link-line">{pairLabel(o)}</span></span>
+                    <span className="mt-1 block truncate text-[14px] text-mute-2">{o.h1}</span>
+                  </span>
+                  <ArrowRight size={16} weight="bold" aria-hidden className="shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </Container>
       </section>
     </Page>
@@ -212,38 +250,44 @@ export function GuidesHub() {
   const shown = useMemo(() => GUIDES.filter((g) => !q || `${g.title} ${g.h1} ${g.from.join(' ')} ${g.to}`.toLowerCase().includes(q.toLowerCase())), [q])
   return (
     <Page>
-      <section className="bg-sand pb-16 pt-36 lg:pt-44">
+      <section className="bg-sand pb-16 pt-36 lg:pb-20 lg:pt-44">
         <Container>
-          <Eyebrow>Guides</Eyebrow>
-          <h1 className="mt-6 max-w-[1000px] text-[clamp(44px,6.4vw,100px)] font-semibold leading-[0.95] tracking-[-0.055em]">How to convert anything on a Mac.</h1>
-          <p className="mt-6 max-w-[560px] text-[18px] leading-[1.55] text-mute">{GUIDES.length} guides, each with the steps, the options that matter, the command line, and what you lose along the way. Useful even if you never install anyfmt.</p>
-          <label className="mt-10 flex h-14 max-w-[560px] items-center gap-3 rounded-full bg-white px-5 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-flare">
-            <MagnifyingGlass size={19} className="text-mute-2" aria-hidden />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="heic, gif, pdf, compress…" aria-label="Filter guides" className="h-full flex-1 bg-transparent text-[17px] outline-none placeholder:text-mute-3" />
+          <div className="grid items-end gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            <div>
+              <Eyebrow>Guides</Eyebrow>
+              <h1 className="mt-6 max-w-[900px] text-[clamp(48px,7vw,112px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">How to convert files on a Mac.</h1>
+            </div>
+            <p className="max-w-[460px] text-[17px] leading-[1.55] text-mute lg:pb-3">{GUIDES.length} guides, each with the steps, the options that matter, the command line, and what you lose along the way. Useful even if you never install anyfmt.</p>
+          </div>
+          <label className="mt-12 flex h-14 max-w-[560px] items-center gap-3 rounded-full bg-white px-5 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-flare">
+            <MagnifyingGlass size={19} className="shrink-0 text-mute-2" aria-hidden />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a guide: heic, gif, pdf, compress…" aria-label="Filter guides" className="h-full min-w-0 flex-1 bg-transparent text-[17px] outline-none placeholder:text-mute-2" />
           </label>
         </Container>
       </section>
-      <section className="bg-white py-20">
+      <section className="bg-white py-20 lg:py-24">
         <Container className="space-y-16">
           {GROUPS.map((grp) => {
             const list = shown.filter(grp.test)
             if (!list.length) return null
             return (
-              <div key={grp.name} className="grid gap-6 border-t border-line pt-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
-                <h2 className="text-[clamp(24px,2.4vw,32px)] font-semibold tracking-[-0.035em] lg:sticky lg:top-28 lg:self-start">{grp.name}</h2>
-                <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div key={grp.name} className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
+                <h2 className="text-[clamp(24px,2.4vw,32px)] font-semibold leading-[1.1] tracking-[-0.035em] lg:sticky lg:top-28 lg:self-start">{grp.name}<span className="mt-1.5 block text-[15px] font-normal tracking-normal text-mute-2">{list.length} {list.length === 1 ? 'guide' : 'guides'}</span></h2>
+                <ul className="grid border-t border-line xl:grid-cols-2 xl:gap-x-10">
                   {list.map((g) => (
-                    <li key={g.slug}>
-                      <Link to={`/convert/${g.slug}`} className="group flex h-full flex-col justify-between gap-5 rounded-[22px] bg-sand p-5 outline-none transition-[transform,background-color] duration-500 hover:-translate-y-1 hover:bg-sand-2 focus-visible:ring-2 focus-visible:ring-flare">
-                        <span className="flex flex-wrap items-center gap-2">
+                    <li key={g.slug} className="border-b border-line">
+                      <Link to={`/convert/${g.slug}`} className="group flex items-center gap-5 py-5 outline-none focus-visible:ring-2 focus-visible:ring-flare">
+                        <span className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-5">
+                        <span className="flex shrink-0 items-center gap-1.5 sm:min-w-[148px]">
                           {g.kind === 'tool' ? <span className="rounded-[7px] bg-ink px-2 py-1 text-[12px] font-semibold text-white">⌘ {toolOf(g.to)?.title}</span> : <>
-                            <FormatChip label={formatLabel(g.from[0])} kind={formatKind(g.from[0])} /><ArrowRight size={14} className="text-flare" /><FormatChip label={formatLabel(g.to)} kind={formatKind(g.to)} />
+                            <FormatChip label={formatLabel(g.from[0])} kind={formatKind(g.from[0])} /><ArrowRight size={13} weight="bold" aria-hidden className="text-mute-2" /><FormatChip label={formatLabel(g.to)} kind={formatKind(g.to)} />
                           </>}
                         </span>
-                        <span>
-                          <span className="block text-[17px] font-semibold leading-[1.25] tracking-[-0.02em]">{g.h1}</span>
-                          <span className="mt-1.5 line-clamp-2 block text-[14px] leading-[1.45] text-mute">{g.description}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[17px] font-semibold leading-[1.3] tracking-[-0.015em]"><span className="link-line">{g.h1}</span></span>
                         </span>
+                        </span>
+                        <ArrowRight size={16} weight="bold" aria-hidden className="shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
                       </Link>
                     </li>
                   ))}
@@ -251,7 +295,7 @@ export function GuidesHub() {
               </div>
             )
           })}
-          {!shown.length && <p className="py-10 text-center text-[16px] text-mute">No guide for “{q}” yet. <Link to="/formats" className="underline decoration-flare/60 underline-offset-4">Check the formats page</Link>: the route may well exist.</p>}
+          {!shown.length && <p className="py-10 text-center text-[17px] text-mute">No guide for “{q}” yet. <Link to="/formats" className="underline decoration-flare/60 underline-offset-4 outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">Check the formats page</Link>: the route may well exist.</p>}
         </Container>
       </section>
     </Page>

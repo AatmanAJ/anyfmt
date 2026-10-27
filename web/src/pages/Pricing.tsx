@@ -1,21 +1,21 @@
 /**
- * Pricing: four ways in, each card its own object. Self-host is a terminal, Desktop is a licence
- * ticket, Pro is a slab of fluted ember glass, Donate is a tip jar. Then the line between what
- * runs on your Mac (free) and what runs on our servers (paid), a full table, and an API meter.
+ * Pricing. Three plans built the same way, Desktop marked as the one most people want with crop
+ * marks (the Crop tool's own corners). Donating sits under them, apart from the plans. Then a
+ * switch that takes "your Mac" offline to show what keeps working, the full table, the API
+ * calculator and the questions.
  */
 import NumberFlow from '@number-flow/react'
-import { Check, Cloud, Heart, Minus } from '@phosphor-icons/react'
-import { AnimatePresence, motion, useInView } from 'motion/react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Check, Cloud, Minus, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Accordion } from '../components/Accordion'
-import { ArrowLink, DownloadButton, RollText, SwapArrow, SmartLink } from '../components/Buttons'
-import { Flutes } from '../components/Flutes'
+import { ArrowLink, RollText, SmartLink, SwapArrow } from '../components/Buttons'
 import { Page } from '../components/Page'
 import { Container, Eyebrow } from '../components/ui'
 import catalog from '../data/catalog.json'
 import { FAQ_FREE } from '../data/copy'
 import { useHead } from '../lib/head'
-import { EASE, prefersReducedMotion, SNAP } from '../lib/hooks'
+import { EASE, SNAP } from '../lib/hooks'
 import { PRICES, SITE } from '../lib/site'
 
 type Billing = 'monthly' | 'yearly'
@@ -24,15 +24,12 @@ type Billing = 'monthly' | 'yearly'
 
 function BillingToggle({ value, onChange }: { value: Billing; onChange: (b: Billing) => void }) {
   return (
-    <div role="radiogroup" aria-label="Billing period" className="inline-flex h-12 items-center rounded-full bg-white p-1 ring-1 ring-black/10">
+    <div role="radiogroup" aria-label="Billing period" className="inline-grid h-10 grid-cols-2 rounded-full bg-sand-2 p-1">
       {(['monthly', 'yearly'] as const).map((b) => (
         <button key={b} type="button" role="radio" aria-checked={value === b} onClick={() => onChange(b)}
-          className="relative h-10 rounded-full px-5 text-[15px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-flare">
-          {value === b && <motion.span layoutId="bill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
-          <span className={`relative flex items-center gap-2 transition-colors duration-300 ${value === b ? 'text-white' : 'text-ink'}`}>
-            {b === 'monthly' ? 'Monthly' : 'Yearly'}
-            {b === 'yearly' && <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${value === b ? 'bg-volt text-ink' : 'bg-sand-2 text-ink'}`}>−25%</span>}
-          </span>
+          className="relative h-8 rounded-full px-4 text-[14px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-flare">
+          {value === b && <motion.span layoutId="bill" className="absolute inset-0 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.08)]" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
+          <span className="relative">{b === 'monthly' ? 'Monthly' : <span className="whitespace-nowrap">Yearly −25%</span>}</span>
         </button>
       ))}
     </div>
@@ -40,14 +37,14 @@ function BillingToggle({ value, onChange }: { value: Billing; onChange: (b: Bill
 }
 
 /** A buy button that's honest about checkout not being open yet. */
-function SoonButton({ label, tone = 'dark' }: { label: string; tone?: 'dark' | 'light' | 'volt' }) {
+function SoonButton({ label, tone = 'dark' }: { label: string; tone?: 'dark' | 'light' }) {
   const [said, setSaid] = useState(false)
   useEffect(() => { if (!said) return; const t = window.setTimeout(() => setSaid(false), 3200); return () => clearTimeout(t) }, [said])
-  const skin = tone === 'dark' ? 'bg-ink text-white' : tone === 'light' ? 'bg-white text-ink' : 'bg-volt text-ink'
+  const skin = tone === 'dark' ? 'bg-ink text-white focus-visible:ring-offset-white' : 'bg-white text-ink focus-visible:ring-offset-ink'
   const dot = tone === 'dark' ? 'bg-white text-ink' : 'bg-ink text-white'
   return (
     <button type="button" onClick={() => setSaid(true)} aria-live="polite"
-      className={`group relative flex h-14 w-full items-center justify-between overflow-hidden rounded-full pl-6 pr-2 text-[16px] font-medium outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2 ${skin}`}>
+      className={`group relative flex h-13 w-full items-center justify-between overflow-hidden rounded-full pl-5 pr-1.5 text-[15.5px] font-medium outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2 ${skin}`}>
       <span className="relative grid overflow-hidden">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span key={String(said)} initial={{ y: 22, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -22, opacity: 0 }} transition={{ duration: 0.4, ease: EASE }} className="whitespace-nowrap text-left">
@@ -60,263 +57,200 @@ function SoonButton({ label, tone = 'dark' }: { label: string; tone?: 'dark' | '
   )
 }
 
+function LinkButton({ to, label, tone = 'dark' }: { to: string; label: string; tone?: 'dark' | 'light' }) {
+  const skin = tone === 'dark' ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-black/10'
+  const dot = tone === 'dark' ? 'bg-white text-ink' : 'bg-ink text-white'
+  return (
+    <SmartLink to={to} className={`group flex h-13 w-full items-center justify-between rounded-full pl-5 pr-1.5 text-[15.5px] font-medium outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2 ${skin}`}>
+      <RollText>{label}</RollText>
+      <span className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ${dot}`}><SwapArrow /></span>
+    </SmartLink>
+  )
+}
+
 function Feature({ children, tone = 'ink' }: { children: ReactNode; tone?: 'ink' | 'white' }) {
   return (
     <li className="flex gap-3 text-[15.5px] leading-[1.45]">
-      <span className={`mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ${tone === 'ink' ? 'bg-ink text-white' : 'bg-white text-ink'}`}><Check size={11} weight="bold" /></span>
-      <span>{children}</span>
+      <Check size={16} weight="bold" aria-hidden className={`mt-[3px] shrink-0 ${tone === 'ink' ? 'text-ink' : 'text-white/70'}`} />
+      <span className="[text-wrap:pretty]">{children}</span>
     </li>
   )
 }
 
-/* ── Self-host: a terminal that types its own install ───────── */
+/* ── the three plans ─────────────────────────────────────────── */
 
-const SH = [
-  ['$ ', 'git clone …/aiwithaj/anyfmt'],
-  ['$ ', 'make engines build'],
-  ['', '✓ anyfmt.app · 63 MB'],
-  ['$ ', 'docker compose up -d'],
-  ['', '✓ api · worker · db · s3'],
-] as const
-
-function Terminal() {
-  const ref = useRef<HTMLDivElement>(null)
-  const seen = useInView(ref, { once: true, amount: 0.5 })
-  const total = SH.reduce((n, [, t]) => n + t.length, 0)
-  const [typed, setTyped] = useState(0)
-  useEffect(() => {
-    if (!seen) return
-    if (prefersReducedMotion()) { setTyped(total); return }
-    let i = 0
-    const id = window.setInterval(() => { i += 2; setTyped(Math.min(i, total)); if (i >= total) clearInterval(id) }, 28)
-    return () => clearInterval(id)
-  }, [seen, total])
-  let left = typed
+function Plan({ name, line, price, unit, note, cta, children, aside, dark = false, className = '' }:
+  { name: string; line: string; price: number; unit: string; note: ReactNode; cta: ReactNode; children: ReactNode; aside?: ReactNode; dark?: boolean; className?: string }) {
   return (
-    <div ref={ref} className="rounded-[18px] bg-black/60 p-4 font-mono text-[11.5px] leading-[1.75] ring-1 ring-white/10" aria-label="Build from source, then run the server with Docker">
-      <div className="mb-2 flex gap-1.5" aria-hidden>{['#FF5F57', '#FEBC2E', '#28C840'].map((c) => <span key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />)}</div>
-      {SH.map(([p, t], i) => {
-        const show = Math.max(0, Math.min(t.length, left)); left -= t.length
-        if (show === 0 && i > 0 && typed < total) return null
-        const done = t.startsWith('✓')
-        return (
-          <p key={i} className={`overflow-hidden text-ellipsis whitespace-nowrap ${done ? 'text-volt' : 'text-white/85'}`}>
-            <span className="text-flare">{p}</span>{t.slice(0, show)}
-            {show < t.length && show > 0 && <span className="animate-blink ml-px inline-block h-[1.1em] w-[0.55em] translate-y-[2px] bg-white/80" />}
-          </p>
-        )
-      })}
-      {typed >= total && <p className="text-white/85"><span className="text-flare">$ </span><span className="animate-blink inline-block h-[1.1em] w-[0.55em] translate-y-[2px] bg-white/80" /></p>}
-    </div>
-  )
-}
-
-/* ── Desktop: a licence ticket with a perforated stub ───────── */
-
-function Ticket() {
-  return (
-    <div className="group/t relative">
-      <div className="relative rotate-[-2.5deg] rounded-[16px] bg-[#FBFAF8] p-4 shadow-[0_1px_0_rgba(0,0,0,.05),0_18px_30px_-16px_rgba(0,0,0,.35)] ring-1 ring-black/5 transition-transform duration-700 group-hover:rotate-0 group-hover:-translate-y-1" style={{ transitionTimingFunction: SNAP }}>
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-mute-2">Licence key</p>
-            <p className="font-wordmark mt-1 text-[20px] font-bold tracking-[-0.03em]">anyfmt<span className="text-flare">.</span> Desktop</p>
-          </div>
-          <span className="rounded-full bg-ink px-2 py-0.5 text-[10px] font-semibold text-white">×{PRICES.desktop.macs} Macs</span>
-        </div>
-        <p className="mt-3 break-all font-mono text-[10.5px] leading-[1.5] text-mute">ANYFMT1-01GQP-8K5F1-R24EK-7JXQ2-M9W4T-…-H58HG-2</p>
-        <div className="mt-3 flex items-center justify-between border-t border-dashed border-black/20 pt-2.5 text-[10.5px] text-mute-2">
-          <span>Ed25519 signed · verifies offline</span><span>exp: never</span>
-        </div>
-        <span aria-hidden className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
-        <span aria-hidden className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
-        <span aria-hidden className="pointer-events-none absolute right-5 top-9 rotate-[-14deg] rounded-md border-2 border-flare px-2 py-0.5 text-[12px] font-bold uppercase tracking-[0.1em] text-flare opacity-0 transition-[opacity,transform] duration-500 group-hover:opacity-90 group-hover:scale-110">Paid once</span>
+    <article className={`relative flex flex-col rounded-[28px] p-7 sm:p-8 ${dark ? 'bg-ink text-white' : 'bg-white ring-1 ring-black/[.07]'} ${className}`}>
+      <div className="flex min-h-10 flex-wrap items-center justify-between gap-3">
+        <h3 className="text-[22px] font-semibold tracking-[-0.025em]">{name}</h3>
+        {aside}
       </div>
-    </div>
-  )
-}
-
-/* ── Pro: fluted ember glass that follows the pointer ───────── */
-
-function ProSlab({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const move = (e: React.PointerEvent) => {
-    if (prefersReducedMotion() || !ref.current) return
-    const r = ref.current.getBoundingClientRect()
-    ref.current.style.setProperty('--rx', `${((e.clientX - r.left) / r.width) * 100}%`)
-    ref.current.style.setProperty('--ry', `${((e.clientY - r.top) / r.height) * 100}%`)
-  }
-  return (
-    <div ref={ref} onPointerMove={move} className="ribs relative flex h-full flex-col overflow-hidden rounded-[30px] p-7 text-white shadow-[0_30px_60px_-30px_rgba(238,18,0,.6)] sm:p-8" style={{ ['--rx' as string]: '80%', ['--ry' as string]: '12%', transition: 'background-position .6s' }}>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0)_40%,rgba(10,10,10,.55))]" />
-      <div className="relative flex h-full flex-col">{children}</div>
-    </div>
-  )
-}
-
-/* ── Donate: a jar with chips ───────────────────────────────── */
-
-const TIP_LINES: Record<number, string> = { 3: 'A thank-you that pays for a coffee.', 5: 'Keeps the next bug fix fuelled.', 10: 'Pulls the next format a little sooner.', 25: 'Keeps anyfmt independent. Thank you.' }
-
-function DonateCard() {
-  const [amt, setAmt] = useState<number>(PRICES.donate[1])
-  const [monthly, setMonthly] = useState(false)
-  return (
-    <div id="donate" className="flex h-full scroll-mt-28 flex-col rounded-[30px] bg-volt p-7 sm:p-8">
-      <div className="flex items-center justify-between">
-        <p className="text-[15px] font-semibold uppercase tracking-[0.12em]">Donate</p>
-        <Heart size={22} weight="fill" className="text-ink" aria-hidden />
-      </div>
-      <p className="mt-6 flex items-baseline gap-1 text-[56px] font-semibold leading-none tracking-[-0.05em]">
-        $<NumberFlow value={amt} />
-        <span className="ml-1 text-[16px] font-medium tracking-normal text-ink/60">{monthly ? 'a month' : 'once'}</span>
+      <p className={`mt-1.5 min-h-[44px] text-[15px] leading-[1.45] ${dark ? 'text-white/70' : 'text-mute'}`}>{line}</p>
+      <p className="mt-6 flex items-baseline gap-2">
+        <span className="text-[64px] font-semibold leading-none tracking-[-0.055em] tabular-nums [--number-flow-mask-height:0.08em]"><NumberFlow value={price} format={{ style: 'currency', currency: 'USD', maximumFractionDigits: 0 }} /></span>
+        <span className={`pb-0.5 text-[16px] font-medium ${dark ? 'text-white/70' : 'text-mute-2'}`}>{unit}</span>
       </p>
-      <p className="mt-3 min-h-[44px] text-[15.5px] leading-[1.45] text-ink/75">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span key={amt} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }} className="block">{TIP_LINES[amt]}</motion.span>
-        </AnimatePresence>
-      </p>
-      <div role="radiogroup" aria-label="Amount" className="mt-5 grid grid-cols-4 gap-2">
-        {PRICES.donate.map((d) => (
-          <button key={d} type="button" role="radio" aria-checked={amt === d} onClick={() => setAmt(d)}
-            className={`h-11 rounded-full text-[15px] font-semibold outline-none ring-1 transition-[background-color,color,transform] duration-300 active:scale-95 focus-visible:ring-2 focus-visible:ring-ink ${amt === d ? 'bg-ink text-white ring-ink' : 'bg-white/60 text-ink ring-black/10 hover:bg-white'}`}>${d}</button>
-        ))}
-      </div>
-      <label className="mt-4 flex cursor-pointer items-center justify-between rounded-full bg-white/50 py-2 pl-4 pr-2 text-[14.5px] font-medium">
-        Make it monthly
-        <span className={`relative h-7 w-12 rounded-full transition-colors duration-300 ${monthly ? 'bg-ink' : 'bg-black/15'}`}>
-          <input type="checkbox" className="peer absolute inset-0 cursor-pointer opacity-0" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
-          <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-[left] duration-300 ${monthly ? 'left-6' : 'left-1'}`} />
-        </span>
-      </label>
-      <ul className="mt-6 flex flex-col gap-3">
-        <Feature>Unlocks nothing, changes nothing</Feature>
-        <Feature>Goes straight to the person building it</Feature>
-      </ul>
-      <div className="mt-auto pt-8">
-        <SmartLink to={PRICES.donateUrl}
-          className="group relative flex h-14 w-full items-center justify-between overflow-hidden rounded-full bg-ink pl-6 pr-2 text-[16px] font-medium text-white outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2">
-          <span>Give ${amt}{monthly ? ' a month' : ''}</span>
-          <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white text-ink"><SwapArrow /></span>
-        </SmartLink>
-        <p className="mt-3 text-center text-[12.5px] text-ink/60">Opens Buy Me a Coffee, where you pick the final amount.</p>
-      </div>
-    </div>
+      <p className={`mt-2 min-h-[42px] text-[14px] leading-[1.5] ${dark ? 'text-white/70' : 'text-mute-2'}`}>{note}</p>
+      <div className="mt-6">{cta}</div>
+      <div className={`my-7 h-px ${dark ? 'bg-white/12' : 'bg-line'}`} />
+      <ul className="flex flex-col gap-3.5">{children}</ul>
+    </article>
   )
 }
 
-/* ── The four cards ─────────────────────────────────────────── */
-
-function Plans({ billing }: { billing: Billing }) {
+function Plans() {
+  const [billing, setBilling] = useState<Billing>('yearly')
   const pro = billing === 'monthly' ? PRICES.pro.monthly : PRICES.pro.yearlyPerMonth
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-      {/* Self-host */}
-      <div className="flex flex-col rounded-[30px] bg-night p-7 text-white sm:p-8">
-        <p className="text-[15px] font-semibold uppercase tracking-[0.12em] text-white/60">Self-host</p>
-        <p className="mt-6 text-[56px] font-semibold leading-none tracking-[-0.05em]">$0</p>
-        <p className="mt-3 text-[15.5px] leading-[1.45] text-white/70">Build the app from source and run your own server. Every feature, on your hardware.</p>
-        <div className="mt-6"><Terminal /></div>
-        <ul className="mt-6 flex flex-col gap-3">
-          <Feature tone="white">All {catalog.counts.routes} routes, {catalog.counts.tools} tools, CLI and MCP</Feature>
-          <Feature tone="white">Your server for links, sync and inbox</Feature>
-          <Feature tone="white">AGPL-3.0, commercial use included</Feature>
-        </ul>
-        <div className="mt-auto pt-8">
-          <SmartLink to="/docs/self-host" className="group flex h-14 w-full items-center justify-between rounded-full bg-white pl-6 pr-2 text-[16px] font-medium text-ink outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-flare">
-            <RollText>Read the self-host guide</RollText>
-            <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-ink text-white"><SwapArrow /></span>
-          </SmartLink>
+    <div className="grid gap-5 lg:gap-6">
+      {/* Desktop is what the headline sells, so it gets the full width */}
+      <article className="grid gap-8 rounded-[28px] bg-ink p-7 text-white sm:p-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
+        <div className="flex flex-col">
+          <h3 className="text-[22px] font-semibold tracking-[-0.025em]">Desktop</h3>
+          <p className="mt-1.5 text-[15px] leading-[1.45] text-white/70">The signed app. Drag it into Applications and you're done.</p>
+          <p className="mt-6 flex items-baseline gap-2">
+            <span className="text-[64px] font-semibold leading-none tracking-[-0.055em] tabular-nums [--number-flow-mask-height:0.08em]"><NumberFlow value={PRICES.desktop.once} format={{ style: 'currency', currency: 'USD', maximumFractionDigits: 0 }} /></span>
+            <span className="text-[16px] font-medium text-white/70">once</span>
+          </p>
+          <p className="mt-2 text-[14px] leading-[1.5] text-white/70">One payment and every future update, on up to {PRICES.desktop.macs} Macs.</p>
+          <div className="mt-8 max-w-[420px] lg:mt-auto lg:pt-8"><SoonButton label="Buy Desktop" tone="light" /></div>
         </div>
-      </div>
-
-      {/* Desktop */}
-      <div className="flex flex-col rounded-[30px] bg-white p-7 ring-1 ring-black/10 sm:p-8">
-        <p className="text-[15px] font-semibold uppercase tracking-[0.12em] text-mute-2">Desktop</p>
-        <p className="mt-6 flex items-baseline gap-2 text-[56px] font-semibold leading-none tracking-[-0.05em]">${PRICES.desktop.once}<span className="text-[16px] font-medium tracking-normal text-mute-2">once</span></p>
-        <p className="mt-3 text-[15.5px] leading-[1.45] text-mute">The signed app, ready to drag into Applications. Pay once, keep every update.</p>
-        <div className="mt-7 px-1"><Ticket /></div>
-        <ul className="mt-7 flex flex-col gap-3">
-          <Feature>Signed and notarized by Apple</Feature>
-          <Feature>Every future update, automatically</Feature>
-          <Feature>Up to {PRICES.desktop.macs} Macs, email support</Feature>
+        <ul className="grid content-start gap-x-8 gap-y-4 border-t border-white/12 pt-8 sm:grid-cols-2 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-1">
+          <Feature tone="white">Every conversion, tool and action, all offline</Feature>
+          <Feature tone="white">Signed and notarized by Apple</Feature>
+          <Feature tone="white">Updates install themselves</Feature>
+          <Feature tone="white">The command line and MCP server, linked for you</Feature>
+          <Feature tone="white">Email support from the person who wrote it</Feature>
+          <Feature tone="white">14 days to change your mind, full refund</Feature>
         </ul>
-        <div className="mt-auto pt-8"><SoonButton label="Get Desktop" /></div>
+      </article>
+
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+        <Plan name="Build it yourself" line="The whole app from source, for people happy to run a build." price={0} unit="free forever"
+          note="AGPL-3.0, commercial use included."
+          cta={<LinkButton to="/docs/self-host" label="Read the build guide" tone="light" />}>
+          <Feature>All {catalog.counts.routes} routes and {catalog.counts.tools} tools</Feature>
+          <Feature>Command line and MCP server</Feature>
+          <Feature>Share links and sync on your own server</Feature>
+          <Feature>Updates when you pull and rebuild</Feature>
+        </Plan>
+
+        <Plan name="Pro" line="Desktop, plus the features that run on our servers." price={pro} unit="a month"
+          aside={<BillingToggle value={billing} onChange={setBilling} />}
+          note={billing === 'yearly' ? `$${pro * 12} billed once a year. Cancel any time.` : 'Billed monthly. Cancel any time.'}
+          cta={<SoonButton label="Start Pro" />}>
+          <Feature>Everything in Desktop</Feature>
+          <Feature>Share links with expiry, a password and a download cap</Feature>
+          <Feature>Heavy video converted in the cloud while your Mac stays free</Feature>
+          <Feature>Synced presets, a phone-to-Mac inbox, transcription and upscaling</Feature>
+        </Plan>
       </div>
-
-      {/* Pro */}
-      <ProSlab>
-        <div className="flex items-center justify-between">
-          <p className="text-[15px] font-semibold uppercase tracking-[0.12em]">Pro</p>
-          <span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-semibold text-ink">Most useful</span>
-        </div>
-        <p className="mt-6 flex items-baseline gap-2 text-[56px] font-semibold leading-none tracking-[-0.05em]">
-          $<NumberFlow value={pro} /><span className="text-[16px] font-medium tracking-normal text-white/80">/ month</span>
-        </p>
-        <p className="mt-3 min-h-[44px] text-[15.5px] leading-[1.45] text-white/85">
-          {billing === 'yearly' ? `$${pro * 12} billed yearly. ` : ''}Desktop, plus the things that need our servers.
-        </p>
-        <ul className="mt-6 flex flex-col gap-3">
-          <Feature tone="white">Everything in Desktop</Feature>
-          <Feature tone="white">Share links with expiry, password and a download cap</Feature>
-          <Feature tone="white">Heavy video in the cloud when your Mac is busy</Feature>
-          <Feature tone="white">Presets and wheel order synced across Macs</Feature>
-          <Feature tone="white">Send from your phone, land in a folder on your Mac</Feature>
-          <Feature tone="white">Transcribe to SRT, upscale, HQ cutouts</Feature>
-        </ul>
-        <div className="mt-auto pt-8"><SoonButton label="Start Pro" tone="light" /></div>
-      </ProSlab>
-
-      <DonateCard />
     </div>
   )
 }
 
-/* ── The line: your Mac | our servers ───────────────────────── */
+/* ── donate: apart from the plans ────────────────────────────── */
 
-const LOCAL = ['Every conversion', 'Every tool', 'AirDrop, Float, Copy, Move', 'Batch and presets', 'Command line and MCP', 'Commercial use']
+function Donate() {
+  const [amt, setAmt] = useState<number>(PRICES.donate[1])
+  return (
+    <div id="donate" className="mt-6 grid scroll-mt-28 items-center gap-6 rounded-[28px] bg-white p-7 ring-1 ring-black/[.07] sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
+      <div>
+        <h3 className="text-[22px] font-semibold tracking-[-0.025em]">Or just chip in</h3>
+        <p className="mt-1.5 max-w-[560px] text-[15px] leading-[1.5] text-mute">A donation doesn't buy any features. It pays for the hours that go into anyfmt, and it goes straight to the person building it.</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <div role="radiogroup" aria-label="Amount" className="flex gap-1.5">
+          {PRICES.donate.map((d) => (
+            <button key={d} type="button" role="radio" aria-checked={amt === d} onClick={() => setAmt(d)}
+              className={`h-12 min-w-[56px] rounded-full px-4 text-[15px] font-semibold tabular-nums outline-none transition-[background-color,color] duration-200 focus-visible:ring-2 focus-visible:ring-flare ${amt === d ? 'bg-ink text-white' : 'bg-sand-2 text-ink hover:bg-sand'}`}>${d}</button>
+          ))}
+        </div>
+        <SmartLink to={PRICES.donateUrl}
+          className="group flex h-12 items-center gap-3 rounded-full bg-ink pl-5 pr-1.5 text-[15.5px] font-medium text-white outline-none transition-transform duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2">
+          <span className="whitespace-nowrap">Give ${amt}</span>
+          <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-white text-ink"><SwapArrow /></span>
+        </SmartLink>
+      </div>
+    </div>
+  )
+}
+
+/* ── offline: what keeps working without the internet ───────── */
+
+const LOCAL = ['Every conversion, all ' + catalog.counts.routes, 'Every tool, all ' + catalog.counts.tools, 'AirDrop, Float, Copy and Move', 'Batches and presets', 'Command line and MCP server', 'Your licence check']
 const CLOUD = ['Share links', 'Cloud conversions', 'Sync across Macs', 'Inbox from your phone', 'Transcription', 'Upscaling and HQ cutouts']
 
-function TheLine() {
-  const [hot, setHot] = useState<number | null>(null)
+function WifiSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
+      className="group flex h-11 items-center gap-3 rounded-full bg-white py-1.5 pl-4 pr-1.5 text-[15px] font-medium outline-none ring-1 ring-black/10 focus-visible:ring-2 focus-visible:ring-flare">
+      {on ? <WifiHigh size={18} weight="bold" aria-hidden /> : <WifiSlash size={18} weight="bold" aria-hidden />}
+      Wi-Fi
+      <span className={`relative h-8 w-[52px] rounded-full transition-colors duration-300 ${on ? 'bg-[#34C759]' : 'bg-black/15'}`}>
+        <span className="absolute top-1 h-6 w-6 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.25)] transition-[left] duration-300" style={{ left: on ? 24 : 4, transitionTimingFunction: SNAP }} />
+      </span>
+    </button>
+  )
+}
+
+function Offline() {
+  const [online, setOnline] = useState(true)
   return (
     <section className="bg-white py-24 lg:py-32">
       <Container>
-        <Eyebrow>The line we don't cross</Eyebrow>
-        <h2 className="mt-6 max-w-[920px] text-[clamp(34px,4.4vw,68px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">If it runs on your Mac, it's yours. If it runs on ours, it costs us.</h2>
-        <div className="mt-16 grid items-stretch gap-6 lg:grid-cols-[1fr_auto_1fr]">
-          <div className="rounded-[28px] bg-sand p-8">
-            <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-mute-2">Your Mac · never paywalled</p>
-            <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-              {LOCAL.map((t) => <li key={t} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 text-[16px] font-medium"><Check size={16} weight="bold" className="text-ink" />{t}</li>)}
-            </ul>
+        <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <div>
+            <Eyebrow>What stays free</Eyebrow>
+            <h2 className="mt-6 max-w-[820px] text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Nothing that runs on your Mac is behind a paywall.</h2>
           </div>
-          <div className="relative hidden w-24 lg:block" aria-hidden>
-            <div className="absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-[repeating-linear-gradient(to_bottom,#0A0A0A_0_6px,transparent_6px_12px)]" />
-            <motion.div className="absolute left-1/2 top-1/2 flex h-14 w-11 -translate-x-1/2 -translate-y-1/2 items-end justify-center rounded-[8px] bg-white pb-1.5 shadow-[0_10px_24px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
-              animate={{ x: hot === null ? '-50%' : '120%', rotate: hot === null ? 0 : 8 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
-              <span className="rounded-[4px] bg-flare px-1 text-[8px] font-bold uppercase text-white">mov</span>
-            </motion.div>
+          <p className="max-w-[460px] text-[17px] leading-[1.55] text-mute lg:pb-2">Pro only covers features that need our servers, because those cost money to run. Switch off the Wi-Fi to see the difference.</p>
+        </div>
+
+        <div className="mt-14 overflow-hidden rounded-[28px] bg-sand">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-4 sm:px-8">
+            <p className="text-[15px] font-medium" aria-live="polite">
+              {online ? 'Online. Everything is available.' : `Offline. All ${LOCAL.length} Mac features still work.`}
+            </p>
+            <WifiSwitch on={online} onChange={setOnline} />
           </div>
-          <div className="rounded-[28px] bg-night p-8 text-white">
-            <p className="flex items-center gap-2 text-[14px] font-semibold uppercase tracking-[0.14em] text-white/55"><Cloud size={16} weight="fill" /> Our servers · Pro</p>
-            <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-              {CLOUD.map((t, i) => (
-                <li key={t} onPointerEnter={() => setHot(i)} onPointerLeave={() => setHot(null)}
-                  className="flex items-center gap-3 rounded-2xl bg-white/[0.07] px-4 py-3 text-[16px] font-medium transition-colors duration-300 hover:bg-white/[0.14]">
-                  <Cloud size={16} weight="fill" className="text-flare" />{t}
-                </li>
-              ))}
-            </ul>
+          <div className="grid md:grid-cols-2">
+            <div className="p-6 sm:p-8">
+              <p className="text-[15px] font-semibold">On your Mac <span className="font-normal text-mute-2">· every plan, including the free build</span></p>
+              <ul className="mt-5 divide-y divide-line border-y border-line">
+                {LOCAL.map((t) => (
+                  <li key={t} className="flex items-center justify-between gap-4 py-3.5 text-[16px]">
+                    <span>{t}</span>
+                    <span className="flex items-center gap-1.5 text-[13px] font-medium text-ink"><Check size={14} weight="bold" aria-hidden />Works</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className={`border-t border-line p-6 transition-colors duration-500 sm:p-8 md:border-l md:border-t-0 ${online ? '' : 'bg-sand-2'}`}>
+              <p className="flex items-center gap-2 text-[15px] font-semibold"><Cloud size={16} weight="fill" className="text-flare" aria-hidden />On our servers <span className="font-normal text-mute-2">· Pro</span></p>
+              <ul className="mt-5 divide-y divide-line border-y border-line">
+                {CLOUD.map((t, i) => (
+                  <li key={t} className="flex items-center justify-between gap-4 py-3.5 text-[16px]">
+                    <span className={`transition-opacity duration-500 ${online ? '' : 'opacity-40'}`} style={{ transitionDelay: `${i * 40}ms` }}>{t}</span>
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span key={String(online)} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25, delay: i * 0.04 }}
+                        className={`text-[13px] font-medium ${online ? 'text-ink' : 'text-mute-2'}`}>{online ? 'Available' : 'Waiting for Wi-Fi'}</motion.span>
+                    </AnimatePresence>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-        <p className="mt-8 max-w-[640px] text-[16px] leading-[1.55] text-mute">In the app, anything that would leave your Mac carries a small cloud glyph, and the first upload always tells you which server it's going to. A licence key never unlocks or limits anything local.</p>
+        <p className="mt-6 max-w-[680px] text-[15px] leading-[1.55] text-mute-2">In the app, anything that would leave your Mac carries a small cloud glyph, and the first upload always names the server it's going to. A licence key never limits anything local.</p>
       </Container>
     </section>
   )
 }
 
-/* ── Full table ─────────────────────────────────────────────── */
+/* ── full table ─────────────────────────────────────────────── */
 
 type Cell = boolean | string
 const ROWS: { group: string; rows: [string, Cell, Cell, Cell][] }[] = [
@@ -329,11 +263,11 @@ const ROWS: { group: string; rows: [string, Cell, Cell, Cell][] }[] = [
   ] },
   { group: 'The app', rows: [
     ['How you get it', 'Build from source', 'Signed download', 'Signed download'],
-    ['Automatic updates', 'Pull and rebuild', true, true],
+    ['Updates', 'Pull and rebuild', 'Automatic', 'Automatic'],
     ['Macs', 'Unlimited', `Up to ${PRICES.desktop.macs}`, `Up to ${PRICES.desktop.macs}`],
     ['Email support', false, true, 'Priority'],
   ] },
-  { group: 'Server features', rows: [
+  { group: 'On our servers', rows: [
     ['Share links', 'Your server', false, true],
     ['Cloud conversions', 'Your server', false, true],
     ['Sync across Macs', 'Your server', false, true],
@@ -341,51 +275,53 @@ const ROWS: { group: string; rows: [string, Cell, Cell, Cell][] }[] = [
     ['Transcribe, upscale, HQ cutouts', 'Your GPU', false, true],
   ] },
 ]
-const PLANS = ['Self-host', 'Desktop', 'Pro'] as const
+const PLANS: [string, string][] = [['Build it yourself', '$0'], ['Desktop', `$${PRICES.desktop.once} once`], ['Pro', `from $${PRICES.pro.yearlyPerMonth} a month`]]
 
 function CellView({ v }: { v: Cell }) {
-  if (v === true) return <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-ink text-white"><Check size={12} weight="bold" /><span className="sr-only">Included</span></span>
-  if (v === false) return <span className="inline-flex h-6 w-6 items-center justify-center text-mute-3"><Minus size={14} weight="bold" /><span className="sr-only">Not included</span></span>
-  return <span className="text-[14.5px] font-medium">{v}</span>
+  if (v === true) return <><Check size={18} weight="bold" aria-hidden /><span className="sr-only">Included</span></>
+  if (v === false) return <><Minus size={16} weight="bold" className="text-mute-3" aria-hidden /><span className="sr-only">Not included</span></>
+  return <span className="text-[15px]">{v}</span>
 }
 
 function Table() {
-  const [col, setCol] = useState(2)
+  const [col, setCol] = useState(1)
   return (
     <section className="bg-sand py-24 lg:py-32">
       <Container>
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <Eyebrow>Side by side</Eyebrow>
-            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">Everything, in one table.</h2>
+            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">Every plan, line by line.</h2>
           </div>
           {/* on phones, one plan at a time */}
           <div role="tablist" aria-label="Plan" className="inline-flex rounded-full bg-white p-1 ring-1 ring-black/10 md:hidden">
-            {PLANS.map((p, i) => (
-              <button key={p} type="button" role="tab" aria-selected={col === i} onClick={() => setCol(i)} className="relative h-9 rounded-full px-4 text-[14px] font-medium">
-                {col === i && <motion.span layoutId="tcol" className="absolute inset-0 rounded-full bg-ink" />}
-                <span className={`relative ${col === i ? 'text-white' : ''}`}>{p}</span>
+            {PLANS.map(([p], i) => (
+              <button key={p} type="button" role="tab" aria-selected={col === i} onClick={() => setCol(i)} className={`h-9 rounded-full px-3.5 text-[14px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-flare ${col === i ? 'bg-ink text-white' : ''}`}>
+                {i === 0 ? 'Free' : p}
               </button>
             ))}
           </div>
         </div>
         <div className="mt-12 overflow-hidden rounded-[28px] bg-white">
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-white">
+          <table className="w-full border-collapse text-left md:table-fixed">
+                        <thead>
               <tr className="border-b border-line">
-                <th scope="col" className="p-5 text-[14px] font-medium text-mute-2 sm:p-6">Feature</th>
-                {PLANS.map((p, i) => (
-                  <th key={p} scope="col" className={`p-5 text-[17px] font-semibold tracking-[-0.02em] sm:p-6 ${i !== col ? 'hidden md:table-cell' : ''} ${i === 2 ? 'text-flare' : ''}`}>{p}</th>
+                <th scope="col" className="w-[58%] p-5 align-bottom text-[14px] font-medium text-mute-2 sm:px-7 sm:py-6 md:w-[34%]"><span className="sr-only">Feature</span></th>
+                {PLANS.map(([p, price], i) => (
+                  <th key={p} scope="col" className={`p-5 align-bottom sm:px-7 sm:py-6 ${i !== col ? 'hidden md:table-cell' : ''}`}>
+                    <span className="block text-[17px] font-semibold tracking-[-0.02em]">{p}</span>
+                    <span className="mt-0.5 block text-[14px] font-normal text-mute-2">{price}</span>
+                  </th>
                 ))}
               </tr>
             </thead>
             {ROWS.map((g) => (
               <tbody key={g.group}>
-                <tr><th colSpan={4} scope="colgroup" className="bg-sand-2/60 px-5 py-3 text-[12.5px] font-semibold uppercase tracking-[0.14em] text-mute-2 sm:px-6">{g.group}</th></tr>
+                <tr><th colSpan={4} scope="colgroup" className="px-5 pb-3 pt-9 text-[14px] font-semibold sm:px-7"><span className="flex items-center gap-2.5"><span className="h-2 w-2 bg-ink" />{g.group}</span></th></tr>
                 {g.rows.map(([label, ...cells]) => (
-                  <tr key={label} className="border-b border-line last:border-0">
-                    <th scope="row" className="p-5 text-[15.5px] font-medium sm:px-6 sm:py-4">{label}</th>
-                    {cells.map((c, i) => <td key={i} className={`p-5 sm:px-6 sm:py-4 ${i !== col ? 'hidden md:table-cell' : ''}`}><CellView v={c} /></td>)}
+                  <tr key={label} className="border-t border-line">
+                    <th scope="row" className="px-5 py-4 text-[15.5px] font-normal text-mute sm:px-7">{label}</th>
+                    {cells.map((c, i) => <td key={i} className={`px-5 py-4 sm:px-7 ${i !== col ? 'hidden md:table-cell' : ''}`}><CellView v={c} /></td>)}
                   </tr>
                 ))}
               </tbody>
@@ -397,7 +333,7 @@ function Table() {
   )
 }
 
-/* ── API meter ──────────────────────────────────────────────── */
+/* ── API calculator ─────────────────────────────────────────── */
 
 const STEPS = [0, 100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000]
 const MIN_STEPS = [0, 10, 30, 60, 120, 300, 600, 1200, 3000, 6000]
@@ -408,14 +344,14 @@ function Slider({ label, steps, value, onChange, unit }: { label: string; steps:
     <label className="block">
       <span className="flex items-baseline justify-between gap-4">
         <span className="text-[15px] font-medium text-white/70">{label}</span>
-        <span className="text-[22px] font-semibold tracking-[-0.02em] text-white"><NumberFlow value={steps[value]} /> <span className="text-[14px] font-medium text-white/55">{unit}</span></span>
+        <span className="text-[22px] font-semibold tabular-nums tracking-[-0.02em] text-white"><NumberFlow value={steps[value]} /> <span className="text-[14px] font-medium text-white/60">{unit}</span></span>
       </span>
       <span className="relative mt-4 block h-10">
-        <span className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-white/10" />
-        <span className="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,#EE1200,#FF4A14,#FFB23E)]" style={{ width: `${pct}%` }} />
-        <span className="pointer-events-none absolute top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,.4)]" style={{ left: `${pct}%` }} />
         <input type="range" min={0} max={steps.length - 1} step={1} value={value} onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-valuetext={`${steps[value]} ${unit}`} />
+          className="peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" aria-valuetext={`${steps[value]} ${unit}`} />
+        <span className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-white/12" />
+        <span className="pointer-events-none absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-flare" style={{ width: `${pct}%` }} />
+        <span className="pointer-events-none absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,.4)] peer-focus-visible:ring-4 peer-focus-visible:ring-flare/50" style={{ left: `${pct}%` }} />
       </span>
     </label>
   )
@@ -427,37 +363,39 @@ function ApiMeter() {
   const conv = STEPS[c] * PRICES.api.perConversion
   const mins = MIN_STEPS[m] * PRICES.api.perMediaMinute
   const total = Math.round((conv + mins) * 100) / 100
+  const cents = (n: number) => `${Math.round(n * 100)}¢`
   return (
-    <section className="bg-white p-3 sm:p-5">
-      <div className="relative overflow-hidden rounded-[32px] bg-night text-white">
-        <Flutes variant="dark" corner="bl" className="pointer-events-none absolute inset-0 opacity-60" />
-        <div className="relative grid gap-12 px-6 py-16 sm:px-12 lg:grid-cols-[1fr_1.1fr] lg:py-24">
+    <section className="bg-white">
+      <div className="mx-auto max-w-[1440px] px-5 sm:px-10 lg:px-14">
+      <div className="rounded-[28px] bg-night text-white">
+        <div className="mx-auto grid max-w-[1440px] gap-12 px-6 py-16 sm:px-12 lg:grid-cols-[1fr_1.1fr] lg:py-24">
           <div>
             <Eyebrow tone="white">HTTP API</Eyebrow>
-            <h2 className="mt-6 max-w-[520px] text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">Pay per conversion. No plan needed.</h2>
+            <h2 className="mt-6 max-w-[560px] text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em] [text-wrap:balance]">The API is {cents(PRICES.api.perConversion)} a conversion, with no plan to buy.</h2>
             <p className="mt-6 max-w-[460px] text-[17px] leading-[1.55] text-white/70">
-              The same routes and options as the app, over HTTP. {Math.round(PRICES.api.perConversion * 100)}¢ a conversion, {Math.round(PRICES.api.perMediaMinute * 100)}¢ a minute of audio or video. Failed conversions are free.
+              The same routes and options as the app, over HTTP. Audio and video cost {cents(PRICES.api.perMediaMinute)} a minute. A conversion that fails costs nothing.
             </p>
-            <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[13px] font-medium text-white/80"><span className="h-1.5 w-1.5 rounded-full bg-volt" />Preview: the contract and SDK are ready, the hosted API isn't live yet</p>
+            <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-[14px] text-white/80"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-volt" />In preview: the contract and SDK are ready, the hosted API isn't live yet.</p>
             <div className="mt-8"><ArrowLink to="/docs/api" className="text-white">Read the API docs</ArrowLink></div>
           </div>
           <div className="rounded-[24px] bg-white/[0.06] p-6 ring-1 ring-white/10 sm:p-8">
             <div className="space-y-8">
               <Slider label="Conversions a month" steps={STEPS} value={c} onChange={setC} unit="files" />
-              <Slider label="Audio and video" steps={MIN_STEPS} value={m} onChange={setM} unit="minutes" />
+              <Slider label="Audio and video a month" steps={MIN_STEPS} value={m} onChange={setM} unit="minutes" />
             </div>
-            <div className="mt-10 flex items-end justify-between gap-4 border-t border-white/10 pt-6">
-              <div className="text-[14px] leading-[1.7] text-white/60">
-                <p>{STEPS[c].toLocaleString('en-US')} × {Math.round(PRICES.api.perConversion * 100)}¢ = ${conv.toFixed(2)}</p>
-                <p>{MIN_STEPS[m].toLocaleString('en-US')} min × {Math.round(PRICES.api.perMediaMinute * 100)}¢ = ${mins.toFixed(2)}</p>
+            <div className="mt-10 flex flex-wrap items-end justify-between gap-4 border-t border-white/10 pt-6">
+              <div className="text-[14px] leading-[1.7] tabular-nums text-white/65">
+                <p>{STEPS[c].toLocaleString('en-US')} × {cents(PRICES.api.perConversion)} = ${conv.toFixed(2)}</p>
+                <p>{MIN_STEPS[m].toLocaleString('en-US')} min × {cents(PRICES.api.perMediaMinute)} = ${mins.toFixed(2)}</p>
               </div>
               <p className="text-right">
-                <span className="block text-[13px] font-medium uppercase tracking-[0.12em] text-white/50">a month</span>
+                <span className="block text-[14px] text-white/65">You'd pay, a month</span>
                 <span className="text-[clamp(40px,5vw,64px)] font-semibold leading-none tracking-[-0.05em]">$<NumberFlow value={total} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} /></span>
               </p>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   )
@@ -475,16 +413,15 @@ const FAQ: [string, string][] = [
 ]
 
 export default function Pricing() {
-  const [billing, setBilling] = useState<Billing>('yearly')
   useHead({
     title: 'Pricing',
-    description: `anyfmt is open source. Self-host for free, buy the signed Desktop app for $${PRICES.desktop.once} once, add Pro for $${PRICES.pro.yearlyPerMonth}/month for cloud features, or donate any amount.`,
+    description: `anyfmt is $${PRICES.desktop.once} once for the signed Mac app. The source is free to build, Pro adds cloud features from $${PRICES.pro.yearlyPerMonth} a month, and you can donate any amount.`,
     path: '/pricing',
     jsonLd: [
       {
         '@context': 'https://schema.org', '@type': 'Product', name: 'anyfmt', description: SITE.description, brand: { '@type': 'Brand', name: 'anyfmt' },
         offers: [
-          { '@type': 'Offer', name: 'Self-host', price: '0', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Build it yourself', price: '0', priceCurrency: 'USD' },
           { '@type': 'Offer', name: 'Desktop licence', price: String(PRICES.desktop.once), priceCurrency: 'USD' },
           { '@type': 'Offer', name: 'Pro (monthly)', price: String(PRICES.pro.monthly), priceCurrency: 'USD' },
         ],
@@ -494,31 +431,24 @@ export default function Pricing() {
   })
   return (
     <Page>
-      <section className="bg-sand pb-20 pt-36 lg:pb-28 lg:pt-44">
+      <section className="overflow-x-clip bg-sand pb-20 pt-36 lg:pb-28 lg:pt-44">
         <Container>
-          <div className="grid items-end gap-10 lg:grid-cols-[1.4fr_1fr]">
-            <div>
-              <Eyebrow>Pricing</Eyebrow>
-              <h1 className="mt-6 text-[clamp(44px,6.4vw,100px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">Pay for convenience. Never for your own files.</h1>
-            </div>
-            <div className="lg:pb-3">
-              <p className="max-w-[440px] text-[18px] leading-[1.55] text-mute">Every conversion that runs on your Mac is open source and free to build. Money buys you a signed app, our servers, or a thank-you.</p>
-              <div className="mt-8"><BillingToggle value={billing} onChange={setBilling} /></div>
-            </div>
-          </div>
-          <div className="mt-16"><Plans billing={billing} /></div>
-          <p className="mt-8 text-[14px] text-mute-2">Prices in US dollars. Taxes may apply at checkout. Checkout opens with the first public release.</p>
+          <Eyebrow>Pricing</Eyebrow>
+          <h1 className="mt-6 text-[clamp(48px,7vw,112px)] font-semibold leading-[0.95] tracking-[-0.055em]">anyfmt is ${PRICES.desktop.once}, once.</h1>
+          <p className="mt-6 max-w-[620px] text-[clamp(17px,1.4vw,20px)] leading-[1.5] text-mute">That's the signed app with every future update, on up to {PRICES.desktop.macs} Macs. The source code is free to build yourself, and Pro adds the features that run on our servers.</p>
+          <div className="mt-16"><Plans /></div>
+          <Donate />
+          <p className="mt-6 text-[14px] text-mute-2">Checkout opens with the first public release; the buttons will say so until then. Prices in US dollars, tax may apply.</p>
         </Container>
       </section>
-      <TheLine />
+      <Offline />
       <Table />
       <ApiMeter />
       <section className="bg-white py-24 lg:py-32">
         <Container className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          <div>
+          <div className="lg:sticky lg:top-28 lg:self-start">
             <Eyebrow>Questions</Eyebrow>
-            <h2 className="mt-6 text-[clamp(36px,4.2vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em]">Money, plainly.</h2>
-            <div className="mt-10"><DownloadButton /></div>
+            <h2 className="mt-6 text-[clamp(36px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Paying for anyfmt, and what happens if you stop.</h2>
           </div>
           <Accordion items={FAQ} />
         </Container>

@@ -658,7 +658,7 @@ export const GUIDES: Guide[] = [
     to: "mp3",
     visual: "audio",
     title: "Extract MP3 audio from MP4 or MOV on Mac",
-    h1: "Keep the sound, drop the picture",
+    h1: "Pull the soundtrack out of a video as MP3",
     description:
       "Extract the audio from an MP4 or MOV as MP3 on your Mac. Drag the video, tap Shift, drop on MP3. Choose a bitrate, or use the Voice preset for talks and calls.",
     answer:
@@ -909,7 +909,7 @@ export const GUIDES: Guide[] = [
       ["What about PDF to PowerPoint?", "Drop on PPTX instead and each page becomes a slide, as a picture rather than editable text."],
     ],
     related: ["word-to-pdf", "pdf-to-jpg", "compress-pdf", "merge-pdf"],
-    measured: [{ label: "Network sockets opened by app, CLI and engines in a 40 s workload", value: "0", source: PERF }],
+    measured: [{ label: "opened by the app, CLI and engines during a 40 s test workload", value: "0 network sockets", source: PERF }],
   },
 
   {
@@ -1444,7 +1444,7 @@ export const GUIDES: Guide[] = [
     to: "image.removeBackground",
     visual: "cutout",
     title: "Remove an image background on Mac, offline",
-    h1: "Cut out the subject, keep the pixels local",
+    h1: "Remove a photo's background without uploading it",
     description:
       "Remove a photo's background on your Mac: drag, tap Command, drop on Remove background. Any subject on macOS 14+, people on macOS 13. Saves a transparent PNG.",
     answer:
@@ -1533,7 +1533,7 @@ export const GUIDES: Guide[] = [
       ["Is the date the photo was taken removed too?", "Yes, the EXIF capture date goes with the rest. The copy's Finder dates are set to now, since tool results are dated when they're made."],
     ],
     related: ["heic-to-jpg", "compress-image", "remove-background", "compress-pdf"],
-    measured: [{ label: "Sockets opened during a 40 s workload (make netcheck)", value: "0, across app, CLI and engines", source: PERF }],
+    measured: [{ label: "opened by the app, CLI and engines during a 40 s test workload (make netcheck)", value: "0 network sockets", source: PERF }],
   },
 
   {
@@ -1594,7 +1594,7 @@ export const GUIDES: Guide[] = [
     to: "video.trim",
     visual: "container",
     title: "Trim a video on Mac without re-encoding",
-    h1: "Cut the start and end, keep the quality",
+    h1: "Trim a video at keyframes, without re-encoding",
     description:
       "Trim MP4, MOV and MKV videos on a Mac: drag, tap Command, drop on Trim, mark in and out. Cuts are lossless at keyframes, or frame-exact with a re-encode.",
     answer:

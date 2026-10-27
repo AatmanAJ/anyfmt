@@ -62,7 +62,7 @@ export const RELEASES: Release[] = [
       { tag: 'convert', title: 'Live estimates', body: 'The options panel shows the output size, duration and frame count as you change settings, measured with the real encoder.' },
       { tag: 'convert', title: 'Better GIFs', body: 'Loop, colour count and dithering options for video to GIF.' },
       { tag: 'cli', title: 'An agent-ready CLI and `anyfmt mcp`', body: 'NDJSON progress, dry runs, `anyfmt schema` for planning, and an MCP server with convert, estimate, formats, options, presets, run_tool and targets.' },
-      { tag: 'cloud', title: 'Offline licence keys', body: 'Ed25519-signed keys that verify without a network. They never unlock anything local.' },
+      { tag: 'cloud', title: 'Offline licence keys', body: 'Ed25519-signed keys that verify without a network. They never limit anything that runs on your Mac.' },
       { tag: 'cloud', title: 'A public conversion API, specified', body: 'An OpenAPI 3.1 contract, a mock server that implements all of it, and a TypeScript SDK tested against the mock.' },
       { tag: 'design', title: 'A new look', body: 'A painted black disc, a heat band on hover, display type for format names, a new icon, and the same language across settings, onboarding, progress cards and every editor.' },
       { tag: 'fix', title: 'Drags from Photos, Mail and Safari', body: 'Promised files from these apps no longer crash the drop, and drags out of Photos and Mail no longer end after a second.' },

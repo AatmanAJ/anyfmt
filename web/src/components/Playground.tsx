@@ -6,6 +6,8 @@
 
 import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { prefersReducedMotion } from '../lib/hooks'
+import { KIND_TINT, kindInk } from './ui'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -25,14 +27,15 @@ const TARGETS: Record<Kind, string[]> = {
 const R0 = 52, R1 = 132
 
 function FileGlyph({ kind, ext, active }: { kind: Kind; ext: string; active?: boolean }) {
-  const tint = { video: '#FF4A14', image: '#FF8A2A', audio: '#E8213A', doc: '#0A0A0A' }[kind]
+  const k = { video: 'video', image: 'image', audio: 'audio', doc: 'document' }[kind]
+  const tint = KIND_TINT[k], ink = kindInk(k)
   return (
     <span className={`relative flex h-[92px] w-[74px] flex-col justify-end rounded-[12px] bg-white p-2 shadow-[0_1px_0_rgba(0,0,0,.04),0_10px_24px_-12px_rgba(0,0,0,.25)] ring-1 ring-black/5 transition-transform duration-300 ${active ? 'scale-95 opacity-40' : ''}`}>
       <span aria-hidden className="absolute right-0 top-0 h-5 w-5 rounded-bl-[8px] rounded-tr-[12px] bg-[#F1EEEA]" />
       <span aria-hidden className="absolute left-2 top-3 flex flex-col gap-1">
         {[30, 22, 26].map((w, i) => <span key={i} className="h-[3px] rounded-full bg-black/10" style={{ width: w }} />)}
       </span>
-      <span className="w-fit rounded-[5px] px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white" style={{ background: tint }}>{ext}</span>
+      <span className="w-fit rounded-[5px] px-1.5 py-0.5 text-[12px] font-semibold uppercase tracking-wide" style={{ background: tint, color: ink }}>{ext}</span>
     </span>
   )
 }
@@ -53,6 +56,24 @@ export function Playground() {
   const [busy, setBusy] = useState<{ x: number; y: number; label: string } | null>(null)
   const [out, setOut] = useState<{ id: number; name: string; kind: Kind; ext: string }[]>([])
   const still = useRef<number>(0)
+  // Until someone touches it, the panel shows the wheel already open over a dragged HEIC, aiming
+  // round the formats, so the gesture is visible at rest. Any press hands control to the visitor.
+  const [demo, setDemo] = useState(false)
+  useEffect(() => {
+    const b = box.current
+    if (!b || !window.matchMedia('(min-width: 768px)').matches) return
+    const r = b.getBoundingClientRect()
+    setWheel({ i: 1, x: Math.round(r.width * 0.56), y: Math.round(r.height * 0.5) })
+    setHot(0)
+    setDemo(true)
+  }, [])
+  useEffect(() => {
+    if (!demo || prefersReducedMotion()) return
+    const n = TARGETS.image.length
+    const t = window.setInterval(() => setHot((h) => (h + 1) % n), 1100)
+    return () => clearInterval(t)
+  }, [demo])
+  const endDemo = () => { if (demo) { setDemo(false); setWheel(null); setHot(-1) } }
   const last = useRef({ x: 0, y: 0 })
   const idRef = useRef(0)
 
@@ -96,6 +117,7 @@ export function Playground() {
   }, [drag, wheel, openWheel])
 
   const down = (i: number) => (e: React.PointerEvent) => {
+    endDemo()
     if (busy) return
     e.preventDefault()
     try { box.current!.setPointerCapture(e.pointerId) } catch { /* pointer already gone: the drag still works without capture */ }
@@ -127,6 +149,7 @@ export function Playground() {
 
   // keyboard path
   const keyOn = (i: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (demo) { setDemo(false); setWheel(null); setHot(-1); if (e.key !== 'Enter' && e.key !== ' ') return }
     const n = TARGETS[FILES[i].kind].length
     if (!wheel && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault()
@@ -146,8 +169,7 @@ export function Playground() {
 
   return (
     <div ref={box} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-      className="relative h-[620px] w-full select-none overflow-hidden rounded-[32px] bg-[#F4F2EF] [touch-action:none] md:h-[560px]"
-      style={{ backgroundImage: 'radial-gradient(rgba(10,10,10,.07) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+      className="relative h-[600px] w-full select-none overflow-hidden rounded-[28px] bg-sand [touch-action:none] md:h-[560px]">
       {/* desktop files */}
       <div className="absolute left-6 top-6 grid grid-cols-2 gap-x-6 gap-y-5 md:left-10 md:top-10">
         {FILES.map((f, i) => (
@@ -155,34 +177,36 @@ export function Playground() {
             aria-label={`${f.name}.${f.ext}, ${f.size}. Press Enter to choose a format.`}
             className="group flex cursor-grab flex-col items-center gap-2 rounded-2xl p-2 outline-none transition-colors duration-300 hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-[#FF4A14] active:cursor-grabbing">
             <FileGlyph kind={f.kind} ext={f.ext} active={drag?.i === i} />
-            <span className="text-center text-[13px] font-medium leading-tight text-[#0A0A0A]">{f.name}.{f.ext}<span className="block text-[11px] font-normal text-black/40">{f.size}</span></span>
+            <span className="text-center text-[13px] font-medium leading-tight text-[#0A0A0A]">{f.name}.{f.ext}<span className="block text-[12px] font-normal text-mute-2">{f.size}</span></span>
           </button>
         ))}
       </div>
 
+      {/* on a phone the hint and the tray stack along the bottom; from md up they take opposite corners */}
+      <div className="pointer-events-none absolute inset-x-4 bottom-4 flex flex-col gap-3 md:contents">
+      {/* hint */}
+      <p className="px-2 text-[14px] leading-snug text-mute md:absolute md:bottom-10 md:left-10 md:max-w-[420px] md:px-0">
+        Press a file and drag. Tap <kbd className="rounded-md bg-white px-1.5 py-0.5 font-sans text-[12px] font-semibold text-ink shadow-[0_1px_0_rgba(0,0,0,.12)] ring-1 ring-black/10">⇧ Shift</kbd> or hold still, then let go on a format.
+      </p>
       {/* output tray */}
-      <div className="absolute bottom-6 right-6 w-[220px] rounded-[24px] bg-white/70 p-4 ring-1 ring-black/5 backdrop-blur-md md:right-10 md:top-10 md:bottom-auto md:w-[240px]">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-black/40">New copies</p>
+      <div className="rounded-[20px] bg-white p-4 ring-1 ring-black/5 md:absolute md:right-10 md:top-10 md:w-[240px]">
+        <p className="text-[13px] font-semibold text-ink">New copies</p>
         <ul className="mt-3 flex min-h-[44px] flex-col gap-2">
           <AnimatePresence initial={false}>
             {out.length === 0 && (
-              <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] leading-snug text-black/45">Converted files land here, beside their originals.</motion.li>
+              <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] leading-snug text-mute-2">Converted files land here, beside their originals.</motion.li>
             )}
             {out.map((o) => (
               <motion.li key={o.id} layout initial={{ opacity: 0, y: -10, filter: 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: EASE }} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-[13px] font-medium text-[#0A0A0A] ring-1 ring-black/5">
                 <span className="truncate">{o.name}</span>
-                <span className="ml-2 rounded-md bg-[#E4FF3A] px-1.5 py-0.5 text-[10px] font-semibold uppercase">new</span>
+                <span className="ml-2 rounded-md bg-[#E4FF3A] px-1.5 py-0.5 text-[12px] font-semibold uppercase">new</span>
               </motion.li>
             ))}
           </AnimatePresence>
         </ul>
       </div>
-
-      {/* hint */}
-      <p className="pointer-events-none absolute bottom-6 left-6 max-w-[46%] text-[13px] leading-snug text-black/50 md:left-10 md:max-w-none">
-        Press a file and drag. Tap <kbd className="rounded-md bg-white px-1.5 py-0.5 font-sans text-[12px] font-semibold text-black shadow-[0_1px_0_rgba(0,0,0,.12)] ring-1 ring-black/10">⇧ Shift</kbd> or hold still, then let go on a format.
-      </p>
+      </div>
 
       {/* wheel */}
       <AnimatePresence>
@@ -208,11 +232,19 @@ export function Playground() {
               )
             })}
             <circle r={R0 - 6} fill="#0A0A0A" />
-            <text y="-6" textAnchor="middle" fontSize="10" fill="rgba(255,255,255,.55)" fontFamily="Inter Tight Variable, sans-serif">convert to</text>
-            <text y="10" textAnchor="middle" fontSize="13" fontWeight="600" fill="#fff" fontFamily="Inter Tight Variable, sans-serif">{hot >= 0 ? targets[hot] : '…'}</text>
+            <text y="-7" textAnchor="middle" fontSize="12" fill="rgba(255,255,255,.6)" fontFamily="Inter Tight Variable, sans-serif">convert to</text>
+            <text y="11" textAnchor="middle" fontSize="14" fontWeight="600" fill="#fff" fontFamily="Inter Tight Variable, sans-serif">{hot >= 0 ? targets[hot] : '…'}</text>
           </motion.svg>
         )}
       </AnimatePresence>
+
+      {/* the demo's dragged HEIC and pointer, parked at the wheel's lower right */}
+      {demo && wheel && (
+        <div aria-hidden className="pointer-events-none absolute z-20" style={{ left: wheel.x + R1 * 0.8, top: wheel.y + R1 * 0.62 }}>
+          <div className="rotate-[-6deg] scale-[0.8] opacity-95 drop-shadow-[0_18px_30px_rgba(0,0,0,.25)]"><FileGlyph kind="image" ext="heic" /></div>
+          <span className="mt-1 block whitespace-nowrap rounded-full bg-ink px-3 py-1 text-[12px] font-medium text-white">Let go on {TARGETS.image[Math.max(0, hot)]}</span>
+        </div>
+      )}
 
       {/* dragged ghost */}
       {drag && dragging && (

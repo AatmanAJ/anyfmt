@@ -2,7 +2,6 @@
  * One interactive object per comparison, each built around the single fact that matters most
  * for that pair. Numbers come from the comparison data or from anyfmt's own measurements.
  */
-import NumberFlow from '@number-flow/react'
 import { Lock } from '@phosphor-icons/react'
 import { AnimatePresence, motion, useInView } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
@@ -10,19 +9,19 @@ import catalog from '../../data/catalog.json'
 import { EASE, SNAP } from '../../lib/hooks'
 
 const Panel = ({ children, dark = false, className = '' }: { children: React.ReactNode; dark?: boolean; className?: string }) => (
-  <div className={`relative overflow-hidden rounded-[28px] p-6 sm:p-8 ${dark ? 'bg-night text-white' : 'bg-white ring-1 ring-black/5'} ${className}`}>{children}</div>
+  <div className={`relative overflow-hidden rounded-[28px] p-6 sm:p-8 ${dark ? 'bg-night text-white' : 'bg-white ring-1 ring-black/[.07]'} ${className}`}>{children}</div>
 )
 
 /* Tangerine: the route tables, one dot per route, side by side. */
 export function Routes({ them, theirs }: { them: string; theirs: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const seen = useInView(ref, { once: true, amount: 0.3 })
+  const seen = useInView(ref, { once: true, amount: 0.2 })
   const ours = catalog.counts.routes
   const Field = ({ n, label, tone }: { n: number; label: string; tone: string }) => (
     <div>
-      <div className="flex items-baseline justify-between"><p className="text-[15px] font-semibold">{label}</p><p className="text-[28px] font-semibold tracking-[-0.04em]"><NumberFlow value={seen ? n : 0} /></p></div>
-      <div className="mt-3 grid gap-[2px] [grid-template-columns:repeat(34,minmax(0,1fr))]">
-        {Array.from({ length: n }, (_, i) => <span key={i} className="aspect-square rounded-[1.5px]" style={{ background: seen ? tone : 'rgba(0,0,0,.06)', transition: `background .4s ${Math.min(i * 1.4, 1100)}ms` }} />)}
+      <div className="flex items-baseline justify-between"><p className="text-[15px] font-semibold">{label}</p><p className="text-[28px] font-semibold tracking-[-0.04em] tabular-nums">{n}</p></div>
+      <div className="mt-3 grid gap-[2px] [grid-template-columns:repeat(30,minmax(0,1fr))] sm:[grid-template-columns:repeat(42,minmax(0,1fr))]">
+        {Array.from({ length: n }, (_, i) => <span key={i} className="aspect-square rounded-[1.5px]" style={{ background: seen ? tone : 'rgba(0,0,0,.08)', transition: `background .4s ${Math.min(i * 1.2, 900)}ms` }} />)}
       </div>
     </div>
   )
@@ -46,24 +45,24 @@ export function Clicks({ them }: { them: string }) {
     <Panel>
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-mute-2">{them}</p>
+          <p className="text-[14px] font-semibold">{them} <span className="font-normal text-mute-2">· {theirSteps.length} steps</span></p>
           <ol className="mt-4 space-y-2">
             {theirSteps.map((s, i) => (
               <li key={s} className={`flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14.5px] transition-colors duration-300 ${step === i ? 'bg-ink text-white' : step > i ? 'bg-sand-2 text-mute' : 'bg-sand'}`}>
-                <span className="font-mono text-[12px] opacity-60">{i + 1}</span>{s}
+                <span className={`font-mono text-[12px] ${step === i ? 'text-white/70' : 'text-mute-2'}`}>{i + 1}</span>{s}
               </li>
             ))}
           </ol>
         </div>
         <div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-flare">anyfmt</p>
+          <p className="flex items-center gap-2 text-[14px] font-semibold"><span className="h-2 w-2 bg-flare" /><span>anyfmt <span className="font-normal text-mute-2">· 1 step</span></span></p>
           <div className="mt-4 flex h-[188px] flex-col justify-between rounded-[16px] bg-night p-4 text-white">
             <p className="text-[14.5px]">Already dragging the file?</p>
             <div className="flex items-center gap-3">
               <span className={`inline-flex h-12 min-w-14 items-center justify-center rounded-[12px] bg-white text-[22px] text-ink transition-transform ${step % 2 ? 'translate-y-[3px]' : 'shadow-[0_4px_0_#9a948d]'}`}>⇧</span>
               <span className="text-[14px] text-white/70">tap, then drop on WebP</span>
             </div>
-            <p className="text-[13px] text-volt">One motion. No menu.</p>
+            <p className="text-[13px] text-volt">No menu to open: the wheel comes to the file.</p>
           </div>
         </div>
       </div>
@@ -77,7 +76,7 @@ export function Timeline({ them, from }: { them: string; from: string }) {
   const NAMES = ['Ventura', 'Sonoma', 'Sequoia', 'Tahoe']
   const start = VERS.indexOf(from)
   const ref = useRef<HTMLDivElement>(null)
-  const seen = useInView(ref, { once: true, amount: 0.5 })
+  const seen = useInView(ref, { once: true, amount: 0.2 })
   const Bar = ({ label, s, tone }: { label: string; s: number; tone: string }) => (
     <div className="grid grid-cols-[90px_1fr] items-center gap-4">
       <p className="text-[15px] font-semibold">{label}</p>
@@ -111,12 +110,12 @@ export function Upload() {
   return (
     <Panel dark>
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className="block"><span className="text-[13px] text-white/60">File size</span>
-          <div className="mt-2 flex flex-wrap gap-1.5">{SIZES.map((x, i) => <button key={x} type="button" onClick={() => setS(i)} className={`h-9 rounded-full px-3 text-[13.5px] font-medium ${s === i ? 'bg-white text-ink' : 'bg-white/10'}`}>{x >= 1000 ? `${x / 1000} GB` : `${x} MB`}</button>)}</div>
-        </label>
-        <label className="block"><span className="text-[13px] text-white/60">Your connection</span>
-          <div className="mt-2 flex flex-wrap gap-1.5">{SPEEDS.map((x, i) => <button key={x} type="button" onClick={() => setV(i)} className={`h-9 rounded-full px-3 text-[13.5px] font-medium ${v === i ? 'bg-white text-ink' : 'bg-white/10'}`}>{x} Mbps</button>)}</div>
-        </label>
+        <div role="radiogroup" aria-label="File size"><p className="text-[13px] text-white/60">File size</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">{SIZES.map((x, i) => <button key={x} type="button" role="radio" aria-checked={s === i} onClick={() => setS(i)} className={`h-9 rounded-full px-3 text-[13.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-flare ${s === i ? 'bg-white text-ink' : 'bg-white/10 hover:bg-white/20'}`}>{x >= 1000 ? `${x / 1000} GB` : `${x} MB`}</button>)}</div>
+        </div>
+        <div role="radiogroup" aria-label="Your connection"><p className="text-[13px] text-white/60">Your connection</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">{SPEEDS.map((x, i) => <button key={x} type="button" role="radio" aria-checked={v === i} onClick={() => setV(i)} className={`h-9 rounded-full px-3 text-[13.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-flare ${v === i ? 'bg-white text-ink' : 'bg-white/10 hover:bg-white/20'}`}>{x} Mbps</button>)}</div>
+        </div>
       </div>
       <div className="mt-8 space-y-5">
         <div>
@@ -128,7 +127,7 @@ export function Upload() {
           <div className="mt-2 h-3 rounded-full bg-white/10"><div className="h-full w-[6px] rounded-full bg-volt" /></div>
         </div>
       </div>
-      <p className="mt-6 text-[12.5px] leading-[1.5] text-white/50">Transfer time only (bar on a log scale), at your full connection speed, assuming the result is about the same size. Conversion time comes on top either way. Above 1 GB the free online tier refuses the file.</p>
+      <p className="mt-6 max-w-[62ch] text-[13px] leading-[1.5] text-white/60">Transfer time only (bar on a log scale), at your full connection speed, assuming the result is about the same size. Conversion time comes on top either way. Above 1 GB the free online tier refuses the file.</p>
     </Panel>
   )
 }
@@ -156,10 +155,10 @@ export function Session({ them }: { them: string }) {
         })}
       </div>
       <div className="mt-6 flex items-center gap-3">
-        <button type="button" onClick={() => setN((x) => x + 1)} className="h-11 rounded-full bg-ink px-5 text-[15px] font-medium text-white transition-transform active:scale-95">Convert a file</button>
-        <button type="button" onClick={() => setN(0)} className="h-11 rounded-full px-4 text-[14px] text-mute">Reset</button>
+        <button type="button" onClick={() => setN((x) => x + 1)} className="h-11 rounded-full bg-ink px-5 text-[15px] font-medium text-white outline-none transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2">Convert a file</button>
+        <button type="button" onClick={() => setN(0)} className="h-11 rounded-full px-4 text-[14px] text-mute outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-flare">Reset</button>
       </div>
-      <p className="mt-4 text-[12.5px] text-mute-2">{them}'s free version limits drop zones, conversions, folder watching and its CLI to 5 per session each.</p>
+      <p className="mt-4 text-[13px] text-mute-2">{them}'s free version limits drop zones, conversions, folder watching and its CLI to 5 per session each.</p>
     </Panel>
   )
 }
@@ -167,7 +166,7 @@ export function Session({ them }: { them: string }) {
 /* HandBrake: rewrap vs re-encode, measured on anyfmt. */
 export function Passthrough() {
   const ref = useRef<HTMLDivElement>(null)
-  const seen = useInView(ref, { once: true, amount: 0.5 })
+  const seen = useInView(ref, { once: true, amount: 0.2 })
   const rows: [string, number, string][] = [['Rewrap, no re-encode', 0.23, '111.9 MB · bit-exact'], ['Re-encode, VideoToolbox', 3.39, '45.4 MB · SSIM 0.995'], ['Re-encode, libx264 CRF 23', 4.91, '44.3 MB · SSIM 0.995']]
   return (
     <Panel>
@@ -176,11 +175,11 @@ export function Passthrough() {
           <div key={l}>
             <div className="flex items-baseline justify-between gap-3 text-[14.5px]"><span className={i === 0 ? 'font-semibold' : ''}>{l}</span><span className="font-mono text-[14px] font-semibold">{s.toFixed(2)} s</span></div>
             <div className="mt-2 h-3 overflow-hidden rounded-full bg-sand"><div className={`h-full rounded-full ${i === 0 ? 'bg-flare' : 'bg-ink/80'}`} style={{ width: seen ? `${Math.max(2, (s / 4.91) * 100)}%` : '0%', transition: `width 1.2s ${SNAP} ${i * 120}ms` }} /></div>
-            <p className="mt-1 text-[12.5px] text-mute-2">{note}</p>
+            <p className="mt-1 text-[13px] text-mute-2">{note}</p>
           </div>
         ))}
       </div>
-      <p className="mt-6 text-[12.5px] text-mute-2">One-minute 1080p30 H.264 MOV to MP4, all three run by anyfmt on an M5 Max (docs/PERF.md). HandBrake wasn't timed; its docs say it always re-encodes.</p>
+      <p className="mt-6 text-[13px] text-mute-2">One-minute 1080p30 H.264 MOV to MP4, all three run by anyfmt on an M5 Max (docs/PERF.md). HandBrake wasn't timed; its docs say it always re-encodes.</p>
     </Panel>
   )
 }
@@ -189,19 +188,19 @@ export function Passthrough() {
 const CMD = 'ffmpeg -i clip.mov -vf "fps=10,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse" -loop 0 clip.gif'
 export function Terminal() {
   const ref = useRef<HTMLDivElement>(null)
-  const seen = useInView(ref, { once: true, amount: 0.5 })
+  const seen = useInView(ref, { once: true, amount: 0.2 })
   const [n, setN] = useState(0)
   useEffect(() => { if (!seen) return; const id = window.setInterval(() => setN((x) => { if (x >= CMD.length) { clearInterval(id); return x } return x + 2 }), 24); return () => clearInterval(id) }, [seen])
   return (
     <div ref={ref} className="grid gap-4">
       <Panel dark>
-        <p className="text-[13px] text-white/50">One way to make a good GIF by hand</p>
+        <p className="text-[13px] text-white/60">One way to make a good GIF by hand</p>
         <p className="mt-3 break-all font-mono text-[13px] leading-[1.7] text-white/90"><span className="text-flare">$ </span>{CMD.slice(0, n)}<span className="animate-blink inline-block h-[1.1em] w-[0.55em] translate-y-[3px] bg-white/80" /></p>
-        <p className="mt-4 font-mono text-[12px] text-white/40">{CMD.length} characters</p>
+        <p className="mt-4 font-mono text-[12px] text-white/60">{CMD.length} characters to get right</p>
       </Panel>
       <Panel>
         <p className="text-[13px] text-mute-2">With anyfmt</p>
-        <p className="mt-3 flex flex-wrap items-center gap-2 text-[17px] font-medium">Drag clip.mov <span className="text-flare">→</span> tap <kbd className="rounded-md bg-sand-2 px-2 py-0.5 font-sans text-[15px] font-semibold shadow-[0_2px_0_#D9D4CE]">⇧</kbd> <span className="text-flare">→</span> drop on <span className="rounded-md bg-flare px-2 py-0.5 text-[13px] font-bold uppercase text-white">GIF</span></p>
+        <p className="mt-3 flex flex-wrap items-center gap-2 text-[17px] font-medium">Drag clip.mov <span className="text-flare">→</span> tap <kbd className="rounded-md bg-sand-2 px-2 py-0.5 font-sans text-[15px] font-semibold shadow-[0_2px_0_#D9D4CE]">⇧</kbd> <span className="text-flare">→</span> <span className="inline-flex items-center gap-2 whitespace-nowrap">drop on <span className="rounded-md bg-flare px-2 py-0.5 text-[13px] font-bold uppercase text-ink">GIF</span></span></p>
         <p className="mt-3 text-[13px] text-mute-2">Same engine. Presets like “Small · 10 fps · 480 w” pick the flags.</p>
       </Panel>
     </div>
@@ -210,7 +209,9 @@ export function Terminal() {
 
 /* macOS: Finder's Convert Image sheet next to the wheel. */
 export function Menu() {
-  const targets = catalog.formats.find((f) => f.id === 'heic')!.targets.filter((t) => t.wheel).map((t) => catalog.formats.find((f) => f.id === t.to)!.label)
+  const heic = catalog.formats.find((f) => f.id === 'heic')!
+  const targets = heic.targets.filter((t) => t.wheel).map((t) => catalog.formats.find((f) => f.id === t.to)!.label)
+  const optIn = heic.targets.length - targets.length
   const [fmt, setFmt] = useState('JPEG')
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -219,19 +220,19 @@ export function Menu() {
         <div className="mt-4 rounded-[14px] bg-[#ECEBE9] p-4 text-[13px] shadow-[inset_0_0_0_1px_rgba(0,0,0,.06)]">
           <p className="font-semibold">Convert Image</p>
           <div className="mt-3 flex items-center justify-between"><span>Format:</span>
-            <span className="flex overflow-hidden rounded-md ring-1 ring-black/15">{['JPEG', 'PNG', 'HEIF'].map((f) => <button key={f} type="button" onClick={() => setFmt(f)} className={`px-2.5 py-1 ${fmt === f ? 'bg-[#2F7BF5] text-white' : 'bg-white'}`}>{f}</button>)}</span>
+            <span className="flex overflow-hidden rounded-md ring-1 ring-black/15">{['JPEG', 'PNG', 'HEIF'].map((f) => <button key={f} type="button" onClick={() => setFmt(f)} aria-pressed={fmt === f} className={`px-2.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-flare ${fmt === f ? 'bg-[#0A66D6] text-white' : 'bg-white'}`}>{f}</button>)}</span>
           </div>
           <div className="mt-2 flex items-center justify-between"><span>Image Size:</span><span className="rounded-md bg-white px-2 py-0.5 ring-1 ring-black/15">Actual Size</span></div>
-          <label className="mt-2 flex items-center gap-2"><input type="checkbox" defaultChecked readOnly className="accent-[#2F7BF5]" />Preserve Metadata</label>
+          <label className="mt-2 flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#0A66D6]" />Preserve Metadata</label>
         </div>
         <p className="mt-4 text-[13px] text-mute-2">3 formats out</p>
       </Panel>
       <Panel dark>
-        <p className="text-[13px] text-white/50">anyfmt, same HEIC photo</p>
+        <p className="text-[13px] text-white/60">anyfmt, same HEIC photo</p>
         <ul className="mt-4 flex flex-wrap gap-1.5">
           {targets.map((t, i) => <motion.li key={t} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="rounded-[8px] bg-white/10 px-2.5 py-1.5 text-[13px] font-semibold">{t}</motion.li>)}
         </ul>
-        <p className="mt-4 text-[13px] text-white/50">{targets.length} on the wheel, more opt-in</p>
+        <p className="mt-4 text-[13px] text-white/60">{targets.length} on the wheel, {optIn} more opt-in</p>
       </Panel>
     </div>
   )

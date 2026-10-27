@@ -53,7 +53,7 @@ If you open the link on another device, the page shows a code. Choose **Opened t
 
 ## Licence keys
 
-A Pro or Team licence key (`ANYFMT1-…`) can be pasted into **Settings › Account › Pro licence key**. It's checked on your Mac, offline, and shows your plan without a server. It never unlocks or changes anything local, and cloud features still need you to sign in. See [Licence keys](/docs/licence-keys).
+A Pro or Team licence key (`ANYFMT1-…`) can be pasted into **Settings › Account › Pro licence key**. It's checked on your Mac, offline, and shows your plan without a server. It never switches on or changes anything local, and cloud features still need you to sign in. See [Licence keys](/docs/licence-keys).
 
 ## Use your own server
 

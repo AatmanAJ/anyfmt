@@ -29,7 +29,7 @@ Pressing ⌘ Command after the drag has started opens Tools rather than Finder's
 - **The centre cancels.** Move back to the middle and let go, and nothing happens to the file.
 - **Near a screen edge**, the wheel is pushed inward so it's never clipped.
 
-**Lock a segment** by tapping ⌥ Option mid-drag. An outline appears and the pill in the centre reads, for example, "GIF · Locked". Drift and even the centre can't change the target now: drop anywhere on the wheel and GIF runs. Tap ⌥ Option again to unlock. If you make ⌥ Option a trigger key, the lock is off.
+**Lock a segment** by tapping ⌥ Option mid-drag. An outline appears and the pill in the centre reads, for example, "GIF · Locked". Drift and even the centre can't change the target now: drop anywhere on the wheel and GIF runs. Tap ⌥ Option again to release it. If you make ⌥ Option a trigger key, the lock is off.
 
 ## What the wheel shows
 

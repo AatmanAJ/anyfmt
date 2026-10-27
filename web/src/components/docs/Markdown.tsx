@@ -25,7 +25,7 @@ function remarkCallouts() {
             t.value = t.value.slice(m[0].length)
             if (!t.value) p.children.shift()
             if (!p.children.length) node.children.shift()
-            node.data = { hName: 'aside', hProperties: { 'data-callout': m[1].toLowerCase() } }
+            node.data = { hName: 'aside', hProperties: { dataCallout: m[1].toLowerCase() } }
           }
         }
       }
@@ -41,35 +41,52 @@ const textOf = (n: ReactNode): string =>
 const CALLOUT: Record<string, { label: string; skin: string; dot: string }> = {
   note: { label: 'Note', skin: 'bg-sand text-ink-2', dot: 'bg-ink' },
   important: { label: 'Important', skin: 'bg-sand text-ink-2', dot: 'bg-flare' },
-  tip: { label: 'Tip', skin: 'bg-[#F6FFC4] text-ink-2', dot: 'bg-[#8FA800]' },
-  warning: { label: 'Careful', skin: 'bg-[#FFF0E8] text-ink-2 ring-1 ring-flare/25', dot: 'bg-flare' },
-  caution: { label: 'Careful', skin: 'bg-[#FFF0E8] text-ink-2 ring-1 ring-flare/25', dot: 'bg-flare' },
+  tip: { label: 'Tip', skin: 'bg-[#F6FFC4] text-ink-2', dot: 'bg-[#6E8200]' },
+  warning: { label: 'Careful', skin: 'bg-[#FFF0E8] text-ink-2', dot: 'bg-flare' },
+  caution: { label: 'Careful', skin: 'bg-[#FFF0E8] text-ink-2', dot: 'bg-flare' },
   preview: { label: 'Preview', skin: 'bg-night text-white/80 [&_a]:text-white [&_strong]:text-white [&_code]:!bg-white/10 [&_code]:!text-white', dot: 'bg-volt' },
 }
 
 function Callout({ type, children }: { type: string; children: ReactNode }) {
   const c = CALLOUT[type] ?? CALLOUT.note
   return (
-    <aside className={`not-prose my-7 rounded-[18px] px-5 py-4 text-[15.5px] leading-[1.6] ${c.skin}`}>
-      <p className={`flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.14em] ${type === 'preview' ? 'text-white' : 'text-ink'}`}><span className={`h-2 w-2 ${c.dot}`} />{c.label}</p>
-      <div className="mt-2 [&>*+*]:mt-2 [&_a]:underline [&_a]:decoration-flare/60 [&_a]:underline-offset-2">{children}</div>
+    <aside className={`not-prose my-7 rounded-[16px] px-5 py-4 text-[16px] leading-[1.6] ${c.skin}`}>
+      <p className={`flex items-center gap-2 text-[14px] font-semibold ${type === 'preview' ? 'text-white' : 'text-ink'}`}><span aria-hidden className={`h-2 w-2 ${c.dot}`} />{c.label}</p>
+      <div className="mt-1.5 [&>*+*]:mt-2 [&_a]:underline [&_a]:decoration-flare/60 [&_a]:underline-offset-2 [&_code]:rounded-[5px] [&_code]:bg-black/[.06] [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.88em]">{children}</div>
     </aside>
   )
 }
 
+const SHELL = /^(bash|sh|shell|zsh|console)$/
+const LANG_NAME: Record<string, string> = { bash: 'Terminal', sh: 'Terminal', shell: 'Terminal', zsh: 'Terminal', console: 'Terminal', json: 'JSON', ts: 'TypeScript', typescript: 'TypeScript', js: 'JavaScript', javascript: 'JavaScript', swift: 'Swift', yaml: 'YAML', yml: 'YAML', http: 'HTTP', text: '', txt: '' }
+
+/**
+ * A one-line command sits on a single row with a prompt and a copy button. Anything longer gets
+ * a title bar (its title, or the language) above it.
+ */
 export function CodeBlock({ code, lang = '', title }: { code: string; lang?: string; title?: string }) {
   const tokens = highlight(code, lang)
-  const copy = /^(bash|sh|shell|zsh|console)$/.test(lang) ? code.replace(/^\$ /gm, '') : code
+  const shell = SHELL.test(lang)
+  const copy = shell ? code.replace(/^\$ /gm, '') : code
+  const body = <code className="font-mono">{tokens.map(([k, v], i) => <span key={i} className={TOKEN_CLASS[k]}>{v}</span>)}</code>
+  // a one-line command titled just "Terminal" says nothing the prompt doesn't
+  if (!code.includes('\n') && (!title || (shell && title === 'Terminal'))) {
+    return (
+      <figure className="not-prose my-6 flex items-center gap-3 rounded-[16px] bg-night py-2 pl-4 pr-2">
+        {shell && <span aria-hidden className="select-none font-mono text-[13.5px] text-flare">$</span>}
+        <pre className="min-w-0 flex-1 overflow-x-auto py-1.5 text-[13.5px] leading-[1.6] text-white/90 [mask-image:linear-gradient(90deg,#000_calc(100%-24px),transparent)] sm:[mask-image:none]">{body}</pre>
+        <CopyButton text={copy} tone="dark" />
+      </figure>
+    )
+  }
   return (
-    <figure className="not-prose group/code my-6 overflow-hidden rounded-[18px] bg-night">
+    <figure className="not-prose my-6 overflow-hidden rounded-[16px] bg-night">
       <figcaption className="flex items-center justify-between gap-3 border-b border-white/[0.08] py-2 pl-4 pr-2">
-        <span className="flex min-w-0 items-center gap-2.5 font-mono text-[12px] text-white/55">
-          {lang && <span className="rounded-[5px] bg-white/10 px-1.5 py-0.5 text-[10.5px] uppercase tracking-wide text-white/70">{lang === 'bash' ? 'sh' : lang}</span>}
-          {title && <span className="truncate">{title}</span>}
-        </span>
+        <span className="min-w-0 truncate font-mono text-[13px] text-white/60">{title ?? LANG_NAME[lang] ?? lang}</span>
         <CopyButton text={copy} tone="dark" />
       </figcaption>
-      <pre className="overflow-x-auto px-4 py-4 text-[13px] leading-[1.7]"><code className="font-mono">{tokens.map(([k, v], i) => <span key={i} className={TOKEN_CLASS[k]}>{v}</span>)}</code></pre>
+      {/* on a phone the right edge fades, so a line that runs on reads as scrollable */}
+      <pre className="overflow-x-auto px-4 py-4 text-[13.5px] leading-[1.7] text-white/90 [mask-image:linear-gradient(90deg,#000_calc(100%-32px),transparent)] sm:[mask-image:none]">{body}</pre>
     </figure>
   )
 }
@@ -83,9 +100,11 @@ export function Markdown({ source }: { source: string }) {
     return n ? `${id}-${n}` : id
   }
   const components: Components = {
-    h2: ({ children }) => { const id = anchor(children); return <h2 id={id} className="group/h relative">{children}<a href={`#${id}`} aria-label="Link to this section" className="ml-2 align-middle text-[0.7em] text-mute-3 opacity-0 transition-opacity group-hover/h:opacity-100 focus:opacity-100">#</a></h2> },
-    h3: ({ children }) => { const id = anchor(children); return <h3 id={id} className="group/h relative">{children}<a href={`#${id}`} aria-label="Link to this section" className="ml-2 align-middle text-[0.75em] text-mute-3 opacity-0 transition-opacity group-hover/h:opacity-100 focus:opacity-100">#</a></h3> },
-    aside: ({ node, children }) => <Callout type={String((node?.properties as Node)?.dataCallout ?? 'note')}>{children}</Callout>,
+    h2: ({ children }) => { const id = anchor(children); return <h2 id={id} className="group/h relative">{children}<a href={`#${id}`} aria-label="Link to this section" className="ml-2 align-middle text-[0.7em] text-mute-2 no-underline opacity-0 outline-none transition-opacity group-hover/h:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-flare">#</a></h2> },
+    h3: ({ children }) => { const id = anchor(children); return <h3 id={id} className="group/h relative">{children}<a href={`#${id}`} aria-label="Link to this section" className="ml-2 align-middle text-[0.75em] text-mute-2 no-underline opacity-0 outline-none transition-opacity group-hover/h:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-flare">#</a></h3> },
+    // short inline code (flags, file names) never splits across lines; long paths may still wrap
+    code: ({ className, children }) => <code className={className ?? (textOf(children).length <= 24 ? '!whitespace-nowrap' : undefined)}>{children}</code>,
+    aside: ({ node, children }) => <Callout type={String((node?.properties as Node)?.dataCallout ?? (node?.properties as Node)?.['data-callout'] ?? 'note')}>{children}</Callout>,
     pre: ({ node }) => {
       const code = node?.children?.[0] as Node
       const cls: string[] = code?.properties?.className ?? []
@@ -98,7 +117,7 @@ export function Markdown({ source }: { source: string }) {
     a: ({ href = '', children }) => href.startsWith('/') && !/\.(md|txt|xml)$/.test(href) ? <Link to={href}>{children}</Link> : href.startsWith('#') ? <a href={href}>{children}</a> : <a href={href} target="_blank" rel="noreferrer">{children}</a>,
     table: ({ children }) => (
       <div className="not-prose my-7 overflow-x-auto rounded-[16px] ring-1 ring-line">
-        <table className="w-full border-collapse text-left text-[14.5px] leading-[1.5] [&_code]:rounded [&_code]:bg-sand-2 [&_code]:px-1 [&_code]:py-px [&_code]:font-mono [&_code]:text-[0.88em] [&_code]:whitespace-nowrap [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_td]:align-top [&_th]:bg-sand [&_th]:px-4 [&_th]:py-3 [&_th]:font-semibold [&_th]:text-ink">{children}</table>
+        <table className="w-full border-collapse text-left text-[15px] leading-[1.5] text-ink-2 [&_code]:rounded-[5px] [&_code]:bg-sand-2 [&_code]:px-1 [&_code]:py-px [&_code]:font-mono [&_code]:text-[0.86em] [&_code]:!whitespace-nowrap [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_td]:align-top [&_th]:bg-sand [&_th]:px-4 [&_th]:py-3 [&_th]:text-[14px] [&_th]:font-semibold [&_th]:text-ink [&_th]:whitespace-nowrap">{children}</table>
       </div>
     ),
   }

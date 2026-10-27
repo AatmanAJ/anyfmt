@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react'
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { prefersReducedMotion } from './lib/hooks'
@@ -32,8 +33,9 @@ function ScrollManager() {
 }
 
 export function App() {
+  // reducedMotion="user": with Reduce Motion on, motion skips transform and layout animations site-wide
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <ScrollManager />
       <Suspense fallback={<div className="min-h-screen bg-white" />}>
         <Routes>
@@ -56,6 +58,6 @@ export function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-    </>
+    </MotionConfig>
   )
 }

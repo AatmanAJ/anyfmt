@@ -2,10 +2,10 @@
  * Call-to-action buttons. Starting points on 21st.dev: Arrow Fill Button (hyperiux), Download
  * Button (bidyut10) and Star On Github (socolled); rebuilt for anyfmt. Every one is a real link.
  */
-import { AppleLogo, GithubLogo } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { SNAP } from '../lib/hooks'
+import { AppleMark, GitHubMark } from './Marks'
 
 /** Letters that roll up and are replaced by a copy from below, staggered. */
 export function RollText({ children, className = '' }: { children: string; className?: string }) {
@@ -64,11 +64,11 @@ export function DownloadButton({ tone = 'dark', label = 'Download for Mac', to =
   const dark = tone === 'dark'
   return (
     <SmartLink to={to}
-      className={`group relative inline-flex h-14 items-center overflow-hidden rounded-full pl-6 pr-2 text-base font-medium outline-none transition-transform duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-offset-2 ${dark ? 'bg-ink text-white focus-visible:ring-ink' : 'bg-white text-ink focus-visible:ring-white focus-visible:ring-offset-ink'}`}>
+      className={`group relative inline-flex h-14 items-center overflow-hidden rounded-full pl-6 pr-2 text-base font-medium outline-none transition-[transform,background-color] duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-offset-2 ${dark ? 'bg-ink text-white focus-visible:ring-ink' : 'bg-white text-ink focus-visible:ring-white focus-visible:ring-offset-ink'} hover:bg-volt hover:delay-[0ms,250ms]`}>
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-volt transition-[clip-path] duration-500 [clip-path:circle(20px_at_calc(100%-28px)_50%)] group-hover:[clip-path:circle(150%_at_calc(100%-28px)_50%)]"
         style={{ transitionTimingFunction: SNAP }} />
       <span className="relative flex items-center gap-2.5 pr-4 transition-colors duration-500 group-hover:text-ink" style={{ transitionTimingFunction: SNAP }}>
-        <AppleLogo size={18} weight="fill" aria-hidden />
+        <AppleMark size={18} className="-mt-0.5" />
         <span className="whitespace-nowrap">{label}</span>
       </span>
       <span className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink">
@@ -82,10 +82,10 @@ export function DownloadButton({ tone = 'dark', label = 'Download for Mac', to =
 export function GitHubButton({ label = 'Read the source', to = '/open-source', tone = 'light' }: { label?: string; to?: string; tone?: 'light' | 'dark' }) {
   return (
     <SmartLink to={to}
-      className={`gh group relative inline-flex h-12 items-center rounded-full p-[1.5px] text-[15px] font-medium outline-none transition-transform duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-flare ${tone === 'light' ? 'text-ink' : 'text-white'}`}>
+      className={`gh group relative inline-flex h-12 items-center rounded-full p-[1.5px] text-[15px] font-medium outline-none transition-transform duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-flare ${tone === 'light' ? 'text-ink' : 'gh-dark text-white'}`}>
       <span aria-hidden className="gh-ring pointer-events-none absolute inset-0 rounded-full" />
       <span className={`relative flex h-full items-center gap-2.5 rounded-full px-4 backdrop-blur-xl ${tone === 'light' ? 'bg-white/85' : 'bg-ink/85'}`}>
-        <GithubLogo size={18} weight="fill" aria-hidden />
+        <GitHubMark size={18} />
         <RollText>{label}</RollText>
       </span>
     </SmartLink>
@@ -98,7 +98,7 @@ export function Badge({ children, to }: { children: ReactNode; to: string }) {
     <SmartLink to={to}
       className="badge group relative inline-flex h-10 items-center gap-2 overflow-hidden rounded-full bg-volt px-4 text-[15px] font-medium text-ink outline-none transition-transform duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink">
       <span aria-hidden className="badge-sheen pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-white/70" />
-      <span className="relative">{children}</span>
+      <span className="relative whitespace-nowrap">{children}</span>
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="relative transition-transform duration-500 group-hover:translate-x-1" style={{ transitionTimingFunction: SNAP }}>
         <path d="M2.5 8h10M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

@@ -14,7 +14,7 @@
   --color-ink-2: #1a1a1a;
   --color-mute: #3a3a3a;
   --color-mute-2: #6a6a6a;
-  --color-mute-3: #9a9690;
+  --color-mute-3: #716c66;
   --color-fog: #efefef;
   --color-sand: #f4f2ef;
   --color-sand-2: #f1eeea;
@@ -78,6 +78,7 @@ body {
 /* GitHub pill: a conic streak runs the border on hover. */
 @property --gh-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .gh-ring { background: rgba(10,10,10,.12); }
+.gh-dark .gh-ring { background: rgba(255,255,255,.24); }
 .gh:hover .gh-ring, .gh:focus-visible .gh-ring {
   background: conic-gradient(from var(--gh-a), #FF2A0E, #FF7A1F, #FFC24A, #FFF1D6, #FF7A1F, #FF2A0E);
   animation: gh-spin 2.4s linear infinite;
@@ -98,13 +99,6 @@ body {
     repeating-linear-gradient(121deg, transparent 0 34px, rgba(255,255,255,.07) 36px, transparent 44px),
     radial-gradient(ellipse 70% 80% at 12% 92%, #ff2e00 0%, #ff5f03 22%, rgba(120,30,5,.6) 45%, transparent 70%),
     #0a0a0a;
-}
-
-/* Glass ribs used as a texture on type and cards (the wordmark in the footer, the Pro card). */
-.ribs {
-  background-image:
-    repeating-linear-gradient(121deg, rgba(255,255,255,0) 0 8px, rgba(255,255,255,.08) 17px, rgba(255,255,255,.3) 23px, rgba(255,255,255,.05) 25px, rgba(0,0,0,.12) 28px, rgba(0,0,0,0) 32px),
-    radial-gradient(ellipse 60% 90% at var(--rx, 80%) var(--ry, 20%), #fff1d6 0%, #ffb23e 12%, #ff5a0a 30%, #ee1200 52%, #3a0800 85%);
 }
 
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -138,3 +132,11 @@ body {
 /* Grid cells may shrink below their content, so code blocks and command lines scroll inside
    their own box instead of widening the page on a phone. */
 .grid > * { min-width: 0; }
+
+/* Windows High Contrast removes backgrounds, so pill buttons and toggles keep a system-coloured edge. */
+@media (forced-colors: active) {
+  button, [role="button"], [role="radio"], [role="tab"], [role="switch"], a[class*="rounded-"], input:not([type="checkbox"], [type="radio"], [type="range"]), label:has(> input:not([type="checkbox"], [type="radio"], [type="range"])) {
+    outline: 1px solid ButtonText !important;
+    outline-offset: -1px;
+  }
+}

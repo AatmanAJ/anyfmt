@@ -1,6 +1,6 @@
 ---
 title: anyfmt documentation
-description: A map of the anyfmt docs. Find the right guide for the Mac app, the command line, MCP and agents, the HTTP API preview, Pro and self-hosting.
+description: A map of the anyfmt docs. Find the right guide for the Mac app, the command line, MCP and agents, the HTTP API preview, Pro and self‑hosting.
 ---
 
 anyfmt is an open-source (AGPL-3.0) file converter that lives in the menu bar of a Mac with Apple silicon. Start dragging a file in Finder, tap ⇧ Shift, and a wheel of every format that file can become opens around the pointer; drop on one and a converted copy appears beside the original.

@@ -98,7 +98,7 @@ export const TOKEN_CLASS: Record<TokenKind, string> = {
   number: 'text-[#FF8A5B]',
   keyword: 'text-[#FF6A3D]',
   key: 'text-[#E4FF3A]',
-  flag: 'text-[#9FD3FF]',
+  flag: 'text-[#FFD2B0]',
   prompt: 'text-[#FF4A14] select-none',
   punct: 'text-[#A7A19A]',
   fn: 'text-[#FFFFFF]',

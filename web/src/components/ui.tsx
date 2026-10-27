@@ -36,7 +36,7 @@ export function Keycap({ glyph, name, pressed = false, size = 'md' }: { glyph: s
   return (
     <span className={`inline-flex flex-col justify-between bg-[#FBFAF8] ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 ${box} ${pressed ? 'translate-y-[4px] shadow-[0_1px_0_#D9D4CE,0_2px_6px_rgba(0,0,0,.06)]' : 'shadow-[0_5px_0_#D9D4CE,0_14px_26px_-12px_rgba(0,0,0,.18)]'}`}>
       <span className={`${g} leading-none`}>{glyph}</span>
-      {name && <span className={`${size === 'sm' ? 'text-[10px]' : 'text-[13px]'} font-medium text-mute`}>{name}</span>}
+      {name && <span className={`${size === 'sm' ? 'text-[12px]' : 'text-[13px]'} font-medium text-mute`}>{name}</span>}
     </span>
   )
 }
@@ -75,7 +75,8 @@ export function Command({ cmd, tone = 'dark', className = '' }: { cmd: string; t
   return (
     <div className={`flex min-w-0 items-center gap-3 rounded-2xl py-2 pl-4 pr-2 ${dark ? 'bg-night text-white' : 'bg-white text-ink ring-1 ring-black/10'} ${className}`}>
       <span aria-hidden className="font-mono text-[13px] text-flare">$</span>
-      <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[13px] no-scrollbar">{cmd}</code>
+      {/* on a phone a long command wraps so all of it shows; from sm up it stays on one line and scrolls */}
+      <code className="min-w-0 flex-1 break-all font-mono text-[13px] leading-[1.6] no-scrollbar sm:overflow-x-auto sm:whitespace-nowrap sm:break-normal">{cmd}</code>
       <CopyButton text={cmd} tone={dark ? 'dark' : 'light'} />
     </div>
   )
@@ -83,10 +84,13 @@ export function Command({ cmd, tone = 'dark', className = '' }: { cmd: string; t
 
 /** Format label chip in the app's style: uppercase, tight, tinted by kind. */
 export const KIND_TINT: Record<string, string> = {
-  image: '#FF8A2A', vector: '#FFB23E', pdf: '#EE1200', video: '#FF4A14', audio: '#E8213A', document: '#0A0A0A',
+  image: '#FF8A2A', vector: '#FFB23E', pdf: '#D11A00', video: '#FF4A14', audio: '#C81E3A', document: '#0A0A0A',
   slides: '#C2410C', spreadsheet: '#3F6212', ebook: '#7C2D12', subtitle: '#525252', archive: '#78716C', folder: '#A8A29E',
 }
+/** Ink on the light tints, white on the dark ones: whichever reads at 4.5:1 or better. */
+const INK_ON = new Set(['image', 'vector', 'video', 'folder'])
+export const kindInk = (kind: string) => (INK_ON.has(kind) ? '#0A0A0A' : '#FFFFFF')
 export function FormatChip({ label, kind, size = 'md' }: { label: string; kind: string; size?: 'sm' | 'md' | 'lg' }) {
-  const s = size === 'lg' ? 'px-3 py-1.5 text-[18px] rounded-[10px]' : size === 'md' ? 'px-2 py-1 text-[12px] rounded-[7px]' : 'px-1.5 py-0.5 text-[10.5px] rounded-[5px]'
-  return <span className={`inline-flex items-center font-semibold uppercase tracking-wide text-white ${s}`} style={{ background: KIND_TINT[kind] ?? '#0A0A0A' }}>{label}</span>
+  const s = size === 'lg' ? 'px-3 py-1.5 text-[18px] rounded-[10px]' : size === 'md' ? 'px-2 py-1 text-[12px] rounded-[7px]' : 'px-1.5 py-0.5 text-[12px] rounded-[5px]'
+  return <span className={`inline-flex items-center font-semibold uppercase tracking-wide ${s}`} style={{ background: KIND_TINT[kind] ?? '#0A0A0A', color: kindInk(kind) }}>{label}</span>
 }

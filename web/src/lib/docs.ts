@@ -81,7 +81,7 @@ export function llmsTxt() {
     for (const d of docs) lines.push(`- [${d.title}](${mdUrl(d)}): ${d.description}`)
     lines.push('')
   }
-  lines.push('## Site', '', `- [Formats](${SITE}/formats): every format and route, generated from the app`, `- [Pricing](${SITE}/pricing): Self-host (free), Desktop licence, Pro, Donate`, `- [Changelog](${SITE}/changelog)`, `- [Full docs in one file](${SITE}/llms-full.txt)`, '')
+  lines.push('## Site', '', `- [Formats](${SITE}/formats): every format and route, generated from the app`, `- [Pricing](${SITE}/pricing): build it yourself (free), Desktop (one payment), Pro (monthly or yearly), donations`, `- [Changelog](${SITE}/changelog)`, `- [Full docs in one file](${SITE}/llms-full.txt)`, '')
   return lines.join('\n')
 }
 
@@ -92,7 +92,7 @@ export const llmsFull = () => DOCS.map(docAsMarkdown).join('\n\n---\n\n')
 export interface Hit { doc: Doc; heading?: Heading; text: string; score: number; at: number }
 interface Chunk { doc: Doc; heading?: Heading; text: string; lower: string }
 
-const plain = (s: string) => s.replace(/```[\s\S]*?```/g, ' ').replace(/`([^`]+)`/g, '$1').replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_>#|]/g, ' ').replace(/\s+/g, ' ').trim()
+const plain = (s: string) => s.replace(/```[\s\S]*?```/g, ' ').replace(/^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/gm, ' ').replace(/`([^`]+)`/g, '$1').replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_>#|]/g, ' ').replace(/\s+/g, ' ').trim()
 
 let INDEX: Chunk[] | null = null
 function index() {

@@ -4,26 +4,37 @@
  * route at once as a matrix, then the formats in plain lists for reading and for search engines.
  * All of it is generated from `anyfmt schema --json`.
  */
-import { MagnifyingGlass } from '@phosphor-icons/react'
+import { ArrowRight, CaretDown, MagnifyingGlass } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Page } from '../components/Page'
-import { Container, Eyebrow, FormatChip, KIND_TINT } from '../components/ui'
+import { Container, Eyebrow } from '../components/ui'
 import catalog from '../data/catalog.json'
+import { GUIDES } from '../data/guides'
 import { useHead } from '../lib/head'
-import { EASE } from '../lib/hooks'
 
 type Format = (typeof catalog.formats)[number]
 type Target = Format['targets'][number]
 const F = Object.fromEntries(catalog.formats.map((f) => [f.id, f])) as Record<string, Format>
 const ENG = catalog.engines as Record<string, { name: string; by: string; what: string }>
-const KIND_NAME = Object.fromEntries(catalog.kinds.map((k) => [k.id, k.name])) as Record<string, string>
 const engineNames = (t: Target) => [...new Set(t.engines.map((e) => ENG[e]?.name ?? e))].join(' → ')
 
-/* ── the wheel ─────────────────────────────────────────────── */
+/* ── the explorer ──────────────────────────────────────────── */
 
-const RINGS = [{ r0: 64, r1: 150, cap: 8 }, { r0: 156, r1: 214, cap: 12 }]
+/** The picker groups the twelve kinds into six shelves, so each shelf holds a handful of formats. */
+const SHELVES: { name: string; kinds: string[] }[] = [
+  { name: 'Images', kinds: ['image', 'vector'] },
+  { name: 'Video', kinds: ['video'] },
+  { name: 'Audio', kinds: ['audio'] },
+  { name: 'Documents', kinds: ['document', 'pdf', 'slides', 'ebook'] },
+  { name: 'Spreadsheets', kinds: ['spreadsheet'] },
+  { name: 'Archives and more', kinds: ['archive', 'subtitle', 'folder'] },
+]
+const shelfOf = (id: string) => SHELVES.findIndex((s) => s.kinds.includes(F[id].kind))
+const GUIDE = Object.fromEntries(GUIDES.filter((g) => g.kind === 'convert').flatMap((g) => g.from.map((f) => [`${f}>${g.to}`, g.slug])))
+
+const RINGS = [{ r0: 70, r1: 160 }, { r0: 166, r1: 218 }]
 
 function arc(r0: number, r1: number, a0: number, a1: number) {
   const p = (r: number, a: number) => `${(Math.cos(a) * r).toFixed(2)},${(Math.sin(a) * r).toFixed(2)}`
@@ -31,23 +42,23 @@ function arc(r0: number, r1: number, a0: number, a1: number) {
   return `M${p(r1, a0)} A${r1},${r1} 0 ${big} 1 ${p(r1, a1)} L${p(r0, a1)} A${r0},${r0} 0 ${big} 0 ${p(r0, a0)} Z`
 }
 
+/** The wheel exactly as the app lays it out: up to eight on the first ring, up to twelve more on the second. */
 function Wheel({ f, hot, setHot }: { f: Format; hot: string | null; setHot: (id: string | null) => void }) {
   const onWheel = f.targets.filter((t) => t.wheel)
   const rings = [onWheel.slice(0, 8), onWheel.slice(8, 20)].filter((r) => r.length)
   const hotT = f.targets.find((t) => t.to === hot)
   return (
-    <svg viewBox="-226 -226 452 452" className="w-full max-w-[520px] select-none" role="img" aria-label={`${f.label} converts to ${onWheel.map((t) => F[t.to]?.label).join(', ')}`}>
+    <svg viewBox="-230 -230 460 460" className="h-auto w-full max-w-[460px] select-none" role="img" aria-label={`${f.label} converts on the wheel to ${onWheel.map((t) => F[t.to]?.label).join(', ')}`}>
       <defs>
-        <linearGradient id="heat" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#E8160C" /><stop offset="0.6" stopColor="#FF4A14" /><stop offset="1" stopColor="#FF9A3C" /></linearGradient>
+        <linearGradient id="fx-heat" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#E8160C" /><stop offset="0.6" stopColor="#FF4A14" /><stop offset="1" stopColor="#FF9A3C" /></linearGradient>
       </defs>
-      <AnimatePresence mode="popLayout">
-        <motion.g key={f.id} initial={{ rotate: -24, scale: 0.85, opacity: 0 }} animate={{ rotate: 0, scale: 1, opacity: 1 }} exit={{ rotate: 18, scale: 0.9, opacity: 0, transition: { duration: 0.2 } }} transition={{ type: 'spring', stiffness: 260, damping: 26 }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.g key={f.id} initial={{ rotate: -20, scale: 0.9, opacity: 0 }} animate={{ rotate: 0, scale: 1, opacity: 1 }} exit={{ rotate: 14, scale: 0.94, opacity: 0, transition: { duration: 0.18 } }} transition={{ type: 'spring', stiffness: 260, damping: 28 }}>
           {rings.map((ring, ri) => {
             const { r0, r1 } = RINGS[ri]
-            // the first ring divides itself among its targets; the second keeps twelve fixed slots, centred on top
             const n = ri === 0 ? ring.length : 12
             const first = ri === 0 ? 0 : -(ring.length - 1) / 2
-            const gap = ri === 0 ? 0.022 : 0.012
+            const gap = ri === 0 ? 0.02 : 0.012
             return ring.map((t, j) => {
               const i = j + first
               const a0 = (i / n) * Math.PI * 2 - Math.PI / 2 - Math.PI / n + gap
@@ -55,99 +66,122 @@ function Wheel({ f, hot, setHot }: { f: Format; hot: string | null; setHot: (id:
               const mid = (a0 + a1) / 2, rm = (r0 + r1) / 2
               const on = hot === t.to
               const label = F[t.to]?.label ?? t.to
+              const size = ri === 0 ? (label.length > 4 ? 15 : 18) : label.length > 4 ? 12 : 13
               return (
-                <g key={t.to} onPointerEnter={() => setHot(t.to)} onPointerLeave={() => setHot(null)} onFocus={() => setHot(t.to)} onBlur={() => setHot(null)} tabIndex={0} role="button" aria-label={`${f.label} to ${label}`} className="cursor-default outline-none">
-                  <path d={arc(r0, r1, a0, a1)} fill={on ? 'url(#heat)' : ri === 0 ? '#FFFFFF' : '#FBFAF8'} stroke={on ? 'none' : 'rgba(10,10,10,.08)'} style={{ transition: 'fill .2s' }} />
-                  <text x={Math.cos(mid) * rm} y={Math.sin(mid) * rm} textAnchor="middle" dominantBaseline="central" fontSize={ri === 0 ? (label.length > 5 ? 13 : 16) : label.length > 5 ? 9.5 : 11.5} fontWeight="600" fill={on ? '#fff' : '#0A0A0A'} style={{ pointerEvents: 'none' }}>{label}</text>
-                  {t.via.length > 0 && <circle cx={Math.cos(mid) * (r1 - 9)} cy={Math.sin(mid) * (r1 - 9)} r={2.4} fill={on ? '#fff' : '#FF4A14'} />}
+                <g key={t.to} onPointerEnter={() => setHot(t.to)} onPointerLeave={() => setHot(null)}>
+                  <path d={arc(r0, r1, a0, a1)} fill={on ? 'url(#fx-heat)' : '#FFFFFF'} stroke={on ? 'none' : 'rgba(10,10,10,.09)'} strokeWidth={1} style={{ transition: 'fill .18s' }} />
+                  <text x={Math.cos(mid) * rm} y={Math.sin(mid) * rm} textAnchor="middle" dominantBaseline="central" fontSize={size} fontWeight="600" fill={on ? '#fff' : '#0A0A0A'} style={{ pointerEvents: 'none', letterSpacing: '-0.01em' }}>{label}</text>
+                  {t.via.length > 0 && <circle cx={Math.cos(mid) * (r1 - 10)} cy={Math.sin(mid) * (r1 - 10)} r={2.6} fill={on ? '#fff' : '#FF4A14'} />}
                 </g>
               )
             })
           })}
         </motion.g>
       </AnimatePresence>
-      <circle r={56} fill="#0A0A0A" />
-      <text y={hotT ? -16 : -8} textAnchor="middle" fontSize="10" fill="rgba(255,255,255,.55)">{hotT ? `${f.label} to` : 'convert'}</text>
-      <text y={hotT ? 3 : 10} textAnchor="middle" fontSize="17" fontWeight="700" fill="#fff">{hotT ? F[hotT.to]?.label : f.label}</text>
-      {hotT && <text y={20} textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,.6)">{hotT.via.length ? `via ${hotT.via.map((v) => F[v]?.label).join(', ')}` : 'one step'}</text>}
+      <circle r={62} fill="#0A0A0A" />
+      <text y={-14} textAnchor="middle" fontSize="12" fill="rgba(255,255,255,.6)">{hotT ? `${f.label} to` : 'convert'}</text>
+      <text y={8} textAnchor="middle" fontSize="20" fontWeight="700" fill="#fff" style={{ letterSpacing: '-0.02em' }}>{hotT ? F[hotT.to]?.label : f.label}</text>
+      {hotT && !hotT.wheel && <text y={28} textAnchor="middle" fontSize="12" fill="#FF8A5B">opt-in</text>}
     </svg>
   )
 }
 
 function Picker({ sel, onPick }: { sel: string; onPick: (id: string) => void }) {
+  const [shelf, setShelf] = useState(() => shelfOf(sel))
   const [q, setQ] = useState('')
-  const [kind, setKind] = useState<string>('all')
-  const list = catalog.formats.filter((f) => f.targets.length && (kind === 'all' || f.kind === kind) &&
-    (!q || f.label.toLowerCase().includes(q.toLowerCase()) || f.name.toLowerCase().includes(q.toLowerCase()) || f.extensions.some((e) => e.includes(q.toLowerCase().replace(/^\./, '')))))
+  const clean = q.trim().toLowerCase().replace(/^\./, '')
+  const exact = (f: Format) => f.id === clean || f.extensions.includes(clean)
+  const found = clean ? catalog.formats.filter((f) => f.targets.length && (f.id.includes(clean) || f.label.toLowerCase().includes(clean) || f.name.toLowerCase().includes(clean) || f.extensions.some((e) => e.startsWith(clean))))
+    .sort((a, b) => Number(exact(b)) - Number(exact(a))) : null
+  const list = found ?? catalog.formats.filter((f) => f.targets.length && SHELVES[shelf].kinds.includes(f.kind))
   return (
     <div>
-      <label className="flex h-12 items-center gap-3 rounded-full bg-white px-4 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-flare">
-        <MagnifyingGlass size={18} className="text-mute-2" aria-hidden />
-        <input value={q} onChange={(e) => { setQ(e.target.value); const m = catalog.formats.find((f) => f.targets.length && (f.id === e.target.value.toLowerCase().replace(/^\./, '') || f.extensions.includes(e.target.value.toLowerCase().replace(/^\./, '')))); if (m) onPick(m.id) }}
-          placeholder="Type an extension: heic, mov, docx…" aria-label="Find a format" className="h-full flex-1 bg-transparent text-[16px] outline-none placeholder:text-mute-3" />
-      </label>
-      <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1 pr-8 no-scrollbar [mask-image:linear-gradient(90deg,#000_88%,transparent)]" role="tablist" aria-label="Kind">
-        {[{ id: 'all', name: 'All' }, ...catalog.kinds].map((k) => (
-          <button key={k.id} type="button" role="tab" aria-selected={kind === k.id} onClick={() => setKind(k.id)}
-            className={`h-9 shrink-0 rounded-full px-3.5 text-[13.5px] font-medium outline-none ring-1 transition-colors focus-visible:ring-2 focus-visible:ring-flare ${kind === k.id ? 'bg-ink text-white ring-ink' : 'bg-white ring-black/10 hover:bg-sand-2'}`}>{k.name}</button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="tablist" aria-label="Kind of file" className="flex flex-wrap gap-1.5">
+          {SHELVES.map((s, i) => (
+            <button key={s.name} type="button" role="tab" aria-selected={!found && shelf === i} onClick={() => { setShelf(i); setQ('') }}
+              className={`h-10 rounded-full px-4 text-[14.5px] font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-flare ${!found && shelf === i ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-black/10 hover:bg-sand-2'}`}>{s.name}</button>
+          ))}
+        </div>
+        <label className="flex h-10 min-w-[180px] flex-1 items-center gap-2 rounded-full bg-white px-4 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-flare sm:max-w-[240px]">
+          <MagnifyingGlass size={16} className="shrink-0 text-mute-2" aria-hidden />
+          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && list[0]) { onPick(list[0].id); setShelf(shelfOf(list[0].id)); setQ('') } }}
+            placeholder="Find .heic, .mkv…" aria-label="Find a format by extension" className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-mute-2" />
+        </label>
       </div>
-      <ul className="mt-4 flex max-h-[232px] flex-wrap content-start gap-1.5 overflow-y-auto pb-6 pr-1 no-scrollbar [mask-image:linear-gradient(180deg,#000_80%,transparent)]" aria-label="Formats">
+      <ul className="mt-5 flex min-h-[48px] flex-wrap gap-2" aria-label="Formats">
         {list.map((f) => (
           <li key={f.id}>
-            <button type="button" onClick={() => onPick(f.id)} aria-pressed={sel === f.id}
-              className={`h-9 rounded-[10px] px-3 text-[13.5px] font-semibold uppercase tracking-wide outline-none ring-1 transition-[background-color,color,transform] duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-flare ${sel === f.id ? 'text-white ring-transparent' : 'bg-white text-ink ring-black/10 hover:-translate-y-0.5'}`}
-              style={sel === f.id ? { background: KIND_TINT[f.kind] } : undefined}>{f.label}</button>
+            <button type="button" onClick={() => { onPick(f.id); setShelf(shelfOf(f.id)); setQ('') }} aria-pressed={sel === f.id}
+              className={`h-11 rounded-[12px] px-3.5 text-[14.5px] font-semibold tracking-[0.01em] outline-none transition-[background-color,color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-flare ${sel === f.id ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-black/10 hover:ring-black/30'}`}>{f.label}</button>
           </li>
         ))}
-        {list.length === 0 && <li className="py-2 text-[14px] text-mute">No format called “{q}”. anyfmt reads the {catalog.counts.inputs} on this page.</li>}
+        {list.length === 0 && <li className="py-3 text-[15px] text-mute">No format matches “{q}”. anyfmt reads the {catalog.counts.inputs} formats on this page.</li>}
       </ul>
     </div>
   )
 }
 
+function Route({ from, t, hot, setHot }: { from: Format; t: Target; hot: string | null; setHot: (id: string | null) => void }) {
+  const to = F[t.to]
+  const guide = GUIDE[`${from.id}>${t.to}`]
+  const on = hot === t.to
+  const body = (
+    <>
+      <span className="w-[56px] shrink-0 text-[15px] font-semibold">{to?.label}</span>
+      <span className="min-w-0 flex-1 truncate text-[15px]">{to?.name}{t.via.length > 0 && <span className="text-mute-2"> · via {t.via.map((v) => F[v]?.label).join(', ')}</span>}</span>
+      <span className="hidden shrink-0 text-[13.5px] text-mute-2 sm:block">{engineNames(t)}</span>
+      <span className="flex w-[60px] shrink-0 items-center justify-end gap-1 text-[13.5px] font-medium">{guide && <>Guide<ArrowRight size={13} weight="bold" aria-hidden /></>}</span>
+    </>
+  )
+  const cls = `flex h-11 w-full items-center gap-3 rounded-[12px] px-3 text-left outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-flare ${on ? 'bg-sand-2' : ''}`
+  const events = { onPointerEnter: () => setHot(t.to), onPointerLeave: () => setHot(null), onFocus: () => setHot(t.to), onBlur: () => setHot(null) }
+  return <li>{guide ? <Link to={`/convert/${guide}`} className={cls} {...events}>{body}</Link> : <div tabIndex={0} className={cls} {...events}>{body}</div>}</li>
+}
+
 function Explorer() {
   const [sel, setSel] = useState('heic')
   const [hot, setHot] = useState<string | null>(null)
+  const [more, setMore] = useState(false)
   const f = F[sel]
-  const optIn = f.targets.filter((t) => !t.wheel)
   const onWheel = f.targets.filter((t) => t.wheel)
-  const hotT = f.targets.find((t) => t.to === hot)
+  const optIn = f.targets.filter((t) => !t.wheel)
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
-      <div className="order-2 min-w-0 lg:order-1">
-        <Picker sel={sel} onPick={(id) => { setSel(id); setHot(null) }} />
-        <div className="mt-8 rounded-[24px] bg-white p-6 ring-1 ring-black/5">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <p className="text-[22px] font-semibold tracking-[-0.03em]">{f.name}</p>
-            <p className="font-mono text-[13px] text-mute-2">{f.extensions.map((e) => `.${e}`).join(' ')}</p>
+    <div>
+      <Picker sel={sel} onPick={(id) => { setSel(id); setHot(null); setMore(false) }} />
+      <div className="mt-8 overflow-hidden rounded-[28px] bg-white ring-1 ring-black/[.07]">
+        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-line px-6 py-6 sm:px-8">
+          <div>
+            <p className="text-[clamp(28px,3vw,40px)] font-semibold leading-none tracking-[-0.04em]">{f.name}</p>
+            <p className="mt-2 font-mono text-[14px] text-mute-2">{f.extensions.map((e) => `.${e}`).join('  ')}</p>
           </div>
-          <p className="mt-2 text-[15.5px] leading-[1.55] text-mute">
-            Becomes <strong className="text-ink">{onWheel.length}</strong> formats from the wheel{optIn.length ? <>, and <strong className="text-ink">{optIn.length}</strong> more once you switch them on in Settings › Formats or call them from the CLI</> : null}.
-          </p>
-          <div className="mt-5 min-h-[64px] rounded-[16px] bg-sand p-4 text-[14px] leading-[1.5]">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={hot ?? 'none'} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18 }}>
-                {hotT ? (
-                  <>
-                    <p className="font-medium">{f.label} → {hotT.via.map((v) => `${F[v]?.label} → `).join('')}{F[hotT.to]?.label}</p>
-                    <p className="mt-1 text-mute">{engineNames(hotT)}{hotT.via.length ? ` · ${hotT.via.length + 1} steps, run in one go` : ' · one step'}</p>
-                  </>
-                ) : <p className="text-mute">Point at a segment to see the route: the engines it uses and any formats it passes through. An ember dot marks routes with more than one step.</p>}
-              </motion.div>
-            </AnimatePresence>
+          <p className="text-[15px] text-mute"><strong className="font-semibold text-ink">{onWheel.length}</strong> on the wheel{optIn.length ? <>, <strong className="font-semibold text-ink">{optIn.length}</strong> more you can switch on</> : null}</p>
+        </div>
+        <div className="grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+          <div className="flex items-center justify-center bg-sand p-6 sm:p-10 lg:border-r lg:border-line"><Wheel f={f} hot={hot} setHot={setHot} /></div>
+          <div className="p-3 sm:p-5">
+            <p className="px-3 pb-2 pt-3 text-[14px] font-semibold">On the wheel <span className="font-normal text-mute-2">· one drag, tap Shift</span></p>
+            <ul>{onWheel.map((t) => <Route key={t.to} from={f} t={t} hot={hot} setHot={setHot} />)}</ul>
+            {optIn.length > 0 && (
+              <div className="mt-3 border-t border-line pt-3">
+                <button type="button" aria-expanded={more} onClick={() => setMore(!more)}
+                  className="group flex h-11 w-full items-center justify-between rounded-[12px] px-3 text-left text-[14px] outline-none hover:bg-sand focus-visible:ring-2 focus-visible:ring-flare">
+                  <span><span className="font-semibold">{optIn.length} more you can switch on</span><span className="text-mute-2"> · Settings › Formats, or the command line</span></span>
+                  <CaretDown size={14} weight="bold" aria-hidden className={`shrink-0 transition-transform duration-300 ${more ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {more && (
+                    <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="overflow-hidden">
+                      {optIn.map((t) => <Route key={t.to} from={f} t={t} hot={hot} setHot={setHot} />)}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+            <p className="px-3 pb-3 pt-5 text-[13px] leading-[1.5] text-mute-2"><span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-flare align-middle" />An ember dot on the wheel marks a route with more than one step. anyfmt runs every step in one go.</p>
           </div>
-          {optIn.length > 0 && (
-            <div className="mt-5">
-              <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-mute-2">Opt-in</p>
-              <ul className="mt-2 flex flex-wrap gap-1.5">
-                {optIn.map((t) => <li key={t.to} onPointerEnter={() => setHot(t.to)} onPointerLeave={() => setHot(null)} className="rounded-[7px] px-2 py-1 text-[11.5px] font-semibold uppercase tracking-wide text-mute ring-1 ring-black/10">{F[t.to]?.label}</li>)}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
-      <div className="order-1 flex min-w-0 justify-center lg:sticky lg:top-28 lg:order-2"><Wheel f={f} hot={hot} setHot={setHot} /></div>
     </div>
   )
 }
@@ -170,7 +204,7 @@ function Matrix() {
               <th className="sticky left-0 z-10 bg-white" />
               {outIds.map((id) => (
                 <th key={id} scope="col" className="relative h-[58px] p-0" style={{ width: cell, minWidth: cell, maxWidth: cell }}>
-                  <span className={`absolute bottom-1 left-[7px] block origin-bottom-left -rotate-[60deg] whitespace-nowrap text-left text-[10px] font-semibold uppercase transition-colors ${hiCol === id ? 'text-flare' : 'text-mute-2'}`}>{F[id].label}</span>
+                  <span className={`absolute bottom-1 left-[7px] block origin-bottom-left -rotate-[60deg] whitespace-nowrap text-left text-[12px] font-semibold uppercase transition-colors ${hiCol === id ? 'text-flare' : 'text-mute-2'}`}>{F[id].label}</span>
                 </th>
               ))}
             </tr>
@@ -180,7 +214,7 @@ function Matrix() {
               const map = Object.fromEntries(f.targets.map((t) => [t.to, t]))
               return (
                 <tr key={f.id}>
-                  <th scope="row" className={`sticky left-0 z-10 bg-white pr-2 text-right text-[10px] font-semibold uppercase transition-colors ${hiRow === f.id ? 'text-flare' : 'text-mute-2'}`}>{f.label}</th>
+                  <th scope="row" className={`sticky left-0 z-10 bg-white pr-2 text-right text-[12px] font-semibold uppercase transition-colors ${hiRow === f.id ? 'text-flare' : 'text-mute-2'}`}>{f.label}</th>
                   {outIds.map((id) => {
                     const t = map[id]
                     const self = id === f.id
@@ -202,7 +236,7 @@ function Matrix() {
           <li className="flex items-center gap-2"><span className="h-3 w-3 rounded-[3px] bg-[#FFD2B0]" />Opt-in</li>
         </ul>
         <p className="min-h-[22px] text-[14px] font-medium" aria-live="polite">
-          {tip ? <>{F[tip.from].label} → {F[tip.t.to].label} <span className="font-normal text-mute">· {engineNames(tip.t)}{tip.t.via.length ? ` · via ${tip.t.via.map((v) => F[v].label).join(', ')}` : ''}</span></> : <span className="font-normal text-mute-2">Point at a square.</span>}
+          {tip ? <>{F[tip.from].label} → {F[tip.t.to].label} <span className="font-normal text-mute">· {engineNames(tip.t)}{tip.t.via.length ? ` · via ${tip.t.via.map((v) => F[v].label).join(', ')}` : ''}</span></> : <span className="font-normal text-mute-2">Tap or point at a square.</span>}
         </p>
       </div>
     </div>
@@ -225,7 +259,7 @@ function Engines() {
             <p className="text-[14px] text-mute">{e.what}</p>
           </div>
           <div className="flex w-[120px] items-center gap-2 sm:w-[160px]">
-            <span className="h-2 flex-1 overflow-hidden rounded-full bg-sand-2"><span className="block h-full rounded-full bg-ink" style={{ width: `${(e.n / max) * 100}%` }} /></span>
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-sand-2"><span className="block h-full min-w-[6px] rounded-full bg-ink" style={{ width: `${(e.n / max) * 100}%` }} /></span>
             <span className="w-9 text-right text-[13px] tabular-nums text-mute">{e.n}</span>
           </div>
         </li>
@@ -234,34 +268,36 @@ function Engines() {
   )
 }
 
+/** Every format, one closed row per kind; the lists stay in the page for search and for reading. */
 function Lists() {
   return (
-    <div className="space-y-14">
+    <div className="divide-y divide-line border-y border-line">
       {catalog.kinds.map((k) => {
         const fs = catalog.formats.filter((f) => f.kind === k.id && f.targets.length)
         if (!fs.length) return null
         return (
-          <section key={k.id} id={k.id} className="grid scroll-mt-28 gap-6 border-t border-line pt-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
-            <h3 className="lg:sticky lg:top-28 lg:self-start">
-              <span className="block text-[clamp(26px,2.6vw,36px)] font-semibold leading-none tracking-[-0.035em]">{k.name}</span>
-              <span className="mt-2 block text-[15px] font-medium text-mute-2">{fs.length} {fs.length === 1 ? 'format' : 'formats'}</span>
-            </h3>
-            <ul className="grid gap-3 md:grid-cols-2">
+          <details key={k.id} id={k.id} className="group scroll-mt-28">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 outline-none focus-visible:ring-2 focus-visible:ring-flare [&::-webkit-details-marker]:hidden">
+              <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="text-[clamp(22px,2.2vw,30px)] font-semibold tracking-[-0.03em]">{k.name}</span>
+                <span className="text-[15px] text-mute-2">{fs.map((f) => f.label).join(', ')}</span>
+              </span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-2 transition-transform duration-300 group-open:rotate-45">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden><path d="M7 1.5v11M1.5 7h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+              </span>
+            </summary>
+            <ul className="mb-6 divide-y divide-line rounded-[20px] bg-sand px-5 sm:px-6">
               {fs.map((f) => (
-                <li key={f.id} className="rounded-[20px] bg-white p-5 ring-1 ring-black/5">
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="flex items-center gap-2.5 text-[17px] font-semibold"><FormatChip label={f.label} kind={f.kind} />{f.name}</h4>
-                    <span className="font-mono text-[12px] text-mute-2">{f.targets.length}</span>
-                  </div>
-                  <p className="mt-3 text-[14px] leading-[1.6] text-mute">
-                    <span className="text-mute-2">Converts to </span>
-                    {f.targets.map((t, i) => <span key={t.to} className={t.wheel ? 'font-medium text-ink' : ''}>{F[t.to]?.label}{i < f.targets.length - 1 ? ', ' : ''}</span>)}
+                <li key={f.id} className="grid gap-x-8 gap-y-1.5 py-4 sm:grid-cols-[220px_minmax(0,1fr)]">
+                  <h4 className="text-[16px] font-semibold">{f.label} <span className="font-normal text-mute-2">{f.name}</span></h4>
+                  <p className="max-w-[62ch] text-[15px] leading-[1.6] text-mute">
+                    {f.targets.map((t, i) => <span key={t.to} className={t.wheel ? 'text-ink' : ''}>{F[t.to]?.label}{i < f.targets.length - 1 ? ', ' : ''}</span>)}
+                    {!f.output && <span className="mt-1 block text-[14px] text-mute-2">anyfmt reads {f.label} but doesn't write it.</span>}
                   </p>
-                  {!f.output && <p className="mt-2 text-[12.5px] text-mute-2">Read only: anyfmt opens {f.label} but doesn't write it.</p>}
                 </li>
               ))}
             </ul>
-          </section>
+          </details>
         )
       })}
     </div>
@@ -279,27 +315,25 @@ export default function Formats() {
       url: 'https://anyfmt.app/formats', creator: { '@type': 'Organization', name: 'anyfmt' }, isAccessibleForFree: true,
     },
   })
-  const stats: [string, string][] = [[String(c.formats), 'formats'], [String(c.routes), 'routes'], [String(c.onWheel), 'on the wheel'], [String(c.multiHop), 'multi-step routes']]
   return (
     <Page>
       <section className="bg-sand pb-20 pt-36 lg:pt-44">
         <Container>
           <Eyebrow>Formats</Eyebrow>
-          <h1 className="mt-6 max-w-[1100px] text-[clamp(44px,6.4vw,100px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">Pick a file. See everything it can become.</h1>
-          <div className="mt-10 flex flex-wrap items-end justify-between gap-8">
-            <ul className="flex flex-wrap gap-x-10 gap-y-4">
-              {stats.map(([v, l]) => <li key={l}><p className="text-[40px] font-semibold leading-none tracking-[-0.05em]">{v}</p><p className="mt-1.5 text-[14px] text-mute">{l}</p></li>)}
-            </ul>
-            <p className="max-w-[420px] text-[15px] leading-[1.55] text-mute">Generated from <span className="font-mono text-[13px]">{catalog.generatedFrom}</span> itself, the same table the wheel reads, so this page can't drift from the app.</p>
+          <div className="grid items-end gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            <h1 className="max-w-[900px] text-[clamp(48px,7vw,112px)] font-semibold leading-[0.95] tracking-[-0.055em] [text-wrap:balance]">What can your file become?</h1>
+            <p className="max-w-[460px] text-[17px] leading-[1.55] text-mute lg:pb-3">
+              Pick the format you have. The wheel is the one anyfmt opens when you drag that file and tap Shift, read straight from <span className="font-mono text-[15px]">{catalog.generatedFrom}</span>: {c.inputs} formats in, {c.outputs} out, {c.routes} tested routes.
+            </p>
           </div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.2 }} className="mt-16"><Explorer /></motion.div>
+          <div className="mt-12 lg:mt-16"><Explorer /></div>
         </Container>
       </section>
 
       <section className="bg-white py-24 lg:py-32">
         <Container>
           <Eyebrow>All {c.routes} at once</Eyebrow>
-          <h2 className="mt-6 max-w-[860px] text-[clamp(34px,4.2vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em]">The whole table, one square per route.</h2>
+          <h2 className="mt-6 max-w-[860px] text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Every route in one table, one square each.</h2>
           <p className="mt-6 max-w-[620px] text-[17px] leading-[1.55] text-mute">Rows are what you have, columns are what you want. Every coloured square is a route that ships, and every one is run on a real file and checked by <span className="font-mono text-[14px]">make matrix</span> before a release.</p>
           <div className="mt-12"><Matrix /></div>
         </Container>
@@ -307,11 +341,11 @@ export default function Formats() {
 
       <section className="bg-sand py-24 lg:py-32">
         <Container className="grid gap-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
-          <div>
+          <div className="lg:sticky lg:top-28 lg:self-start">
             <Eyebrow>Engines</Eyebrow>
-            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em]">Picked per route, not per app.</h2>
+            <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em] [text-wrap:balance]">Each route uses the best engine for that job.</h2>
             <p className="mt-6 max-w-[420px] text-[16.5px] leading-[1.55] text-mute">Apple's frameworks first, because they cost nothing to ship. Bundled engines where Apple has none. Our own writers where nothing good existed. Numbers show how many routes each one touches.</p>
-            <Link to="/docs/routes" className="mt-8 inline-flex text-[15px] font-medium underline decoration-flare/60 underline-offset-4">How routes work</Link>
+            <Link to="/docs/routes" className="mt-8 inline-flex rounded-sm text-[15px] font-medium underline decoration-flare/60 underline-offset-4 outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">How routes work</Link>
           </div>
           <Engines />
         </Container>
@@ -320,12 +354,8 @@ export default function Formats() {
       <section className="bg-white py-24 lg:py-32">
         <Container>
           <Eyebrow>Every format</Eyebrow>
-          <h2 className="mt-6 text-[clamp(34px,4.2vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em]">The list, kind by kind.</h2>
-          <nav aria-label="Kinds" className="mt-8 flex flex-wrap gap-2">
-            {catalog.kinds.filter((k) => catalog.formats.some((f) => f.kind === k.id && f.targets.length)).map((k) => (
-              <a key={k.id} href={`#${k.id}`} className="rounded-full bg-sand px-3.5 py-2 text-[14px] font-medium transition-colors hover:bg-sand-2">{KIND_NAME[k.id]}</a>
-            ))}
-          </nav>
+          <h2 className="mt-6 text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em]">All {c.inputs} formats, by kind.</h2>
+          <p className="mt-6 max-w-[620px] text-[17px] leading-[1.55] text-mute">Open a kind to see every format in it and everything each one converts to. Formats in ink are on the wheel by default; the rest are one switch away in Settings.</p>
           <div className="mt-14"><Lists /></div>
         </Container>
       </section>

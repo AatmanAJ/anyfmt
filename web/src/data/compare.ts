@@ -27,7 +27,7 @@ export interface Competitor {
 export const CHECKED = '27 October 2026'
 
 export const ANYFMT_FACTS = {
-  price: 'Free to build (AGPL-3.0); Desktop $19 once; Pro $8/mo',
+  price: 'Free to build (AGPL-3.0); Desktop $19 once; Pro from $6 a month',
   platforms: 'macOS 13+, Apple silicon',
   processing: 'On your Mac',
   source: 'Open source, AGPL-3.0',
@@ -41,7 +41,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'tangerine', name: 'Tangerine', maker: 'Leap Studio', site: 'https://tangerineformac.com', kind: 'Mac App Store converter',
     title: 'anyfmt vs Tangerine: the open-source alternative',
-    h1: 'Same gesture. Three times the routes. Open source.',
+    h1: 'An open-source Tangerine alternative, with 793 routes to its 275.',
     description: 'anyfmt vs Tangerine for Mac: both open a format wheel when you tap Shift mid-drag. anyfmt is open source, has 793 tested routes to 275, a CLI and an MCP server.',
     answer: 'Tangerine and anyfmt work the same way: drag a file, tap Shift for formats, Command for tools, Control for actions. The differences are underneath: anyfmt is open source, ships 793 tested conversion routes to Tangerine\'s 275, adds a command-line tool and an MCP server for agents, and is 63 MB to Tangerine\'s 97.6 MB. Tangerine is on the Mac App Store and opens Pages and legacy PowerPoint files without extra setup.',
     centrepiece: 'routes',
@@ -75,7 +75,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'convt', name: 'convt', maker: 'opencoredev', site: 'https://convt.app', kind: 'Open-source right-click converter',
     title: 'anyfmt vs convt: wheel vs right-click menu',
-    h1: 'Both open source. One gesture instead of a menu.',
+    h1: 'anyfmt and convt: a wheel mid-drag, or a right-click menu.',
     description: 'anyfmt vs convt: two AGPL file converters. convt adds a right-click menu on Mac, Windows and Linux; anyfmt is a Mac wheel with 793 routes, no sign-in and an MCP server.',
     answer: 'convt and anyfmt are both AGPL-3.0 converters that sell a signed desktop build and a cloud tier. convt runs on macOS, Windows and Linux from a right-click menu, and uses LibreOffice for documents as an optional download. anyfmt is Mac only and works mid-drag from a wheel, with 793 tested routes, its own document writers built in, no sign-in at first run, and a local MCP server.',
     centrepiece: 'clicks',
@@ -111,7 +111,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'permute', name: 'Permute', maker: 'Charlie Monroe Software', site: 'https://software.charliemonroe.net/permute/', kind: 'Media converter app',
     title: 'anyfmt vs Permute 4: which Mac converter?',
-    h1: 'Permute is a media studio. anyfmt is a reflex.',
+    h1: 'anyfmt or Permute: a wheel mid-drag, or a media window.',
     description: 'anyfmt vs Permute 4 on Mac: Permute is a window-based media converter for macOS 26. anyfmt converts mid-drag on macOS 13+, adding documents, spreadsheets and archives.',
     answer: 'Permute 4 is a window-based media converter for macOS 26 or later: you drop files on its window and pick a preset, with strong video features such as ProRes, HLS and on-device transcription. anyfmt runs on macOS 13 and later and converts mid-drag from a wheel, covering documents, spreadsheets, ebooks, subtitles and archives as well as media. It is open source; Permute is $14.99.',
     centrepiece: 'timeline',
@@ -144,7 +144,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'cloudconvert', name: 'CloudConvert', maker: 'Lunaweb GmbH', site: 'https://cloudconvert.com', kind: 'Online converter',
     title: 'anyfmt vs CloudConvert: convert without uploading',
-    h1: 'The fastest upload is the one you skip.',
+    h1: 'Convert files like CloudConvert does, without uploading them.',
     description: 'anyfmt vs CloudConvert and other online converters: CloudConvert uploads your file and gives 10 free conversions a day. anyfmt converts on your Mac with no upload or limit.',
     answer: 'CloudConvert converts files on its servers: you upload, it converts, you download, with 10 free conversions a day and a 1 GB limit on the free tier. anyfmt converts on your Mac, so nothing is uploaded, there is no daily limit, and a large video starts converting immediately. CloudConvert supports more exotic formats, such as CAD and camera RAW, and works from any computer with a browser.',
     centrepiece: 'upload',
@@ -177,7 +177,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'clop', name: 'Clop', maker: 'The low-tech guys', site: 'https://lowtechguys.com/clop/', kind: 'File optimiser',
     title: 'anyfmt vs Clop: converter vs optimiser',
-    h1: 'Clop shrinks files. anyfmt changes what they are.',
+    h1: 'Clop makes files smaller, where anyfmt changes their format.',
     description: 'anyfmt vs Clop on Mac: Clop optimises images, video and PDFs automatically. anyfmt converts between 59 formats mid-drag, with a free CLI and MCP server.',
     answer: 'Clop is an optimiser: it shrinks images on your clipboard, screen recordings and files in watched folders, and converts to a handful of modern formats. anyfmt is a converter: 793 routes between 59 formats, plus compress-to-size tools, all free locally. Clop\'s free version limits most features to 5 per session and keeps its MCP server for Pro; anyfmt\'s CLI and MCP server are free.',
     centrepiece: 'session',
@@ -207,7 +207,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'handbrake', name: 'HandBrake', maker: 'The HandBrake Team', site: 'https://handbrake.fr', kind: 'Open-source video transcoder',
     title: 'anyfmt vs HandBrake for converting video on Mac',
-    h1: 'When MOV to MP4 shouldn\'t mean re-encoding.',
+    h1: 'MOV to MP4 without re-encoding, which HandBrake doesn\'t do.',
     description: 'anyfmt vs HandBrake: HandBrake is a free video transcoder that always re-encodes. anyfmt converts MOV to MP4 losslessly when it can, plus images, audio and documents.',
     answer: 'HandBrake is a free, open-source video transcoder with deep encoding controls; its own documentation says it doesn\'t pass video through without re-encoding. anyfmt is a general converter: when a MOV already holds H.264, anyfmt rewraps it as MP4 without re-encoding, in 0.23 seconds for a one-minute 1080p clip in our tests. HandBrake is the better tool for fine-tuned encodes, DVDs and Blu-ray.',
     centrepiece: 'passthrough',
@@ -236,7 +236,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'ffmpeg', name: 'FFmpeg', maker: 'The FFmpeg project', site: 'https://ffmpeg.org', kind: 'Command-line media engine',
     title: 'anyfmt vs FFmpeg: the engine, without the flags',
-    h1: 'FFmpeg is inside. The flags aren\'t your problem.',
+    h1: 'anyfmt runs FFmpeg for you, so you never write its flags.',
     description: 'anyfmt vs using FFmpeg directly: anyfmt bundles FFmpeg 9.0.2 and picks the right flags for 167 video and audio routes, mid-drag. Its own CLI is there when you want one.',
     answer: 'FFmpeg is the engine behind most video and audio conversion, and anyfmt bundles it: FFmpeg 9.0.2, built without network support. The difference is the interface. With FFmpeg you write the command; with anyfmt you drag, tap Shift and drop, and anyfmt picks codecs, quality and container for you. When something fails, anyfmt shows the exact FFmpeg command it ran.',
     centrepiece: 'terminal',
@@ -264,7 +264,7 @@ export const COMPETITORS: Competitor[] = [
   {
     slug: 'macos', name: 'Finder and Preview', maker: 'Apple', site: 'https://support.apple.com/guide/mac-help/perform-quick-actions-in-the-finder-on-mac-mchl97ff9142/mac', kind: 'Built into macOS',
     title: 'anyfmt vs Finder Convert Image and Preview export',
-    h1: 'What your Mac already does, and where it stops.',
+    h1: 'What Finder and Preview already convert, and what they can\'t.',
     description: 'Finder\'s Convert Image Quick Action and Preview\'s Export cover photos well. Here is what they convert, and what anyfmt adds: video, audio, PDF, documents and options.',
     answer: 'For photos, macOS already has two good converters. Finder\'s Convert Image Quick Action (macOS 12 or later) turns images into JPEG, PNG or HEIF, and Preview\'s File › Export also writes JPEG-2000, OpenEXR, PDF and TIFF. Neither converts video, audio, documents or spreadsheets, and neither writes WebP or AVIF. anyfmt covers those, mid-drag.',
     centrepiece: 'menu',

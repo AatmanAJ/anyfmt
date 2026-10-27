@@ -43,3 +43,15 @@ export function AppIcon({ size = 128, className = '', uid = 'ai', tone = 'ink' }
     </svg>
   )
 }
+
+/** The menu bar glyph: the same "a." as a single-colour template image, 18 pt like the system's own. */
+export function MenuBarGlyph({ size = 16, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 -560 600 600" className={className} aria-hidden>
+      <g transform="scale(1 -1)" fill="currentColor">
+        <path d={GLYPH_A.d} />
+        <path d={GLYPH_DOT.d} transform={`translate(${GLYPH_A.adv - 40} 0)`} />
+      </g>
+    </svg>
+  )
+}

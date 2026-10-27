@@ -41,7 +41,7 @@ function Hero() {
         </motion.p>
         <motion.div {...rise(4)} className="mt-10 flex flex-wrap items-center gap-4">
           <DownloadButton />
-          <a href="#try" className="group flex h-14 items-center gap-2 rounded-full px-4 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-ink">
+          <a href="#try" className="group flex h-14 items-center gap-2 rounded-full px-2 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-ink sm:px-4">
             <span className="link-line">Try the gesture here</span>
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden className="transition-transform duration-500 group-hover:translate-y-1"><path d="M7 2v10M3 8l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </a>
@@ -52,7 +52,7 @@ function Hero() {
         <ul className="mt-5 flex flex-wrap items-center gap-x-10 gap-y-4">
           {ENGINES.map(([e, d], i) => (
             <li key={e} className="relative" onPointerEnter={() => setTip(i)} onPointerLeave={() => setTip(-1)}>
-              <span className={`text-[22px] font-semibold tracking-[-0.03em] transition-colors duration-300 ${tip === i ? 'text-ink' : 'text-ink/45'}`}>{e}</span>
+              <span className={`text-[22px] font-semibold tracking-[-0.03em] transition-colors duration-300 ${tip === i ? 'text-ink' : 'text-mute-2'}`}>{e}</span>
               <AnimatePresence>
                 {tip === i && (
                   <motion.span initial={{ opacity: 0, y: 6, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: 4 }} transition={{ duration: 0.3, ease: EASE }}
@@ -67,11 +67,12 @@ function Hero() {
   )
 }
 
-const STATEMENT = 'Other converters want your file before they help. anyfmt meets it where it already is.'
+const STATEMENT = 'Most converters make you open an app or upload the file first. anyfmt works inside the drag you were already making.'
 
 function W({ children, p, i, n }: { children: string; p: MotionValue<number>; i: number; n: number }) {
   const s = (i / n) * 0.8
-  const color = useTransform(p, [s, s + 0.12], ['#CFCBC6', '#0A0A0A'])
+  // starts at a readable grey (over 3:1 at this size) and inks in as you scroll
+  const color = useTransform(p, [s, s + 0.12], ['#8A857F', '#0A0A0A'])
   return <motion.span style={{ color }}>{children}</motion.span>
 }
 
@@ -97,7 +98,7 @@ function TrySection() {
     <section id="try" className="scroll-mt-24 bg-white px-5 pb-24 sm:px-10 lg:px-14 lg:pb-32">
       <div className="mx-auto max-w-[1440px]">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-          <h2 className="max-w-[640px] text-[clamp(32px,3.8vw,56px)] font-semibold leading-[1.02] tracking-[-0.04em]">Go on, try the gesture.</h2>
+          <h2 className="max-w-[640px] text-[clamp(32px,3.8vw,56px)] font-semibold leading-[1.02] tracking-[-0.04em] [text-wrap:balance]">Go on, try the gesture.</h2>
           <p className="max-w-[420px] text-[17px] leading-[1.5] text-mute">This is the real interaction, minus your files. On a keyboard, focus a file and press Enter, then the arrow keys.</p>
         </div>
         <Playground />
@@ -118,12 +119,13 @@ function KeysSection() {
     <section id="keys" className="scroll-mt-24 bg-sand px-5 py-24 sm:px-10 lg:px-14 lg:py-32">
       <div className="mx-auto max-w-[1440px]">
         <Eyebrow>Three keys</Eyebrow>
-        <h2 className="mt-6 max-w-[900px] text-[clamp(36px,4.6vw,72px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">One drag. Three keys. Every file you own.</h2>
+        <h2 className="mt-6 max-w-[900px] text-[clamp(36px,4.6vw,72px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">The key you tap mid‑drag picks the wheel.</h2>
         <div className="mt-16 grid gap-5 md:grid-cols-3">
           {KEYS.map((k, i) => (
             <Link key={k.name} to={k.to} onPointerEnter={() => setOn(i)} onPointerLeave={() => setOn(-1)} onFocus={() => setOn(i)} onBlur={() => setOn(-1)}
               className="group rounded-[28px] bg-white p-8 outline-none focus-visible:ring-2 focus-visible:ring-flare">
-              <Keycap glyph={k.k} name={k.name} pressed={on === i} size="lg" />
+              <span className="md:hidden"><Keycap glyph={k.k} name={k.name} pressed={on === i} size="md" /></span>
+              <span className="hidden md:block"><Keycap glyph={k.k} name={k.name} pressed={on === i} size="lg" /></span>
               <p className="mt-8 text-[30px] font-semibold tracking-[-0.03em]">{k.verb}</p>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {k.items.map((t, j) => (
@@ -172,12 +174,12 @@ function Doors() {
     <section className="bg-sand px-5 py-24 sm:px-10 lg:px-14 lg:py-32">
       <div className="mx-auto max-w-[1440px]">
         <Eyebrow>Beyond the wheel</Eyebrow>
-        <h2 className="mt-6 max-w-[880px] text-[clamp(36px,4.6vw,72px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Same engine, wherever you work.</h2>
+        <h2 className="mt-6 max-w-[880px] text-[clamp(36px,4.6vw,72px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">The same routes, from Terminal and from your agent.</h2>
         <div className="mt-14 grid gap-5 lg:grid-cols-[1.25fr_1fr]">
           <div className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[28px] bg-night p-8 text-white sm:p-10">
             <div className="flutes-static-dark pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-700 group-hover:opacity-100" />
             <div className="relative">
-              <p className="text-[14px] font-medium uppercase tracking-[0.14em] text-white/55">For agents</p>
+              <p className="text-[14px] font-semibold text-white/70">For agents</p>
               <p className="mt-4 max-w-[520px] text-[clamp(28px,3vw,44px)] font-semibold leading-[1.02] tracking-[-0.04em]">Your agent converts files too. On your Mac, through MCP.</p>
             </div>
             <div className="relative mt-10 space-y-3">
@@ -188,16 +190,16 @@ function Doors() {
           </div>
           <div className="grid gap-5">
             <Link to="/docs/cli" className="group flex flex-col justify-between rounded-[28px] bg-white p-8 outline-none focus-visible:ring-2 focus-visible:ring-flare">
-              <p className="text-[14px] font-medium uppercase tracking-[0.14em] text-mute-2">Command line</p>
-              <div className="mt-6 rounded-2xl bg-sand p-4 font-mono text-[12.5px] leading-[1.7] text-ink">
+              <p className="text-[14px] font-semibold text-mute-2">Command line</p>
+              <div className="mt-6 overflow-x-auto whitespace-nowrap rounded-2xl bg-sand p-4 font-mono text-[12.5px] leading-[1.7] text-ink no-scrollbar">
                 <p><span className="text-flare">$</span> anyfmt convert IMG_0042.heic --to jpg</p>
                 <p className="text-mute-2">{'{"event":"progress","fraction":0.62}'}</p>
                 <p className="text-mute-2">{'{"event":"output","path":"IMG_0042.jpg"}'}</p>
               </div>
-              <p className="mt-6 text-[22px] font-semibold tracking-[-0.03em]">--json on every command. Stable exit codes.</p>
+              <p className="mt-6 text-[22px] font-semibold tracking-[-0.03em]">Every command takes --json and exits with a documented code.</p>
             </Link>
             <Link to="/compare" className="group flex flex-col justify-between rounded-[28px] bg-white p-8 outline-none focus-visible:ring-2 focus-visible:ring-flare">
-              <p className="text-[14px] font-medium uppercase tracking-[0.14em] text-mute-2">Choosing a converter?</p>
+              <p className="text-[14px] font-semibold text-mute-2">Choosing a converter?</p>
               <p className="mt-6 text-[22px] font-semibold leading-[1.15] tracking-[-0.03em]">Honest side-by-sides with Tangerine, convt, Permute and the web upload sites.</p>
               <span className="mt-6 inline-flex items-center gap-2 font-medium"><span className="link-line">Compare</span><span aria-hidden>→</span></span>
             </Link>
@@ -223,7 +225,7 @@ function Faq() {
       <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div>
           <Eyebrow>Questions</Eyebrow>
-          <h2 className="mt-6 text-[clamp(36px,4.2vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em]">Short answers.</h2>
+          <h2 className="mt-6 text-[clamp(36px,4.2vw,64px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Before you download.</h2>
         </div>
         <ul className="divide-y divide-line border-y border-line">
           {FAQ.map(([q, a], i) => (
@@ -250,14 +252,16 @@ function Faq() {
 
 function FinalCta() {
   return (
-    <section id="download" className="bg-white p-3 sm:p-5">
-      <div className="relative overflow-hidden rounded-[32px] bg-night">
+    <section id="download" className="bg-white">
+      <div className="mx-auto max-w-[1440px] px-5 sm:px-10 lg:px-14">
+      <div className="relative overflow-hidden rounded-[28px] bg-night">
         <Flutes variant="dark" corner="bl" className="pointer-events-none absolute inset-0" />
         <div className="relative mx-auto flex min-h-[640px] max-w-[1440px] flex-col items-end justify-center px-6 py-24 text-right sm:px-14">
-          <h2 className="max-w-[820px] text-[clamp(44px,6vw,96px)] font-semibold leading-[0.97] tracking-[-0.05em] text-white [text-wrap:balance]">Your next drag already knows the way.</h2>
-          <p className="mt-6 max-w-[460px] text-[18px] leading-[1.5] text-white/70">No account, no uploads, open source. Install it once and every file you touch learns a new trick.</p>
+          <h2 className="max-w-[820px] text-[clamp(44px,6vw,96px)] font-semibold leading-[0.97] tracking-[-0.05em] text-white [text-wrap:balance]">Try it on the next file you drag.</h2>
+          <p className="mt-6 max-w-[460px] text-[18px] leading-[1.5] text-white/70">No account, no uploads, nothing to set up. It lives in your menu bar until you need it.</p>
           <div className="mt-10 flex flex-wrap justify-end gap-3"><GitHubButton tone="dark" /><DownloadButton tone="light" /></div>
         </div>
+      </div>
       </div>
     </section>
   )
