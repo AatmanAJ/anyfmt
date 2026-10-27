@@ -1,7 +1,6 @@
 # BASE44 BUILD PROMPT: exact clone of the "anyfmt" landing page
 
-> Paste this whole message into the Base44 builder chat (Build mode).
-> It has two parts. If you paste them as two messages, send PART 1, wait for it to finish, then send PART 2.
+> Paste this whole message into the Base44 builder chat (Build mode) as one message. Do every step in order, then reply in the format at the end.
 
 ---
 
@@ -45,7 +44,7 @@ When you are done, the app's home page (`/`) is the "anyfmt" landing page below,
 
 ---
 
-# PART 1 of 2: packages, global CSS and components
+# BUILD STEPS
 
 ## BASE44 PLATFORM RULES FOR THIS TASK
 
@@ -55,7 +54,7 @@ When you are done, the app's home page (`/`) is the "anyfmt" landing page below,
   - `@number-flow/react@0.6.2`
 - `framer-motion` is already installed in Base44 apps. If it is somehow missing, install `framer-motion@11.18.2`. Do not upgrade or downgrade an existing install.
 - Fonts load via Google Fonts `@import` at the very top of `src/index.css` (Base44 convention). No font packages.
-- Do not touch any other existing file except `src/index.css` (append-only as described) and the router (PART 2).
+- Do not touch any other existing file except `src/index.css` (append-only as described) and the router (Step 5).
 
 ## STEP 1: Install packages
 
@@ -997,12 +996,6 @@ export function Playground() {
   )
 }
 ```
-
-When PART 1 is done, reply with: the installed versions of `shaders`, `@number-flow/react` and `framer-motion`, and the list of files created. Then wait for PART 2 if it has not been sent yet.
-
----
-
-# PART 2 of 2: the page, routing and verification
 
 ## STEP 4: Create the page
 
