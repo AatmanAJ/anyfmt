@@ -61,11 +61,13 @@ final class ActionScreensTests: XCTestCase {
 
     func testCardSizes() {
         XCTAssertEqual(ShelfCardView.size(mode: .collapsed, count: 5), ShelfCardView.collapsedSize)
+        // Tile 84 wide, row 96 tall, 6 between tiles, 14 padding, 40 header.
+        let tile: CGFloat = 84, row: CGFloat = 96, gap: CGFloat = 6, pad: CGFloat = 14, header: CGFloat = 40
         let grid = ShelfCardView.size(mode: .expanded, count: 5)
-        XCTAssertEqual(grid.width, 3 * 84 + 2 * 6 + 2 * 14)
-        XCTAssertEqual(grid.height, 40 + 2 * 96 + 6 + 14)
+        XCTAssertEqual(grid.width, 3 * tile + 2 * gap + 2 * pad)
+        XCTAssertEqual(grid.height, header + 2 * row + gap + pad)
         let tall = ShelfCardView.size(mode: .expanded, count: 30)
-        XCTAssertEqual(tall.height, 40 + 3 * 96 + 2 * 6 + 14, "more than three rows scroll")
+        XCTAssertEqual(tall.height, header + 3 * row + 2 * gap + pad, "more than three rows scroll")
         XCTAssertEqual(ShelfGridView.columns(for: 2), 2)
     }
 }

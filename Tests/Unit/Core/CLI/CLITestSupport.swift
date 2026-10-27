@@ -159,7 +159,7 @@ enum AnyfmtCLI {
         func u32(_ v: Int) -> Data { withUnsafeBytes(of: UInt32(v).littleEndian) { Data($0) } }
         func u16(_ v: Int) -> Data { withUnsafeBytes(of: UInt16(v).littleEndian) { Data($0) } }
         var d = Data("RIFF".utf8) + u32(36 + pcm.count) + Data("WAVE".utf8)
-        d += Data("fmt ".utf8) + u32(16) + u16(1) + u16(1) + u32(rate) + u32(rate * 2) + u16(2) + u16(16)
+        for part in [Data("fmt ".utf8), u32(16), u16(1), u16(1), u32(rate), u32(rate * 2), u16(2), u16(16)] { d += part }
         d += Data("data".utf8) + u32(pcm.count) + pcm
         try d.write(to: url)
     }
