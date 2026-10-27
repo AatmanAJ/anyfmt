@@ -5,3 +5,6 @@ dist-artifact
 *.local
 dist-debug*
 *.tsbuildinfo
+
+# Base44 app link (per machine)
+base44/.app.jsonc

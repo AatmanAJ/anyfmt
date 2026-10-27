@@ -11,8 +11,12 @@ const tree = (
   </StrictMode>
 )
 const root = document.getElementById('root')!
-// Hydrate only HTML prerendered for this exact path; a host that falls back to another page's
-// HTML (or the bare template) gets a fresh render instead of a mismatch.
+// Hydrate only HTML prerendered for this exact path and not re-formatted since. A host that falls
+// back to another page's HTML, or rewrites it, gets a fresh render instead of a mismatch.
 const here = location.pathname.replace(/\/$/, '') || '/'
-if (root.dataset.path === here && !import.meta.env.ARTIFACT) hydrateRoot(root, tree)
+// React's markup starts with its own node; a re-formatter puts whitespace text first
+const first = root.firstChild
+const reformatted = !!first && first.nodeType === Node.TEXT_NODE && !first.textContent?.trim()
+const untouched = root.dataset.path === here && !reformatted
+if (untouched && !import.meta.env.ARTIFACT) hydrateRoot(root, tree)
 else { root.textContent = ''; createRoot(root).render(tree) }

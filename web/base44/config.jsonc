@@ -1,0 +1,16 @@
+// Base44 project for anyfmt.app. The site is a prerendered static build (see scripts/prerender.mjs);
+// Base44 hosts the files in ./dist. There is no Base44 backend: no entities, functions or agents.
+{
+  "name": "anyfmt",
+  "description": "anyfmt.app: the website, docs, guides and comparisons for the anyfmt Mac app.",
+
+  // Private until it's reviewed. `base44 visibility public` publishes it.
+  "visibility": "private",
+
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
