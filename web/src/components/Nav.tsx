@@ -51,18 +51,22 @@ export function Nav({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
           : { maxWidth: 1440, paddingLeft: 18, paddingRight: 18, backgroundColor: 'rgba(255,255,255,0)', boxShadow: '0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0)', borderRadius: 999 }}
         transition={reduce ? { duration: 0 } : { duration: 0.6, ease: EASE }}
         className={`mx-auto flex h-16 items-center justify-between gap-4`}>
-        <div className="flex min-w-0 items-center gap-10">
+        <div className="flex min-w-0 items-center gap-7">
           <Link to="/" aria-label="anyfmt home" className="shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-flare">
             <Logo tone={light ? 'ink' : 'white'} className={pinned ? 'text-[26px]' : 'text-[30px]'} />
           </Link>
-          <ul className="hidden items-center gap-7 lg:flex">
-            {NAV.map(([l, to]) => (
-              <li key={to} className="relative">
-                <Link to={to} aria-current={active(to) ? 'page' : undefined}
-                  className={`link-line py-1 text-[15.5px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-flare ${ink}`}>{l}</Link>
-                {active(to) && <motion.span layoutId="nav-dot" className="absolute -bottom-2.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-flare" transition={{ type: 'spring', stiffness: 500, damping: 34 }} />}
-              </li>
-            ))}
+          {/* the current section sits in a soft pill that slides to the next one; the others are a step quieter */}
+          <ul className="hidden items-center gap-1 lg:flex">
+            {NAV.map(([l, to]) => {
+              const on = active(to)
+              return (
+                <li key={to} className="relative">
+                  {on && <motion.span layoutId="nav-pill" aria-hidden className={`absolute inset-0 rounded-full ${light ? 'bg-black/[.06]' : 'bg-white/[.14]'}`} transition={{ type: 'spring', stiffness: 520, damping: 40 }} />}
+                  <Link to={to} aria-current={on ? 'page' : undefined}
+                    className={`relative flex h-9 items-center rounded-full px-3.5 text-[15.5px] outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-flare ${on ? ink : light ? 'text-ink/65 hover:text-ink' : 'text-white/70 hover:text-white'}`}>{l}</Link>
+                </li>
+              )
+            })}
           </ul>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -95,8 +99,8 @@ export function Nav({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
               <ul className="mt-6 flex flex-col">
                 {NAV.map(([l, to], i) => (
                   <motion.li key={to} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE, delay: 0.08 + i * 0.04 }}>
-                    <Link to={to} className="flex items-center justify-between rounded-[12px] py-1 text-[32px] font-semibold tracking-[-0.04em] outline-none focus-visible:ring-2 focus-visible:ring-flare">
-                      {l}{active(to) && <span className="h-2.5 w-2.5 rounded-full bg-flare" />}
+                    <Link to={to} aria-current={active(to) ? 'page' : undefined} className={`-mx-3 flex items-center rounded-[16px] px-3 py-1 text-[32px] font-semibold tracking-[-0.04em] outline-none focus-visible:ring-2 focus-visible:ring-flare ${active(to) ? 'bg-sand-2' : ''}`}>
+                      {l}
                     </Link>
                   </motion.li>
                 ))}

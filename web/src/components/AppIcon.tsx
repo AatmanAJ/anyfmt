@@ -14,8 +14,9 @@ const squircle = (() => {
   return `M${pts.join('L')}Z`
 })()
 
-// "a." set as in the wordmark (tracking −0.04em), sized to 0.52 of the canvas and centred on its ink
-const TRACK = -40
+// "a." as in the wordmark: tracking −0.04em, then the full stop eased 45 units clear of the a's foot.
+// Sized to 0.52 of the canvas and centred on its ink.
+const TRACK = 5
 const DOT_X = GLYPH_A.adv + TRACK
 const INK = { x0: 23.5, x1: DOT_X + 145.3, y0: -12.6, y1: 541.7 }
 const S = 532 / (INK.x1 - INK.x0)
@@ -47,10 +48,10 @@ export function AppIcon({ size = 128, className = '', uid = 'ai', tone = 'ink' }
 /** The menu bar glyph: the same "a." as a single-colour template image, 18 pt like the system's own. */
 export function MenuBarGlyph({ size = 16, className = '' }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 -560 600 600" className={className} aria-hidden>
+    <svg width={size} height={size} viewBox="4 -572 624 624" className={className} aria-hidden>
       <g transform="scale(1 -1)" fill="currentColor">
         <path d={GLYPH_A.d} />
-        <path d={GLYPH_DOT.d} transform={`translate(${GLYPH_A.adv - 40} 0)`} />
+        <path d={GLYPH_DOT.d} transform={`translate(${DOT_X} 0)`} />
       </g>
     </svg>
   )

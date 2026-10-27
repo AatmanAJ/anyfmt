@@ -6,7 +6,7 @@ import { copyText, EASE } from '../lib/hooks'
 export function Logo({ className = '', tone = 'ink' }: { className?: string; tone?: 'ink' | 'white' }) {
   return (
     <span className={`font-wordmark text-[32px] font-bold leading-none tracking-[-0.04em] ${tone === 'ink' ? 'text-ink' : 'text-white'} ${className}`}>
-      anyfmt<span className="text-flare">.</span>
+      anyfmt<span className="ml-[0.05em] text-flare">.</span>
     </span>
   )
 }
