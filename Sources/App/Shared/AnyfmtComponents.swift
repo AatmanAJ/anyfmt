@@ -6,7 +6,7 @@ import SwiftUI
 // blue pill = primary, orange pill = secondary, quiet = text button; charcoal
 // tiles; heavy uppercase display type; big numerals for stats.
 
-/// Pill buttons. Primary: cobalt with white text (5.0:1). Secondary: orange with
+/// Pill buttons. Primary: ink with paper text (paper with ink in dark). Secondary: ember with
 /// black text (9.6:1). Quiet: no fill. Disabled lowers opacity *and* keeps the
 /// label, so state never rides on colour alone.
 struct AnyfmtPillButtonStyle: ButtonStyle {
@@ -32,15 +32,15 @@ struct AnyfmtPillButtonStyle: ButtonStyle {
 
     private var fill: Color? {
         switch kind {
-        case .primary: Color(hex: DesignTokens.Primitive.cobalt500)
-        case .secondary: Color(hex: DesignTokens.Primitive.orange500)
+        case .primary: Color.token(DesignTokens.Semantic.accentPrimary)
+        case .secondary: Color(hex: DesignTokens.Primitive.ember500)
         case .quiet: nil
         }
     }
 
     private var foreground: Color {
         switch kind {
-        case .primary: Color(hex: DesignTokens.Semantic.onAccentPrimary)
+        case .primary: Color.token(DesignTokens.Semantic.onAccentPrimary)
         case .secondary: Color(hex: DesignTokens.Semantic.onAccentSecondary)
         case .quiet: Color.anyfmtSecondaryText
         }
@@ -66,13 +66,13 @@ extension View {
     }
 }
 
-/// Heavy, tightly tracked, uppercase display words: format names, headlines.
+/// Bold, tightly tracked display words in sentence case: format names, headlines.
 struct DisplayText: View {
     let text: String
     var size: CGFloat = DesignTokens.Typeface.Size.displayL
-    var uppercase = true
+    var uppercase = false
 
-    init(_ text: String, size: CGFloat = DesignTokens.Typeface.Size.displayL, uppercase: Bool = true) {
+    init(_ text: String, size: CGFloat = DesignTokens.Typeface.Size.displayL, uppercase: Bool = false) {
         self.text = text
         self.size = size
         self.uppercase = uppercase

@@ -1,7 +1,7 @@
 import SwiftUI
 import AnyfmtCore
 
-// Every page: a heavy uppercase headline at the top left, a plain subtitle, then
+// Every page: a sentence-case headline at the top left, a plain subtitle, then
 // at most one charcoal tile of controls. The page's band column (if any) is drawn
 // by `OnboardingView`; nothing here adds colour of its own. The quieter pages set
 // the headline at the top and the controls at the foot, like a poster.
@@ -38,7 +38,7 @@ private struct FactLine: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Space.m) {
-            Text(verbatim: tag.localizedUppercase)
+            Text(verbatim: tag)
                 .font(.anyfmtDisplay(T.tagSize))
                 .displayTracking(T.tagSize)
                 .frame(width: T.tagWidth, alignment: .leading)
@@ -214,7 +214,7 @@ private struct KeyEntry: View {
 
 // MARK: - Pieces
 
-/// Heavy uppercase display lines set tight, like a poster. Lines come from the
+/// Display lines in sentence case, set tight, like a poster. Lines come from the
 /// localized string (one per `\n`) so translators choose the breaks.
 struct OnboardingHeadline: View {
     let text: String
@@ -224,7 +224,7 @@ struct OnboardingHeadline: View {
         let lines = text.split(separator: "\n").map(String.init)
         VStack(alignment: .leading, spacing: size * DesignTokens.Component.Onboarding.headlineLeading) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
-                Text(verbatim: line.localizedUppercase)
+                Text(verbatim: line)
                     .font(.anyfmtDisplay(size))
                     .displayTracking(size)
                     .lineLimit(1)

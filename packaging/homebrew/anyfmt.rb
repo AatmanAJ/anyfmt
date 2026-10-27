@@ -5,10 +5,10 @@ cask "anyfmt" do
   version "0.1.0"
   sha256 "REPLACE_WITH_DMG_SHA256"
 
-  url "https://github.com/aiwithaj/anyfmt/releases/download/v#{version}/anyfmt-#{version}.dmg"
+  url "https://github.com/AatmanAJ/anyfmt/releases/download/v#{version}/anyfmt-#{version}.dmg"
   name "anyfmt"
   desc "Drag a file, tap a key, convert it: radial file converter for the menu bar"
-  homepage "https://github.com/aiwithaj/anyfmt"
+  homepage "https://github.com/AatmanAJ/anyfmt"
 
   livecheck do
     url :url

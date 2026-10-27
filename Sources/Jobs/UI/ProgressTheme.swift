@@ -78,10 +78,10 @@ enum ProgressTheme {
     /// Cobalt as a small glyph or text (AA on either tile).
     static func accentText(_ s: ColorScheme) -> Color { color(DesignTokens.Semantic.accentPrimaryText, s) }
     /// Cobalt as a fill (behind white).
-    static var accentFill: Color { Color(hex: DesignTokens.Primitive.cobalt500) }
+    static var accentFill: Color { Color(hex: DesignTokens.Primitive.ember500) }
     /// Errors: flame on charcoal, ember on light (both AA as text). Always with an icon + words.
     static func danger(_ s: ColorScheme) -> Color { color(DesignTokens.Palette.danger, s) }
-    static var onAccent: Color { Color(hex: DesignTokens.Semantic.onAccentPrimary) }
+    static var onAccent: Color { Color(hex: DesignTokens.Semantic.onAccentSecondary) }
 
     static func secondary(_ s: ColorScheme, highContrast: Bool) -> Color {
         highContrast ? ink(s) : color(DesignTokens.Semantic.textSecondary, s)

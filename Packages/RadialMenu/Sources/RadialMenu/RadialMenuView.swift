@@ -171,6 +171,9 @@ public final class RadialMenuView: NSView {
     private var materialView: NSVisualEffectView?
     private let maskRoot = CALayer()
     private let hitLayer = CAShapeLayer()
+    /// A painted surface's track: one soft disc the segments and hub sit on, so the wheel reads
+    /// as one object rather than loose pieces.
+    private let trackLayer = CAShapeLayer()
     private(set) var nodes: [SegmentNode] = []
     private var hubNode: HubNode
     private var dropZoneNode: DropZoneNode?
@@ -221,6 +224,8 @@ public final class RadialMenuView: NSView {
         }
         addSubview(overlayView)
         hitLayer.actions = SegmentNode.noActions
+        trackLayer.actions = SegmentNode.noActions
+        shadowView.content.addSublayer(trackLayer)
         shadowView.content.addSublayer(hitLayer)
         hubNode.install(shadowRoot: shadowView.content, maskRoot: liveMaskRoot, overlayRoot: overlayView.content)
         installAimLayers()
@@ -283,6 +288,7 @@ public final class RadialMenuView: NSView {
                 ? LayerAnimation.basic(configuration.morphDuration, LayerAnimation.easeInOut) : nil)
         if animated {
             if hapticsEnabled { NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now) }
+            soundHandler?(.page)
             announce(String(format: strings.pageFormat, radialLayout.page + 1, radialLayout.pageCount))
         }
     }
@@ -291,6 +297,11 @@ public final class RadialMenuView: NSView {
 
     /// Haptic ticks on segment and page changes (the host's Settings switch).
     public var hapticsEnabled = true
+
+    /// Moments the host may give a sound to. The package plays nothing itself.
+    public enum Sound: Sendable { case open, tick, page, activate, cancel }
+    /// Called on each `Sound` moment; nil keeps the wheel silent.
+    public var soundHandler: ((Sound) -> Void)?
 
     /// Item index under a point in view coordinates.
     public func itemIndex(at point: NSPoint) -> Int? {
@@ -438,6 +449,22 @@ public final class RadialMenuView: NSView {
             hitLayer.frame = canvas
             hitLayer.path = CGPath(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2), transform: nil)
             hitLayer.fillColor = palette.hitFill
+            let painted = style.surface != nil
+            trackLayer.isHidden = !painted
+            if painted {
+                let t = base - configuration.outerTolerance + configuration.trackPadding
+                let disc = CGPath(ellipseIn: CGRect(x: c.x - t, y: c.y - t, width: t * 2, height: t * 2), transform: nil)
+                trackLayer.frame = canvas
+                trackLayer.path = disc
+                trackLayer.fillColor = palette.material
+                trackLayer.strokeColor = palette.rim
+                trackLayer.lineWidth = palette.rimWidth
+                trackLayer.shadowPath = disc
+                trackLayer.shadowColor = palette.shadowColor
+                trackLayer.shadowOpacity = palette.shadowOpacity * 1.4
+                trackLayer.shadowRadius = 22
+                trackLayer.shadowOffset = CGSize(width: 0, height: -10)
+            }
         }
     }
 
@@ -584,6 +611,7 @@ public final class RadialMenuView: NSView {
             if animated {
                 // Best effort: AppKit ignores haptics while our app isn't active (mid-drag).
                 if hapticsEnabled { NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now) }
+                soundHandler?(.tick)
             }
         }
         if chipsSlot != nil && chipsSlot != highlightedSlot { hideChips() }
@@ -659,11 +687,13 @@ public final class RadialMenuView: NSView {
             NSSound.beep()
             return false
         }
+        soundHandler?(.activate)
         delegate?.radialMenu(self, didActivate: items[index])
         return true
     }
 
     func cancel() {
+        soundHandler?(.cancel)
         delegate?.radialMenuDidCancel(self)
     }
 
@@ -696,6 +726,7 @@ public final class RadialMenuView: NSView {
     /// Reduce Motion: a plain crossfade.
     public func playOpenAnimation() {
         prepareForDisplay()
+        soundHandler?(.open)
         let segments = nodes.map(\.movingLayers) + [dropZoneNode?.movingLayers ?? []]
         if resolvedAppearance.reduceMotion {
             let fade = LayerAnimation.basic(configuration.crossfadeDuration, LayerAnimation.easeInOut)

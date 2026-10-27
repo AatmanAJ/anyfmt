@@ -3,10 +3,9 @@ import SwiftUI
 import AnyfmtCore
 
 /// Fallback wheel for the onboarding demo, used until the real `RadialMenuView`
-/// is wired through `OnboardingHooks.demoWheel`. Drawn in the phase 2 wheel look:
-/// a black disc, charcoal wedges, heavy uppercase labels, and the heat band on the
-/// wedge under the pointer, like a stage light swinging onto it. Nothing glows,
-/// nothing is blurred. Same geometry and motion tokens as the real wheel.
+/// is wired through `OnboardingHooks.demoWheel`. Drawn like the real wheel: a soft fog track,
+/// paper pillows (charcoal in dark), labels as written, and one flat ember wedge under the
+/// pointer with ink text. Same geometry and motion tokens as the real wheel.
 struct DemoWheelRing: View {
     let context: DemoWheelContext
     @State private var appeared = false
@@ -23,7 +22,8 @@ struct DemoWheelRing: View {
         let n = context.segments.count
         ZStack {
             Circle()
-                .fill(Color(hex: T.wheelDisc))
+                .fill(Color.token(T.wheelDisc))
+                .shadow(color: .black.opacity(0.14), radius: 18, y: 8)
                 .frame(width: (outer + T.wheelRim) * 2, height: (outer + T.wheelRim) * 2)
                 .opacity(appeared ? 1 : 0)
 
@@ -55,21 +55,15 @@ struct DemoWheelRing: View {
         let lift = hot && !context.reduceMotion ? DesignTokens.Wheel.hoverLift : 0
         let delay = context.reduceMotion ? 0 : DesignTokens.Motion.openStaggerPerSegment * Double(i)
         let shape = WedgeShape(index: i, count: n, inner: inner, outer: outer,
-                               gap: T.wheelGap, cornerRadius: DesignTokens.Shape.segment * 0.5)
-        let box = shape.path(in: CGRect(x: 0, y: 0, width: side, height: side)).boundingRect
+                               gap: T.wheelGap, cornerRadius: DesignTokens.Wheel.segmentCornerRadius * 0.6)
         ZStack {
             if hot {
-                // The heat band laid across this wedge's own bounds, so all six bands show.
-                BandGradient(bands: DesignTokens.Band.heat, flat: DesignTokens.Band.heatFlat)
-                    .frame(width: box.width, height: box.height)
-                    .position(x: box.midX, y: box.midY)
-                    .frame(width: side, height: side)
-                    .mask(shape)
+                shape.fill(Color(hex: DesignTokens.Band.heatFlat))
                 if flatBands {
                     shape.stroke(Color(hex: T.wheelLabelOnBand), lineWidth: DesignTokens.Component.Focus.ringWidth)
                 }
             } else {
-                shape.fill(Color(hex: T.wheelWedge))
+                shape.fill(Color.token(T.wheelWedge))
             }
             label(seg, hot: hot)
                 .position(x: side / 2 + cos(mid) * (inner + outer) / 2, y: side / 2 + sin(mid) * (inner + outer) / 2)
@@ -96,14 +90,14 @@ struct DemoWheelRing: View {
     private func label(_ seg: DemoSegment, hot: Bool) -> some View {
         let isFormat = context.kind == .convert
         let size = isFormat ? T.formatLabel : T.toolLabel
-        return Text(verbatim: seg.title.localizedUppercase)
+        return Text(verbatim: seg.title)
             .font(.anyfmtDisplay(size, black: isFormat))
             .displayTracking(size)
             .multilineTextAlignment(.center)
             .lineLimit(isFormat ? 1 : 2)
             .minimumScaleFactor(0.7)
             .frame(width: T.toolLabelWidth)
-            .foregroundStyle(Color(hex: hot ? T.wheelLabelOnBand : T.wheelLabel))
+            .foregroundStyle(hot ? Color(hex: T.wheelLabelOnBand) : Color.token(T.wheelLabel))
     }
 
     private var hub: some View {
@@ -115,7 +109,7 @@ struct DemoWheelRing: View {
             .frame(width: r * 2 - DesignTokens.Space.s * 2, height: r * 2 - DesignTokens.Space.s * 2)
             .clipShape(Circle())
             .frame(width: r * 2, height: r * 2)
-            .background(Circle().fill(Color(hex: DesignTokens.Primitive.ink900)))
+            .background(Circle().fill(Color.token(DesignTokens.Semantic.tile)))
             .scaleEffect(appeared || context.reduceMotion ? 1 : 0.7)
             .opacity(appeared ? 1 : 0)
             .accessibilityHidden(true)

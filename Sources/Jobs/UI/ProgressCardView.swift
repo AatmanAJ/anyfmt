@@ -281,9 +281,9 @@ struct ProgressBarView: View {
 
     @ViewBuilder private var fill: some View {
         if flat {
-            Color(hex: DesignTokens.Band.cobaltFlat)
+            Color(hex: DesignTokens.Band.heatFlat)
         } else {
-            BandGradient(bands: DesignTokens.Band.cobalt)
+            BandGradient(bands: Array(DesignTokens.Band.heat.prefix(3)))
         }
     }
 }

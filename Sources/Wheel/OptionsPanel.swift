@@ -411,7 +411,7 @@ private struct PresetRow: View {
                     Button(preset.title) { apply(preset) }
                         .buttonStyle(.plain)
                         .font(.system(size: DesignTokens.TypeRamp.body, weight: on ? .bold : .medium))
-                        .foregroundStyle(on ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
+                        .foregroundStyle(on ? Color.token(DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
                         .padding(.horizontal, DesignTokens.Space.m)
                         .padding(.vertical, DesignTokens.Space.xs + 2)
                         .background(Capsule().fill(on ? Color.iris : Color.anyfmtTile))
@@ -458,9 +458,8 @@ struct PanelChoiceRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Space.xs) {
-            Text(verbatim: spec.label.localizedUppercase)
-                .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
-                .tracking(0.6)
+            Text(verbatim: spec.label)
+                .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
                 .foregroundStyle(Color.anyfmtSecondaryText)
             HStack(spacing: DesignTokens.Space.xs) {
                 ForEach(choices) { choice in chip(choice) }
@@ -492,7 +491,7 @@ struct PanelChoiceRow: View {
                 }
             }
             .lineLimit(1)
-            .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
+            .foregroundStyle(selected ? Color.token(DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .frame(minWidth: 58)
             .padding(.horizontal, DesignTokens.Space.s)
             .padding(.vertical, sub == nil ? DesignTokens.Space.xs + 2 : DesignTokens.Space.xs)

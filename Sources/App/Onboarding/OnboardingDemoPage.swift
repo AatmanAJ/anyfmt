@@ -142,9 +142,9 @@ private struct FileTile: View {
                 .overlay(Rectangle().strokeBorder(Color.anyfmtHairline, lineWidth: DesignTokens.Shape.hairline))
                 .overlay(alignment: .bottomTrailing) {
                     if let badge {
-                        Text(verbatim: badge.localizedUppercase)
+                        Text(verbatim: badge)
                             .font(.anyfmtDisplay(DesignTokens.Typeface.Size.label))
-                            .foregroundStyle(Color(hex: DesignTokens.Semantic.onAccentPrimary))
+                            .foregroundStyle(Color.token(DesignTokens.Semantic.onAccentPrimary))
                             .padding(.horizontal, DesignTokens.Space.s)
                             .padding(.vertical, DesignTokens.Space.xxs)
                             .background(Capsule().fill(Color.iris))
@@ -156,14 +156,14 @@ private struct FileTile: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: DesignTokens.Typeface.Size.title, weight: .semibold))
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color(hex: DesignTokens.Semantic.onAccentPrimary), Color.iris)
+                            .foregroundStyle(Color.token(DesignTokens.Semantic.onAccentPrimary), Color.iris)
                             .offset(x: DesignTokens.Space.s, y: -DesignTokens.Space.s)
                             .accessibilityLabel(Text("New file"))
                     }
                 }
             Text(verbatim: name)
                 .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-                .foregroundStyle(selected ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
+                .foregroundStyle(selected ? Color.token(DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
                 .padding(.horizontal, DesignTokens.Space.s - DesignTokens.Space.xxs)
                 .padding(.vertical, DesignTokens.Space.xxs)
                 .background(Capsule().fill(selected ? Color.iris : Color.clear))
@@ -223,7 +223,7 @@ private struct KeyLegend: View {
                 let on = active == role || pressing == key
                 HStack(spacing: DesignTokens.Space.m) {
                     DemoKeyCap(text: key.displayName, prominent: on)
-                    Text(verbatim: role.title.localizedUppercase)
+                    Text(verbatim: role.title)
                         .font(.anyfmtDisplay(T.tagSize, black: false))
                         .displayTracking(T.tagSize)
                         .foregroundStyle(active == role ? Color.anyfmtInk : Color.anyfmtSecondaryText)
@@ -246,7 +246,7 @@ private struct DemoKeyCap: View {
     var body: some View {
         Text(verbatim: text)
             .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
-            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
+            .foregroundStyle(prominent ? Color.token(DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .lineLimit(1)
             .padding(.horizontal, DesignTokens.Space.m)
             .frame(minWidth: DesignTokens.Component.Onboarding.keyCapWidth, alignment: .leading)

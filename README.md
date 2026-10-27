@@ -33,7 +33,7 @@ Inspired by drag-to-convert tools.
 
 **Requirements:** a Mac with Apple silicon, macOS 13 Ventura or later.
 
-- Download the latest `anyfmt-x.y.z.dmg` from [Releases](https://github.com/aiwithaj/anyfmt/releases) and drag anyfmt to Applications, or
+- Download the latest `anyfmt-x.y.z.dmg` from [Releases](https://github.com/AatmanAJ/anyfmt/releases) and drag anyfmt to Applications, or
 - `brew install --cask aiwithaj/tap/anyfmt`
 
 anyfmt appears in the menu bar. There's no Dock icon and no main window.
@@ -159,7 +159,7 @@ in [`Server/openapi.yaml`](Server/openapi.yaml).
 ## Build from source
 
 ```bash
-git clone https://github.com/aiwithaj/anyfmt && cd anyfmt
+git clone https://github.com/AatmanAJ/anyfmt && cd anyfmt
 make bootstrap   # build-machine tools (xcodegen, meson, ninja, nasm)
 make engines     # ffmpeg/ffprobe/resvg from pinned, checksummed sources
 make build

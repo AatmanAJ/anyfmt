@@ -104,15 +104,15 @@ server unlocks every feature for its own users.
 # docker-compose.yml (sketch)
 services:
   api:
-    image: ghcr.io/aiwithaj/anyfmt-server:latest
+    image: ghcr.io/aatmanaj/anyfmt-server:latest
     env_file: .env
     ports: ["8080:8080"]
     depends_on: [db, storage]
   worker-media:
-    image: ghcr.io/aiwithaj/anyfmt-worker-media:latest
+    image: ghcr.io/aatmanaj/anyfmt-worker-media:latest
     env_file: .env
   worker-gpu:            # optional
-    image: ghcr.io/aiwithaj/anyfmt-worker-gpu:latest
+    image: ghcr.io/aatmanaj/anyfmt-worker-gpu:latest
     env_file: .env
     deploy: { resources: { reservations: { devices: [{ capabilities: [gpu] }] } } }
   db:

@@ -18,16 +18,16 @@ enum ActionStyle {
     /// One value in both appearances.
     static func fixed(_ hex: Int) -> NSColor { .anyfmt((light: hex, dark: hex)) }
 
-    /// Cobalt as a fill (behind white text: 5.0:1).
-    static let iris = fixed(DesignTokens.Primitive.cobalt500)
+    /// The action fill: ink on paper, paper on ink.
+    static let iris = color(DesignTokens.Semantic.accentPrimary)
     /// Cobalt as a glyph or text (AA on black and on white).
     static let accentText = color(DesignTokens.Semantic.accentPrimaryText)
     static let ink = color(DesignTokens.Semantic.textPrimary)
     static let mist = color(DesignTokens.Semantic.textSecondary)
     static let danger = color(DesignTokens.Palette.danger)
-    /// Selected-row fill under white text.
-    static let selection = fixed(DesignTokens.Primitive.cobalt500)
-    static let onSelection = fixed(DesignTokens.Semantic.onAccentPrimary)
+    /// Selected-row fill and the text on it.
+    static let selection = color(DesignTokens.Semantic.accentPrimary)
+    static let onSelection = color(DesignTokens.Semantic.onAccentPrimary)
 
     /// The card fill: charcoal in dark, the light tile in light. Always solid:
     /// no materials, so Reduce Transparency changes nothing and renders match.

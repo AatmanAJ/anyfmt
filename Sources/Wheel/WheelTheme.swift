@@ -43,30 +43,31 @@ public enum WheelTheme {
         return c
     }
 
-    /// The approved phase 2 look (D-042): a painted near-black disc with charcoal
-    /// wedges (no vibrancy), heavy uppercase format names in Inter Display, the
-    /// heat band on the hovered segment with black text, cobalt for the lock,
-    /// the lip, chips and the hub pill. Pro marks in orange with black text.
+    /// The anyfmt look: a soft fog track with paper pillows (ink and charcoal in dark), format
+    /// names in Inter Tight as they're written (WebP, not WEBP), and one flat ember segment
+    /// under the pointer with ink text. The hub label is a quiet ink pill. Pro marks in ember.
     public static var style: RadialMenuStyle {
         let p = DesignTokens.Primitive.self
         let dyn = { (light: Int, dark: Int) in RadialMenuStyle.dynamic(light: NSColor(srgbHex: light), dark: NSColor(srgbHex: dark)) }
         var style = RadialMenuStyle(
-            accentColor: NSColor(srgbHex: p.cobalt500),
+            accentColor: NSColor(srgbHex: p.ember500),
             badgeColor: dyn(DesignTokens.Palette.proGold.light, DesignTokens.Palette.proGold.dark),
             badgeTextColor: dyn(p.paper0, p.ink1000),
             material: .popover)
         let dark = RadialMenuStyle.Surface(
-            disc: NSColor(srgbHex: p.ink950), segment: NSColor(srgbHex: p.ink800), hub: NSColor(srgbHex: p.ink900),
+            disc: NSColor(srgbHex: p.ink950, alpha: 0.92), segment: NSColor(srgbHex: p.ink800), hub: NSColor(srgbHex: p.ink900),
             stroke: NSColor(srgbHex: p.ink700), content: NSColor(srgbHex: p.paper0), secondaryContent: NSColor(srgbHex: p.ink400),
-            highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.ink900), pillText: NSColor(srgbHex: p.paper0))
+            highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.paper0), pillText: NSColor(srgbHex: p.ink950))
         let light = RadialMenuStyle.Surface(
-            disc: NSColor(srgbHex: p.paper50), segment: NSColor(srgbHex: p.paper0), hub: NSColor(srgbHex: p.paper50),
+            disc: NSColor(srgbHex: p.paper75, alpha: 0.9), segment: NSColor(srgbHex: p.paper0), hub: NSColor(srgbHex: p.paper0),
             stroke: NSColor(srgbHex: p.paper100), content: NSColor(srgbHex: p.ink950), secondaryContent: NSColor(srgbHex: p.ink300),
             highlightContent: NSColor(srgbHex: p.ink1000), pill: NSColor(srgbHex: p.ink950), pillText: NSColor(srgbHex: p.paper0))
         style.surface = RadialMenuStyle.SurfaceSet(light: light, dark: dark)
-        style.highlightBands = DesignTokens.Band.heat.dropLast(2).map { NSColor(srgbHex: $0) }
+        // One flat ember, no stripes: the heat lives in the glass, not on the controls.
+        style.highlightBands = nil
+        style.uppercaseTitleProminence = false
         AnyfmtFonts.registerBundled()
-        style.titleFontName = DesignTokens.Typeface.displayBlack
+        style.titleFontName = DesignTokens.Typeface.displayExtraBold
         return style
     }
 

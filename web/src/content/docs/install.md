@@ -58,7 +58,7 @@ anyfmt doctor
 You need Xcode 16 or later (Swift 6) and Rust, which builds the SVG renderer.
 
 ```bash title="Terminal"
-git clone https://github.com/aiwithaj/anyfmt && cd anyfmt
+git clone https://github.com/AatmanAJ/anyfmt && cd anyfmt
 make bootstrap   # build-machine tools (xcodegen, meson, ninja, nasm)
 make engines     # ffmpeg/ffprobe/resvg from pinned, checksummed sources
 make build

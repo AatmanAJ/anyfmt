@@ -35,16 +35,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             renderGallery(into: dir)
             exit(0)
         }
-        if let dir = launch.renderDirection {
-            do {
-                let files = try DirectionBoard.render(into: dir)
-                FileHandle.standardError.write(Data("rendered \(files.count) direction images into \(dir.path)\n".utf8))
-                exit(0)
-            } catch {
-                FileHandle.standardError.write(Data("direction board failed: \(error)\n".utf8))
-                exit(1)
-            }
-        }
         if AppShellUI.handleLaunchArguments() { NSApp.terminate(nil); return }
         LegacyBrandMigration.runIfNeeded()
         let c = AppCoordinator(launch: launch)

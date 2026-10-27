@@ -70,6 +70,16 @@ public final class WheelController: NSObject {
         super.init()
         menuView.strings = WheelTheme.strings
         menuView.delegate = self
+        menuView.soundHandler = { sound in
+            let cue: InterfaceSounds.Cue = switch sound {
+            case .open: .open
+            case .tick: .tick
+            case .page: .page
+            case .activate: .select
+            case .cancel: .cancel
+            }
+            InterfaceSounds.shared.play(cue)
+        }
         panel.onVisible = { [weak self] in self?.markVisible?() }
         options.draggedTypes = panel.draggedTypes
         options.onApply = { [weak self] target, values in self?.applyOptions(target: target, values: values) }

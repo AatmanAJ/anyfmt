@@ -284,6 +284,7 @@ final class AppCoordinator {
     /// Settings that apply without rebuilding anything.
     private func applyLiveSettings() {
         wheel.hapticsEnabled = settings.hapticsEnabled
+        InterfaceSounds.shared.isEnabled = settings.soundsEnabled
         wheel.menuView.tuneModifier = Self.tuneModifier(settings)
         sense.diagnostics.isVerbose = settings.verboseLogging
         jobs.queue.limits = Self.limits(for: settings)
@@ -292,10 +293,8 @@ final class AppCoordinator {
     /// Settings › General › Sounds: a quiet confirmation when a batch ends.
     private func batchFinished(_ progress: BatchProgress) {
         guard settings.soundsEnabled, progress.total > 0, progress.running == 0, progress.queued == 0 else { return }
-        let name: NSSound.Name? = progress.failed > 0 ? "Basso" : (progress.succeeded > 0 ? "Glass" : nil)
-        guard let name, let sound = NSSound(named: name) else { return }
-        sound.volume = 0.35
-        sound.play()
+        if progress.failed > 0 { InterfaceSounds.shared.play(.fail) }
+        else if progress.succeeded > 0 { InterfaceSounds.shared.play(.done) }
     }
 
     static func senseConfiguration(_ s: AppSettings) -> DragSenseConfiguration {

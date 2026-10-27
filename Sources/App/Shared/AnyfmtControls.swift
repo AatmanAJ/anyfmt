@@ -164,7 +164,7 @@ struct KeyCap: View {
             .font(.system(size: compact ? T.compactFontSize : T.fontSize, weight: .semibold))
             .lineLimit(1)
             .fixedSize()
-            .foregroundStyle(prominent ? Color(hex: DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
+            .foregroundStyle(prominent ? Color.token(DesignTokens.Semantic.onAccentPrimary) : Color.anyfmtInk)
             .padding(.horizontal, compact ? T.compactHorizontalPadding : T.horizontalPadding)
             .frame(minWidth: compact ? T.compactMinWidth : T.minWidth,
                    minHeight: compact ? T.compactHeight : T.height)
@@ -281,19 +281,20 @@ struct FormatChip: View {
         let t = DesignTokens.Component.FormatChip.self
         switch kind {
         case .image, .vector: return .iris
-        case .video, .audio: return Color(hex: DesignTokens.Primitive.orange500)
-        case .pdf: return Color(hex: DesignTokens.Primitive.flame500)
+        case .video, .audio: return Color(hex: DesignTokens.Primitive.ember500)
+        case .pdf: return Color(hex: DesignTokens.Primitive.ember700)
         case .document, .ebook, .slides, .spreadsheet, .subtitle: return Color.token(t.neutralFill)
         case .archive, .folder, .other: return Color.token(t.quietFill)
         }
     }
 
     /// Text or glyph colour on `tint(for:)`, AA in both appearances: white on
-    /// cobalt (5.0:1) and grey, black on orange (9.6:1) and flame (6.3:1).
+    /// ink and grey, black on ember (5.9:1), white on deep ember (5.6:1).
     static func onTint(for kind: FileKind) -> Color {
         switch kind {
-        case .image, .vector, .archive, .folder, .other: return Color(hex: DesignTokens.Semantic.onAccentPrimary)
-        case .video, .audio, .pdf: return Color(hex: DesignTokens.Semantic.onAccentSecondary)
+        case .image, .vector, .archive, .folder, .other: return Color.token(DesignTokens.Semantic.onAccentPrimary)
+        case .video, .audio: return Color(hex: DesignTokens.Semantic.onAccentSecondary)
+        case .pdf: return Color(hex: DesignTokens.Primitive.paper0)
         case .document, .ebook, .slides, .spreadsheet, .subtitle:
             return Color.token(DesignTokens.Component.FormatChip.neutralText)
         }

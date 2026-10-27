@@ -17,7 +17,7 @@ struct SettingsGlyphTile: View {
         let shape = RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous)
         Image(systemName: symbol)
             .font(.system(size: T.glyphSize, weight: .semibold))
-            .foregroundStyle(quiet ? Color.accentText : Color(hex: DesignTokens.Semantic.onAccentPrimary))
+            .foregroundStyle(quiet ? Color.accentText : Color.token(DesignTokens.Semantic.onAccentPrimary))
             .frame(width: T.glyphTile, height: T.glyphTile)
             .background(shape.fill(quiet ? Color.anyfmtRaised : Color.iris))
             .anyfmtBorder(shape, contrast == .increased ? Color.anyfmtInk : .clear)

@@ -35,8 +35,7 @@ extension DesignTokens.Component {
         /// surfaces); the current step is cobalt *and* wider, so it never
         /// rides on colour alone.
         /// The permissions page's cobalt column: deep to bright, never toward violet.
-        static let cobaltBands = [DesignTokens.Primitive.cobalt700, DesignTokens.Primitive.cobalt500,
-                                  DesignTokens.Primitive.cobaltBright, DesignTokens.Primitive.cobalt400]
+        static let cobaltBands = Array(DesignTokens.Band.heat.reversed())
 
         static let dotSize: CGFloat = 6
         static let dotCurrentWidth: CGFloat = 20
@@ -50,9 +49,9 @@ extension DesignTokens.Component {
         static let keyCapWidth: CGFloat = 96
         static let keyCapHeight: CGFloat = 26
         /// The demo wheel is a black disc in both appearances, like a record.
-        static let wheelDisc = DesignTokens.Primitive.ink1000
-        static let wheelWedge = DesignTokens.Primitive.ink800
-        static let wheelLabel = DesignTokens.Primitive.paper0
+        static let wheelDisc = (light: DesignTokens.Primitive.paper75, dark: DesignTokens.Primitive.ink950)
+        static let wheelWedge = (light: DesignTokens.Primitive.paper0, dark: DesignTokens.Primitive.ink800)
+        static let wheelLabel = DesignTokens.Semantic.textPrimary
         static let wheelLabelOnBand = DesignTokens.Primitive.ink1000
         /// Wide enough that the lifted, scaled hot wedge stays on the disc.
         static let wheelRim: CGFloat = 13

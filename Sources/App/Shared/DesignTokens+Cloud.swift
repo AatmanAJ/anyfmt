@@ -28,24 +28,24 @@ extension DesignTokens.Component {
         static let inboxIcon: CGFloat = 16
 
         // Pro chip: orange with black text (9.6:1), never gold.
-        static let proFill: Pair = (light: P.orange500, dark: P.orange500)
+        static let proFill: Pair = (light: P.ember500, dark: P.ember500)
         static let proText: Pair = (light: P.ink1000, dark: P.ink1000)
         /// Increased contrast keeps the orange and adds an ink outline.
         static let proOutline: Pair = (light: P.ink1000, dark: P.paper0)
 
         // Semantic colours with their increased-contrast partners.
         static let accent: Pair = DesignTokens.Palette.iris
-        static let accentHC: Pair = (light: P.cobalt700, dark: P.cobalt500)
+        static let accentHC: Pair = (light: P.ink950, dark: P.paper0)
         static let accentText: Pair = DesignTokens.Semantic.accentPrimaryText
-        static let accentTextHC: Pair = (light: P.cobalt700, dark: P.paper0)
+        static let accentTextHC: Pair = (light: P.ink950, dark: P.paper0)
         static let ink: Pair = DesignTokens.Palette.ink
         static let inkHC: Pair = (light: P.ink1000, dark: P.paper0)
         static let secondary: Pair = DesignTokens.Semantic.textSecondary
         static let secondaryHC: Pair = (light: P.ink950, dark: P.paper50)
         static let danger: Pair = DesignTokens.Palette.danger
-        static let dangerHC: Pair = (light: P.ember700, dark: P.flame500)
+        static let dangerHC: Pair = (light: P.ember700, dark: P.ember300)
         static let success: Pair = DesignTokens.Palette.success
-        static let successHC: Pair = (light: P.cobalt700, dark: P.paper0)
+        static let successHC: Pair = (light: P.ink950, dark: P.paper0)
         static let tile: Pair = DesignTokens.Semantic.tile
         static let tileHC: Pair = (light: P.paper0, dark: P.ink1000)
         static let hairline: Pair = DesignTokens.Semantic.hairline

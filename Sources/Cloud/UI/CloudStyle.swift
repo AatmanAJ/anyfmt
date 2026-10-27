@@ -67,9 +67,8 @@ struct CloudPlanBadge: View {
     @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        Text(plan.displayName.uppercased())
-            .font(.system(size: DesignTokens.TypeRamp.caption, weight: .heavy))
-            .tracking(0.6)
+        Text(plan.displayName)
+            .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
             .padding(.horizontal, DesignTokens.Space.s + DesignTokens.Space.xxs)
             .padding(.vertical, DesignTokens.Space.xxs + 1)
             .foregroundStyle(foreground)
@@ -113,9 +112,8 @@ struct CloudProChip: View {
         HStack(spacing: DesignTokens.Space.xxs) {
             Image(systemName: "icloud.fill")
                 .font(.system(size: DesignTokens.TypeRamp.micro, weight: .bold))
-            Text("PRO")
-                .font(.system(size: DesignTokens.TypeRamp.micro, weight: .heavy))
-                .tracking(0.5)
+            Text("Pro")
+                .font(.system(size: DesignTokens.TypeRamp.micro + 1, weight: .bold))
         }
         .padding(.horizontal, DesignTokens.Space.xs + DesignTokens.Space.xxs)
         .padding(.vertical, DesignTokens.Space.xxs)

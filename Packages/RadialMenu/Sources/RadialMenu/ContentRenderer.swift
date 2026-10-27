@@ -298,7 +298,7 @@ enum ContentRenderer {
     }
 
     static func badgeImageSpec(text: String, accessory: NSImage?, size: CGFloat, palette: RadialPalette) -> BadgeSpec {
-        let label = attributed(text.localizedUppercase, size: size, weight: .heavy, tracking: 0.5,
+        let label = attributed(text, size: size + 1, weight: .bold, tracking: 0,
                                color: palette.badgeText, alignment: .left)
         let textSize = label.size()
         let icon = accessory.map { glyphImage($0, pointSize: size) }

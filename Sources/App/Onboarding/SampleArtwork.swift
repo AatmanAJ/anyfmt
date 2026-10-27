@@ -28,7 +28,7 @@ enum SampleArtwork {
         let horizon = s * 0.34
 
         // Sky: deep ember at the top, through flame and orange, to peach at the horizon.
-        let sky = [color(P.ember700), color(P.flame600), color(P.orange600), color(P.orange500), color(P.peach200)] as CFArray
+        let sky = [color(P.ember700), color(P.ember600), color(P.ember500), color(P.amber400), color(P.peach200)] as CFArray
         if let g = CGGradient(colorsSpace: space, colors: sky, locations: [0, 0.3, 0.55, 0.78, 1]) {
             ctx.drawLinearGradient(g, start: CGPoint(x: 0, y: s), end: CGPoint(x: 0, y: horizon), options: [.drawsAfterEndLocation])
         }
@@ -53,7 +53,7 @@ enum SampleArtwork {
             ctx.drawLinearGradient(g, start: CGPoint(x: 0, y: horizon), end: .zero, options: [])
             ctx.restoreGState()
         }
-        ctx.setFillColor(color(P.orange500, 0.85))
+        ctx.setFillColor(color(P.amber400, 0.85))
         for (x, y, w) in [(0.52, 0.28, 0.2), (0.55, 0.23, 0.14), (0.5, 0.18, 0.18), (0.57, 0.13, 0.08), (0.2, 0.08, 0.1)] {
             let r = CGRect(x: s * x, y: s * y, width: s * w, height: s * 0.01)
             ctx.addPath(CGPath(roundedRect: r, cornerWidth: r.height / 2, cornerHeight: r.height / 2, transform: nil))

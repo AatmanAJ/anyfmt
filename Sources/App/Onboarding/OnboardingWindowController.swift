@@ -201,7 +201,7 @@ struct OnboardingView: View {
         case .none: Color.clear
         case .heat: BandGradient(bands: DesignTokens.Band.heat, flat: DesignTokens.Band.heatFlat).id(s)
                 .transition(.opacity)
-        case .cobalt: BandGradient(bands: T.cobaltBands, flat: DesignTokens.Band.cobaltFlat).id(s)
+        case .cobalt: BandGradient(bands: T.cobaltBands, flat: DesignTokens.Band.heatFlat).id(s)
                 .transition(.opacity)
         }
     }

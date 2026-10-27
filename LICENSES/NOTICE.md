@@ -25,7 +25,7 @@ Each keeps its own licence. The full texts are in the folders next to this file.
 | libwebp | 1.6.0 | BSD-3-Clause + patent grant | `libwebp-1.6.0/` |
 | resvg (and 68 Rust crates) | 0.48.1 | Apache-2.0 OR MIT (crates: MIT/Apache/Zlib/BSD/Unicode, see `CRATES.md`) | `resvg-0.48.1/` |
 | Sparkle | 2.10.0 | MIT | `Sparkle-2.10.0/` |
-| Inter Display (Black, ExtraBold; UI display face, `Contents/Resources/Fonts`) | 4.1 | SIL OFL 1.1 | `inter-4.1/` |
+| Inter Tight (SemiBold, Bold, ExtraBold; static instances of the variable font; UI display face, `Contents/Resources/Fonts`) | 4.1 | SIL OFL 1.1 | `inter-4.1/` |
 
 Optional packs are **never bundled**. Users download them only if they choose
 to, from the Settings › Engines pane, and they keep their own licences:

@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 DIR="${1:?dir with release DMGs}"
-BASE="${2:?download URL prefix, e.g. https://github.com/aiwithaj/anyfmt/releases/download/v0.1.0/}"
+BASE="${2:?download URL prefix, e.g. https://github.com/AatmanAJ/anyfmt/releases/download/v0.1.0/}"
 BIN="build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"
 [[ -x "$BIN/generate_appcast" ]] || { echo "Sparkle tools not found; run make build first"; exit 1; }
 

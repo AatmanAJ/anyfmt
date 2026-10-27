@@ -247,7 +247,7 @@ enum SampleArt {
 
     static func sunset() -> NSImage {
         image(width: 480, height: 360) { ctx, s in
-            linear(ctx, [P.cream100, P.orange500, P.flame600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: s.height * 0.3))
+            linear(ctx, [P.cream100, P.amber400, P.ember600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: s.height * 0.3))
             ctx.setFillColor(cg(P.paper0))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.56, y: s.height * 0.34, width: s.width * 0.2, height: s.width * 0.2))
             ctx.setFillColor(cg(P.ember700))
@@ -274,7 +274,7 @@ enum SampleArt {
 
     static func lagoon() -> NSImage {
         image(width: 300, height: 400) { ctx, s in
-            linear(ctx, [P.cobalt400, P.cobaltBright, P.cobalt700], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            linear(ctx, [0x5B8CFF, 0x2E6BF2, 0x1D4FD8], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
             ctx.setFillColor(cg(P.cream100))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.18, y: s.height * 0.48, width: s.width * 0.64, height: s.height * 0.12))
             ctx.setFillColor(cg(P.ink800))
@@ -293,14 +293,14 @@ enum SampleArt {
 
     static func dusk() -> NSImage {
         image(width: 480, height: 270) { ctx, s in
-            linear(ctx, [P.ink1000, P.cobalt700, P.flame600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            linear(ctx, [P.ink1000, 0x1D4FD8, P.ember600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
             let widths: [CGFloat] = [0.08, 0.06, 0.1, 0.07, 0.09, 0.05, 0.11, 0.08, 0.06, 0.1, 0.07, 0.13]
             let heights: [CGFloat] = [0.42, 0.6, 0.35, 0.72, 0.5, 0.4, 0.64, 0.3, 0.55, 0.45, 0.68, 0.38]
             var x: CGFloat = 0
             for (w, h) in zip(widths, heights) {
                 ctx.setFillColor(cg(P.ink950))
                 ctx.fill(CGRect(x: x * s.width, y: 0, width: w * s.width, height: h * s.height))
-                ctx.setFillColor(cg(P.orange500, alpha: 0.85))
+                ctx.setFillColor(cg(P.amber400, alpha: 0.85))
                 var wy: CGFloat = 0.06
                 while wy < h - 0.06 {
                     ctx.fill(CGRect(x: (x + w * 0.3) * s.width, y: wy * s.height, width: 3, height: 4))
@@ -326,7 +326,7 @@ enum SampleArt {
             }
             let bars: [CGFloat] = [0.35, 0.55, 0.45, 0.8]
             for (i, h) in bars.enumerated() {
-                ctx.setFillColor(cg(i == 3 ? P.orange500 : P.cobalt500))
+                ctx.setFillColor(cg(i == 3 ? P.amber400 : 0x2766EE))
                 ctx.fill(CGRect(x: 30 + CGFloat(i) * 46, y: 34, width: 30, height: 90 * h))
             }
         }

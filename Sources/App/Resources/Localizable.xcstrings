@@ -141,7 +141,9 @@
     "25 MB" : {},
     "3 days" : {},
     "30 days" : {},
-    "34 MB" : {},
+    "34 MB" : {
+      "extractionState" : "stale"
+    },
     "5 MB" : {},
     "50 MB" : {},
     "7 days" : {},
@@ -149,9 +151,14 @@
     "A 1 kHz tone replaces the sound, like broadcast censoring." : {},
     "A different “%@” already exists there." : {},
     "A light tick on Force Touch trackpads as you move between segments." : {},
-    "A soft chime when a conversion finishes." : {},
+    "A soft chime when a conversion finishes." : {
+      "extractionState" : "stale"
+    },
+    "A soft pop as the wheel opens, a tap per segment, and a chime when a conversion finishes." : {},
     "A4" : {},
-    "Aa INTER DISPLAY BLACK · body: SF Pro" : {},
+    "Aa INTER DISPLAY BLACK · body: SF Pro" : {
+      "extractionState" : "stale"
+    },
     "About %@" : {},
     "About %@ per file" : {},
     "About %lld h %lld min left" : {},
@@ -231,8 +238,12 @@
     "Back / forward 1 second" : {},
     "Background" : {},
     "Balanced" : {},
-    "band.cobalt" : {},
-    "band.heat" : {},
+    "band.cobalt" : {
+      "extractionState" : "stale"
+    },
+    "band.heat" : {
+      "extractionState" : "stale"
+    },
     "Before / after" : {},
     "Before / After" : {},
     "Beside the original" : {},
@@ -286,8 +297,12 @@
     "Click a mark to select it, then drag it or its handles. Delete removes it; arrow keys nudge. Hover a tool for its shortcut." : {},
     "Click, then press the new shortcut" : {},
     "Clip %lld, %@, %@" : {},
-    "clip.mp4" : {},
-    "clip.mp4 → GIF" : {},
+    "clip.mp4" : {
+      "extractionState" : "stale"
+    },
+    "clip.mp4 → GIF" : {
+      "extractionState" : "stale"
+    },
     "Clips" : {},
     "Clips play in list order. Drag a row, or use the arrows, to move it." : {},
     "Close" : {},
@@ -422,7 +437,9 @@
     "Drag pages to reorder them." : {},
     "Drag photos in the preview or in this list to reorder." : {},
     "Drag the frame or its handles. Drag outside it to draw a new one. Arrow keys nudge by 1 px, Shift by 10 px." : {},
-    "Drag the photo and press ⇧ Shift while you hold it. Tap or hold, either works." : {},
+    "Drag the photo and press ⇧ Shift while you hold it. Tap or hold, either works." : {
+      "extractionState" : "stale"
+    },
     "Drag to cover an area. Select an area and press Delete to remove it." : {},
     "Drag to move every item out of the shelf. Press to show them all." : {},
     "Drag to move or resize. Arrow keys nudge by one pixel, with Shift by ten." : {},
@@ -548,7 +565,9 @@
       "comment" : "Settings pane"
     },
     "Ghostty opens a new tab. Set macos-dock-drop-behavior = new-window in Ghostty for a window." : {},
-    "GIF" : {},
+    "GIF" : {
+      "extractionState" : "stale"
+    },
     "Good for sharing and email" : {},
     "Got a\nPro key?" : {
       "comment" : "Onboarding activation headline; keep each line short"
@@ -850,7 +869,9 @@
     "Pages" : {},
     "Pages are copied as they are: text stays selectable and nothing is turned into images. Bookmarks are kept for pages you keep." : {},
     "pages fit each image" : {},
-    "PALETTE" : {},
+    "PALETTE" : {
+      "extractionState" : "stale"
+    },
     "pandoc pack" : {},
     "pandoc’s document conversions for DOCX, ODT and EPUB." : {},
     "pandoc’s document conversions, for the highest-fidelity DOCX, EPUB and ODT." : {},
@@ -917,7 +938,9 @@
     "Private" : {
       "comment" : "Onboarding welcome fact tag"
     },
-    "PRO" : {},
+    "PRO" : {
+      "extractionState" : "stale"
+    },
     "Pro" : {
       "comment" : "Chip on wheel segments that use the paid cloud service"
     },
@@ -975,7 +998,9 @@
       "comment" : "Options panel checkbox, e.g. Remember as default for GIF",
       "extractionState" : "stale"
     },
-    "Remember as default for GIF" : {},
+    "Remember as default for GIF" : {
+      "extractionState" : "stale"
+    },
     "Remove" : {},
     "Remove %@" : {},
     "Remove %@ from Favourites" : {},
@@ -1037,7 +1062,9 @@
     "Runs straight away with your defaults" : {},
     "s" : {},
     "Same size" : {},
-    "Sample.heic" : {},
+    "Sample.heic" : {
+      "extractionState" : "stale"
+    },
     "Saturation" : {},
     "Save as Preset" : {
       "comment" : "Options panel button"

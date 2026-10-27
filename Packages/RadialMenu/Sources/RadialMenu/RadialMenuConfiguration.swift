@@ -33,6 +33,8 @@ public struct RadialMenuConfiguration: Equatable, Sendable {
     public var hoverLift: CGFloat = 5
     /// Drop/hover tolerance beyond the outermost ring, so a slight overshoot keeps the target.
     public var outerTolerance: CGFloat = 18
+    /// How far a painted surface's track reaches past the outermost segment (points).
+    public var trackPadding: CGFloat = 8
     /// Angular hysteresis before hover moves to a neighbour (degrees). Stops flicker on edges.
     /// The sticky rule below usually dominates; this is the floor.
     public var hysteresisDegrees: CGFloat = 1.5

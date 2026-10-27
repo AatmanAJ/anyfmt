@@ -44,8 +44,8 @@ extension DesignTokens.Component {
         static let canvas = (light: DesignTokens.Primitive.paper50, dark: DesignTokens.Primitive.ink1000)
         /// Raised controls on a tile (chips, keycaps, list wells).
         static let chip = DesignTokens.Semantic.raised
-        /// Selected chips and cells: cobalt with white text (5.0:1).
-        static let selected = (light: DesignTokens.Primitive.cobalt500, dark: DesignTokens.Primitive.cobalt500)
+        /// Selected chips and cells: ink with paper text (paper with ink in dark).
+        static let selected = DesignTokens.Semantic.accentPrimary
         static let onSelected = DesignTokens.Semantic.onAccentPrimary
         /// Warnings ("this re-encodes"): deep orange on white (5.3:1), orange on black.
         /// Always paired with a glyph and words.
@@ -55,9 +55,9 @@ extension DesignTokens.Component {
         static let checkerDark = DesignTokens.Primitive.paper100
 
         /// Marks drawn over arbitrary pixels (crop frame, selection, playhead).
-        /// A dark anyfmt, a white rim and a cobalt core, so they read on any image.
+        /// A dark anyfmt, a white rim and an ember core, so they read on any image.
         enum Overlay {
-            static let core = DesignTokens.Primitive.cobalt500
+            static let core = DesignTokens.Primitive.ember500
             static let rim = DesignTokens.Primitive.paper0
             static let anyfmt = DesignTokens.Primitive.ink1000
             static let haloOpacity: Double = 0.55

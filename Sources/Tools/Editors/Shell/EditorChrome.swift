@@ -14,15 +14,15 @@ enum EditorPalette {
     static let canvas = Color.token(EditorTokens.canvas)
     static let chip = Color.token(EditorTokens.chip)
     static let selected = Color.token(EditorTokens.selected)
-    static let onSelected = Color(hex: EditorTokens.onSelected)
+    static let onSelected = Color.token(EditorTokens.onSelected)
     static let warning = Color.token(EditorTokens.warning)
     static let overlayCore = Color(hex: EditorTokens.Overlay.core)
     static let overlayRim = Color(hex: EditorTokens.Overlay.rim)
     static let overlayHalo = Color(hex: EditorTokens.Overlay.anyfmt)
     /// Text that sits on an orange or flame fill (black, 6.3:1 or better).
     static let onWarm = Color(hex: DesignTokens.Semantic.onAccentSecondary)
-    static let orange = Color(hex: DesignTokens.Primitive.orange500)
-    static let flame = Color(hex: DesignTokens.Primitive.flame500)
+    static let orange = Color(hex: DesignTokens.Primitive.ember500)
+    static let flame = Color(hex: DesignTokens.Primitive.ember600)
 }
 
 // MARK: - Titles
@@ -85,9 +85,7 @@ struct EditorCaption: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: DesignTokens.TypeRamp.caption, weight: .bold))
-            .tracking(0.6)
-            .textCase(.uppercase)
+            .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
             .foregroundStyle(Color.anyfmtSecondaryText)
             .accessibilityAddTraits(.isHeader)
     }

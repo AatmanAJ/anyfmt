@@ -21,9 +21,9 @@
 #   tar -czf $D.tar.gz $D && shasum -a 256 $D.tar.gz
 class AnyfmtCli < Formula
   desc "Convert images, video, audio and documents locally (CLI and MCP server)"
-  homepage "https://github.com/aiwithaj/anyfmt"
+  homepage "https://github.com/AatmanAJ/anyfmt"
   # Placeholder: the GitHub release asset for this version.
-  url "https://github.com/aiwithaj/anyfmt/releases/download/v0.1.0/anyfmt-cli-0.1.0-arm64.tar.gz"
+  url "https://github.com/AatmanAJ/anyfmt/releases/download/v0.1.0/anyfmt-cli-0.1.0-arm64.tar.gz"
   version "0.1.0"
   # Placeholder: `shasum -a 256 anyfmt-cli-<version>-arm64.tar.gz`.
   sha256 "REPLACE_WITH_TARBALL_SHA256"

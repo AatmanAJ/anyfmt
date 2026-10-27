@@ -45,9 +45,8 @@ struct EnginesPane: View {
                         Text("Licence")
                         Color.clear.frame(width: 1, height: 1).gridCellUnsizedAxes([.horizontal, .vertical])
                     }
-                    .font(.system(size: DesignTokens.TypeRamp.caption, weight: .semibold))
+                    .font(.system(size: DesignTokens.TypeRamp.label, weight: .semibold))
                     .foregroundStyle(Color.anyfmtSecondaryText)
-                    .textCase(.uppercase)
                     ForEach(engines) { engine in
                         GridRow {
                             Text(verbatim: engine.name)

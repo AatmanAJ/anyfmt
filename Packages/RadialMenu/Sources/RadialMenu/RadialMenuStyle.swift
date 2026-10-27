@@ -182,7 +182,7 @@ struct RadialPalette {
     var glowOpacity: Float
     var pillFill: CGColor
     var pillText: NSColor
-    let pillHighlightFill: CGColor
+    var pillHighlightFill: CGColor
     let badgeFill: NSColor
     let badgeText: NSColor
     let accent: NSColor
@@ -267,17 +267,19 @@ struct RadialPalette {
             secondaryContent = resolve(sf.secondaryContent)
             pillFill = resolve(sf.pill).cgColor
             pillText = resolve(sf.pillText)
-            // A painted surface sits flat: no glow, one quiet shadow.
+            // A painted surface sits flat: no glow, one soft shadow under each piece.
             glowOpacity = 0
             shadowOpacity = min(shadowOpacity, 0.22)
             highlightStroke = accent.cgColor
+            // The hub label stays a quiet pill while the hovered segment carries the colour.
+            pillHighlightFill = pillFill
         }
         let banded = !(a.increaseContrast || a.reduceTransparency) && (style.highlightBands?.count ?? 0) > 1
         highlightBands = banded ? style.highlightBands?.map { resolve($0).cgColor } : nil
         if let set = style.surface {
             let sf = a.isDark ? set.dark : set.light
-            // On the bands the surface's highlight colour (dark text); on a flat accent, white.
-            highlightContent = banded ? resolve(sf.highlightContent) : white
+            // A painted surface names its own highlight text, on the bands or on a flat accent.
+            highlightContent = resolve(sf.highlightContent)
         }
         titleFontName = style.titleFontName
     }

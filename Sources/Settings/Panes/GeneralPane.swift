@@ -19,7 +19,7 @@ struct GeneralPane: View {
             Section {
                 Toggle(isOn: $settings.soundsEnabled) {
                     Text("Play sounds")
-                    Text("A soft chime when a conversion finishes.")
+                    Text("A soft pop as the wheel opens, a tap per segment, and a chime when a conversion finishes.")
                 }
                 .accessibilityIdentifier("settings.sounds")
                 Toggle(isOn: $settings.hapticsEnabled) {

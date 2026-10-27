@@ -101,7 +101,7 @@ struct CloudGlyphTile: View {
             .foregroundStyle(CloudStyle.onAccent)
             .frame(width: T.glyphTile, height: T.glyphTile)
             .background {
-                BandGradient(bands: DesignTokens.Band.cobalt, flat: DesignTokens.Band.cobaltFlat)
+                BandGradient(bands: DesignTokens.Band.heat, flat: DesignTokens.Band.heatFlat)
                     .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Shape.tile, style: .continuous))
             }
             .accessibilityHidden(true)

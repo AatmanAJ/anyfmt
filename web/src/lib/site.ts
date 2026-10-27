@@ -6,7 +6,7 @@ export const SITE = {
   tagline: 'Any file, any format, one drag away.',
   description:
     'anyfmt is an open-source macOS menu bar app that converts files where they are. Drag a file, tap Shift, drop it on the format you want. 793 tested conversion routes, all on your Mac, nothing uploaded.',
-  github: 'https://github.com/aiwithaj/anyfmt',
+  github: 'https://github.com/AatmanAJ/anyfmt',
   version: '0.1.0',
   released: false, // flips when the first public build ships; download copy reads from this
   dmgSize: '27 MB',

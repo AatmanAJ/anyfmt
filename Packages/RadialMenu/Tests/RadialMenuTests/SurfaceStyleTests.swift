@@ -29,8 +29,9 @@ final class SurfaceStyleTests: XCTestCase {
         for a in [RadialAppearance(isDark: true, increaseContrast: true), RadialAppearance(isDark: true, reduceTransparency: true)] {
             let p = RadialPalette(style: styled(), appearance: a, hitAlpha: 0.01)
             XCTAssertNil(p.highlightBands, "flat accent under \(a)")
-            XCTAssertEqual(p.highlightContent.usingColorSpace(.sRGB)?.whiteComponentApprox ?? 0, 1, accuracy: 0.01,
-                           "white on the flat accent")
+            // A painted surface names its own highlight text, flat accent or not (dark here).
+            XCTAssertEqual(p.highlightContent.usingColorSpace(.sRGB)?.whiteComponentApprox ?? 1, 0, accuracy: 0.01,
+                           "the surface's highlight text on the flat accent")
         }
     }
 

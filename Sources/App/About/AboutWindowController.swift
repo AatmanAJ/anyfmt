@@ -57,9 +57,8 @@ final class AboutWindowController: NSWindowController, NSWindowDelegate {
     }
 }
 
-/// A record sleeve: a strip of the heat band across the top (the one
-/// spotlight), then the name set big at the top left, the open-source line, and
-/// the engine credits in a charcoal tile.
+/// A record sleeve: a strip of fluted ember glass across the top (the one spotlight), then
+/// the wordmark at the top left, the open-source line, and the engine credits in a tile.
 struct AboutView: View {
     let info: AppInfo
     let engines: [EngineInfo]
@@ -76,14 +75,11 @@ struct AboutView: View {
                 .accessibilityHidden(true)
 
             HStack(alignment: .bottom, spacing: DesignTokens.Space.l) {
-                Text(verbatim: Brand.name.localizedUppercase)
-                    .font(.anyfmtDisplay(DesignTokens.Typeface.Size.displayXL))
-                    .displayTracking(DesignTokens.Typeface.Size.displayXL)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
+                Wordmark()
+                    .frame(height: DesignTokens.Typeface.Size.displayXL)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
-                Image(nsImage: NSApp.applicationIconImage ?? NSImage())
+                Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage ?? NSImage())
                     .resizable()
                     .interpolation(.high)
                     .frame(width: T.aboutIcon, height: T.aboutIcon)
@@ -138,7 +134,6 @@ struct AboutView: View {
             Text("Built with")
                 .font(.anyfmtDisplay(DesignTokens.Component.Onboarding.tagSize))
                 .displayTracking(DesignTokens.Component.Onboarding.tagSize)
-                .textCase(.uppercase)
                 .padding(.horizontal, DesignTokens.Space.l)
                 .padding(.top, DesignTokens.Space.l)
                 .padding(.bottom, DesignTokens.Space.s)
