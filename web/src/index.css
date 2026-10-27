@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+@import "@fontsource-variable/inter-tight";
+@import "@fontsource-variable/bricolage-grotesque/wdth.css";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* Flare: paper greys, one ink, an ember accent, a volt highlight used sparingly. */
+@theme {
+  --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Inter Tight Variable", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-ink: #0a0a0a;
+  --color-ink-2: #1a1a1a;
+  --color-mute: #3a3a3a;
+  --color-mute-2: #6a6a6a;
+  --color-mute-3: #9a9690;
+  --color-fog: #efefef;
+  --color-sand: #f4f2ef;
+  --color-sand-2: #f1eeea;
+  --color-line: rgb(10 10 10 / 0.1);
+  --color-flare: #ff4a14;
+  --color-ember: #ee1200;
+  --color-amber: #ffb23e;
+  --color-peach: #ffd2b0;
+  --color-volt: #e4ff3a;
+  --color-night: #0a0a0a;
+  --color-night-2: #141414;
+  --color-night-3: #1e1e1e;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+::selection { background: var(--color-volt); color: var(--color-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* The condensed wordmark face. */
+@utility font-wordmark {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 75;
+}
+
+/* Underline that draws in from the left on hover and leaves to the right. */
+@utility link-line {
+  position: relative;
+  &::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1.5px; background: currentColor;
+    transform: scaleX(0); transform-origin: right; transition: transform .5s var(--ease-snap);
+  }
+  &:hover::after, :is(a, button):focus-visible &::after, .group:hover &::after { transform: scaleX(1); transform-origin: left; }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Letters that roll up and are replaced from below (RollText). */
+.roll-ch { transition: transform .5s var(--ease-snap); }
+.group:hover .roll-ch, .group:focus-visible .roll-ch { transform: translateY(-100%); }
+
+/* GitHub pill: a conic streak runs the border on hover. */
+@property --gh-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.gh-ring { background: rgba(10,10,10,.12); }
+.gh:hover .gh-ring, .gh:focus-visible .gh-ring {
+  background: conic-gradient(from var(--gh-a), #FF2A0E, #FF7A1F, #FFC24A, #FFF1D6, #FF7A1F, #FF2A0E);
+  animation: gh-spin 2.4s linear infinite;
+}
+@keyframes gh-spin { to { --gh-a: 360deg; } }
+.badge-sheen { transform: translateX(-120%) skewX(-20deg); }
+.badge:hover .badge-sheen { transition: transform .9s var(--ease-snap); transform: translateX(520%) skewX(-20deg); }
+
+/* The static stand-in for the flute shader: 31° ribs over an ember mass. */
+.flutes-static {
+  background:
+    repeating-linear-gradient(121deg, transparent 0 34px, rgba(255,255,255,.32) 36px, transparent 44px),
+    radial-gradient(ellipse 70% 80% at 88% 8%, #ff2e00 0%, #ff5f03 22%, rgba(255,140,60,.55) 45%, transparent 70%),
+    #efefef;
+}
+.flutes-static-dark {
+  background:
+    repeating-linear-gradient(121deg, transparent 0 34px, rgba(255,255,255,.07) 36px, transparent 44px),
+    radial-gradient(ellipse 70% 80% at 12% 92%, #ff2e00 0%, #ff5f03 22%, rgba(120,30,5,.6) 45%, transparent 70%),
+    #0a0a0a;
+}
+
+/* Glass ribs used as a texture on type and cards (the wordmark in the footer, the Pro card). */
+.ribs {
+  background-image:
+    repeating-linear-gradient(121deg, rgba(255,255,255,0) 0 8px, rgba(255,255,255,.08) 17px, rgba(255,255,255,.3) 23px, rgba(255,255,255,.05) 25px, rgba(0,0,0,.12) 28px, rgba(0,0,0,0) 32px),
+    radial-gradient(ellipse 60% 90% at var(--rx, 80%) var(--ry, 20%), #fff1d6 0%, #ffb23e 12%, #ff5a0a 30%, #ee1200 52%, #3a0800 85%);
+}
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@utility animate-marquee { animation: marquee var(--marquee-duration, 40s) linear infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+@utility animate-blink { animation: blink 1.1s steps(1) infinite; }
+
+/* Long-form prose (docs, legal). Components style the rest. */
+.prose-flare { font-size: 17px; line-height: 1.65; color: var(--color-ink-2); }
+.prose-flare > * + * { margin-top: 1.1em; }
+.prose-flare h2 { margin-top: 2.4em; font-size: clamp(26px, 2.4vw, 32px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; color: var(--color-ink); scroll-margin-top: 96px; }
+.prose-flare h3 { margin-top: 2em; font-size: 21px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; color: var(--color-ink); scroll-margin-top: 96px; }
+.prose-flare h4 { margin-top: 1.6em; font-size: 17px; font-weight: 600; color: var(--color-ink); }
+.prose-flare h2 + *, .prose-flare h3 + *, .prose-flare h4 + * { margin-top: .6em; }
+.prose-flare a { color: var(--color-ink); text-decoration: underline; text-decoration-color: rgba(255,74,20,.55); text-decoration-thickness: 1.5px; text-underline-offset: 3px; transition: text-decoration-color .3s; }
+.prose-flare a:hover { text-decoration-color: var(--color-flare); }
+.prose-flare strong { font-weight: 600; color: var(--color-ink); }
+.prose-flare ul, .prose-flare ol { padding-left: 1.3em; }
+.prose-flare ul { list-style: none; padding-left: 1.2em; }
+.prose-flare ul > li { position: relative; }
+.prose-flare ul > li::before { content: ""; position: absolute; left: -1.05em; top: .68em; width: 6px; height: 6px; background: var(--color-ink); }
+.prose-flare ol { list-style: decimal; }
+.prose-flare ol > li::marker { font-weight: 600; color: var(--color-flare); }
+.prose-flare li + li { margin-top: .4em; }
+.prose-flare li > ul, .prose-flare li > ol { margin-top: .4em; }
+.prose-flare :not(pre) > code { font-family: var(--font-mono); font-size: .86em; background: var(--color-sand-2); padding: .12em .38em; border-radius: 6px; color: var(--color-ink); white-space: break-spaces; word-break: break-word; }
+.prose-flare hr { border: 0; border-top: 1px solid var(--color-line); margin: 2.4em 0; }
+.prose-flare blockquote { border-left: 3px solid var(--color-flare); padding-left: 1em; color: var(--color-mute); }
+
+/* Grid cells may shrink below their content, so code blocks and command lines scroll inside
+   their own box instead of widening the page on a phone. */
+.grid > * { min-width: 0; }

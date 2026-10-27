@@ -1,0 +1,37 @@
+{
+  "name": "anyfmt-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/data.mjs",
+    "dev": "vite",
+    "build": "node scripts/data.mjs && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "build:artifact": "node scripts/data.mjs && vite build --mode artifact --outDir dist-artifact",
+    "preview": "vite preview --port 5310"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@number-flow/react": "^0.6.2",
+    "@phosphor-icons/react": "^2.1.10",
+    "motion": "^12.43.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.4",
+    "remark-gfm": "^4.0.1",
+    "shaders": "4.0.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.8.3",
+    "vite": "^6.4.5"
+  }
+}
