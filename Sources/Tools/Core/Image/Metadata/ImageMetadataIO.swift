@@ -182,16 +182,16 @@ enum ImageMetadataIO {
                 let words = text?.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
                 edit(iptc) { set(&$0, kCGImagePropertyIPTCKeywords, (words?.isEmpty ?? true) ? nil : words) }
             case "dateTaken":
-                let exifDate = try text.map { s -> String in
+                let stamp = try text.map { s -> String in
                     guard let d = exifDate(s) else { throw ConversionError.invalidOption("dateTaken") }
                     return d
                 }
                 edit(exif) {
-                    set(&$0, kCGImagePropertyExifDateTimeOriginal, exifDate)
-                    set(&$0, kCGImagePropertyExifDateTimeDigitized, exifDate)
+                    set(&$0, kCGImagePropertyExifDateTimeOriginal, stamp)
+                    set(&$0, kCGImagePropertyExifDateTimeDigitized, stamp)
                 }
                 edit(iptc) {
-                    let parts = exifDate?.split(separator: " ")
+                    let parts = stamp?.split(separator: " ")
                     set(&$0, kCGImagePropertyIPTCDateCreated, parts.map { $0[0].replacingOccurrences(of: ":", with: "") })
                     set(&$0, kCGImagePropertyIPTCTimeCreated, parts.flatMap { $0.count > 1 ? $0[1].replacingOccurrences(of: ":", with: "") : nil })
                 }
