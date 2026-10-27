@@ -1,5 +1,5 @@
 # Homebrew formula template: the `anyfmt` command-line tool only, no app.
-# Copy into a tap (e.g. aiwithaj/homebrew-tap/Formula/anyfmt-cli.rb) and fill
+# Copy into a tap (e.g. AatmanAJ/homebrew-tap/Formula/anyfmt-cli.rb) and fill
 # version + sha256 from the release tarball. The cask (anyfmt.rb, next to this
 # file) installs the app and links the same binary; install one or the other,
 # since both put `anyfmt` on PATH.

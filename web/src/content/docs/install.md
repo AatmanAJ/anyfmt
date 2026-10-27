@@ -32,7 +32,7 @@ anyfmt appears as an icon in the menu bar. It has no Dock icon and no main windo
 ## Install with Homebrew
 
 ```bash title="Terminal"
-brew install --cask aiwithaj/tap/anyfmt
+brew install --cask aatmanaj/tap/anyfmt
 ```
 
 The cask installs the app and links the `anyfmt` command onto your `PATH`.
@@ -42,7 +42,7 @@ The cask installs the app and links the `anyfmt` command onto your `PATH`.
 If you want the CLI and the MCP server without the app:
 
 ```bash title="Terminal"
-brew install aiwithaj/tap/anyfmt-cli
+brew install aatmanaj/tap/anyfmt-cli
 ```
 
 This installs `anyfmt`, its framework and the bundled engines (ffmpeg, ffprobe, resvg), and no app. Install either the cask or this formula, not both: each one puts `anyfmt` on your `PATH`.

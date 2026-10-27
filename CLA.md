@@ -2,7 +2,7 @@
 
 # anyfmt Contributor Licence Agreement, version 1.0
 
-This agreement is between you and [OWNER LEGAL NAME] (the "Maintainer"), who runs the anyfmt project at <https://github.com/aiwithaj/anyfmt>. It covers everything you submit to anyfmt.
+This agreement is between you and [OWNER LEGAL NAME] (the "Maintainer"), who runs the anyfmt project at <https://github.com/AatmanAJ/anyfmt>. It covers everything you submit to anyfmt.
 
 **1. Words used here.** A "Contribution" is any code, documentation, artwork, translation or other material that you submit to a repository, issue tracker or discussion run for anyfmt, with the intention that it be included in anyfmt. To "submit" means to send it by pull request, patch, commit, attachment or any other channel the project uses. "anyfmt" means the software, documentation and packages the Maintainer publishes as part of the project, including the separately licensed MIT packages.
 

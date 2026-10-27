@@ -136,7 +136,7 @@ export default function OpenSource() {
             <div className="flex w-full flex-col gap-3 rounded-[20px] bg-white p-4 ring-1 ring-black/[.07] sm:w-auto sm:flex-row sm:items-center sm:rounded-full sm:py-2 sm:pl-5 sm:pr-2">
               <span className="flex min-w-0 items-center gap-2.5"><GitHubMark size={20} /><span className="truncate font-mono text-[14px]">{SITE.github.replace('https://', '')}</span></span>
               <span className="flex items-center gap-2">
-                <span className="whitespace-nowrap rounded-full bg-sand-2 px-2.5 py-1 text-[12.5px] font-medium">Public with the first release</span>
+                <span className="whitespace-nowrap rounded-full bg-sand-2 px-2.5 py-1 text-[12.5px] font-medium">Public on GitHub</span>
                 <CopyButton text={SITE.github} label="Copy" />
               </span>
             </div>

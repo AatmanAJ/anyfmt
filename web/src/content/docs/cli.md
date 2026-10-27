@@ -10,8 +10,8 @@ description: Use the anyfmt command to convert files from Terminal and scripts, 
 | How | What you get |
 |---|---|
 | **Settings › Advanced › Command-line tool › Install** | A link to `anyfmt.app/Contents/Helpers/anyfmt` in the first writable folder on your `PATH`: `/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin` or `~/bin` |
-| `brew install --cask aiwithaj/tap/anyfmt` | The app, plus the same `anyfmt` link |
-| `brew install aiwithaj/tap/anyfmt-cli` | The CLI, its framework and its engines only, with no app |
+| `brew install --cask aatmanaj/tap/anyfmt` | The app, plus the same `anyfmt` link |
+| `brew install aatmanaj/tap/anyfmt-cli` | The CLI, its framework and its engines only, with no app |
 
 The CLI finds ffmpeg, ffprobe and resvg in its own `Helpers` folder, even when you run it through a link. It never uses another copy on your `PATH`. Check what it found:
 

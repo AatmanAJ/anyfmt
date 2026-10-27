@@ -83,7 +83,7 @@ export default function Contact() {
             {CHANNELS.map((c) => <Row key={c.id} c={c} open={open === c.id} onToggle={() => setOpen(open === c.id ? '' : c.id)} />)}
           </ul>
           <dl className="mt-12 grid gap-x-10 gap-y-6 border-t border-line pt-8 md:grid-cols-3">
-            {[['No ticket numbers', 'Just email. Reply to the same thread to add anything.'], ['No mailing list', 'Writing to us never signs you up for anything.'], ['In public, later', 'When the repository opens, bugs and ideas can go to GitHub issues too.']].map(([t, d]) => (
+            {[['No ticket numbers', 'Just email. Reply to the same thread to add anything.'], ['No mailing list', 'Writing to us never signs you up for anything.'], ['In public, too', 'Bugs and ideas can also go to GitHub issues.']].map(([t, d]) => (
               <div key={t}><dt className="text-[17px] font-semibold tracking-[-0.02em]">{t}</dt><dd className="mt-1.5 text-[15px] leading-[1.55] text-mute">{d}</dd></div>
             ))}
           </dl>

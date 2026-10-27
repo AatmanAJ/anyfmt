@@ -34,7 +34,7 @@ Inspired by drag-to-convert tools.
 **Requirements:** a Mac with Apple silicon, macOS 13 Ventura or later.
 
 - Download the latest `anyfmt-x.y.z.dmg` from [Releases](https://github.com/AatmanAJ/anyfmt/releases) and drag anyfmt to Applications, or
-- `brew install --cask aiwithaj/tap/anyfmt`
+- `brew install --cask aatmanaj/tap/anyfmt`
 
 anyfmt appears in the menu bar. There's no Dock icon and no main window.
 

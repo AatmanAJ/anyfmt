@@ -13,7 +13,7 @@ export const SITE = {
   appSize: '63 MB',
   requires: 'Apple silicon, macOS 13 Ventura or later',
   email: { hello: 'hello@anyfmt.app', support: 'support@anyfmt.app', sales: 'teams@anyfmt.app', press: 'press@anyfmt.app', security: 'security@anyfmt.app', legal: 'legal@anyfmt.app' },
-  brew: { cask: 'brew install --cask aiwithaj/tap/anyfmt', cli: 'brew install aiwithaj/tap/anyfmt-cli' },
+  brew: { cask: 'brew install --cask aatmanaj/tap/anyfmt', cli: 'brew install aatmanaj/tap/anyfmt-cli' },
 } as const
 
 /** Prices are proposals until checkout exists; every page reads them from here. */

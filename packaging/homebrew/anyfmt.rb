@@ -1,4 +1,4 @@
-# Homebrew cask template. Copy into a tap (e.g. aiwithaj/homebrew-tap/Casks/anyfmt.rb)
+# Homebrew cask template. Copy into a tap (e.g. AatmanAJ/homebrew-tap/Casks/anyfmt.rb)
 # and fill version + sha256 from the release DMG:
 #   shasum -a 256 dist/anyfmt-<version>.dmg
 cask "anyfmt" do
