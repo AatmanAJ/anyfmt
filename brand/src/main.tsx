@@ -20,6 +20,9 @@ const HeroPage = lazy(() => import('./heroes/Heroes').then((m) => ({ default: m.
 const AnyfmtBook = lazy(() => import('./anyfmt/BrandBook'))
 const RasterPage = lazy(() => import('./raster/Raster'))
 const SitePage = lazy(() => import('./raster/Site'))
+const ElayaLanding = lazy(() => import('./elaya/Landing'))
+const ElayaLegal = lazy(() => import('./elaya/Landing').then((m) => ({ default: m.ElayaLegal })))
+const ElayaNotFound = lazy(() => import('./elaya/Landing').then((m) => ({ default: m.ElayaNotFound })))
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -52,6 +55,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Hub />} />
         <Route path="/heroes" element={<Suspense fallback={<div className="min-h-screen bg-[#0B0B0D]" />}><HeroIndex /></Suspense>} />
         <Route path="/heroes/:n" element={<Suspense fallback={<div className="min-h-screen bg-[#0B0B0D]" />}><HeroPage /></Suspense>} />
+        <Route path="/elaya" element={<Suspense fallback={<div className="min-h-screen bg-[#131209]" />}><ElayaLanding /></Suspense>} />
+        <Route path="/elaya/legal" element={<Suspense fallback={<div className="min-h-screen bg-[#131209]" />}><ElayaLegal /></Suspense>} />
+        <Route path="/elaya/*" element={<Suspense fallback={<div className="min-h-screen bg-[#131209]" />}><ElayaNotFound /></Suspense>} />
         <Route path="/site" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><SitePage /></Suspense>} />
         <Route path="/raster" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><RasterPage /></Suspense>} />
         <Route path="/raster/:n" element={<Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}><RasterPage /></Suspense>} />
