@@ -34,12 +34,13 @@ public struct PackSpec: Sendable, Hashable {
 }
 
 public enum OfficePack {
-    /// LibreOffice (MPL-2.0), Apple silicon build. Fill `sha256` from the official
-    /// `<dmg>.sha256` next to the download (and check its `.asc` signature).
+    /// LibreOffice (MPL-2.0), Apple silicon build. Pinned 2026-10-27 after `gpg --verify` of the
+    /// `.asc` passed against The Document Foundation's release key
+    /// (C2839ECAD9408FBE9531C3E9F434A1EFAFEEAEA3, "LibreOffice Build Team").
     public static let spec = PackSpec(
         name: "LibreOffice", version: "26.8.1",
         downloadURL: URL(string: "https://download.documentfoundation.org/libreoffice/stable/26.8.1/mac/aarch64/LibreOffice_26.8.1_MacOS_aarch64.dmg"),
-        sha256: nil, kind: .dmg(appName: "LibreOffice.app"), installName: "LibreOffice.app")
+        sha256: "ca074e0b13571efb30a31fc531c5f95e997030637325e5d5de92d67aefdf0dfc", kind: .dmg(appName: "LibreOffice.app"), installName: "LibreOffice.app")
 }
 
 public enum PandocPack {

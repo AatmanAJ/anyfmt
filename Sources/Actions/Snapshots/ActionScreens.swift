@@ -274,7 +274,7 @@ enum SampleArt {
 
     static func lagoon() -> NSImage {
         image(width: 300, height: 400) { ctx, s in
-            linear(ctx, [0x5B8CFF, 0x2E6BF2, 0x1D4FD8], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            linear(ctx, [0x5B8CFF, 0x2E6BF2, 0x1D4FD8], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))   // token-ok: sample photo artwork, not UI
             ctx.setFillColor(cg(P.cream100))
             ctx.fillEllipse(in: CGRect(x: s.width * 0.18, y: s.height * 0.48, width: s.width * 0.64, height: s.height * 0.12))
             ctx.setFillColor(cg(P.ink800))
@@ -293,7 +293,7 @@ enum SampleArt {
 
     static func dusk() -> NSImage {
         image(width: 480, height: 270) { ctx, s in
-            linear(ctx, [P.ink1000, 0x1D4FD8, P.ember600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))
+            linear(ctx, [P.ink1000, 0x1D4FD8, P.ember600], from: CGPoint(x: 0, y: s.height), to: CGPoint(x: 0, y: 0))   // token-ok: sample photo artwork, not UI
             let widths: [CGFloat] = [0.08, 0.06, 0.1, 0.07, 0.09, 0.05, 0.11, 0.08, 0.06, 0.1, 0.07, 0.13]
             let heights: [CGFloat] = [0.42, 0.6, 0.35, 0.72, 0.5, 0.4, 0.64, 0.3, 0.55, 0.45, 0.68, 0.38]
             var x: CGFloat = 0
@@ -326,7 +326,7 @@ enum SampleArt {
             }
             let bars: [CGFloat] = [0.35, 0.55, 0.45, 0.8]
             for (i, h) in bars.enumerated() {
-                ctx.setFillColor(cg(i == 3 ? P.amber400 : 0x2766EE))
+                ctx.setFillColor(cg(i == 3 ? P.amber400 : 0x2766EE))   // token-ok: sample photo artwork, not UI
                 ctx.fill(CGRect(x: 30 + CGFloat(i) * 46, y: 34, width: 30, height: 90 * h))
             }
         }

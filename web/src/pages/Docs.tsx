@@ -1,6 +1,6 @@
 /**
  * Docs: sidebar of sections, the page, and a rail with the live table of contents and an
- * "ask your agent" card. Every page has Copy for AI. /docs adds five doors before the overview.
+ * "ask your agent" card. Every page has Copy for AI. /docs adds its doors before the overview.
  */
 import { ArrowLeft, ArrowRight, List, MagnifyingGlass, ThumbsDown, ThumbsUp, X } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -12,6 +12,7 @@ import { SearchPalette, useSearchHotkey } from '../components/docs/SearchPalette
 import { Page } from '../components/Page'
 import { CopyButton, Kbd } from '../components/ui'
 import { DOC, DOC_SECTIONS, DOCS, tokensOf, type Doc } from '../lib/docs'
+import { SITE } from '../lib/site'
 import { useHead } from '../lib/head'
 import { EASE } from '../lib/hooks'
 import NotFound from './NotFound'
@@ -104,14 +105,15 @@ function AgentCard() {
   )
 }
 
-/** Five ways in, each with the thing you'd actually type or press. */
-const DOORS: { to: string; title: string; text: string; cue: ReactNode }[] = [
+/** The ways in, each with the thing you'd actually type or press. The server ones wait for `SITE.cloud`. */
+const ALL_DOORS: { to: string; title: string; text: string; cue: ReactNode }[] = [
   { to: '/docs/first-conversion', title: 'Use the app', text: 'The wheel, the three keys, options and presets.', cue: <span className="inline-flex gap-1.5 py-0.5 text-[16px] sm:justify-end">{['⇧', '⌘', '⌃'].map((k) => <Kbd key={k} className="min-w-[1.9em] py-1 text-ink">{k}</Kbd>)}</span> },
   { to: '/docs/cli', title: 'Script it', text: 'anyfmt in Terminal, JSON on every command, stable exit codes.', cue: <code className="block truncate font-mono text-[13.5px]">anyfmt convert IMG_0042.heic --to jpg</code> },
   { to: '/docs/mcp', title: 'Give it to an agent', text: 'A local MCP server with seven tools. No network, no key.', cue: <code className="block truncate font-mono text-[13.5px]">claude mcp add anyfmt -- anyfmt mcp</code> },
   { to: '/docs/api', title: 'Call the HTTP API', text: 'The same routes over HTTP, paid per conversion. In preview.', cue: <code className="block truncate font-mono text-[13.5px]">POST /v1/conversions</code> },
   { to: '/docs/self-host', title: 'Run your own server', text: 'Share links, sync and the inbox on your own hardware.', cue: <span className="text-[13.5px]">Settings › Account › Server URL</span> },
 ]
+const DOORS = ALL_DOORS.filter((d) => SITE.cloud || !['/docs/api', '/docs/self-host'].includes(d.to))
 
 function Doors() {
   return (

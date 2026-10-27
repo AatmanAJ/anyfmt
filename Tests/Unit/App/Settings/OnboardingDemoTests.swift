@@ -185,7 +185,7 @@ final class DemoModelTests: XCTestCase {
 }
 
 @MainActor
-final class OnboardingModelTests: XCTestCase {
+final class OnboardingModelTests: CloudOnTestCase {
     func testNavigationAndFinish() throws {
         let (settings, cleanup) = try makeSettings()
         defer { cleanup() }

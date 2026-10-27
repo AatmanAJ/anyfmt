@@ -7,7 +7,7 @@ import os
 /// onboarding is open, and revoked afterwards. The app must stay usable in each:
 /// the wheel never needs a permission (D-001), only the opt-in Finder shortcut does.
 @MainActor
-final class OnboardingPermissionPathsTests: XCTestCase {
+final class OnboardingPermissionPathsTests: CloudOnTestCase {
     /// Grants that can change while the coach is watching.
     private final class Grants: Sendable {
         private let lock = OSAllocatedUnfairLock(initialState: (ax: false, im: false, ae: PermissionStatus.notGranted))

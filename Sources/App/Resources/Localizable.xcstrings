@@ -523,6 +523,7 @@
     "Files" : {},
     "Files are never overwritten. If the name is taken, a number is added, like Finder does." : {},
     "Files never leave your Mac unless you choose a cloud feature." : {},
+    "Files never leave your Mac." : {},
     "Files stay in place." : {},
     "Files you send wait on %@ until this Mac saves them." : {},
     "Fill" : {},

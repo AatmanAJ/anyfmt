@@ -23,7 +23,7 @@ enum WheelTestTable {
 }
 
 @MainActor
-final class WheelContentProviderTests: XCTestCase {
+final class WheelContentProviderTests: CloudOnTestCase {
     private let provider = WheelTestTable.provider
     private let prefs = WheelPreferences.standard
 

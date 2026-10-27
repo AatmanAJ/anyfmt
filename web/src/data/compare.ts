@@ -27,7 +27,7 @@ export interface Competitor {
 export const CHECKED = '27 October 2026'
 
 export const ANYFMT_FACTS = {
-  price: 'Free to build (AGPL-3.0); Desktop $19 once; Pro from $6 a month',
+  price: 'Free to build (AGPL-3.0); Desktop $19 once',
   platforms: 'macOS 13+, Apple silicon',
   processing: 'On your Mac',
   source: 'Open source, AGPL-3.0',
@@ -62,7 +62,7 @@ export const COMPETITORS: Competitor[] = [
     faq: [
       ['Is anyfmt a Tangerine clone?', 'They share the drag-and-tap gesture, the three-key layout and the counts of tools and actions. anyfmt\'s code is written from scratch and published under AGPL-3.0, and its route table is about three times larger.'],
       ['How much does Tangerine cost?', 'On the US Mac App Store it is free for the first 20 files, then $24.99 once for Tangerine Full Unlock (checked 27 October 2026). Its press kit still lists $29.99.'],
-      ['Do both work offline?', 'Yes. Both convert on your Mac. Tangerine\'s privacy policy says it has no server to upload files to; anyfmt only uploads when you use a Pro feature such as a share link.'],
+      ['Do both work offline?', 'Yes. Both convert on your Mac. Tangerine\'s privacy policy says it has no server to upload files to; anyfmt has no server at all and never uploads a file.'],
       ['Which Macs do they need?', 'Both need macOS 13 Ventura or later on Apple silicon.'],
     ],
     sources: [
@@ -77,7 +77,7 @@ export const COMPETITORS: Competitor[] = [
     title: 'anyfmt vs convt: wheel vs right-click menu',
     h1: 'anyfmt and convt: a wheel mid-drag, or a right-click menu.',
     description: 'anyfmt vs convt: two AGPL file converters. convt adds a right-click menu on Mac, Windows and Linux; anyfmt is a Mac wheel with 793 routes, no sign-in and an MCP server.',
-    answer: 'convt and anyfmt are both AGPL-3.0 converters that sell a signed desktop build and a cloud tier. convt runs on macOS, Windows and Linux from a right-click menu, and uses LibreOffice for documents as an optional download. anyfmt is Mac only and works mid-drag from a wheel, with 793 tested routes, its own document writers built in, no sign-in at first run, and a local MCP server.',
+    answer: 'convt and anyfmt are both AGPL-3.0 converters that sell a signed desktop build; convt also sells a cloud tier. convt runs on macOS, Windows and Linux from a right-click menu, and uses LibreOffice for documents as an optional download. anyfmt is Mac only and works mid-drag from a wheel, with 793 tested routes, its own document writers built in, no sign-in at first run, and a local MCP server.',
     centrepiece: 'clicks',
     facts: { price: 'Desktop $29 once; Pro $12/mo or $96/yr', platforms: 'macOS (Apple silicon), Windows, Linux', processing: 'Local; cloud when you choose it', source: 'Open source, AGPL-3.0', scope: '40 formats on its site (49 in the README)', cli: 'Yes', mcp: 'No; a SKILL.md for agents', macos: 'Not stated' },
     rows: [
@@ -88,16 +88,16 @@ export const COMPETITORS: Competitor[] = [
       { label: 'First run', anyfmt: 'No account', them: 'Sign in or enter a licence key (since 0.4.0)' },
       { label: 'Update checks', anyfmt: 'Off until you turn them on', them: 'Every launch and every 5 hours' },
       { label: 'Agents', anyfmt: 'Local MCP server', them: 'SKILL.md for coding agents' },
-      { label: 'Price', anyfmt: '$19 once; Pro $8/mo', them: '$29 once; Pro $12/mo' },
-      { label: 'API', anyfmt: '1¢ a conversion (preview)', them: '1¢ a job (domain not live yet)' },
+      { label: 'Price', anyfmt: '$19 once', them: '$29 once; Pro $12/mo' },
+      { label: 'API', anyfmt: 'Local CLI and MCP; no hosted API', them: '1¢ a job (domain not live yet)' },
     ],
     pickThem: ['You need the same converter on Windows or Linux.', 'You prefer a right-click menu to a drag gesture.', 'You want folder automations that watch your screenshots folder.'],
     pickUs: ['You\'re on a Mac and want conversions without leaving the drag you\'re already doing.', 'You convert documents, spreadsheets, ebooks, subtitles or archives without installing LibreOffice.', 'You want an MCP server so agents can convert, estimate and list options locally.'],
     faq: [
-      ['Are both really open source?', 'Yes. Both are AGPL-3.0, and both sell signed builds and cloud features on top. convt\'s README says ordinary source builds are unrestricted; anyfmt is the same.'],
+      ['Are both really open source?', 'Yes. Both are AGPL-3.0 and both sell signed builds; convt also sells cloud features. convt\'s README says ordinary source builds are unrestricted; anyfmt is the same.'],
       ['Which has more formats?', 'convt\'s site lists 40 formats. anyfmt handles 59 formats across 793 tested routes. Counting convt\'s formats page gives about 579 source-to-target pairs, a number convt doesn\'t publish itself.'],
-      ['Does either upload my files?', 'Neither does by default. Both upload only for cloud features you choose.'],
-      ['Which is cheaper?', 'anyfmt\'s Desktop licence is $19 once against convt\'s $29; Pro is $8 a month against $12. Building either from source is free.'],
+      ['Does either upload my files?', 'anyfmt never does: it has no server. convt uploads only for cloud features you choose.'],
+      ['Which is cheaper?', 'anyfmt\'s Desktop licence is $19 once against convt\'s $29. anyfmt has no subscription; convt\'s Pro is $12 a month. Building either from source is free.'],
     ],
     sources: [
       { label: 'convt.app', url: 'https://convt.app' },
@@ -123,7 +123,7 @@ export const COMPETITORS: Competitor[] = [
       { label: 'Archives and subtitles', anyfmt: 'ZIP, TAR, 7z, RAR in; SRT, VTT', them: 'Not listed' },
       { label: 'Pro video', anyfmt: 'H.264, HEVC, AV1, VP9', them: 'Adds ProRes, HLS, IP-camera repair' },
       { label: 'Camera RAW', anyfmt: 'Not yet', them: 'ARW, CR2, CR3, NEF' },
-      { label: 'Transcription', anyfmt: 'Pro (cloud)', them: 'On-device' },
+      { label: 'Transcription', anyfmt: 'Not yet', them: 'On-device' },
       { label: 'Price', anyfmt: 'Free to build; $19 signed', them: '$14.99 per major version' },
       { label: 'Source', anyfmt: 'Open, AGPL-3.0', them: 'Closed' },
     ],

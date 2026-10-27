@@ -30,14 +30,13 @@ export const RELEASES: Release[] = [
   {
     version: '0.1.0', date: '', status: 'upcoming',
     title: 'The first public release',
-    summary: 'Everything below, signed, notarized and in one 27 MB download. Apple silicon, macOS 13 or later.',
+    summary: 'Everything below, signed, notarized and in one 25 MB download. Apple silicon, macOS 13 or later.',
     visual: 'box',
     entries: [
       { tag: 'convert', title: '793 conversion routes, every one tested', body: 'Images, video, audio, PDF, documents, slides, spreadsheets, ebooks, subtitles and archives. Every route runs on a generated file and its output is opened and checked before release. 516 are on the wheel by default; the rest are one switch away in Settings › Formats.' },
       { tag: 'tools', title: '26 tools on ⌘ Command', body: 'Compress to a target size, resize, crop, adjust, annotate, redact, remove or add a background, collage, trim and split video, normalize audio, bleep, merge and compress PDFs, strip metadata.' },
       { tag: 'actions', title: '6 actions on ⌃ Control', body: 'AirDrop, Float, Copy, Move, Copy Path and Terminal. They work on folders and mixed selections too.' },
       { tag: 'cli', title: 'The anyfmt command and an MCP server', body: 'Same routes as the wheel, --json on every command, stable exit codes, and `anyfmt mcp` for agents. Neither opens a network socket.' },
-      { tag: 'cloud', title: 'Pro, when you want it', body: 'Share links, cloud jobs, sync, an inbox from your phone and GPU tools, all behind a small cloud glyph. Point the app at your own server if you prefer.' },
     ],
   },
   {

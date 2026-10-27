@@ -1,16 +1,15 @@
 ---
 title: Uninstall anyfmt
-description: Remove anyfmt completely. Delete the app and the command-line tool, clear its settings, presets, logs, packs and Keychain items, and revoke its permissions.
+description: Remove anyfmt completely. Delete the app and the command-line tool, clear its settings, presets, logs and packs, and revoke its permissions.
 ---
 
-To uninstall anyfmt, quit it, delete the app, and remove the command-line link if you made one. If you want nothing left behind, also delete its settings, presets, logs, optional packs and Keychain items, and remove it from System Settings. Your converted files are never touched.
+To uninstall anyfmt, quit it, delete the app, and remove the command-line link if you made one. If you want nothing left behind, also delete its settings, presets, logs and optional packs, and remove it from System Settings. Your converted files are never touched.
 
 ## 1. Before you delete the app
 
-1. If you activated a licence key, open **Settings › Account** and choose **Remove Licence…**. If you signed in to a server, choose **Sign Out**.
-2. Open **Settings › General** and turn off **Launch anyfmt at login**.
-3. If you linked the command-line tool, open **Settings › Advanced** and choose **Remove** next to **Command-line tool**.
-4. Click the anyfmt menu bar icon and choose **Quit anyfmt**.
+1. Open **Settings › General** and turn off **Launch anyfmt at login**.
+2. If you linked the command-line tool, open **Settings › Advanced** and choose **Remove** next to **Command-line tool**.
+3. Click the anyfmt menu bar icon and choose **Quit anyfmt**.
 
 ## 2. Delete the app
 
@@ -38,12 +37,10 @@ brew uninstall anyfmt-cli             # if you installed only the command-line t
 
 | What | Where |
 |---|---|
-| Presets, recent conversions, optional packs, received Mail and Photos files, cloud upload state | `~/Library/Application Support/anyfmt` |
+| Presets, recent conversions, optional packs, received Mail and Photos files | `~/Library/Application Support/anyfmt` |
 | Settings | `~/Library/Preferences/app.anyfmt.plist` |
 | Caches | `~/Library/Caches/app.anyfmt` |
 | Logs | `~/Library/Logs/anyfmt` |
-| Licence key | Login Keychain, service `app.anyfmt.licence` |
-| Server sign-in | Login Keychain, service `app.anyfmt.cloud`, one item per server |
 
 To delete the files and folders in Terminal:
 
@@ -51,15 +48,6 @@ To delete the files and folders in Terminal:
 rm -r ~/Library/Application\ Support/anyfmt ~/Library/Caches/app.anyfmt ~/Library/Logs/anyfmt
 defaults delete app.anyfmt
 ```
-
-To delete the Keychain items, open **Keychain Access**, search for `app.anyfmt`, and delete the items you find. Or in Terminal:
-
-```bash title="Terminal"
-security delete-generic-password -s app.anyfmt.licence
-security delete-generic-password -s app.anyfmt.cloud
-```
-
-Run the second command once per server you signed in to.
 
 The presets file is shared with the command-line tool. If you keep the CLI, keep `presets.json`.
 

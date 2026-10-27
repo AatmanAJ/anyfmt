@@ -33,7 +33,9 @@ enum OnboardingPage: Int, CaseIterable, Identifiable {
     var id: Int { rawValue }
     /// 1-based, for screenshots and VoiceOver ("Step 2 of 4").
     var number: Int { rawValue + 1 }
-    var next: OnboardingPage? { OnboardingPage(rawValue: rawValue + 1) }
+    /// The pages shown. Pro activation waits for the cloud service (`Brand.cloudAvailable`).
+    static var visible: [OnboardingPage] { allCases.filter { $0 != .activate || Brand.cloudAvailable } }
+    var next: OnboardingPage? { OnboardingPage(rawValue: rawValue + 1).flatMap { Self.visible.contains($0) ? $0 : nil } }
     var previous: OnboardingPage? { OnboardingPage(rawValue: rawValue - 1) }
     var isLast: Bool { next == nil }
 }

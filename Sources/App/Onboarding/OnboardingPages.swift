@@ -20,7 +20,8 @@ struct OnboardingWelcomePage: View {
                          text: String(localized: "Hundreds of conversions, on this Mac, with nothing to install."))
                 OnboardingDivider()
                 FactLine(tag: String(localized: "Private", comment: "Onboarding welcome fact tag"),
-                         text: String(localized: "Files never leave your Mac unless you choose a cloud feature."))
+                         text: Brand.cloudAvailable ? String(localized: "Files never leave your Mac unless you choose a cloud feature.")
+                                                     : String(localized: "Files never leave your Mac."))
                 OnboardingDivider()
                 FactLine(tag: String(localized: "Free", comment: "Onboarding welcome fact tag"),
                          text: String(localized: "Every local feature is free, with no account and no time limit."))

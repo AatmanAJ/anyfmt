@@ -13,8 +13,7 @@ The first time anyfmt opens, a short welcome window walks you through:
 2. **A live demo**: drag the sample photo inside the window and try ⇧ Shift, ⌘ Command and ⌃ Control for real.
 3. **Permissions**: the wheel needs none. The one optional extra, pressing Return in Finder, is off unless you turn it on.
 4. **Launch at login**: start anyfmt with your Mac so the wheel is always there.
-5. **Updates**: turn on automatic update checks, or leave them off.
-6. **Pro key**: optional. Choose **Start Using anyfmt** to skip it.
+5. **Updates**: turn on automatic update checks, or leave them off. Then choose **Start Using anyfmt**.
 
 You can open it again later: hold ⌥ Option while you click the menu bar icon, then choose **Show Welcome…**.
 

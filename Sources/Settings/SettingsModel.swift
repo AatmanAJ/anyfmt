@@ -8,6 +8,9 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// The panes shown in the toolbar. Account waits for the cloud service (`Brand.cloudAvailable`).
+    static var visible: [SettingsPane] { allCases.filter { $0 != .account || Brand.cloudAvailable } }
+
     var title: String {
         switch self {
         case .general: String(localized: "General", comment: "Settings pane")

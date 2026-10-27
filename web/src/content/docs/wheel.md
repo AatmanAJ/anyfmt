@@ -39,7 +39,6 @@ Pressing ⌘ Command after the drag has started opens Tools rather than Finder's
 - **Several files.** Convert shows only targets every file can reach. Files already in the chosen format are skipped and reported.
 - **Nothing to convert.** The Actions wheel opens instead, and the centre says "No conversions".
 - **Opt-in formats** stay off the wheel until you switch them on. See [How routes work](/docs/routes).
-- **Pro segments** carry a cloud glyph and a **Pro** chip. Choosing one while signed out explains the feature, and nothing happens to the file. See [What Pro adds](/docs/pro).
 
 Hide formats and tools from the wheel in **Settings › Formats**.
 

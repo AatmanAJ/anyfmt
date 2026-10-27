@@ -212,7 +212,7 @@ function Doors() {
 
 const FAQ: [string, string][] = [
   FAQ_FREE,
-  ['Does it upload my files?', 'No. Conversions happen on your Mac, offline. Share links and cloud jobs are the only things that leave, and only when you use them.'],
+  ['Does it upload my files?', 'No. Conversions happen on your Mac, offline. anyfmt has no account and no server, so your files never leave it.'],
   ['Will it overwrite my original?', 'Never. Every conversion and edit writes a new copy beside the file you started with.'],
   ['What do I need?', `A Mac with ${SITE.requires}. The engines ship inside the app, so there's nothing else to install.`],
   ['Can I script it?', 'Yes. The anyfmt command in Terminal runs the same routes the wheel does, with --json output and an MCP server for agents.'],

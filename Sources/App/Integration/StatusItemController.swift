@@ -58,8 +58,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
         add(String(localized: "Settings…"), #selector(openSettings), key: ",", symbol: "gearshape")
-        add(String(localized: "Pro Licence & Account…", comment: "Menu bar item opening Settings › Account"),
-            #selector(openActivation), key: "", symbol: "person.crop.circle")
+        if Brand.cloudAvailable {
+            add(String(localized: "Pro Licence & Account…", comment: "Menu bar item opening Settings › Account"),
+                #selector(openActivation), key: "", symbol: "person.crop.circle")
+        }
         if actions.checkForUpdates != nil && actions.canCheckForUpdates() {
             add(String(localized: "Check for Updates…"), #selector(checkUpdates), key: "", symbol: "arrow.down.circle")
         }

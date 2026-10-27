@@ -1,6 +1,6 @@
 ---
 title: anyfmt documentation
-description: A map of the anyfmt docs. Find the right guide for the Mac app, the command line, MCP and agents, the HTTP API preview, Pro and self‑hosting.
+description: A map of the anyfmt docs. Find the right guide for the Mac app, the command line, and MCP and agents.
 ---
 
 anyfmt is an open-source (AGPL-3.0) file converter that lives in the menu bar of a Mac with Apple silicon. Start dragging a file in Finder, tap ⇧ Shift, and a wheel of every format that file can become opens around the pointer; drop on one and a converted copy appears beside the original.
@@ -20,7 +20,7 @@ Start here if you want to convert files by dragging them.
 - [Actions and Float](/docs/actions): AirDrop, Float, Copy, Move, Copy Path and Terminal.
 - [Keys and shortcuts](/docs/keyboard): every key, mid-drag and with a wheel in focus.
 - [How routes work](/docs/routes): how anyfmt gets from one format to another, and the 793 tested routes.
-- [Settings](/docs/settings): all seven panes, setting by setting.
+- [Settings](/docs/settings): all six panes, setting by setting.
 
 To see which formats convert to which, open the [formats explorer](/formats).
 
@@ -37,21 +37,6 @@ The `anyfmt` command does everything the wheel does, with JSON output and stable
 - [MCP server](/docs/mcp): run `anyfmt mcp` and connect Claude Code, Claude Desktop or Cursor.
 - [Agent recipes](/docs/agent-recipes): worked examples an agent can follow, from planning to batch conversions.
 
-## Call the HTTP API (preview)
-
-The hosted API isn't live yet. The contract is final for v1, and every example runs against the open-source mock today.
-
-- [API overview](/docs/api): the upload, convert, fetch flow and pay-per-use pricing.
-- [Authentication](/docs/api-auth), [Files](/docs/api-files), [Conversions](/docs/api-conversions), [Formats and schema](/docs/api-formats)
-- [Webhooks](/docs/api-webhooks), [Errors](/docs/api-errors), [Rate limits and retries](/docs/api-limits)
-- [TypeScript SDK](/docs/sdk): `@anyfmt/sdk`.
-
-## Pro and self-hosting
-
-- [What Pro adds](/docs/pro): share links, cloud jobs, sync, inbox and GPU tools. Nothing local is ever behind a paywall.
-- [Self-host the server](/docs/self-host): the planned server, its containers and settings, and how to point the app at it.
-- [Licence keys](/docs/licence-keys): what an `ANYFMT1-…` key proves, and what it never changes.
-
 Prices are on the [pricing page](/pricing).
 
 ## Help
@@ -61,4 +46,4 @@ Prices are on the [pricing page](/pricing).
 
 ## Status
 
-The first public build of the app is on its way. The Pro features and the HTTP API have a finished Mac client, contract, mock server and SDK, but the hosted server isn't built yet. Pages that describe server features say so at the top.
+The first public build of the app is on its way. Everything in these docs runs on your Mac, with no account and no server.

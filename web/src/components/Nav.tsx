@@ -15,7 +15,8 @@ import { Logo } from './ui'
 export const NAV: [string, string][] = [['Formats', '/formats'], ['Pricing', '/pricing'], ['Docs', '/docs'], ['Changelog', '/changelog'], ['Compare', '/compare']]
 
 /** Links the phone menu adds under the main five, none of them repeated. */
-const MORE: [string, string][] = [['Command line', '/docs/cli'], ['MCP for agents', '/docs/mcp'], ['HTTP API', '/docs/api'], ['Guides', '/convert'], ['Open source', '/open-source'], ['Brand', '/brand'], ['Contact', '/contact']]
+const MORE: [string, string][] = ([['Command line', '/docs/cli'], ['MCP for agents', '/docs/mcp'], ['HTTP API', '/docs/api'], ['Guides', '/convert'], ['Open source', '/open-source'], ['Brand', '/brand'], ['Contact', '/contact']] as [string, string][])
+  .filter(([, to]) => SITE.cloud || to !== '/docs/api')
 
 export function Nav({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const { pathname } = useLocation()

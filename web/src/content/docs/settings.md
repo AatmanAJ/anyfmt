@@ -1,9 +1,9 @@
 ---
 title: Settings
-description: Every anyfmt setting in its seven panes, General, Keys, Output, Formats, Engines, Account and Advanced, with what each one does and its default.
+description: Every anyfmt setting in its six panes, General, Keys, Output, Formats, Engines and Advanced, with what each one does and its default.
 ---
 
-Open Settings from the anyfmt menu bar icon › **Settings…**, or press ⌘, while that menu is open. Settings has seven panes: General, Keys, Output, Formats, Engines, Account and Advanced. Everything here is stored on this Mac unless you turn on Pro sync.
+Open Settings from the anyfmt menu bar icon › **Settings…**, or press ⌘, while that menu is open. Settings has six panes: General, Keys, Output, Formats, Engines and Advanced. Everything here is stored on this Mac.
 
 ## General
 
@@ -66,21 +66,6 @@ The Formats pane has two tabs.
 
 **Optional packs** lists the packs this build offers, such as pandoc and the Office pack (LibreOffice), each with **Install** or **Remove**. Packs are never downloaded unless you choose **Install**: it opens the official download page in your browser, then you pick the downloaded file and anyfmt checks it against a pinned SHA-256. The Office pack can't be installed yet because its checksum isn't pinned.
 
-## Account
-
-> [!PREVIEW]
-> The Account pane is built and tested against a mock server, but the hosted server isn't live yet. Nothing here is needed for anything that runs on your Mac.
-
-| Section | What it does |
-|---|---|
-| Account | **Sign In…** opens the server's sign-in page in your browser and emails you a link. If you open the link on another device, choose **Opened the link on another device?** and type the code. Signed in, it shows your email, plan and usage, and **Sign Out** |
-| Pro licence key | Paste an `ANYFMT1-…` key and choose **Activate**. **Remove Licence…** takes it off this Mac. See [Licence keys](/docs/licence-keys) |
-| Sync | **Sync across your Macs**: favourites, wheel order, presets, recipes and settings. **Sync Now**. Off by default |
-| Inbox | **Receive files from your phone or browser**: new files are saved to a folder you choose (**Save to**), then removed from the server. **Check Now**. Off by default |
-| Server | **Server URL**, **Validate**, **Use This Server** and **Reset to Default**, for pointing anyfmt at your own server. Each server keeps its own sign-in. See [Self-host the server](/docs/self-host) |
-
-The menu bar item **Pro Licence & Account…** opens this pane.
-
 ## Advanced
 
 | Setting | What it does | Default |
@@ -101,4 +86,3 @@ The menu bar item **Pro Licence & Account…** opens this pane.
 | Presets and recent conversions | `~/Library/Application Support/anyfmt/presets.json` and `recents.json` |
 | Optional packs | `~/Library/Application Support/anyfmt/Packs/` |
 | Logs | `~/Library/Logs/anyfmt` |
-| Licence key and sign-in | Your login Keychain, not synced to iCloud |

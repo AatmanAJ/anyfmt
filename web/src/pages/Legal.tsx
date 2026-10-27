@@ -3,7 +3,7 @@
  * every section (above it on a phone), so the plain-English version is never more than a glance
  * away. Privacy opens with a ledger of every byte that can leave your Mac.
  */
-import { Check, Cloud, Power } from '@phosphor-icons/react'
+import { Check, CursorClick, Power } from '@phosphor-icons/react'
 import { motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -75,28 +75,33 @@ function AskLegal({ what }: { what: string }) {
 /* ── Privacy ───────────────────────────────────────────────── */
 
 type When = 'never' | 'opt-in' | 'you-ask'
-const LEDGER: { when: string; sends: string; to: string; on: When }[] = [
+type Row = { when: string; sends: string; to: string; on: When; cloud?: true }
+const LEDGER: Row[] = ([
   { when: 'Converting, editing, any action', sends: 'Nothing', to: 'Nowhere. The bundled ffmpeg is built without network support.', on: 'never' },
   { when: 'Using the CLI or the MCP server', sends: 'Nothing', to: 'Neither opens a socket or a port.', on: 'never' },
   { when: 'Update checks', sends: 'A request for the release feed, once a day', to: 'Our update server. No identifier is attached.', on: 'opt-in' },
   { when: 'Installing an optional engine pack', sends: 'Nothing from anyfmt', to: 'Your browser downloads it; anyfmt verifies the checksum.', on: 'you-ask' },
-  { when: 'Validating a server URL', sends: 'One health check', to: 'The server you typed, only when you press Validate.', on: 'you-ask' },
-  { when: 'Activating a licence key', sends: 'The key, a random install id, the Mac\'s name', to: 'Our licence server. Never a hardware serial.', on: 'you-ask' },
-  { when: 'Pro: share links, cloud jobs, sync, inbox', sends: 'The files and settings you choose', to: 'Our servers, or yours if you set a Server URL.', on: 'you-ask' },
-]
+  { when: 'Validating a server URL', sends: 'One health check', to: 'The server you typed, only when you press Validate.', on: 'you-ask', cloud: true },
+  { when: 'Activating a licence key', sends: 'The key, a random install id, the Mac\'s name', to: 'Our licence server. Never a hardware serial.', on: 'you-ask', cloud: true },
+  { when: 'Pro: share links, cloud jobs, sync, inbox', sends: 'The files and settings you choose', to: 'Our servers, or yours if you set a Server URL.', on: 'you-ask', cloud: true },
+] as Row[]).filter((row) => SITE.cloud || !row.cloud)
 
 /** "Never" is the one highlight; the other defaults are said in words. */
 function Status({ on, className = '' }: { on: When; className?: string }) {
   if (on === 'never') return <span className={`w-fit shrink-0 items-center gap-1.5 rounded-full bg-volt px-3 py-1 text-[13px] font-semibold text-ink ${className}`}><Check size={13} weight="bold" aria-hidden />Never</span>
   return (
     <span className={`shrink-0 items-center gap-1.5 text-[14px] font-medium text-ink ${className}`}>
-      {on === 'opt-in' ? <Power size={14} weight="bold" aria-hidden className="shrink-0" /> : <Cloud size={14} weight="fill" aria-hidden className="shrink-0" />}
+      {on === 'opt-in' ? <Power size={14} weight="bold" aria-hidden className="shrink-0" /> : <CursorClick size={14} weight="bold" aria-hidden className="shrink-0" />}
       {on === 'opt-in' ? 'Off until you turn it on' : 'Only when you ask'}
     </span>
   )
 }
 
-const PRIVACY: Section[] = [
+/** Sections about the hosted service, shown once it exists (`SITE.cloud`). */
+const CLOUD_SECTIONS = new Set(['pro', 'api', 'use', 'self-host'])
+const local = (sections: Section[]) => sections.filter((x) => SITE.cloud || !CLOUD_SECTIONS.has(x.id))
+
+const PRIVACY: Section[] = local([
   { id: 'app', title: 'The app', short: 'The app collects nothing. No analytics, no crash reporting, no account.', body: <>
     <p>anyfmt converts, edits and moves your files on your Mac. It does not collect analytics, usage data, crash reports or identifiers, and it does not need an account. The table above is the complete list of what can leave your Mac and when.</p>
     <p>Your files, presets and recent-conversion list stay in your home folder (<code>~/Library/Application Support/anyfmt</code>). Deleting the app and that folder removes everything anyfmt kept.</p>
@@ -128,12 +133,12 @@ const PRIVACY: Section[] = [
   </> },
   { id: 'rights', title: 'Your rights', short: 'Ask to see, export or delete what we hold about you, and we will.', body: <>
     <p>Wherever you live, you can ask us what personal data we hold about you, ask for a copy, ask us to correct it, or ask us to delete it. Write to <strong>{SITE.email.legal}</strong>. If you're in the UK or the EU you also have the right to complain to your data protection authority, in the UK the ICO.</p>
-    <p>Deleting your Pro account deletes your synced documents, share links and inbox items. Records we must keep by law, such as invoices, are kept for as long as the law requires.</p>
+    <p>{SITE.cloud ? 'Deleting your Pro account deletes your synced documents, share links and inbox items. ' : ''}Records we must keep by law, such as invoices, are kept for as long as the law requires.</p>
   </> },
   { id: 'changes', title: 'Changes', short: 'If this changes, the date at the top changes, and big changes get announced.', body: <>
     <p>We'll update this page if what anyfmt does with data changes, and note anything significant in the <Link to="/changelog">changelog</Link>. This policy takes effect with the first public release.</p>
   </> },
-]
+])
 
 export function Privacy() {
   useHead({ title: 'Privacy', description: 'anyfmt collects nothing from the app: no analytics, no account, no uploads. Here is exactly what can leave your Mac, when, and why.', path: '/privacy' })
@@ -179,9 +184,9 @@ export function Privacy() {
 
 /* ── Terms ─────────────────────────────────────────────────── */
 
-const TERMS: Section[] = [
+const TERMS: Section[] = local([
   { id: 'who', title: 'Who these terms are with', short: 'You and the people who make anyfmt.', body: <>
-    <p>These terms cover the anyfmt app, the anyfmt website, the Desktop licence, the Pro subscription and the HTTP API. “We” means the maintainer of anyfmt. You can reach us at <strong>{SITE.email.legal}</strong>.</p>
+    <p>These terms cover the anyfmt app, the anyfmt website{SITE.cloud ? ', the Desktop licence, the Pro subscription and the HTTP API' : ' and the Desktop licence'}. “We” means the maintainer of anyfmt. You can reach us at <strong>{SITE.email.legal}</strong>.</p>
   </> },
   { id: 'licence', title: 'The software licence', short: 'The code is AGPL-3.0. Nothing here takes away your rights under it.', body: <>
     <p>anyfmt's source code is licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.html">GNU Affero General Public License, version 3</a>. Two packages, DragSense and RadialMenu, are MIT. The bundled engines keep their own licences, listed inside the app and on the <Link to="/download">download page</Link>.</p>
@@ -189,7 +194,9 @@ const TERMS: Section[] = [
   </> },
   { id: 'desktop', title: 'The Desktop licence', short: `$${PRICES.desktop.once} once: the signed app, every update, up to ${PRICES.desktop.macs} of your Macs.`, body: <>
     <p>A Desktop licence gives one person the signed and notarized anyfmt app, every future update of it, and email support, on up to {PRICES.desktop.macs} Macs they use. It's a one-time payment and doesn't expire.</p>
-    <p>A licence key never limits anything that runs locally; it only records that you bought the app. Keys verify offline. Please don't share yours: deactivate a Mac in the app to move a seat to another.</p>
+    <p>{SITE.cloud
+      ? 'A licence key never limits anything that runs locally; it only records that you bought the app. Keys verify offline. Please don\'t share yours: deactivate a Mac in the app to move a seat to another.'
+      : 'The licence never limits anything that runs locally: the app does the same whether you bought it or built it yourself. Please don\'t share your download link.'}</p>
   </> },
   { id: 'pro', title: 'Pro', short: 'Monthly or yearly, cancel any time, keeps working until the period ends.', body: <>
     <p>Pro is a subscription that adds features running on our servers: share links, cloud conversions, sync, the inbox and GPU tools. It includes everything in the Desktop licence. You can pay monthly or yearly, and cancel at any time; Pro then stays active until the end of the period you paid for.</p>
@@ -216,12 +223,12 @@ const TERMS: Section[] = [
     <p>To the extent the law allows, we aren't liable for indirect or consequential losses, and our total liability to you is limited to what you paid us in the 12 months before the claim. Nothing here limits liability that can't be limited by law.</p>
   </> },
   { id: 'changes', title: 'Changes and law', short: 'We\'ll tell you before terms change. Northern Irish law applies.', body: <>
-    <p>We may update these terms. For material changes we'll give notice on this site and, for Pro subscribers, by email, before they take effect. These terms are governed by the laws of Northern Ireland, and its courts have jurisdiction, without taking away protections your local consumer law gives you. Last updated {UPDATED}; they take effect with the first public release.</p>
+    <p>We may update these terms. For material changes we'll give notice on this site{SITE.cloud ? ' and, for Pro subscribers, by email,' : ''} before they take effect. These terms are governed by the laws of Northern Ireland, and its courts have jurisdiction, without taking away protections your local consumer law gives you. Last updated {UPDATED}; they take effect with the first public release.</p>
   </> },
-]
+])
 
 export function Terms() {
-  useHead({ title: 'Terms', description: 'The terms for the anyfmt app, Desktop licence, Pro subscription and API, with a plain-English summary beside every section.', path: '/terms' })
+  useHead({ title: 'Terms', description: `The terms for the anyfmt app${SITE.cloud ? ', Desktop licence, Pro subscription and API' : ' and the Desktop licence'}, with a plain-English summary beside every section.`, path: '/terms' })
   return (
     <Page>
       <section className="bg-sand pb-16 pt-36 lg:pb-20 lg:pt-44">

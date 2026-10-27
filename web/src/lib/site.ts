@@ -9,10 +9,15 @@ export const SITE = {
   github: 'https://github.com/AatmanAJ/anyfmt',
   version: '0.1.0',
   released: false, // flips when the first public build ships; download copy reads from this
-  dmgSize: '27 MB',
-  appSize: '63 MB',
+  dmgSize: '25 MB',
+  appSize: '64 MB',
   requires: 'Apple silicon, macOS 13 Ventura or later',
   email: { hello: 'hello@anyfmt.app', support: 'support@anyfmt.app', sales: 'teams@anyfmt.app', press: 'press@anyfmt.app', security: 'security@anyfmt.app', legal: 'legal@anyfmt.app' },
+  /** The hosted service (sign-in, Pro, share links, the HTTP API). Off for v1; flip when the server
+   *  exists. Mirrors `Brand.cloudAvailable` in the app. */
+  cloud: false as boolean,
+  /** Where "Buy Desktop" goes. Empty until a checkout exists; the buttons say so meanwhile. */
+  checkoutUrl: '' as string,
   brew: { cask: 'brew install --cask aatmanaj/tap/anyfmt', cli: 'brew install aatmanaj/tap/anyfmt-cli' },
 } as const
 

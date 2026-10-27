@@ -2,9 +2,11 @@
  * The docs, in reading order. Each slug is a Markdown file beside this one (`<slug>.md`, with
  * `title` and `description` front matter); `index` is /docs itself.
  */
+import { SITE } from '../../lib/site'
+
 export interface DocSection { title: string; items: [slug: string, label: string][] }
 
-export const DOC_SECTIONS: DocSection[] = [
+const ALL_SECTIONS: DocSection[] = [
   { title: 'Start here', items: [['index', 'Overview'], ['install', 'Install'], ['first-conversion', 'Your first conversion'], ['permissions', 'Permissions']] },
   { title: 'The app', items: [['wheel', 'The wheel'], ['options-presets', 'Options and presets'], ['tools', 'Tools'], ['actions', 'Actions and Float'], ['keyboard', 'Keys and shortcuts'], ['routes', 'How routes work'], ['settings', 'Settings']] },
   { title: 'Command line and agents', items: [['cli', 'Command line'], ['cli-reference', 'Command reference'], ['json-output', 'JSON events and exit codes'], ['mcp', 'MCP server'], ['agent-recipes', 'Agent recipes']] },
@@ -12,5 +14,9 @@ export const DOC_SECTIONS: DocSection[] = [
   { title: 'Pro and self-hosting', items: [['pro', 'What Pro adds'], ['self-host', 'Self-host the server'], ['licence-keys', 'Licence keys']] },
   { title: 'Help', items: [['troubleshooting', 'Troubleshooting'], ['uninstall', 'Uninstall']] },
 ]
+
+/** Sections about the hosted service wait for it (`SITE.cloud`). */
+const CLOUD_SECTIONS = new Set(['HTTP API (preview)', 'Pro and self-hosting'])
+export const DOC_SECTIONS = ALL_SECTIONS.filter((s) => SITE.cloud || !CLOUD_SECTIONS.has(s.title))
 
 export const DOC_ORDER = DOC_SECTIONS.flatMap((s) => s.items.map(([slug, label]) => ({ slug, label, section: s.title })))

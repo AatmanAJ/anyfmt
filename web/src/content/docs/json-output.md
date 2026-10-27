@@ -71,7 +71,7 @@ These appear as `code` in `error` events, in MCP tool results, and in the error 
 | 5 | `engine_failed` | An engine ran and failed; the original is untouched |
 | 6 | `partial` | A batch where some files failed, or failures of different kinds. Also `output_exists` |
 | 7 | `cancelled` | SIGINT (^C) or MCP cancellation. The job stops, temporary files go, and nothing is placed |
-| 8 | `cloud_unavailable` | The request needs the cloud (Pro), which the CLI never uses |
+| 8 | `cloud_unavailable` | The request needs the cloud, which the CLI never uses |
 
 When every job fails the same way, the exit code is that failure's code: one missing file exits with 4. When some files succeed, or the failures differ, it's 6. A second ^C exits at once with 7.
 

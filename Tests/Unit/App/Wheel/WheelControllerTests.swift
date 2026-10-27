@@ -12,7 +12,7 @@ private struct FakeEntitlements: Entitlements {
 }
 
 @MainActor
-final class CloudSegmentsTests: XCTestCase {
+final class CloudSegmentsTests: CloudOnTestCase {
     private let provider = WheelTestTable.provider
 
     private func entries(_ kind: WheelKind) -> [WheelEntry] {
@@ -75,7 +75,7 @@ final class CloudSegmentsTests: XCTestCase {
 }
 
 @MainActor
-final class WheelControllerTests: XCTestCase {
+final class WheelControllerTests: CloudOnTestCase {
     private var controller: WheelController!
     private var selections: [(WheelSelection, [URL], CGPoint)] = []
 

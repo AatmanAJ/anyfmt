@@ -93,6 +93,6 @@ Paths must be absolute. A failure comes back as a result with `isError: true` an
 - `anyfmt doctor --json` shows the engines it found and their versions, the optional packs, the binary's signature, and the permissions that can matter. The CLI itself needs none.
 - A route missing from `targets` may need an optional pack (pandoc or LibreOffice), installed from the app's **Settings › Engines**. `doctor` shows whether it's there.
 - Files in Desktop, Documents or Downloads can trigger a macOS Files and Folders prompt for your terminal app. Grant it there; anyfmt can't.
-- Exit code 8 means the request needs Pro cloud features, which the CLI never uses. Convert locally instead.
+- Exit code 8 means the request asked for a cloud feature, which the CLI never uses. Convert locally instead.
 
 The repository also ships these rules as an agent skill file, `agents/SKILL.md`, that you can give to an agent directly.

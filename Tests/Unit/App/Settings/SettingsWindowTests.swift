@@ -5,7 +5,7 @@ import AnyfmtCore
 
 /// Drives the real Settings window offscreen (fully transparent, never key).
 @MainActor
-final class SettingsWindowTests: XCTestCase {
+final class SettingsWindowTests: CloudOnTestCase {
     private func makeController(pane: SettingsPane? = nil) throws -> (SettingsWindowController, SampleState) {
         let sample = try SampleState()
         let controller = SettingsWindowController(model: sample.model, pane: pane)

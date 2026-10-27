@@ -61,7 +61,7 @@ anyfmt convert *.png --to webp --dry-run --json
 
 ## What the CLI won't do
 
-- **Use the cloud.** Pro features run in the app only. `--opt cloud=true` and the cloud tools exit with code 8.
+- **Use the cloud.** Everything runs on this Mac. `--opt cloud=true` and the cloud tools exit with code 8.
 - **Ask for permissions.** The CLI needs no macOS permission. Converting files in Desktop, Documents or Downloads can show a Files and Folders prompt, which macOS raises for your terminal app, not anyfmt.
 
 ## Environment variables

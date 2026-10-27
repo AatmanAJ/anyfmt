@@ -82,7 +82,7 @@ final class SlidesAndPackTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: p.path))
     }
 
-    func testPinnedPandocMatchesVersionsEnv() throws {
+    func testPinnedPacksMatchVersionsEnv() throws {
         let env = try String(contentsOf: DocsFixtures.repoRoot.appendingPathComponent("Engines/versions.env"), encoding: .utf8)
         func value(_ k: String) -> String? {
             env.split(separator: "\n").first { $0.hasPrefix(k + "=") }.map { String($0.dropFirst(k.count + 1)) }
@@ -90,7 +90,9 @@ final class SlidesAndPackTests: XCTestCase {
         XCTAssertEqual(PandocPack.spec.downloadURL?.absoluteString, value("PANDOC_URL"))
         XCTAssertEqual(PandocPack.spec.sha256, value("PANDOC_SHA256"))
         XCTAssertEqual(PandocPack.spec.version, value("PANDOC_VERSION"))
-        XCTAssertNil(OfficePack.spec.sha256, "Office pack stays unpinned until a release engineer verifies the DMG (see F-docs.md)")
+        XCTAssertEqual(OfficePack.spec.downloadURL?.absoluteString, value("LIBREOFFICE_URL"))
+        XCTAssertEqual(OfficePack.spec.sha256, value("LIBREOFFICE_SHA256"), "pinned only after the .asc verifies (BLOCKERS.md B-011)")
+        XCTAssertEqual(OfficePack.spec.version, value("LIBREOFFICE_VERSION"))
     }
 
     func testPackEnginesAreUnavailableWithoutPacks() {

@@ -11,7 +11,8 @@ import { PillLink } from './Buttons'
 
 const COLS: { title: string; links: [string, string][] }[] = [
   { title: 'Product', links: [['Download', '/download'], ['Formats', '/formats'], ['Pricing', '/pricing'], ['Changelog', '/changelog'], ['Donate', '/pricing#donate']] },
-  { title: 'Developers', links: [['Docs', '/docs'], ['Command line', '/docs/cli'], ['MCP for agents', '/docs/mcp'], ['HTTP API', '/docs/api'], ['Self-host', '/docs/self-host'], ['Open source', '/open-source']] },
+  { title: 'Developers', links: ([['Docs', '/docs'], ['Command line', '/docs/cli'], ['MCP for agents', '/docs/mcp'], ['HTTP API', '/docs/api'], ['Self-host', '/docs/self-host'], ['Open source', '/open-source']] as [string, string][])
+    .filter(([, to]) => SITE.cloud || !['/docs/api', '/docs/self-host'].includes(to)) },
   { title: 'Compare', links: [['vs Tangerine', '/compare/tangerine'], ['vs convt', '/compare/convt'], ['vs Permute', '/compare/permute'], ['vs CloudConvert', '/compare/cloudconvert'], ['All comparisons', '/compare']] },
   { title: 'Convert', links: [['HEIC to JPG', '/convert/heic-to-jpg'], ['MOV to MP4', '/convert/mov-to-mp4'], ['Video to GIF', '/convert/video-to-gif'], ['PDF to Word', '/convert/pdf-to-word'], ['All guides', '/convert']] },
   { title: 'Company', links: [['Privacy', '/privacy'], ['Terms', '/terms'], ['Contact', '/contact'], ['Brand', '/brand']] },

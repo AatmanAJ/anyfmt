@@ -238,7 +238,7 @@ struct OnboardingView: View {
                 .padding(.leading, -DesignTokens.Space.s) // align the text, not the hit area, with the page edge
 
             Spacer(minLength: DesignTokens.Space.s)
-            ProgressDots(count: OnboardingPage.allCases.count, current: model.page.rawValue, reduceMotion: reduceMotion) { i in
+            ProgressDots(count: OnboardingPage.visible.count, current: model.page.rawValue, reduceMotion: reduceMotion) { i in
                 if let p = OnboardingPage(rawValue: i) { withAnimation(animation) { model.go(to: p) } }
             }
             Spacer(minLength: DesignTokens.Space.s)

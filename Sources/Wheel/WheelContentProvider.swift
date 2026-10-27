@@ -55,7 +55,7 @@ public struct WheelContentProvider: Sendable {
         case .actions:
             raw = actions().map(WheelEntry.action)
         }
-        return CloudSegments.filter(raw, showCloudItems: preferences.showCloudItems)
+        return CloudSegments.filter(raw, showCloudItems: Brand.cloudAvailable && preferences.showCloudItems)
     }
 
     /// What to actually show for a requested kind: the kind itself, or Actions

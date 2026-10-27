@@ -81,7 +81,7 @@ export function llmsTxt() {
     for (const d of docs) lines.push(`- [${d.title}](${mdUrl(d)}): ${d.description}`)
     lines.push('')
   }
-  lines.push('## Site', '', `- [Formats](${SITE}/formats): every format and route, generated from the app`, `- [Pricing](${SITE}/pricing): build it yourself (free), Desktop (one payment), Pro (monthly or yearly), donations`, `- [Changelog](${SITE}/changelog)`, `- [Full docs in one file](${SITE}/llms-full.txt)`, '')
+  lines.push('## Site', '', `- [Formats](${SITE}/formats): every format and route, generated from the app`, `- [Pricing](${SITE}/pricing): build it yourself (free), Desktop (one payment), donations`, `- [Changelog](${SITE}/changelog)`, `- [Full docs in one file](${SITE}/llms-full.txt)`, '')
   return lines.join('\n')
 }
 

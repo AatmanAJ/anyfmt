@@ -154,7 +154,7 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSW
     // MARK: NSToolbarDelegate
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        SettingsPane.allCases.map { NSToolbarItem.Identifier($0.rawValue) }
+        SettingsPane.visible.map { NSToolbarItem.Identifier($0.rawValue) }
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {

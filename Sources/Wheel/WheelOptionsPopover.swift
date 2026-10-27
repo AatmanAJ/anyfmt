@@ -37,7 +37,9 @@ final class WheelOptionsPopover: NSObject, NSPopoverDelegate {
         self.itemID = itemID
         let title = String(localized: "\(Formats.label(target.format)) options",
                            comment: "Title of the conversion options popover, e.g. MP4 options")
-        let model = WheelOptionsModel(title: title, schema: target.schema, values: values, interactive: interactive)
+        let schema = Brand.cloudAvailable ? target.schema
+            : OptionsSchema(target.schema.id, target.schema.specs.filter { $0.id != OptionKey.cloud })
+        let model = WheelOptionsModel(title: title, schema: schema, values: values, interactive: interactive)
         model.allowCloud = { [weak cloud] in cloud?.allowsCloudJobs() ?? false }
         model.apply = { [weak self] values in
             guard let self, let target = self.target else { return }

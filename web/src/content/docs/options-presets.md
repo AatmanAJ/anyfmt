@@ -124,8 +124,6 @@ In **Settings › Formats › Presets**, each preset has **Use as Defaults**, **
 
 Presets live in `~/Library/Application Support/anyfmt/presets.json`. The app and the `anyfmt` command read the same file, and each re-reads it when the other changes it, so a preset you add in Terminal is on the wheel the next time it opens, with no relaunch.
 
-With Pro, presets can also sync across your Macs. See [What Pro adds](/docs/pro).
-
 ## Options from the command line
 
 ```bash title="Terminal"

@@ -56,7 +56,7 @@ The `anyfmt` command-line tool needs no permission to convert files you can read
 - **Local conversions make no network requests.** The bundled ffmpeg is built without network support. A test samples the sockets of the app, the CLI and the engines during a workload, and finds none.
 - **Update checks are opt-in.** When on, anyfmt fetches an update feed once a day and sends nothing else.
 - **Optional packs are never downloaded by anyfmt.** **Install** in **Settings › Engines** opens the official download page in your browser. You choose the downloaded file, and anyfmt checks it against a pinned SHA-256 before installing it.
-- **Pro features are the only ones that upload.** Signed out, anyfmt makes no cloud requests at all. The first upload to a server always tells you which server it's going to. See [What Pro adds](/docs/pro).
+- **Nothing uploads.** anyfmt has no account and no cloud features. Your files never leave your Mac.
 
 ## Turn a permission off
 

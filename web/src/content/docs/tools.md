@@ -1,6 +1,6 @@
 ---
 title: Tools
-description: Every anyfmt tool, from Compress and Crop to Trim, Normalize and Merge PDF, with its key options and output suffix, plus the three Pro cloud tools.
+description: Every anyfmt tool, from Compress and Crop to Trim, Normalize and Merge PDF, with its key options and output suffix.
 ---
 
 Tools change a file instead of converting it: compress it, crop it, trim it, strip its metadata. Press ⌘ Command mid-drag to open the Tools wheel, which lists only the tools that apply to the files you're holding. All 26 local tools are free and run on your Mac.
@@ -69,18 +69,6 @@ These work on images, audio, video and PDFs.
 | Compress PDF `pdf.compress` | Shrinks the images inside a PDF while text stays vector. Instant | Mode (Preset, Target size), Image quality, Image resolution (72 to 300 DPI), Target size | `compressed` |
 
 On the test fixture, Compress PDF took a 4.1 MB file to 315 KB with the text still vector.
-
-## Pro cloud tools
-
-Three tools need GPUs, so they run on a server. They appear on the Tools wheel with a cloud glyph and a **Pro** chip.
-
-| Tool | Works on | Suffix |
-|---|---|---|
-| Transcribe `cloud.transcribe` | Audio and video, giving an SRT or VTT transcript | `transcript` |
-| Upscale `cloud.upscale` | Images | `upscaled` |
-| Remove background HQ `cloud.removeBackgroundHQ` | Images | `cutout-hq` |
-
-The local **Remove background** tool stays free. The Mac side of the cloud tools is built and tested against a mock server, but the hosted server isn't live yet, so these tools can't run today. From the command line, cloud tools are listed with `"cloud": true` and exit with code 8. See [What Pro adds](/docs/pro).
 
 ## Run tools from the command line
 

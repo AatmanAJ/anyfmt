@@ -16,7 +16,7 @@ import catalog from '../data/catalog.json'
 import { BUNDLED } from '../data/engines'
 import { useHead } from '../lib/head'
 import { EASE, SNAP } from '../lib/hooks'
-import { SITE } from '../lib/site'
+import { PRICES, SITE } from '../lib/site'
 
 /* ── the release button ────────────────────────────────────── */
 
@@ -166,7 +166,7 @@ export default function Download() {
     jsonLd: {
       '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'anyfmt', operatingSystem: 'macOS 13+', applicationCategory: 'UtilitiesApplication',
       softwareVersion: SITE.version, fileSize: SITE.dmgSize, processorRequirements: 'Apple silicon (arm64)', downloadUrl: `${SITE.url}/download`,
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      offers: { '@type': 'Offer', price: String(PRICES.desktop.once), priceCurrency: 'USD' },
     },
   })
   return (

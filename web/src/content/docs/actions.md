@@ -1,6 +1,6 @@
 ---
 title: Actions and Float
-description: Use the anyfmt Actions wheel to AirDrop, float, copy, move, copy the path of, or open a terminal at any file or folder, plus the Float shelf and share links.
+description: Use the anyfmt Actions wheel to AirDrop, float, copy, move, copy the path of, or open a terminal at any file or folder, plus the Float shelf.
 ---
 
 Actions do something with files without changing them: send them with AirDrop, park them on the Float shelf, copy them, move them, copy their paths, or open a terminal there. Press ⌃ Control mid-drag for the Actions wheel. Actions work on files, folders and mixed selections, including files that have nothing to convert.
@@ -64,19 +64,3 @@ The shelf follows files you rename or move, and drops files you delete or trash.
 
 - No Quick Look on shelf items yet.
 - No arrow-key navigation between items yet. VoiceOver can reach and act on every item.
-
-## Share link (Pro)
-
-> [!PREVIEW]
-> Share links are built and tested in the app against a mock server, but the hosted server isn't live yet. Signed out, choosing Share link explains what it does and uploads nothing.
-
-Share link is a Pro segment on the Actions wheel, marked with a cloud glyph and a **Pro** chip. It uploads the files, makes a link, and copies the link to your clipboard.
-
-1. Drop files on **Share link**.
-2. Set the link options: **Expires**, **Require a password** (at least 4 characters), and **Limit downloads**. A custom **Domain** appears when your plan includes one.
-3. Choose **Create Link**.
-4. The first time you upload to a server, a one-time note says the files will leave your Mac and which server they go to. Choose **Continue**.
-
-The link is copied to your clipboard when it's ready.
-
-Uploads resume after a dropped connection. A "Your links" list for revoking links from the app isn't built yet. See [What Pro adds](/docs/pro).
