@@ -1,17 +1,16 @@
 /**
  * Flare: anyfmt in a bright editorial layout. Hero background is the `shaders` stack turned
- * horizontal (HeroShader); the final call to action reuses the WebGL Streaks on black.
+ * diagonal (FluteShader), in light for the hero and dark for the final call to action.
  */
 
 import '@fontsource-variable/inter-tight'
 import '@fontsource-variable/bricolage-grotesque/wdth.css'
 import NumberFlow from '@number-flow/react'
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform, type MotionValue } from 'motion/react'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Badge, ButtonStyles, DownloadButton, GitHubButton, NavDownload } from './Buttons'
-import { HeroShader } from './HeroShader'
+import { FluteShader } from './FluteShader'
 import { Playground } from './Playground'
-import { Streaks } from './Streaks'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
@@ -86,7 +85,7 @@ function Hero() {
   const [tip, setTip] = useState(-1)
   return (
     <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#EFEFEF]">
-      <HeroShader className="pointer-events-none absolute inset-0" />
+      <FluteShader className="pointer-events-none absolute inset-0" />
       <Nav />
       <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-center px-5 pb-10 pt-36 sm:px-10 lg:px-14">
         <motion.div {...rise(0)}><Badge onClick={() => go('try')}>Free and open source, for macOS</Badge></motion.div>
@@ -276,7 +275,7 @@ function FinalCta() {
   return (
     <section id="download" className="bg-white p-3 sm:p-5">
       <div className="relative overflow-hidden rounded-[32px] bg-[#0A0A0A]">
-        <div className="pointer-events-none absolute inset-0 opacity-90"><Streaks corner="bl" dark reach={1.1} /></div>
+        <FluteShader variant="dark" corner="bl" className="pointer-events-none absolute inset-0" />
         <div className="relative mx-auto flex min-h-[640px] max-w-[1440px] flex-col items-end justify-center px-6 py-24 text-right sm:px-14">
           <h2 className="max-w-[820px] text-[clamp(44px,6vw,96px)] font-semibold leading-[0.97] tracking-[-0.05em] text-white [text-wrap:balance]">Your next drag already knows the way.</h2>
           <p className="mt-6 max-w-[460px] text-[18px] leading-[1.5] text-white/70">Free, no account, open source. Install it once and every file you touch learns a new trick.</p>
@@ -287,17 +286,53 @@ function FinalCta() {
   )
 }
 
+function FooterCol({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <p className="flex items-center gap-2.5 text-[14px] text-[#6A6A6A]"><span className="h-2 w-2 bg-[#0A0A0A]" />{title}</p>
+      <ul className="mt-5 flex flex-col gap-3 text-[16px]">{children}</ul>
+    </div>
+  )
+}
+
 function Footer() {
   return (
-    <footer className="bg-white px-5 pb-10 pt-16 sm:px-10 lg:px-14">
-      <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-8">
-        <div>
-          <Logo className="text-[clamp(64px,9vw,140px)]" />
-          <p className="mt-4 text-[15px] text-[#3A3A3A]">Apple silicon, macOS 13 or later. AGPL 3.0.</p>
+    <footer className="bg-white px-5 pb-8 pt-20 sm:px-10 lg:px-14">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="grid gap-12 border-t border-black/10 pt-12 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
+          <div>
+            <Logo />
+            <p className="mt-5 max-w-[340px] text-[16px] leading-[1.5] text-[#3A3A3A]">Any file, any format, one drag away. Free and open source, for macOS.</p>
+            <div className="mt-7"><NavDownload onClick={() => go('download')} /></div>
+          </div>
+          <FooterCol title="On this page">
+            {LINKS.map(([l, id]) => <li key={id}><button type="button" onClick={() => go(id)} className="link-line relative">{l}</button></li>)}
+          </FooterCol>
+          <FooterCol title="Project">
+            <li><button type="button" onClick={() => go('download')} className="link-line relative">Download</button></li>
+            <li className="flex items-center gap-2 text-[#0A0A0A]/45">Source on GitHub<span className="rounded-full bg-[#E4FF3A] px-2 py-0.5 text-[11px] font-semibold text-[#0A0A0A]">Soon</span></li>
+            <li><a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noreferrer" className="link-line relative">Licence: AGPL 3.0</a></li>
+          </FooterCol>
+          <FooterCol title="Requirements">
+            <li className="text-[#3A3A3A]">Mac with Apple silicon</li>
+            <li className="text-[#3A3A3A]">macOS 13 Ventura or later</li>
+            <li className="text-[#3A3A3A]">No account, no uploads</li>
+          </FooterCol>
         </div>
-        <ul className="flex flex-wrap gap-8 text-[15px]">
-          {LINKS.map(([l, id]) => <li key={id}><button type="button" onClick={() => go(id)} className="link-line relative">{l}</button></li>)}
-        </ul>
+        <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 pt-6 text-[14px] text-[#6A6A6A]">
+          <span>© 2026 anyfmt</span>
+          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })}
+            className="group flex items-center gap-2 text-[#0A0A0A] outline-none focus-visible:ring-2 focus-visible:ring-black">
+            <span className="link-line relative">Back to top</span>
+            <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#F1EEEA] transition-colors duration-300 group-hover:bg-[#0A0A0A] group-hover:text-white">
+              {[0, 1].map((k) => (
+                <svg key={k} width="12" height="12" viewBox="0 0 12 12" aria-hidden className={`absolute transition-transform duration-500 ${k === 0 ? 'group-hover:-translate-y-6' : 'translate-y-6 group-hover:translate-y-0'}`} style={{ transitionTimingFunction: 'cubic-bezier(0.785,0.135,0.15,0.86)' }}>
+                  <path d="M6 10.5v-9M2 5.5l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ))}
+            </span>
+          </button>
+        </div>
       </div>
     </footer>
   )
