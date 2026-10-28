@@ -41,6 +41,8 @@ final class ImagePerfTests: XCTestCase {
         let upright = try await medianMilliseconds(twelveMegapixelHEIC(dir, orientation: 1))
         let rotated = try await medianMilliseconds(twelveMegapixelHEIC(dir, orientation: 6))
         print(String(format: "lane D perf: 12 MP HEIC → JPG median %.0f ms (upright), %.0f ms (orientation 6, rotated)", upright, rotated))
+        // The budget is for a real Mac. Shared CI VMs (ANYFMT_CI, set by ci.yml) only log the timing.
+        try XCTSkipIf(ProcessInfo.processInfo.environment["ANYFMT_CI"] != nil, "timing logged; budget checked on real hardware (make perf)")
         XCTAssertLessThan(upright, 400)
         XCTAssertLessThan(rotated, 400)
     }
