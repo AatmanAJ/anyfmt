@@ -56,7 +56,10 @@ final class AimTests: XCTestCase {
         let (view, _) = make()
         view.updateHover(at: at(view, deg: 0, r: ringMid))
         view.updateHover(at: at(view, deg: 45, r: ringMid))
-        try await Task.sleep(nanoseconds: 150_000_000)
+        // The switch fires from a timer after switchDelay; wait for it (CI runners can be slow).
+        for _ in 0..<40 where view.highlightedItemIndex != 1 {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
         XCTAssertEqual(view.highlightedItemIndex, 1, "the delay re-checks without another drag event")
     }
 
@@ -139,7 +142,9 @@ final class AimTests: XCTestCase {
         host.presets["i0"] = [RadialPreset(id: "a", title: "A")]
         view.updateHover(at: at(view, deg: 0, r: ringMid))
         XCTAssertTrue(view.chipTitlesForTesting.isEmpty)
-        try await Task.sleep(nanoseconds: 200_000_000)
+        for _ in 0..<40 where view.chipTitlesForTesting.isEmpty {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
         XCTAssertEqual(view.chipTitlesForTesting, ["A"])
         // The way out to the chip keeps the segment selected.
         let f = try XCTUnwrap(view.chipFramesForTesting.first)
