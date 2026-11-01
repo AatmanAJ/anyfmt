@@ -22,7 +22,7 @@ export interface Release {
   status: 'upcoming' | 'build'
   title: string
   summary: string
-  visual: 'box' | 'rename' | 'manners' | 'dayone'
+  visual: 'box' | 'warning' | 'rename' | 'manners' | 'dayone'
   entries: Entry[]
 }
 
@@ -37,6 +37,17 @@ export const RELEASES: Release[] = [
       { tag: 'tools', title: '26 tools on ⌘ Command', body: 'Compress to a target size, resize, crop, adjust, annotate, redact, remove or add a background, collage, trim and split video, normalize audio, bleep, merge and compress PDFs, strip metadata.' },
       { tag: 'actions', title: '6 actions on ⌃ Control', body: 'AirDrop, Float, Copy, Move, Copy Path and Terminal. They work on folders and mixed selections too.' },
       { tag: 'cli', title: 'The anyfmt command and an MCP server', body: 'Same routes as the wheel, --json on every command, stable exit codes, and `anyfmt mcp` for agents. Neither opens a network socket.' },
+    ],
+  },
+  {
+    version: 'Preview 1', date: '2026-11-01', status: 'build',
+    title: 'The first build you can download',
+    summary: "The whole app in a 25 MB disk image, not signed by Apple yet. Apple's $99/year developer account hasn't been bought, so macOS warns you the first time.",
+    visual: 'warning',
+    entries: [
+      { tag: 'convert', title: 'Everything runs on your Mac', body: 'All 793 conversion routes, 26 tools and 6 actions. No account, and nothing uploads.' },
+      { tag: 'cloud', title: 'Cloud and Pro stay hidden', body: 'Sign-in, share links and cloud conversions stay out of the app until a hosted service exists.' },
+      { tag: 'fix', title: 'Update checks wait for the signed release', body: 'They find nothing until then, so new previews come from the download page.' },
     ],
   },
   {

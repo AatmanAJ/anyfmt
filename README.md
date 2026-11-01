@@ -33,8 +33,7 @@ Inspired by drag-to-convert tools.
 
 **Requirements:** a Mac with Apple silicon, macOS 13 Ventura or later.
 
-- Download the latest `anyfmt-x.y.z.dmg` from [Releases](https://github.com/AatmanAJ/anyfmt/releases) and drag anyfmt to Applications, or
-- `brew install --cask aatmanaj/tap/anyfmt`
+The current download is an unsigned preview, because Apple's $99/year developer account hasn't been bought yet. Get it from [preview 1](https://github.com/AatmanAJ/anyfmt/releases/tag/preview-1), drag anyfmt to Applications, then follow the steps there to get past the macOS warning. Homebrew arrives with the first signed release.
 
 anyfmt appears in the menu bar. There's no Dock icon and no main window.
 

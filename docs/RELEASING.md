@@ -50,8 +50,9 @@ rm anyfmt-updates-private.key
 6. Homebrew: in the `AatmanAJ/homebrew-tap` repo, update `Casks/anyfmt.rb` and
    `Formula/anyfmt-cli.rb` from `packaging/homebrew/` with the new version and the two SHA-256s
    (`shasum -a 256` on the release's DMG and `anyfmt-cli-<version>-arm64.tar.gz`).
-7. Website: set `SITE.version`, `SITE.released: true` and the sizes in `web/src/lib/site.ts`,
-   then publish the Base44 app.
+7. Website: set `SITE.version`, `SITE.released: true`, `SITE.dmgUrl` and the sizes in
+   `web/src/lib/site.ts`, remove the unsigned-preview notes from the install and troubleshooting
+   docs and the README, then publish the Base44 app.
 
 ## Building a release locally
 

@@ -4,8 +4,8 @@
  * minute, what's inside, and the permissions, honestly.
  */
 import { Check } from '@phosphor-icons/react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AppIcon, MenuBarGlyph } from '../components/AppIcon'
 import { ArrowLink, SwapArrow } from '../components/Buttons'
@@ -21,24 +21,16 @@ import { PRICES, SITE } from '../lib/site'
 /* ── the release button ────────────────────────────────────── */
 
 function ReleaseButton() {
-  const [said, setSaid] = useState(false)
-  useEffect(() => { if (!said) return; const t = window.setTimeout(() => setSaid(false), 3600); return () => clearTimeout(t) }, [said])
   return (
-    <button type="button" onClick={() => setSaid(true)} aria-live="polite"
+    <a href={SITE.dmgUrl}
       className="group relative inline-flex h-16 max-w-full items-center overflow-hidden rounded-full bg-ink pl-6 pr-2 text-[16px] font-medium sm:pl-7 sm:text-[17px] text-white outline-none transition-transform duration-300 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-flare focus-visible:ring-offset-2">
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-volt transition-[clip-path] duration-500 [clip-path:circle(24px_at_calc(100%-32px)_50%)] group-hover:[clip-path:circle(150%_at_calc(100%-32px)_50%)]" style={{ transitionTimingFunction: SNAP }} />
       <span className="relative flex items-center gap-3 pr-5 transition-colors duration-500 group-hover:text-ink">
         <AppleMark size={20} className="-mt-0.5" />
-        <span className="relative grid overflow-hidden">
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={String(said)} initial={{ y: 26, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -26, opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="whitespace-nowrap">
-              {said ? 'The first build lands soon' : <>Download <span className="hidden min-[360px]:inline">anyfmt </span>{SITE.version}</>}
-            </motion.span>
-          </AnimatePresence>
-        </span>
+        <span className="whitespace-nowrap">{SITE.released ? <>Download <span className="hidden min-[360px]:inline">anyfmt </span>{SITE.version}</> : 'Download the preview'}</span>
       </span>
       <span className="relative flex h-12 w-12 items-center justify-center rounded-full text-ink"><span className="relative flex h-5 w-5 items-center justify-center overflow-hidden"><SwapArrow size={16} dir="s" /></span></span>
-    </button>
+    </a>
   )
 }
 
@@ -125,6 +117,40 @@ function Way({ title, tag, children, action }: { title: string; tag?: string; ch
   )
 }
 
+/* ── first open, while the build is unsigned ───────────────── */
+
+const strong = 'font-semibold text-ink'
+const OPEN_STEPS: ReactNode[] = [
+  <>Drag anyfmt into Applications and open it.</>,
+  <>macOS blocks it. Click <strong className={strong}>Done</strong>, or <strong className={strong}>OK</strong> on older versions.</>,
+  <>Go to <strong className={strong}>System Settings › Privacy &amp; Security</strong> and scroll down to <strong className={strong}>Security</strong>.</>,
+  <>Click <strong className={strong}>Open Anyway</strong> next to anyfmt.</>,
+  <>Click <strong className={strong}>Open Anyway</strong> again and enter your Mac password.</>,
+]
+
+function FirstOpen() {
+  return (
+    <section id="first-open" className="scroll-mt-20 bg-white py-24 lg:py-32">
+      <Container className="grid gap-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <Eyebrow>First open</Eyebrow>
+          <h2 className="mt-6 text-[clamp(32px,3.6vw,54px)] font-semibold leading-[1.02] tracking-[-0.04em] [text-wrap:balance]">macOS will warn you first.</h2>
+          <p className="mt-6 max-w-[400px] text-[16.5px] leading-[1.55] text-mute">This preview isn't signed by Apple yet, because the $99/year developer account hasn't been bought. macOS can't check it for malware, so you have to approve it once. If you'd rather not, <Link to="/open-source" className="font-medium text-ink underline decoration-flare/60 underline-offset-4 outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">read the code and build it yourself</Link>.</p>
+          <div className="mt-6"><ArrowLink to={PRICES.donateUrl} className="text-[16px]">Sponsor the $99</ArrowLink></div>
+        </div>
+        <ol className="divide-y divide-line rounded-[28px] bg-sand px-6 sm:px-8">
+          {OPEN_STEPS.map((step, i) => (
+            <li key={i} className="flex gap-5 py-6">
+              <span aria-hidden className="w-5 shrink-0 text-[17px] font-semibold tabular-nums text-mute-2">{i + 1}</span>
+              <p className="text-[17px] leading-[1.5] text-mute">{step}</p>
+            </li>
+          ))}
+        </ol>
+      </Container>
+    </section>
+  )
+}
+
 /* ── the first minute ──────────────────────────────────────── */
 
 function FirstMinute() {
@@ -161,7 +187,9 @@ const PERMS: [string, string, string][] = [
 export default function Download() {
   useHead({
     title: 'Download anyfmt for Mac',
-    description: `Download anyfmt ${SITE.version} for macOS: a ${SITE.dmgSize} disk image for Apple silicon Macs on macOS 13 or later. Or install with Homebrew, or build it from source.`,
+    description: SITE.released
+      ? `Download anyfmt ${SITE.version} for macOS: a ${SITE.dmgSize} disk image for Apple silicon Macs on macOS 13 or later. Or install with Homebrew, or build it from source.`
+      : `Download the anyfmt ${SITE.version} preview for macOS: a ${SITE.dmgSize} disk image for Apple silicon Macs on macOS 13 or later. It isn't signed by Apple yet, so macOS warns you first. Or build it from source.`,
     path: '/download',
     jsonLd: {
       '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'anyfmt', operatingSystem: 'macOS 13+', applicationCategory: 'UtilitiesApplication',
@@ -180,24 +208,26 @@ export default function Download() {
             <p className="mt-6 max-w-[480px] text-[19px] leading-[1.5] text-ink-2">One disk image, one drag into Applications. Every engine is inside, so there is nothing else to install.</p>
             <div className="mt-10"><ReleaseButton /></div>
             <dl className="mt-10 grid max-w-[520px] grid-cols-2 gap-x-8 gap-y-4 text-[15px] sm:grid-cols-4">
-              {[['Version', SITE.version], ['Download', SITE.dmgSize], ['Chip', 'Apple silicon'], ['macOS', '13 or later']].map(([k, v]) => (
+              {[['Version', SITE.released ? SITE.version : `${SITE.version} preview`], ['Download', SITE.dmgSize], ['Chip', 'Apple silicon'], ['macOS', '13 or later']].map(([k, v]) => (
                 <div key={k}><dt className="text-[13px] text-mute">{k}</dt><dd className="mt-0.5 font-semibold">{v}</dd></div>
               ))}
             </dl>
-            {!SITE.released && <p className="mt-8 flex max-w-[480px] items-baseline gap-2.5 text-[15px] leading-[1.5] text-mute"><span className="h-2 w-2 shrink-0 translate-y-[-1px] rounded-full bg-flare" /><span>The first public build is on its way. <Link to="/changelog" className="font-medium text-ink underline decoration-flare/60 decoration-[1.5px] underline-offset-[3px] outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">Follow the changelog</Link></span></p>}
+            {!SITE.released && <p className="mt-8 flex max-w-[480px] items-baseline gap-2.5 text-[15px] leading-[1.5] text-mute"><span className="h-2 w-2 shrink-0 translate-y-[-1px] rounded-full bg-flare" /><span>This preview isn't signed by Apple yet, so macOS warns you the first time. <a href="#first-open" className="font-medium text-ink underline decoration-flare/60 decoration-[1.5px] underline-offset-[3px] outline-none hover:decoration-flare focus-visible:ring-2 focus-visible:ring-flare">How to open it</a></span></p>}
           </div>
           <DiskImage />
         </Container>
       </section>
 
+      {!SITE.released && <FirstOpen />}
+
       <section className="bg-sand py-24 lg:py-32">
         <Container>
           <Eyebrow>Ways in</Eyebrow>
-          <h2 className="mt-6 max-w-[820px] text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">Four ways to install it.</h2>
+          <h2 className="mt-6 max-w-[820px] text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1.0] tracking-[-0.045em] [text-wrap:balance]">{SITE.released ? 'Four ways to install it.' : 'Two ways to install it today.'}</h2>
           <ul className="mt-12 divide-y divide-line border-y border-line">
-            <Way title="Disk image" tag="Easiest" action={<p className="text-[15.5px] text-mute">{SITE.released ? <ArrowLink to="#top" className="text-[16px]">Download the {SITE.dmgSize} .dmg</ArrowLink> : `The ${SITE.dmgSize} .dmg arrives with the first release.`}</p>}>Signed and notarized by Apple. Open it and drag anyfmt into Applications.</Way>
-            <Way title="Homebrew" action={<Command cmd={SITE.brew.cask} tone="light" />}>The app, plus the <code className="font-mono text-[14px]">anyfmt</code> command linked onto your PATH.</Way>
-            <Way title="Command line only" action={<Command cmd={SITE.brew.cli} tone="light" />}>Just the CLI, its framework and the engines. No app and no menu bar.</Way>
+            <Way title="Disk image" tag="Easiest" action={<ArrowLink to={SITE.dmgUrl} className="text-[16px]">Download the {SITE.dmgSize} .dmg</ArrowLink>}>{SITE.released ? 'Signed and notarized by Apple.' : "Not signed by Apple yet, so macOS warns you the first time."} Open it and drag anyfmt into Applications.</Way>
+            <Way title="Homebrew" action={SITE.released ? <Command cmd={SITE.brew.cask} tone="light" /> : <p className="text-[15.5px] text-mute">Arrives with the first signed release.</p>}>The app, plus the <code className="font-mono text-[14px]">anyfmt</code> command linked onto your PATH.</Way>
+            <Way title="Command line only" action={SITE.released ? <Command cmd={SITE.brew.cli} tone="light" /> : <p className="text-[15.5px] text-mute">Arrives with the first signed release.</p>}>Just the CLI, its framework and the engines. No app and no menu bar.</Way>
             <Way title="Build from source" action={<ArrowLink to="/open-source" className="text-[16px]">Clone and build</ArrowLink>}>AGPL-3.0 and free. You need Xcode 16 and Rust, and <code className="font-mono text-[14px]">make</code> does the rest.</Way>
           </ul>
         </Container>

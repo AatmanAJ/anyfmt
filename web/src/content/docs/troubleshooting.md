@@ -50,11 +50,14 @@ Converting files in Desktop, Documents or Downloads from Terminal can make macOS
 
 ## macOS says anyfmt can't be opened
 
-The release DMG is signed with a Developer ID and notarized by Apple, so Gatekeeper opens it without a warning. If you see a warning, you're likely running a build that isn't the release, such as an ad-hoc build made with `make dmg` without signing credentials.
+The current preview isn't signed by Apple yet, because the $99/year developer account hasn't been bought, so macOS blocks it the first time you open it. Signed releases will open without a warning.
 
-- Run `anyfmt doctor` and look at **signature**. A release build says `signed`, with a Developer ID authority. A local build says `ad-hoc`.
-- Install the signed app from [anyfmt.app/download](https://anyfmt.app/download) or with Homebrew.
-- If it's a build you made yourself and trust, macOS lets you open it from **System Settings › Privacy & Security** with **Open Anyway**.
+1. Click **Done** on the warning, or **OK** on older versions.
+2. Go to **System Settings › Privacy & Security** and scroll down to **Security**.
+3. Click **Open Anyway** next to anyfmt.
+4. Click **Open Anyway** again and enter your Mac password.
+
+Run `anyfmt doctor` and look at **signature** to see which build you have. The preview and local builds say `ad-hoc`. A signed release says `signed`, with a Developer ID authority.
 
 ## A conversion I expect isn't on the wheel
 

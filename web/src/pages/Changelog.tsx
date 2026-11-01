@@ -74,6 +74,24 @@ function BoxVisual() {
   )
 }
 
+/** The dialog every preview download gets, with macOS's own wording. */
+function WarningVisual() {
+  return (
+    <div className="rounded-[28px] bg-sand p-6 sm:p-8">
+      <div role="img" aria-label="The macOS warning: anyfmt Not Opened. Apple could not verify anyfmt is free of malware that may harm your Mac or compromise your privacy."
+        className="mx-auto w-full max-w-[420px] rounded-[20px] bg-white p-6 shadow-[0_24px_48px_-24px_rgba(0,0,0,.35)] ring-1 ring-black/[.07]">
+        <AppIcon size={64} uid="cl-warning" />
+        <p className="mt-4 text-[19px] font-semibold tracking-[-0.02em]">“anyfmt” Not Opened</p>
+        <p className="mt-2 text-[15px] leading-[1.45] text-mute">Apple could not verify “anyfmt” is free of malware that may harm your Mac or compromise your privacy.</p>
+        <div className="mt-5 grid grid-cols-2 gap-2.5 text-[15px] font-medium">
+          <span className="flex h-10 items-center justify-center rounded-[10px] bg-[#0A64D6] text-white">Done</span>
+          <span className="flex h-10 items-center justify-center rounded-[10px] bg-sand-2">Move to Trash</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function RenameVisual() {
   const ref = useRef<HTMLDivElement>(null)
   const seen = useInView(ref, { once: true, amount: 0.6 })
@@ -161,7 +179,7 @@ function DayOneVisual() {
   )
 }
 
-const VISUAL: Record<Release['visual'], () => React.ReactElement> = { box: BoxVisual, rename: RenameVisual, manners: MannersVisual, dayone: DayOneVisual }
+const VISUAL: Record<Release['visual'], () => React.ReactElement> = { box: BoxVisual, warning: WarningVisual, rename: RenameVisual, manners: MannersVisual, dayone: DayOneVisual }
 
 /* ── releases ─────────────────────────────────────────────── */
 

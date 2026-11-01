@@ -7,7 +7,7 @@ description: Run anyfmt mcp to give AI agents local file conversion over the Mod
 
 ## Before you start
 
-The `anyfmt` command must be installed: link it from **Settings › Advanced › Command-line tool**, or install it with Homebrew. See [Command line](/docs/cli). Check it with:
+The `anyfmt` command must be installed: link it from **Settings › Advanced › Command-line tool**. See [Command line](/docs/cli). Check it with:
 
 ```bash title="Terminal"
 anyfmt doctor

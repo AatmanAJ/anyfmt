@@ -6,7 +6,7 @@ description: Install anyfmt on a Mac with Apple silicon and macOS 13 or later, f
 anyfmt runs on a Mac with Apple silicon and macOS 13 Ventura or later. You can install the app from the DMG or Homebrew, install only the `anyfmt` command-line tool, or build everything from source.
 
 > [!NOTE]
-> The first public release of anyfmt is on its way. The steps below describe installing it once that build ships.
+> The current download is an unsigned preview, because Apple's $99/year developer account hasn't been bought yet. macOS warns you the first time you open it. Homebrew arrives with the first signed release.
 
 ## Requirements
 
@@ -14,8 +14,8 @@ anyfmt runs on a Mac with Apple silicon and macOS 13 Ventura or later. You can i
 |---|---|
 | Mac | Apple silicon (arm64) |
 | macOS | 13 Ventura or later |
-| Download | 27 MB DMG |
-| On disk | 63 MB, engines included |
+| Download | 25 MB DMG |
+| On disk | 64 MB, engines included |
 | Other software | None. ffmpeg, x264/x265, VP9, AV1, Opus, WebP and the SVG renderer ship inside the app, so you never need Homebrew or ffmpeg of your own |
 
 Every binary in the app targets macOS 13. So far the full test suite and the conversion matrix have run on macOS 27 only; checks on macOS 13, 14 and 15 are still to do.
@@ -24,12 +24,17 @@ Every binary in the app targets macOS 13. So far the full test suite and the con
 
 1. Download the DMG from [anyfmt.app/download](https://anyfmt.app/download).
 2. Open `anyfmt-x.y.z.dmg` and drag **anyfmt** to **Applications**.
-3. Open anyfmt from Applications.
-4. The welcome window opens. It walks you through a live demo of the wheel, permissions (none are needed), launch at login and update checks.
+3. Open anyfmt from Applications. macOS blocks the preview, so click **Done** (or **OK** on older versions).
+4. Go to **System Settings › Privacy & Security**, scroll down to **Security** and click **Open Anyway** next to anyfmt.
+5. Click **Open Anyway** again and enter your Mac password.
+6. The welcome window opens. It walks you through a live demo of the wheel, permissions (none are needed), launch at login and update checks.
 
 anyfmt appears as an icon in the menu bar. It has no Dock icon and no main window.
 
 ## Install with Homebrew
+
+> [!NOTE]
+> This arrives with the first signed release, and the command doesn't work yet.
 
 ```bash title="Terminal"
 brew install --cask aatmanaj/tap/anyfmt
@@ -40,6 +45,9 @@ The cask installs the app and links the `anyfmt` command onto your `PATH`.
 ## Install only the command-line tool
 
 If you want the CLI and the MCP server without the app:
+
+> [!NOTE]
+> This arrives with the first signed release, and the command doesn't work yet. Until then, install the app and link the tool from **Settings › Advanced › Command-line tool**.
 
 ```bash title="Terminal"
 brew install aatmanaj/tap/anyfmt-cli

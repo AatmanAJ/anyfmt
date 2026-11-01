@@ -8,7 +8,9 @@ export const SITE = {
     'anyfmt is an open-source macOS menu bar app that converts files where they are. Drag a file, tap Shift, drop it on the format you want. 793 tested conversion routes, all on your Mac, nothing uploaded.',
   github: 'https://github.com/AatmanAJ/anyfmt',
   version: '0.1.0',
-  released: false, // flips when the first public build ships; download copy reads from this
+  released: false, // flips when the first signed build ships; download copy reads from this
+  /** The DMG every download link points at. Unsigned preview until `released` flips. */
+  dmgUrl: 'https://github.com/AatmanAJ/anyfmt/releases/download/preview-1/anyfmt-0.1.0-preview-1.dmg',
   dmgSize: '25 MB',
   appSize: '64 MB',
   requires: 'Apple silicon, macOS 13 Ventura or later',
